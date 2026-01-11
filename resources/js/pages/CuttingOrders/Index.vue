@@ -210,14 +210,14 @@ const formatDate = (date: string | null) => {
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               <tr v-if="cuttingOrders.data.length === 0">
-                <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
+                <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                   <p class="font-medium">Tidak ada data {{ termLower('preparation_order', 'cutting order') }}</p>
                   <p class="text-xs">Tambahkan {{ termLower('preparation_order', 'cutting order') }} pertama Anda</p>
                 </td>
               </tr>
-              <tr v-for="order in cuttingOrders.data" :key="order.id" class="hover:bg-gray-50">
+              <tr v-for="order in cuttingOrders.data" :key="order.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">{{ order.order_number }}</div>
                 </td>

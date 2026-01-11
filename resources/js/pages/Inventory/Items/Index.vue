@@ -97,13 +97,13 @@ const isLowStock = (item: Item) => {
                             type="text"
                             placeholder="Cari SKU atau nama..."
                             @keyup.enter="applyFilters"
-                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-64"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-64"
                         />
 
                         <select
                             v-model="statusFilter"
                             @change="applyFilters"
-                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-auto"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-auto"
                         >
                             <option value="">Semua Status</option>
                             <option value="available">Available</option>
@@ -116,7 +116,7 @@ const isLowStock = (item: Item) => {
                         <select
                             v-model="categoryFilter"
                             @change="applyFilters"
-                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-auto"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-auto"
                         >
                             <option value="">Semua Kategori</option>
                             <option value="garment">Garment</option>
@@ -126,7 +126,7 @@ const isLowStock = (item: Item) => {
                         <button
                             v-if="search || statusFilter || categoryFilter"
                             @click="clearFilters"
-                            class="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                            class="rounded-md bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                         >
                             Reset
                         </button>
@@ -141,41 +141,41 @@ const isLowStock = (item: Item) => {
                 </div>
 
                 <!-- Items Table -->
-                <div v-if="items.data.length > 0" class="overflow-hidden rounded-lg bg-white shadow-sm">
+                <div v-if="items.data.length > 0" class="overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-sm">
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">SKU</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Nama</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Lokasi</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Stok</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Grade</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">Aksi</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">SKU</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Nama</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Lokasi</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Stok</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Grade</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 bg-white">
-                                <tr v-for="item in items.data" :key="item.id" class="hover:bg-gray-50">
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                                <tr v-for="item in items.data" :key="item.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                                         {{ item.sku }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                         <div>
                                             {{ item.name }}
-                                            <span v-if="isLowStock(item)" class="ml-2 inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+                                            <span v-if="isLowStock(item)" class="ml-2 inline-flex items-center rounded-full bg-red-100 dark:bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-800 dark:text-red-300">
                                                 Low Stock
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                         {{ item.inventory_location?.name || '-' }}
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                         {{ item.current_stock }}
-                                        <span v-if="item.reserved_stock > 0" class="text-gray-500">({{ item.reserved_stock }} reserved)</span>
+                                        <span v-if="item.reserved_stock > 0" class="text-gray-500 dark:text-gray-400">({{ item.reserved_stock }} reserved)</span>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                         {{ item.quality_grade }}
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4">
@@ -186,7 +186,7 @@ const isLowStock = (item: Item) => {
                                     <td class="whitespace-nowrap px-6 py-4 text-sm">
                                         <Link
                                             :href="`/inventory/items/${item.id}`"
-                                            class="font-medium text-indigo-600 hover:text-indigo-500"
+                                            class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
                                         >
                                             Detail
                                         </Link>
@@ -198,9 +198,9 @@ const isLowStock = (item: Item) => {
                 </div>
 
                 <!-- Empty State -->
-                <div v-else class="rounded-lg bg-white p-12 text-center shadow-sm">
-                    <h3 class="text-sm font-semibold text-gray-900">Belum ada inventory items</h3>
-                    <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan item pertama.</p>
+                <div v-else class="rounded-lg bg-white dark:bg-gray-800 p-12 text-center shadow-sm">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Belum ada inventory items</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Mulai dengan menambahkan item pertama.</p>
                     <div class="mt-6">
                         <Link
                             href="/inventory/items/create"
