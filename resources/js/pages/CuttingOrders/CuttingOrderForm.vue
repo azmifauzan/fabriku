@@ -137,7 +137,7 @@ watch(() => form.status, (newStatus) => {
         <Head :title="isEdit ? 'Edit Cutting Order' : 'Buat Cutting Order Baru'" />
 
         <!-- Navigation -->
-        <nav class="bg-white shadow-sm dark:bg-gray-800">
+        <nav class="bg-white shadow-sm">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 justify-between">
                     <div class="flex">
@@ -147,25 +147,25 @@ watch(() => form.status, (newStatus) => {
                         <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
                             <Link
                                 href="/dashboard"
-                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
                             >
                                 Dashboard
                             </Link>
                             <Link
                                 href="/materials"
-                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
                             >
                                 Bahan Baku
                             </Link>
                             <Link
                                 href="/patterns"
-                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
                             >
                                 Pattern
                             </Link>
                             <Link
                                 href="/cutting-orders"
-                                class="inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100"
+                                class="inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900"
                             >
                                 Cutting Orders
                             </Link>
@@ -187,23 +187,23 @@ watch(() => form.status, (newStatus) => {
 
         <!-- Page Header -->
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <h2 class="text-2xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+            <h2 class="text-2xl font-semibold leading-tight text-gray-800">
                 {{ isEdit ? 'Edit Cutting Order' : 'Buat Cutting Order Baru' }}
             </h2>
         </div>
 
         <div class="py-6">
             <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
+                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <form @submit.prevent="submit" class="p-6">
                         <!-- Order Information -->
                         <div class="space-y-6">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                            <h3 class="text-lg font-medium text-gray-900">
                                 Informasi Cutting Order
                             </h3>
 
-                            <div v-if="isEdit" class="rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
-                                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <div v-if="isEdit" class="rounded-lg bg-gray-50 p-4">
+                                <p class="text-sm font-medium text-gray-700">
                                     Order Number: <span class="font-bold">{{ cuttingOrder?.order_number }}</span>
                                 </p>
                             </div>
@@ -211,13 +211,13 @@ watch(() => form.status, (newStatus) => {
                             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                 <!-- Pattern Selection -->
                                 <div class="sm:col-span-2">
-                                    <label for="pattern_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label for="pattern_id" class="block text-sm font-medium text-gray-700">
                                         Pattern <span class="text-red-500">*</span>
                                     </label>
                                     <select
                                         id="pattern_id"
                                         v-model="form.pattern_id"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         :disabled="isEdit"
                                         required
                                     >
@@ -226,7 +226,7 @@ watch(() => form.status, (newStatus) => {
                                             {{ pattern.name }} ({{ pattern.code }}) - {{ pattern.product_type }} {{ pattern.size || '' }}
                                         </option>
                                     </select>
-                                    <p v-if="isEdit" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <p v-if="isEdit" class="mt-1 text-xs text-gray-500">
                                         Pattern tidak bisa diubah setelah order dibuat
                                     </p>
                                     <p v-if="form.errors.pattern_id" class="mt-1 text-sm text-red-600">
@@ -236,7 +236,7 @@ watch(() => form.status, (newStatus) => {
 
                                 <!-- Planned Quantity -->
                                 <div>
-                                    <label for="planned_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label for="planned_quantity" class="block text-sm font-medium text-gray-700">
                                         Jumlah Target <span class="text-red-500">*</span>
                                     </label>
                                     <input
@@ -244,10 +244,10 @@ watch(() => form.status, (newStatus) => {
                                         v-model.number="form.planned_quantity"
                                         type="number"
                                         min="1"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         required
                                     />
-                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="mt-1 text-xs text-gray-500">
                                         Jumlah produk yang direncanakan
                                     </p>
                                     <p v-if="form.errors.planned_quantity" class="mt-1 text-sm text-red-600">
@@ -257,7 +257,7 @@ watch(() => form.status, (newStatus) => {
 
                                 <!-- Actual Quantity -->
                                 <div>
-                                    <label for="actual_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label for="actual_quantity" class="block text-sm font-medium text-gray-700">
                                         Jumlah Aktual
                                     </label>
                                     <input
@@ -265,9 +265,9 @@ watch(() => form.status, (newStatus) => {
                                         v-model.number="form.actual_quantity"
                                         type="number"
                                         min="0"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     />
-                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="mt-1 text-xs text-gray-500">
                                         Jumlah produk yang berhasil dipotong
                                     </p>
                                     <p v-if="form.errors.actual_quantity" class="mt-1 text-sm text-red-600">
@@ -277,13 +277,13 @@ watch(() => form.status, (newStatus) => {
 
                                 <!-- Status -->
                                 <div>
-                                    <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label for="status" class="block text-sm font-medium text-gray-700">
                                         Status <span class="text-red-500">*</span>
                                     </label>
                                     <select
                                         id="status"
                                         v-model="form.status"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         :disabled="!canEditStatus"
                                         required
                                     >
@@ -291,7 +291,7 @@ watch(() => form.status, (newStatus) => {
                                             {{ option.label }}
                                         </option>
                                     </select>
-                                    <p v-if="!canEditStatus" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <p v-if="!canEditStatus" class="mt-1 text-xs text-gray-500">
                                         Status tidak bisa diubah untuk order yang sudah selesai/dibatalkan
                                     </p>
                                     <p v-if="form.errors.status" class="mt-1 text-sm text-red-600">
@@ -301,13 +301,13 @@ watch(() => form.status, (newStatus) => {
 
                                 <!-- Priority -->
                                 <div>
-                                    <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label for="priority" class="block text-sm font-medium text-gray-700">
                                         Prioritas <span class="text-red-500">*</span>
                                     </label>
                                     <select
                                         id="priority"
                                         v-model="form.priority"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         required
                                     >
                                         <option v-for="option in priorityOptions" :key="option.value" :value="option.value">
@@ -321,14 +321,14 @@ watch(() => form.status, (newStatus) => {
 
                                 <!-- Scheduled Date -->
                                 <div>
-                                    <label for="scheduled_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label for="scheduled_date" class="block text-sm font-medium text-gray-700">
                                         Tanggal Jadwal
                                     </label>
                                     <input
                                         id="scheduled_date"
                                         v-model="form.scheduled_date"
                                         type="date"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     />
                                     <p v-if="form.errors.scheduled_date" class="mt-1 text-sm text-red-600">
                                         {{ form.errors.scheduled_date }}
@@ -337,14 +337,14 @@ watch(() => form.status, (newStatus) => {
 
                                 <!-- Completed Date -->
                                 <div>
-                                    <label for="completed_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label for="completed_date" class="block text-sm font-medium text-gray-700">
                                         Tanggal Selesai
                                     </label>
                                     <input
                                         id="completed_date"
                                         v-model="form.completed_date"
                                         type="date"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         :disabled="form.status !== 'completed'"
                                     />
                                     <p v-if="form.errors.completed_date" class="mt-1 text-sm text-red-600">
@@ -355,14 +355,14 @@ watch(() => form.status, (newStatus) => {
 
                             <!-- Notes -->
                             <div>
-                                <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label for="notes" class="block text-sm font-medium text-gray-700">
                                     Catatan
                                 </label>
                                 <textarea
                                     id="notes"
                                     v-model="form.notes"
                                     rows="3"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                 ></textarea>
                                 <p v-if="form.errors.notes" class="mt-1 text-sm text-red-600">
                                     {{ form.errors.notes }}
@@ -372,11 +372,11 @@ watch(() => form.status, (newStatus) => {
 
                         <!-- Material Requirements -->
                         <div v-if="selectedPattern" class="mt-8 space-y-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                            <h3 class="text-lg font-medium text-gray-900">
                                 Kebutuhan Bahan
                             </h3>
 
-                            <div v-if="!allMaterialsSufficient" class="rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">
+                            <div v-if="!allMaterialsSufficient" class="rounded-md bg-yellow-50 p-4/20">
                                 <div class="flex">
                                     <div class="flex-shrink-0">
                                         <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
@@ -384,58 +384,58 @@ watch(() => form.status, (newStatus) => {
                                         </svg>
                                     </div>
                                     <div class="ml-3">
-                                        <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                                        <h3 class="text-sm font-medium text-yellow-800">
                                             Stok bahan tidak mencukupi
                                         </h3>
-                                        <div class="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
+                                        <div class="mt-2 text-sm text-yellow-700">
                                             <p>Beberapa bahan tidak memiliki stok yang cukup untuk order ini.</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
-                                <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-                                    <thead class="bg-gray-50 dark:bg-gray-900">
+                            <div class="overflow-hidden rounded-lg border border-gray-300">
+                                <table class="min-w-full divide-y divide-gray-300">
+                                    <thead class="bg-gray-50">
                                         <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                                 Bahan
                                             </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                                 Per Unit
                                             </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                                 Total Butuh
                                             </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                                 Stok Tersedia
                                             </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                                 Status
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                                    <tbody class="divide-y divide-gray-200 bg-white">
                                         <tr v-for="rm in requiredMaterials" :key="rm.material.id">
-                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                                                 {{ rm.material.name }}
-                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ rm.material.code }}</div>
+                                                <div class="text-xs text-gray-500">{{ rm.material.code }}</div>
                                             </td>
-                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                                                 {{ rm.quantity_needed }} {{ rm.material.unit }}
                                             </td>
-                                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
                                                 {{ rm.total_needed }} {{ rm.material.unit }}
                                             </td>
-                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                                                 {{ rm.available }} {{ rm.material.unit }}
                                             </td>
                                             <td class="whitespace-nowrap px-6 py-4 text-sm">
                                                 <span
                                                     :class="[
                                                         rm.sufficient
-                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+                                                            ? 'bg-green-100 text-green-800/30'
+                                                            : 'bg-red-100 text-red-800/30',
                                                         'inline-flex rounded-full px-2 text-xs font-semibold leading-5',
                                                     ]"
                                                 >
@@ -447,10 +447,10 @@ watch(() => form.status, (newStatus) => {
                                 </table>
                             </div>
 
-                            <div class="flex justify-end rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
+                            <div class="flex justify-end rounded-lg bg-gray-50 p-4">
                                 <div class="text-right">
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Estimasi Biaya Total</p>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                    <p class="text-sm text-gray-500">Estimasi Biaya Total</p>
+                                    <p class="text-2xl font-bold text-gray-900">
                                         Rp {{ estimatedCost.toLocaleString('id-ID') }}
                                     </p>
                                 </div>
@@ -462,7 +462,7 @@ watch(() => form.status, (newStatus) => {
                             <button
                                 type="button"
                                 @click="goBack"
-                                class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-700 dark:hover:bg-gray-700"
+                                class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                             >
                                 Batal
                             </button>
