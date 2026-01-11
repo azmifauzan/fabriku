@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import { create } from '@/actions/App/Http/Controllers/ProductionOrderController'
 import AppLayout from '@/layouts/AppLayout.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useBusinessContext } from '@/composables/useBusinessContext'
 
 interface Pattern {
@@ -106,14 +107,14 @@ const deleteOrder = (order: ProductionOrder) => {
 
 const getStatusBadge = (status: string) => {
   const colors: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-800',
-    pending: 'bg-yellow-100 text-yellow-800',
-    sent: 'bg-indigo-100 text-indigo-800',
-    in_progress: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800',
+    draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800/40 dark:text-gray-300',
+    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800/20 dark:text-yellow-300',
+    sent: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-800/20 dark:text-indigo-300',
+    in_progress: 'bg-blue-100 text-blue-800 dark:bg-blue-800/20 dark:text-blue-300',
+    completed: 'bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300',
+    cancelled: 'bg-red-100 text-red-800 dark:bg-red-800/20 dark:text-red-300',
   }
-  return colors[status] || 'bg-gray-100 text-gray-800'
+  return colors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-800/40 dark:text-gray-300'
 }
 
 const getStatusLabel = (status: string) => {
@@ -137,14 +138,12 @@ const getTypeLabel = (type: string) => {
   <AppLayout>
     <Head :title="`Data ${productionOrderLabel}`" />
 
-    <PageHeader 
-      :title="productionOrderLabel"
-      subtitle="Kelola order produksi internal dan eksternal"
-    />
-
-    <!-- Page Content -->
-    <div class="py-12">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 px-6">
+      <div class="max-w-7xl mx-auto">
+        <PageHeader
+          :title="productionOrderLabel"
+          description="Kelola order produksi internal dan eksternal"
+        />
 
         <!-- Filters -->
         <div class="mb-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
@@ -227,7 +226,7 @@ const getTypeLabel = (type: string) => {
 
         <!-- Actions -->
         <div class="mb-6 flex items-center justify-between">
-          <div class="text-sm text-gray-500">
+          <div class="text-sm text-gray-500 dark:text-gray-400">
             Menampilkan {{ orders.from }} - {{ orders.to }} dari {{ orders.total }} orders
           </div>
           <Link

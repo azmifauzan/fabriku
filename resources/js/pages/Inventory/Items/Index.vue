@@ -85,10 +85,10 @@ const isLowStock = (item: Item) => {
     <AppLayout>
         <Head title="Inventory Items" />
 
-        <PageHeader title="Inventory Items" />
+        <div class="py-6 px-6">
+            <div class="mx-auto max-w-7xl">
+                <PageHeader title="Inventory Items" />
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <!-- Filters & Actions -->
                 <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div class="flex flex-1 flex-col gap-4 sm:flex-row">

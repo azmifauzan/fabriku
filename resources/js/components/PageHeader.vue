@@ -5,6 +5,7 @@ import { Plus } from 'lucide-vue-next'
 defineProps<{
   title: string
   description?: string
+  subtitle?: string
   createLink?: string
   createText?: string
 }>()
@@ -14,8 +15,8 @@ defineProps<{
   <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
     <div class="flex-1">
       <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{{ title }}</h2>
-      <p v-if="description" class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-        {{ description }}
+      <p v-if="description || subtitle" class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+        {{ description || subtitle }}
       </p>
     </div>
     <Link

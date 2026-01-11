@@ -2,6 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useBusinessContext } from '@/composables/useBusinessContext'
 
 interface Pattern {
@@ -83,12 +84,12 @@ const deleteCuttingOrder = (order: CuttingOrder) => {
 
 const getStatusBadge = (status: string) => {
   const colors: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-800',
-    in_progress: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800',
+    draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800/40 dark:text-gray-300',
+    in_progress: 'bg-blue-100 text-blue-800 dark:bg-blue-800/20 dark:text-blue-300',
+    completed: 'bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300',
+    cancelled: 'bg-red-100 text-red-800 dark:bg-red-800/20 dark:text-red-300',
   }
-  return colors[status] || 'bg-gray-100 text-gray-800'
+  return colors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-800/40 dark:text-gray-300'
 }
 
 const getStatusLabel = (status: string) => {
@@ -115,26 +116,14 @@ const formatDate = (date: string | null) => {
   <AppLayout>
     <Head :title="`Data ${preparationOrderLabel}`" />
 
-    <PageHeader 
-      :title="`Data ${preparationOrderLabel}`"
-      :subtitle="`Kelola ${preparationOrderLabel.toLowerCase()} untuk proses ${preparationLabel.toLowerCase()}`"
-    />
-
-    <!-- Main Content -->
-    <div class="py-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Actions -->
-        <div class="mb-6 flex justify-end">
-          <Link
-            href="/cutting-orders/create"
-            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-          >
-            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Tambah Order
-          </Link>
-        </div>
+    <div class="py-6 px-6">
+      <div class="max-w-7xl mx-auto">
+        <PageHeader
+          :title="`Data ${preparationOrderLabel}`"
+          :description="`Kelola ${preparationOrderLabel.toLowerCase()} untuk proses ${preparationLabel.toLowerCase()}`"
+          create-link="/cutting-orders/create"
+          create-text="Tambah Order"
+        />
 
         <!-- Filters -->
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
@@ -218,20 +207,20 @@ const formatDate = (date: string | null) => {
               </tr>
               <tr v-for="order in cuttingOrders.data" :key="order.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">{{ order.order_number }}</div>
+                  <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ order.order_number }}</div>
                 </td>
                 <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">{{ order.pattern.code }}</div>
-                  <div class="text-xs text-gray-500">{{ order.pattern.name }}</div>
+                  <div class="text-sm text-gray-900 dark:text-gray-100">{{ order.pattern.code }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">{{ order.pattern.name }}</div>
                 </td>
                 <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">{{ formatDate(order.order_date) }}</div>
-                  <div v-if="order.target_date" class="text-xs text-gray-500">
+                  <div class="text-sm text-gray-900 dark:text-gray-100">{{ formatDate(order.order_date) }}</div>
+                  <div v-if="order.target_date" class="text-xs text-gray-500 dark:text-gray-400">
                     Target: {{ formatDate(order.target_date) }}
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ order.target_quantity }} pcs</div>
+                  <div class="text-sm text-gray-900 dark:text-gray-100">{{ order.target_quantity }} pcs</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
@@ -241,7 +230,7 @@ const formatDate = (date: string | null) => {
                     {{ getStatusLabel(order.status) }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                   {{ order.cutter?.name || '-' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -249,14 +238,14 @@ const formatDate = (date: string | null) => {
                     <Link
                       v-if="order.status === 'draft' || order.status === 'in_progress'"
                       :href="`/cutting-orders/${order.id}/edit`"
-                      class="text-indigo-600 hover:text-indigo-900"
+                      class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
                     >
                       Edit
                     </Link>
                     <button
                       type="button"
                       @click="deleteCuttingOrder(order)"
-                      class="text-red-600 hover:text-red-900"
+                      class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                       :disabled="order.status !== 'draft'"
                       :class="{ 'opacity-50 cursor-not-allowed': order.status !== 'draft' }"
                       :title="order.status !== 'draft' ? 'Hanya draft yang bisa dihapus' : 'Hapus'"
@@ -270,9 +259,12 @@ const formatDate = (date: string | null) => {
           </table>
 
           <!-- Pagination -->
-          <div v-if="cuttingOrders.data.length > 0" class="bg-white px-4 py-3 border-t border-gray-200">
+          <div
+            v-if="cuttingOrders.data.length > 0"
+            class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700"
+          >
             <div class="flex items-center justify-between">
-              <div class="text-sm text-gray-700">
+              <div class="text-sm text-gray-700 dark:text-gray-300">
                 Menampilkan {{ cuttingOrders.from }} - {{ cuttingOrders.to }} dari {{ cuttingOrders.total }} data
               </div>
               <div class="flex gap-2">
@@ -284,7 +276,7 @@ const formatDate = (date: string | null) => {
                     'px-3 py-1 text-sm rounded',
                     page === cuttingOrders.current_page
                       ? 'bg-indigo-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
                   ]"
                   preserve-state
                   preserve-scroll

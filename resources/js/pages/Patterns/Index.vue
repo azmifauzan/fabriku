@@ -2,6 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useBusinessContext } from '@/composables/useBusinessContext'
 
 interface PatternMaterial {
@@ -84,12 +85,12 @@ const getProductTypeLabel = (type: string) => {
 
 const getProductTypeBadge = (type: string) => {
   const palette = [
-    'bg-purple-100 text-purple-800',
-    'bg-pink-100 text-pink-800',
-    'bg-blue-100 text-blue-800',
-    'bg-green-100 text-green-800',
-    'bg-yellow-100 text-yellow-800',
-    'bg-indigo-100 text-indigo-800',
+    'bg-purple-100 text-purple-800 dark:bg-purple-800/20 dark:text-purple-300',
+    'bg-pink-100 text-pink-800 dark:bg-pink-800/20 dark:text-pink-300',
+    'bg-blue-100 text-blue-800 dark:bg-blue-800/20 dark:text-blue-300',
+    'bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300',
+    'bg-yellow-100 text-yellow-800 dark:bg-yellow-800/20 dark:text-yellow-300',
+    'bg-indigo-100 text-indigo-800 dark:bg-indigo-800/20 dark:text-indigo-300',
   ]
 
   let hash = 0
@@ -97,34 +98,22 @@ const getProductTypeBadge = (type: string) => {
     hash = (hash * 31 + type.charCodeAt(i)) % 2147483647
   }
 
-  return palette[hash % palette.length] || 'bg-gray-100 text-gray-800'
+  return palette[hash % palette.length] || 'bg-gray-100 text-gray-800 dark:bg-gray-800/40 dark:text-gray-300'
 }
 </script>
 
 <template>
   <AppLayout>
-    <Head :title="`Data ${patternLabel} Produk`" />
+    <Head :title="`Data ${patternLabel}`" />
 
-    <PageHeader 
-      :title="`Data ${patternLabel} Produk`"
-      :subtitle="`Template produk dengan kebutuhan ${materialLabel.toLowerCase()} (BOM)`"
-    />
-
-    <!-- Main Content -->
-    <div class="py-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Actions -->
-        <div class="mb-6 flex justify-end">
-          <Link
-            href="/patterns/create"
-            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-          >
-            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Tambah {{ patternLabel }}
-          </Link>
-        </div>
+    <div class="py-6 px-6">
+      <div class="max-w-7xl mx-auto">
+        <PageHeader
+          :title="patternLabel"
+          :description="`Template produk dengan kebutuhan ${materialLabel.toLowerCase()} (BOM)`"
+          create-link="/patterns/create"
+          :create-text="`Tambah ${patternLabel}`"
+        />
 
         <!-- Filters -->
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
@@ -213,8 +202,8 @@ const getProductTypeBadge = (type: string) => {
               <tr v-for="pattern in patterns.data" :key="pattern.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                 <td class="px-6 py-4">
                   <div class="flex flex-col">
-                    <div class="text-sm font-medium text-gray-900">{{ pattern.code }}</div>
-                    <div class="text-sm text-gray-500">{{ pattern.name }}</div>
+                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ pattern.code }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ pattern.name }}</div>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -225,13 +214,13 @@ const getProductTypeBadge = (type: string) => {
                     >
                       {{ getProductTypeLabel(pattern.product_type) }}
                     </span>
-                    <span v-if="pattern.size" class="text-xs text-gray-500">
+                    <span v-if="pattern.size" class="text-xs text-gray-500 dark:text-gray-400">
                       Size: {{ pattern.size }}
                     </span>
                   </div>
                 </td>
                 <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">
+                  <div class="text-sm text-gray-900 dark:text-gray-100">
                     <div v-if="pattern.materials && pattern.materials.length > 0" class="space-y-1">
                       <div
                         v-for="material in pattern.materials"
@@ -247,13 +236,13 @@ const getProductTypeBadge = (type: string) => {
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
                     v-if="pattern.is_active"
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300"
                   >
                     Aktif
                   </span>
                   <span
                     v-else
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-800/20 dark:text-red-300"
                   >
                     Nonaktif
                   </span>
@@ -262,14 +251,14 @@ const getProductTypeBadge = (type: string) => {
                   <div class="flex justify-end gap-2">
                     <Link
                       :href="`/patterns/${pattern.id}/edit`"
-                      class="text-indigo-600 hover:text-indigo-900"
+                      class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
                     >
                       Edit
                     </Link>
                     <button
                       type="button"
                       @click="deletePattern(pattern)"
-                      class="text-red-600 hover:text-red-900"
+                      class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                       :disabled="pattern.cutting_orders_count > 0"
                       :class="{ 'opacity-50 cursor-not-allowed': pattern.cutting_orders_count > 0 }"
                       :title="pattern.cutting_orders_count > 0 ? 'Tidak bisa dihapus, sudah ada cutting order' : 'Hapus'"
@@ -283,9 +272,12 @@ const getProductTypeBadge = (type: string) => {
           </table>
 
           <!-- Pagination -->
-          <div v-if="patterns.data.length > 0" class="bg-white px-4 py-3 border-t border-gray-200">
+          <div
+            v-if="patterns.data.length > 0"
+            class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700"
+          >
             <div class="flex items-center justify-between">
-              <div class="text-sm text-gray-700">
+              <div class="text-sm text-gray-700 dark:text-gray-300">
                 Menampilkan {{ patterns.from }} - {{ patterns.to }} dari {{ patterns.total }} data
               </div>
               <div class="flex gap-2">
@@ -297,7 +289,7 @@ const getProductTypeBadge = (type: string) => {
                     'px-3 py-1 text-sm rounded',
                     page === patterns.current_page
                       ? 'bg-indigo-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
                   ]"
                   preserve-state
                   preserve-scroll
