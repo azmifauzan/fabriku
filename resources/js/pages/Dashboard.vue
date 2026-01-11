@@ -4,7 +4,6 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import {
   Package,
   Box,
-  DollarSign,
   ClipboardList,
   AlertTriangle,
   TrendingUp,
@@ -14,7 +13,7 @@ import {
 import { computed } from 'vue'
 import { useBusinessContext } from '@/composables/useBusinessContext'
 
-const { term, termLower } = useBusinessContext()
+const { term } = useBusinessContext()
 
 const materialLabel = computed(() => term('material', 'Bahan Baku'))
 
@@ -49,17 +48,17 @@ interface Material {
   id: number
   code: string
   name: string
-  quantity: number
+  current_stock: number
   unit: string
-  minimum_stock: number
+  reorder_point: number
 }
 
 interface InventoryItem {
   id: number
   sku: string
   name: string
-  quantity: number
-  reserved_quantity: number
+  current_stock: number
+  reserved_stock: number
   minimum_stock: number
 }
 
