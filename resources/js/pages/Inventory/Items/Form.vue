@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import { useBusinessContext } from '@/composables/useBusinessContext';
 
