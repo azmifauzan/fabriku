@@ -133,7 +133,7 @@ watch(() => form.status, (newStatus) => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div class="min-h-screen bg-gray-100">
         <Head :title="isEdit ? 'Edit Cutting Order' : 'Buat Cutting Order Baru'" />
 
         <!-- Navigation -->

@@ -36,7 +36,7 @@ class CuttingOrderController extends Controller
         $patterns = Pattern::query()
             ->with(['materials.material'])
             ->where('is_active', true)
-            ->select('id', 'code', 'name', 'product_type', 'size', 'estimated_cost')
+            ->select('id', 'code', 'name', 'product_type', 'size')
             ->orderBy('name')
             ->get();
 
