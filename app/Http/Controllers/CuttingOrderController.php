@@ -26,7 +26,7 @@ class CuttingOrderController extends Controller
             ->withQueryString();
 
         return Inertia::render('CuttingOrders/Index', [
-            'orders' => $orders,
+            'cuttingOrders' => $orders,
             'filters' => request()->only(['search', 'status']),
         ]);
     }
@@ -42,7 +42,7 @@ class CuttingOrderController extends Controller
 
         $materials = Material::query()
             ->where('is_active', true)
-            ->select('id', 'code', 'name', 'unit', 'stock_quantity')
+            ->select('id', 'code', 'name', 'unit', 'current_stock')
             ->orderBy('name')
             ->get();
 
@@ -78,7 +78,7 @@ class CuttingOrderController extends Controller
 
         $materials = Material::query()
             ->where('is_active', true)
-            ->select('id', 'code', 'name', 'unit', 'stock_quantity')
+            ->select('id', 'code', 'name', 'unit', 'current_stock')
             ->orderBy('name')
             ->get();
 

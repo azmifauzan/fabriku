@@ -35,7 +35,7 @@ class PatternController extends Controller
     {
         $materials = Material::query()
             ->where('is_active', true)
-            ->select('id', 'code', 'name', 'unit', 'unit_price', 'stock_quantity')
+            ->select('id', 'code', 'name', 'unit', 'standard_price', 'current_stock')
             ->orderBy('name')
             ->get();
 

@@ -7,7 +7,7 @@ interface Material {
     name: string;
     code: string;
     unit: string;
-    stock_quantity: number;
+    current_stock: number;
 }
 
 interface Pattern {
@@ -71,8 +71,8 @@ const requiredMaterials = computed(() => {
         material: pm.material,
         quantity_needed: pm.quantity_needed,
         total_needed: pm.quantity_needed * form.planned_quantity,
-        available: pm.material.stock_quantity,
-        sufficient: pm.material.stock_quantity >= (pm.quantity_needed * form.planned_quantity),
+        available: pm.material.current_stock,
+        sufficient: pm.material.current_stock >= (pm.quantity_needed * form.planned_quantity),
     }));
 });
 

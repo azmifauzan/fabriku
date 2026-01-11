@@ -7,8 +7,8 @@ interface Material {
     name: string;
     code: string;
     unit: string;
-    unit_price: number;
-    stock_quantity: number;
+    standard_price: number;
+    current_stock: number;
 }
 
 interface PatternMaterial {
@@ -81,7 +81,7 @@ const getMaterial = (materialId: number): Material | undefined => {
 const calculateItemCost = (item: PatternMaterial): number => {
     const material = getMaterial(item.material_id);
     if (!material) return 0;
-    return material.unit_price * item.quantity_needed;
+    return material.standard_price * item.quantity_needed;
 };
 
 // Calculate total pattern cost
@@ -341,7 +341,7 @@ const goBack = () => {
                                                 </option>
                                             </select>
                                             <p v-if="item.material_id > 0" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                                Stok: {{ getMaterial(item.material_id)?.stock_quantity || 0 }} {{ getMaterial(item.material_id)?.unit }}
+                                                Stok: {{ getMaterial(item.material_id)?.current_stock || 0 }} {{ getMaterial(item.material_id)?.unit }}
                                             </p>
                                         </div>
 
