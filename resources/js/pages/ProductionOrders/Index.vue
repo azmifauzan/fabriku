@@ -137,22 +137,21 @@ const getTypeLabel = (type: string) => {
   <AppLayout>
     <Head :title="`Data ${productionOrderLabel}`" />
 
+    <PageHeader 
+      :title="productionOrderLabel"
+      subtitle="Kelola order produksi internal dan eksternal"
+    />
+
     <!-- Page Content -->
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">{{ productionOrderLabel }}</h2>
-          <p class="mt-2 text-sm text-gray-600">
-            Kelola order produksi internal dan eksternal
-          </p>
-        </div>
 
         <!-- Filters -->
-        <div class="mb-6 bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="mb-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
           <div class="p-6">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
               <div>
-                <label class="block text-sm font-medium text-gray-700">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Pencarian
                 </label>
                 <input
@@ -160,18 +159,18 @@ const getTypeLabel = (type: string) => {
                   @input="applyFilters"
                   type="text"
                   :placeholder="`Order number, ${contractorLabelLower}...`"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Status
                 </label>
                 <select
                   v-model="statusFilter"
                   @change="applyFilters"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 >
                   <option value="">Semua Status</option>
                   <option value="draft">Draft</option>
@@ -184,13 +183,13 @@ const getTypeLabel = (type: string) => {
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Tipe
                 </label>
                 <select
                   v-model="typeFilter"
                   @change="applyFilters"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 >
                   <option value="">Semua Tipe</option>
                   <option value="internal">Internal</option>
@@ -199,13 +198,13 @@ const getTypeLabel = (type: string) => {
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   {{ contractorLabel }}
                 </label>
                 <select
                   v-model="contractorFilter"
                   @change="applyFilters"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 >
                   <option :value="''">Semua {{ contractorLabel }}</option>
                   <option v-for="contractor in contractors" :key="contractor.id" :value="contractor.id">
@@ -217,7 +216,7 @@ const getTypeLabel = (type: string) => {
               <div class="flex items-end">
                 <button
                   @click="clearFilters"
-                  class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  class="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
                 >
                   Reset Filter
                 </button>
@@ -243,74 +242,74 @@ const getTypeLabel = (type: string) => {
         </div>
 
         <!-- Orders Table -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Order Number
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {{ patternLabel }}
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Tipe
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {{ contractorLabel }}
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Quantity
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Target Date
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Aksi
                   </th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
+              <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 <tr v-if="orders.data.length === 0">
-                  <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
+                  <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
                     Tidak ada data {{ termLower('production_order', 'production order') }}
                   </td>
                 </tr>
-                <tr v-for="order in orders.data" :key="order.id" class="hover:bg-gray-50">
+                <tr v-for="order in orders.data" :key="order.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">
+                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {{ order.order_number }}
                     </div>
-                    <div class="text-sm text-gray-500">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
                       {{ new Date(order.requested_date).toLocaleDateString('id-ID') }}
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">
+                    <div class="text-sm text-gray-900 dark:text-gray-100">
                       {{ order.cutting_result.cutting_order.pattern.name }}
                     </div>
-                    <div class="text-sm text-gray-500">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
                       {{ order.cutting_result.cutting_order.pattern.code }}
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="text-sm text-gray-900">
+                    <span class="text-sm text-gray-900 dark:text-gray-100">
                       {{ getTypeLabel(order.type) }}
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="text-sm text-gray-900">
+                    <span class="text-sm text-gray-900 dark:text-gray-100">
                       {{ order.contractor?.name || '-' }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                     {{ order.quantity_requested }} pcs
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {{ order.promised_date ? new Date(order.promised_date).toLocaleDateString('id-ID') : '-' }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -325,21 +324,21 @@ const getTypeLabel = (type: string) => {
                     <div class="flex items-center justify-end gap-2">
                       <Link
                         :href="`/production-orders/${order.id}`"
-                        class="text-indigo-600 hover:text-indigo-900"
+                        class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
                       >
                         Detail
                       </Link>
                       <Link
                         v-if="order.status === 'draft'"
                         :href="`/production-orders/${order.id}/edit`"
-                        class="text-blue-600 hover:text-blue-900"
+                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                       >
                         Edit
                       </Link>
                       <button
                         v-if="order.status === 'draft'"
                         @click="deleteOrder(order)"
-                        class="text-red-600 hover:text-red-900"
+                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                       >
                         Hapus
                       </button>
@@ -351,27 +350,27 @@ const getTypeLabel = (type: string) => {
           </div>
 
           <!-- Pagination -->
-          <div v-if="orders.last_page > 1" class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+          <div v-if="orders.last_page > 1" class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
             <div class="flex items-center justify-between">
               <div class="flex-1 flex justify-between sm:hidden">
                 <Link
                   v-if="orders.current_page > 1"
                   :href="`/production-orders?page=${orders.current_page - 1}`"
-                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                 >
                   Previous
                 </Link>
                 <Link
                   v-if="orders.current_page < orders.last_page"
                   :href="`/production-orders?page=${orders.current_page + 1}`"
-                  class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                 >
                   Next
                 </Link>
               </div>
               <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
-                  <p class="text-sm text-gray-700">
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
                     Halaman {{ orders.current_page }} dari {{ orders.last_page }}
                   </p>
                 </div>
@@ -380,14 +379,14 @@ const getTypeLabel = (type: string) => {
                     <Link
                       v-if="orders.current_page > 1"
                       :href="`/production-orders?page=${orders.current_page - 1}`"
-                      class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                      class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
                       ←
                     </Link>
                     <Link
                       v-if="orders.current_page < orders.last_page"
                       :href="`/production-orders?page=${orders.current_page + 1}`"
-                      class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                      class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
                       →
                     </Link>

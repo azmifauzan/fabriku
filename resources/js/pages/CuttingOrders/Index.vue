@@ -115,17 +115,16 @@ const formatDate = (date: string | null) => {
   <AppLayout>
     <Head :title="`Data ${preparationOrderLabel}`" />
 
+    <PageHeader 
+      :title="`Data ${preparationOrderLabel}`"
+      :subtitle="`Kelola ${preparationOrderLabel.toLowerCase()} untuk proses ${preparationLabel.toLowerCase()}`"
+    />
+
     <!-- Main Content -->
-    <div class="py-6">
+    <div class="py-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-6 flex justify-between items-center">
-          <div>
-            <h2 class="text-2xl font-bold text-gray-900">Data {{ preparationOrderLabel }}</h2>
-            <p class="mt-1 text-sm text-gray-600">
-              Kelola {{ preparationOrderLabel.toLowerCase() }} untuk proses {{ preparationLabel.toLowerCase() }}
-            </p>
-          </div>
+        <!-- Actions -->
+        <div class="mb-6 flex justify-end">
           <Link
             href="/cutting-orders/create"
             class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
@@ -138,23 +137,23 @@ const formatDate = (date: string | null) => {
         </div>
 
         <!-- Filters -->
-        <div class="bg-white shadow rounded-lg p-4 mb-6">
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cari</label>
               <input
                 v-model="search"
                 type="text"
                 :placeholder="`Nomor order atau ${patternLabel.toLowerCase()}...`"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                class="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 @keyup.enter="applyFilters"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
               <select
                 v-model="statusFilter"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                class="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
               >
                 <option value="">Semua Status</option>
                 <option value="draft">Draft</option>
@@ -174,7 +173,7 @@ const formatDate = (date: string | null) => {
               <button
                 type="button"
                 @click="clearFilters"
-                class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
               >
                 Reset
               </button>
@@ -183,29 +182,29 @@ const formatDate = (date: string | null) => {
         </div>
 
         <!-- Table -->
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   No. Order
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   {{ patternLabel }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Tanggal
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Target Qty
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Pelaksana
                 </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Aksi
                 </th>
               </tr>

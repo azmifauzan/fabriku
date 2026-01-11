@@ -105,17 +105,16 @@ const getProductTypeBadge = (type: string) => {
   <AppLayout>
     <Head :title="`Data ${patternLabel} Produk`" />
 
+    <PageHeader 
+      :title="`Data ${patternLabel} Produk`"
+      :subtitle="`Template produk dengan kebutuhan ${materialLabel.toLowerCase()} (BOM)`"
+    />
+
     <!-- Main Content -->
-    <div class="py-6">
+    <div class="py-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-6 flex justify-between items-center">
-          <div>
-            <h2 class="text-2xl font-bold text-gray-900">Data {{ patternLabel }} Produk</h2>
-            <p class="mt-1 text-sm text-gray-600">
-              Template produk dengan kebutuhan {{ materialLabel.toLowerCase() }} (BOM)
-            </p>
-          </div>
+        <!-- Actions -->
+        <div class="mb-6 flex justify-end">
           <Link
             href="/patterns/create"
             class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
