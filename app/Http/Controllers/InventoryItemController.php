@@ -72,7 +72,7 @@ class InventoryItemController extends Controller
                 'search', 'category', 'status', 'location_id',
                 'quality_grade', 'low_stock', 'expiring_soon', 'expired',
             ]),
-            'locations' => InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code']),
+            'locations' => InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'zone', 'rack']),
             'stats' => [
                 'total_items' => InventoryItem::count(),
                 'total_stock' => InventoryItem::sum('current_stock'),
@@ -98,8 +98,8 @@ class InventoryItemController extends Controller
 
     public function create(Request $request)
     {
-        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'type']);
-        $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'category']);
+        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'zone', 'rack']);
+        $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'product_type']);
 
         return Inertia::render('Inventory/Items/Create', [
             'locations' => $locations,
@@ -130,8 +130,8 @@ class InventoryItemController extends Controller
 
     public function edit(InventoryItem $inventoryItem)
     {
-        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'type']);
-        $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'category']);
+        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'zone', 'rack']);
+        $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'product_type']);
 
         return Inertia::render('Inventory/Items/Edit', [
             'item' => $inventoryItem,

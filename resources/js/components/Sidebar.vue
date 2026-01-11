@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Home,
   Package,
   Scissors,
@@ -29,6 +30,9 @@ const emit = defineEmits<{
 }>()
 
 const page = usePage()
+
+// Track expanded menu items
+const expandedMenus = ref<string[]>([])
 
 const businessCategory = computed(() => (page.props.tenant as any)?.business_category as string | undefined)
 const terminology = computed(() => ((page.props.tenant as any)?.terminology ?? {}) as Record<string, string>)
@@ -87,6 +91,43 @@ const menuItems = computed(() => {
 
 const isActive = (href: string) => {
   return props.currentRoute.startsWith(href)
+}
+
+// Auto-expand parent menu if child is active
+const checkAndExpandActiveMenu = () => {
+  menuItems.value.forEach((item) => {
+    if (item.children) {
+      const hasActiveChild = item.children.some((child) => isActive(child.href))
+      if (hasActiveChild && !expandedMenus.value.includes(item.href)) {
+        expandedMenus.value.push(item.href)
+      }
+    }
+  })
+}
+
+// Run on mount and when route changes
+onMounted(() => {
+  checkAndExpandActiveMenu()
+})
+
+watch(
+  () => props.currentRoute,
+  () => {
+    checkAndExpandActiveMenu()
+  },
+)
+
+const isMenuExpanded = (href: string) => {
+  return expandedMenus.value.includes(href)
+}
+
+const toggleMenu = (href: string) => {
+  const index = expandedMenus.value.indexOf(href)
+  if (index > -1) {
+    expandedMenus.value.splice(index, 1)
+  } else {
+    expandedMenus.value.push(href)
+  }
 }
 
 const handleLinkClick = () => {
@@ -167,34 +208,52 @@ const handleLinkClick = () => {
 
         <!-- Menu with Children -->
         <div v-else>
-          <div
+          <button
+            type="button"
             :class="[
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
+              'w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700',
               isActive(item.href)
                 ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
                 : 'text-gray-700 dark:text-gray-300',
             ]"
+            @click="toggleMenu(item.href)"
           >
-            <component
-              :is="item.icon"
-              :size="20"
+            <div class="flex items-center gap-3">
+              <component
+                :is="item.icon"
+                :size="20"
+                :class="[
+                  'flex-shrink-0',
+                  isActive(item.href)
+                    ? 'text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-500 dark:text-gray-400',
+                ]"
+              />
+              <span
+                v-if="isMobile || isOpen"
+                class="text-sm font-medium whitespace-nowrap"
+              >
+                {{ item.name }}
+              </span>
+            </div>
+            <ChevronDown
+              v-if="isMobile || isOpen"
+              :size="16"
               :class="[
-                'flex-shrink-0',
+                'flex-shrink-0 transition-transform duration-200',
+                isMenuExpanded(item.href) ? 'rotate-180' : '',
                 isActive(item.href)
                   ? 'text-indigo-600 dark:text-indigo-400'
-                  : 'text-gray-500 dark:text-gray-400',
+                  : 'text-gray-400 dark:text-gray-500',
               ]"
             />
-            <span
-              v-if="isMobile || isOpen"
-              class="text-sm font-medium whitespace-nowrap"
-            >
-              {{ item.name }}
-            </span>
-          </div>
+          </button>
 
           <!-- Submenu Items -->
-          <div v-if="isMobile || isOpen" class="ml-8 mt-1 space-y-1">
+          <div
+            v-if="(isMobile || isOpen) && isMenuExpanded(item.href)"
+            class="ml-8 mt-1 space-y-1"
+          >
             <Link
               v-for="child in item.children"
               :key="child.href"
