@@ -13,6 +13,7 @@ import {
   BookOpen,
   ClipboardList,
   ChefHat,
+  Warehouse,
   X,
 } from 'lucide-vue-next'
 
@@ -66,6 +67,21 @@ const menuItems = computed(() => {
       href: '/production-orders',
       icon: isFood ? ChefHat : FileBox,
     },
+    {
+      name: 'Inventory',
+      href: '/inventory',
+      icon: Warehouse,
+      children: [
+        {
+          name: 'Lokasi',
+          href: '/inventory/locations',
+        },
+        {
+          name: 'Items',
+          href: '/inventory/items',
+        },
+      ],
+    },
   ]
 })
 
@@ -118,35 +134,84 @@ const handleLinkClick = () => {
 
     <!-- Menu Items -->
     <nav class="px-2 py-4 space-y-1 overflow-y-auto h-full">
-      <Link
-        v-for="item in menuItems"
-        :key="item.href"
-        :href="item.href"
-        :class="[
-          'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group',
-          isActive(item.href)
-            ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
-            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
-        ]"
-        @click="handleLinkClick"
-      >
-        <component
-          :is="item.icon"
-          :size="20"
+      <template v-for="item in menuItems" :key="item.href">
+        <!-- Parent Menu Item -->
+        <Link
+          v-if="!item.children"
+          :href="item.href"
           :class="[
-            'flex-shrink-0',
+            'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group',
             isActive(item.href)
-              ? 'text-indigo-600 dark:text-indigo-400'
-              : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300',
+              ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
           ]"
-        />
-        <span
-          v-if="isMobile || isOpen"
-          class="text-sm font-medium whitespace-nowrap"
+          @click="handleLinkClick"
         >
-          {{ item.name }}
-        </span>
-      </Link>
+          <component
+            :is="item.icon"
+            :size="20"
+            :class="[
+              'flex-shrink-0',
+              isActive(item.href)
+                ? 'text-indigo-600 dark:text-indigo-400'
+                : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300',
+            ]"
+          />
+          <span
+            v-if="isMobile || isOpen"
+            class="text-sm font-medium whitespace-nowrap"
+          >
+            {{ item.name }}
+          </span>
+        </Link>
+
+        <!-- Menu with Children -->
+        <div v-else>
+          <div
+            :class="[
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
+              isActive(item.href)
+                ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
+                : 'text-gray-700 dark:text-gray-300',
+            ]"
+          >
+            <component
+              :is="item.icon"
+              :size="20"
+              :class="[
+                'flex-shrink-0',
+                isActive(item.href)
+                  ? 'text-indigo-600 dark:text-indigo-400'
+                  : 'text-gray-500 dark:text-gray-400',
+              ]"
+            />
+            <span
+              v-if="isMobile || isOpen"
+              class="text-sm font-medium whitespace-nowrap"
+            >
+              {{ item.name }}
+            </span>
+          </div>
+
+          <!-- Submenu Items -->
+          <div v-if="isMobile || isOpen" class="ml-8 mt-1 space-y-1">
+            <Link
+              v-for="child in item.children"
+              :key="child.href"
+              :href="child.href"
+              :class="[
+                'block px-3 py-2 rounded-lg text-sm transition-colors',
+                isActive(child.href)
+                  ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-medium'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700',
+              ]"
+              @click="handleLinkClick"
+            >
+              {{ child.name }}
+            </Link>
+          </div>
+        </div>
+      </template>
     </nav>
   </aside>
 </template>
