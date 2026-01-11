@@ -53,29 +53,54 @@ Fabriku menggunakan arsitektur modern berbasis Laravel 12 dengan Inertia.js dan 
 ### 1. Frontend Architecture
 
 **Technology Stack**:
-- Vue 3 (Composition API)
-- Inertia.js v2 (SSR-capable)
-- Tailwind CSS 4 (Utility-first CSS)
-- TypeScript (Type safety)
-- Wayfinder (Type-safe routing)
+- **Vue 3.5.13** (Composition API with `<script setup>`)
+- **Inertia.js v2** (Modern monolithic SPA)
+- **Tailwind CSS v4** (Utility-first CSS)
+- **TypeScript 5.2.2** (Type safety)
+- **Laravel Wayfinder v0.1.3** (Type-safe routing)
+- **Lucide Vue Next** (Modern icon library)
+- **VueUse Core** (Composition utilities)
+
+**UI/UX Features**:
+- ✅ **Mobile-First Responsive Design**
+- ✅ **Dark Mode Support** (persistent via localStorage)
+- ✅ **Collapsible Sidebar Navigation**
+- ✅ **Type-Safe Routing** dengan Wayfinder
+- ✅ **Component-Based Architecture**
+
+**Layout System**:
+- **AppLayout** - Main layout dengan navbar, sidebar, footer
+- **Navbar** - Fixed top bar dengan theme toggle & user menu
+- **Sidebar** - Collapsible navigation (drawer di mobile, panel di desktop)
+- **PageHeader** - Reusable page title dengan action buttons
+- **Footer** - Copyright dan app info
+
+Lihat detail lengkap di [Frontend UI Architecture](./07-frontend-ui-architecture.md).
 
 **Component Structure**:
 ```
 resources/js/
+├── layouts/            # Layout components
+│   └── AppLayout.vue   # Main app layout
+├── components/         # Reusable UI components
+│   ├── Navbar.vue      # Top navigation
+│   ├── Sidebar.vue     # Side navigation
+│   ├── Footer.vue      # App footer
+│   └── PageHeader.vue  # Page header component
+├── composables/        # Vue composables
+│   └── useDarkMode.ts  # Dark mode utility
 ├── pages/              # Inertia pages
+│   ├── Auth/
 │   ├── Dashboard.vue
 │   ├── Materials/      # Bahan baku
-│   ├── Cutting/        # Pemotongan
-│   ├── Production/     # Produksi jahit
+│   ├── Patterns/       # Pattern/Recipe
+│   ├── CuttingOrders/  # Pemotongan/Prep
+│   ├── Contractors/    # Kontraktor
+│   ├── ProductionOrders/ # Produksi jahit/baking
 │   ├── Inventory/      # Gudang produk jadi
 │   ├── Sales/          # Penjualan
 │   └── Reports/        # Laporan
-├── components/         # Reusable components
-│   ├── layouts/
-│   ├── forms/
-│   ├── tables/
-│   └── charts/
-├── composables/        # Vue composables
+├── actions/            # Wayfinder generated routes
 ├── types/              # TypeScript types
 └── lib/                # Utilities & helpers
 ```

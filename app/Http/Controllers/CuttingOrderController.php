@@ -57,8 +57,11 @@ class CuttingOrderController extends Controller
     {
         $order = CuttingOrder::create($request->validated());
 
+        $tenant = auth()->user()?->tenant;
+        $prepOrderLabel = $tenant?->getTerminology('preparation_order') ?? 'Cutting order';
+
         return redirect()->route('cutting-orders.index')
-            ->with('success', 'Cutting order berhasil dibuat.');
+            ->with('success', "{$prepOrderLabel} berhasil dibuat.");
     }
 
     public function edit(CuttingOrder $cuttingOrder)
@@ -98,8 +101,11 @@ class CuttingOrderController extends Controller
 
         $cuttingOrder->update($request->validated());
 
+        $tenant = auth()->user()?->tenant;
+        $prepOrderLabel = $tenant?->getTerminology('preparation_order') ?? 'Cutting order';
+
         return redirect()->route('cutting-orders.index')
-            ->with('success', 'Cutting order berhasil diupdate.');
+            ->with('success', "{$prepOrderLabel} berhasil diperbarui.");
     }
 
     public function destroy(CuttingOrder $cuttingOrder)
@@ -110,7 +116,10 @@ class CuttingOrderController extends Controller
 
         $cuttingOrder->delete();
 
+        $tenant = auth()->user()?->tenant;
+        $prepOrderLabel = $tenant?->getTerminology('preparation_order') ?? 'Cutting order';
+
         return redirect()->route('cutting-orders.index')
-            ->with('success', 'Cutting order berhasil dihapus.');
+            ->with('success', "{$prepOrderLabel} berhasil dihapus.");
     }
 }

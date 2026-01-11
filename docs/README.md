@@ -68,6 +68,9 @@ Namun terminologi dan business rules disesuaikan per kategori.
 - [04-api-endpoints.md](04-api-endpoints.md) - API specifications
 - [05-user-flows.md](05-user-flows.md) - User journey & UI flows
 - [06-mvp-development-plan.md](06-mvp-development-plan.md) - Implementation roadmap
+- [07-frontend-ui-architecture.md](07-frontend-ui-architecture.md) - ⭐ **Frontend UI/UX** - Layout system, mobile-first design, dark mode
+- [multi-category-architecture.md](multi-category-architecture.md) - Multi-category design patterns
+- [phase-2-summary.md](phase-2-summary.md) - Phase 2 completion summary
 
 ## 🚀 Development Progress
 
@@ -87,7 +90,12 @@ Namun terminologi dan business rules disesuaikan per kategori.
 - Preparation/Cutting orders
 - Material usage & efficiency tracking
 - 20 tests passing (backend complete) ✅
-- Frontend components (2/4 done)
+- Frontend components (3/4 done)
+- UI/UX modernization complete ✅:
+  - Mobile-first responsive layout
+  - Collapsible sidebar navigation
+  - Dark/light theme support
+  - Lucide icon integration
 
 ### 📋 Next Phases
 - Phase 4: Production Management (Sewing/Baking)

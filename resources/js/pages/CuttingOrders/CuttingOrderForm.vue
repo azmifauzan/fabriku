@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { useBusinessContext } from '@/composables/useBusinessContext';
 
 interface Material {
     id: number;
@@ -121,6 +123,11 @@ const goBack = () => {
     router.visit('/cutting-orders');
 };
 
+const { term } = useBusinessContext();
+
+const preparationOrderLabel = computed(() => term('preparation_order', 'Cutting Order'));
+const patternLabel = computed(() => term('pattern', 'Pattern'));
+
 // Auto-set completed date when status is completed
 watch(() => form.status, (newStatus) => {
     if (newStatus === 'completed' && !form.completed_date) {
@@ -133,62 +140,13 @@ watch(() => form.status, (newStatus) => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-100">
-        <Head :title="isEdit ? 'Edit Cutting Order' : 'Buat Cutting Order Baru'" />
-
-        <!-- Navigation -->
-        <nav class="bg-white shadow-sm">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 justify-between">
-                    <div class="flex">
-                        <div class="flex flex-shrink-0 items-center">
-                            <h1 class="text-xl font-bold text-indigo-600">Fabriku</h1>
-                        </div>
-                        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                            <Link
-                                href="/dashboard"
-                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
-                            >
-                                Dashboard
-                            </Link>
-                            <Link
-                                href="/materials"
-                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
-                            >
-                                Bahan Baku
-                            </Link>
-                            <Link
-                                href="/patterns"
-                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
-                            >
-                                Pattern
-                            </Link>
-                            <Link
-                                href="/cutting-orders"
-                                class="inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900"
-                            >
-                                Cutting Orders
-                            </Link>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <Link
-                            href="/logout"
-                            method="post"
-                            as="button"
-                            class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
-                        >
-                            Logout
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        </nav>
+    <AppLayout>
+        <Head :title="isEdit ? `Edit ${preparationOrderLabel}` : `Buat ${preparationOrderLabel} Baru`" />
 
         <!-- Page Header -->
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <h2 class="text-2xl font-semibold leading-tight text-gray-800">
-                {{ isEdit ? 'Edit Cutting Order' : 'Buat Cutting Order Baru' }}
+                {{ isEdit ? `Edit ${preparationOrderLabel}` : `Buat ${preparationOrderLabel} Baru` }}
             </h2>
         </div>
 
@@ -199,7 +157,7 @@ watch(() => form.status, (newStatus) => {
                         <!-- Order Information -->
                         <div class="space-y-6">
                             <h3 class="text-lg font-medium text-gray-900">
-                                Informasi Cutting Order
+                                Informasi {{ preparationOrderLabel }}
                             </h3>
 
                             <div v-if="isEdit" class="rounded-lg bg-gray-50 p-4">
@@ -212,7 +170,7 @@ watch(() => form.status, (newStatus) => {
                                 <!-- Pattern Selection -->
                                 <div class="sm:col-span-2">
                                     <label for="pattern_id" class="block text-sm font-medium text-gray-700">
-                                        Pattern <span class="text-red-500">*</span>
+                                        {{ patternLabel }} <span class="text-red-500">*</span>
                                     </label>
                                     <select
                                         id="pattern_id"
@@ -221,13 +179,13 @@ watch(() => form.status, (newStatus) => {
                                         :disabled="isEdit"
                                         required
                                     >
-                                        <option :value="0">-- Pilih Pattern --</option>
+                                        <option :value="0">-- Pilih {{ patternLabel }} --</option>
                                         <option v-for="pattern in patterns" :key="pattern.id" :value="pattern.id">
                                             {{ pattern.name }} ({{ pattern.code }}) - {{ pattern.product_type }} {{ pattern.size || '' }}
                                         </option>
                                     </select>
                                     <p v-if="isEdit" class="mt-1 text-xs text-gray-500">
-                                        Pattern tidak bisa diubah setelah order dibuat
+                                        {{ patternLabel }} tidak bisa diubah setelah order dibuat
                                     </p>
                                     <p v-if="form.errors.pattern_id" class="mt-1 text-sm text-red-600">
                                         {{ form.errors.pattern_id }}
@@ -268,7 +226,7 @@ watch(() => form.status, (newStatus) => {
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     />
                                     <p class="mt-1 text-xs text-gray-500">
-                                        Jumlah produk yang berhasil dipotong
+                                        Jumlah produk yang berhasil diproses
                                     </p>
                                     <p v-if="form.errors.actual_quantity" class="mt-1 text-sm text-red-600">
                                         {{ form.errors.actual_quantity }}
@@ -478,5 +436,5 @@ watch(() => form.status, (newStatus) => {
                 </div>
             </div>
         </div>
-    </div>
+    </AppLayout>
 </template>

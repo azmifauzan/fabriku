@@ -66,8 +66,11 @@ class PatternController extends Controller
             }
         }
 
+        $tenant = auth()->user()?->tenant;
+        $patternLabel = $tenant?->getTerminology('pattern') ?? 'Pattern';
+
         return redirect()->route('patterns.index')
-            ->with('success', 'Pattern berhasil ditambahkan.');
+            ->with('success', "{$patternLabel} berhasil ditambahkan.");
     }
 
     public function edit(Pattern $pattern)
@@ -110,19 +113,26 @@ class PatternController extends Controller
             $pattern->materials()->sync($syncData);
         }
 
+        $tenant = auth()->user()?->tenant;
+        $patternLabel = $tenant?->getTerminology('pattern') ?? 'Pattern';
+
         return redirect()->route('patterns.index')
-            ->with('success', 'Pattern berhasil diupdate.');
+            ->with('success', "{$patternLabel} berhasil diperbarui.");
     }
 
     public function destroy(Pattern $pattern)
     {
+        $tenant = auth()->user()?->tenant;
+        $patternLabel = $tenant?->getTerminology('pattern') ?? 'Pattern';
+        $prepOrderLabel = $tenant?->getTerminology('preparation_order') ?? 'Cutting order';
+
         if ($pattern->cuttingOrders()->exists()) {
-            return back()->withErrors(['pattern' => 'Pattern tidak bisa dihapus karena sudah digunakan di cutting order.']);
+            return back()->withErrors(['pattern' => "{$patternLabel} tidak bisa dihapus karena sudah digunakan di {$prepOrderLabel}."]);
         }
 
         $pattern->delete();
 
         return redirect()->route('patterns.index')
-            ->with('success', 'Pattern berhasil dihapus.');
+            ->with('success', "{$patternLabel} berhasil dihapus.");
     }
 }

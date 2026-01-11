@@ -80,6 +80,11 @@ class CuttingOrder extends Model
         return $this->hasMany(CuttingResult::class);
     }
 
+    public function productionOrders(): HasMany
+    {
+        return $this->hasMany(ProductionOrder::class);
+    }
+
     public function isDraft(): bool
     {
         return $this->status === 'draft';

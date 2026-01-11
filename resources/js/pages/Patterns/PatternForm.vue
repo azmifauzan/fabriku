@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { useBusinessContext } from '@/composables/useBusinessContext';
 
 interface Material {
     id: number;
@@ -41,6 +43,12 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     isEdit: false,
 });
+
+const { term, termLower } = useBusinessContext();
+
+const patternLabel = computed(() => term('pattern', 'Pattern'));
+const materialLabel = computed(() => term('material', 'Bahan Baku'));
+const materialLabelLower = computed(() => termLower('material', 'bahan'));
 
 const form = useForm({
     code: props.pattern?.code || '',
@@ -120,62 +128,13 @@ const goBack = () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-100">
-        <Head :title="isEdit ? 'Edit Pattern' : 'Buat Pattern Baru'" />
-
-        <!-- Navigation -->
-        <nav class="bg-white shadow-sm">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 justify-between">
-                    <div class="flex">
-                        <div class="flex flex-shrink-0 items-center">
-                            <h1 class="text-xl font-bold text-indigo-600">Fabriku</h1>
-                        </div>
-                        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                            <Link
-                                href="/dashboard"
-                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
-                            >
-                                Dashboard
-                            </Link>
-                            <Link
-                                href="/materials"
-                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
-                            >
-                                Bahan Baku
-                            </Link>
-                            <Link
-                                href="/patterns"
-                                class="inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900"
-                            >
-                                Pattern
-                            </Link>
-                            <Link
-                                href="/cutting-orders"
-                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
-                            >
-                                Cutting Orders
-                            </Link>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <Link
-                            href="/logout"
-                            method="post"
-                            as="button"
-                            class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
-                        >
-                            Logout
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        </nav>
+    <AppLayout>
+        <Head :title="isEdit ? `Edit ${patternLabel}` : `Buat ${patternLabel} Baru`" />
 
         <!-- Page Header -->
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <h2 class="text-2xl font-semibold leading-tight text-gray-800">
-                {{ isEdit ? 'Edit Pattern' : 'Buat Pattern Baru' }}
+                {{ isEdit ? `Edit ${patternLabel}` : `Buat ${patternLabel} Baru` }}
             </h2>
         </div>
 
@@ -186,14 +145,14 @@ const goBack = () => {
                         <!-- Pattern Information -->
                         <div class="space-y-6">
                             <h3 class="text-lg font-medium text-gray-900">
-                                Informasi Pattern
+                                Informasi {{ patternLabel }}
                             </h3>
 
                             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                 <!-- Code -->
                                 <div>
                                     <label for="code" class="block text-sm font-medium text-gray-700">
-                                        Kode Pattern <span class="text-red-500">*</span>
+                                        Kode {{ patternLabel }} <span class="text-red-500">*</span>
                                     </label>
                                     <input
                                         id="code"
@@ -210,7 +169,7 @@ const goBack = () => {
                                 <!-- Name -->
                                 <div>
                                     <label for="name" class="block text-sm font-medium text-gray-700">
-                                        Nama Pattern <span class="text-red-500">*</span>
+                                        Nama {{ patternLabel }} <span class="text-red-500">*</span>
                                     </label>
                                     <input
                                         id="name"
@@ -291,7 +250,7 @@ const goBack = () => {
                                     class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
                                 <label for="is_active" class="ml-2 block text-sm text-gray-700">
-                                    Pattern Aktif
+                                    {{ patternLabel }} Aktif
                                 </label>
                             </div>
                         </div>
@@ -307,13 +266,13 @@ const goBack = () => {
                                     @click="addBomItem"
                                     class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
                                 >
-                                    + Tambah Bahan
+                                    + Tambah {{ materialLabel }}
                                 </button>
                             </div>
 
                             <div v-if="bomItems.length === 0" class="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center">
                                 <p class="text-sm text-gray-500">
-                                    Belum ada bahan. Klik "Tambah Bahan" untuk menambahkan.
+                                    Belum ada {{ materialLabelLower }}. Klik "Tambah {{ materialLabel }}" untuk menambahkan.
                                 </p>
                             </div>
 
@@ -327,7 +286,7 @@ const goBack = () => {
                                         <!-- Material -->
                                         <div class="sm:col-span-5">
                                             <label :for="`material-${index}`" class="block text-sm font-medium text-gray-700">
-                                                Bahan <span class="text-red-500">*</span>
+                                                {{ materialLabel }} <span class="text-red-500">*</span>
                                             </label>
                                             <select
                                                 :id="`material-${index}`"
@@ -335,7 +294,7 @@ const goBack = () => {
                                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                 required
                                             >
-                                                <option :value="0">-- Pilih Bahan --</option>
+                                                <option :value="0">-- Pilih {{ materialLabel }} --</option>
                                                 <option v-for="material in materials" :key="material.id" :value="material.id">
                                                     {{ material.name }} ({{ material.code }})
                                                 </option>
@@ -437,5 +396,5 @@ const goBack = () => {
                 </div>
             </div>
         </div>
-    </div>
+    </AppLayout>
 </template>

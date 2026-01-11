@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 interface MaterialAttribute {
   id?: number
@@ -61,63 +62,8 @@ const isEditing = !!props.material?.id
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <AppLayout>
     <Head :title="isEditing ? 'Edit Bahan Baku' : 'Tambah Bahan Baku'" />
-
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
-              <h1 class="text-xl font-bold text-indigo-600">Fabriku</h1>
-            </div>
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                href="/dashboard"
-                class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/materials"
-                class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
-                Bahan Baku
-              </Link>
-              <Link
-                href="/patterns"
-                class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
-                Pattern
-              </Link>
-              <Link
-                href="/cutting-orders"
-                class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
-                Cutting Order
-              </Link>
-            </div>
-          </div>
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <span class="text-sm text-gray-700">{{ $page.props.auth.user?.name || 'User' }}</span>
-              <span class="text-xs text-gray-500 ml-2">({{ $page.props.auth.user?.role || 'staff' }})</span>
-            </div>
-            <div class="ml-4">
-              <Link
-                href="/logout"
-                method="post"
-                as="button"
-                class="text-sm text-red-600 hover:text-red-800"
-              >
-                Logout
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
 
     <!-- Main Content -->
     <div class="py-6">
@@ -387,5 +333,5 @@ const isEditing = !!props.material?.id
         </div>
       </div>
     </div>
-  </div>
+  </AppLayout>
 </template>

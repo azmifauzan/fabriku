@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CuttingResult extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'tenant_id',
         'cutting_order_id',
         'material_id',
         'material_used',
@@ -34,7 +37,13 @@ class CuttingResult extends Model
 
     protected static function booted(): void
     {
+        static::addGlobalScope(new TenantScope);
+
         static::creating(function (CuttingResult $result) {
+            if (! $result->tenant_id) {
+                $result->tenant_id = auth()->user()->tenant_id;
+            }
+
             // Auto-calculate waste percentage
             if ($result->material_used > 0) {
                 $result->waste_percentage = ($result->material_wasted / $result->material_used) * 100;
@@ -65,6 +74,11 @@ class CuttingResult extends Model
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
+    }
+
+    public function productionOrders(): HasMany
+    {
+        return $this->hasMany(ProductionOrder::class);
     }
 
     public function getGoodQuantityAttribute(): int

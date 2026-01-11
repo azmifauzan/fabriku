@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { useBusinessContext } from '@/composables/useBusinessContext'
 
 interface PatternMaterial {
   id: number
@@ -31,6 +33,11 @@ interface PaginatedPatterns {
   from: number
   to: number
 }
+
+const { productTypes, term, termLower } = useBusinessContext()
+
+const patternLabel = computed(() => term('pattern', 'Pattern'))
+const materialLabel = computed(() => term('material', 'Bahan Baku'))
 
 const props = defineProps<{
   patterns: PaginatedPatterns
@@ -64,7 +71,7 @@ const clearFilters = () => {
 }
 
 const deletePattern = (pattern: Pattern) => {
-  if (!confirm(`Hapus pattern ${pattern.name}?`)) return
+  if (!confirm(`Hapus ${termLower('pattern', 'pattern')} ${pattern.name}?`)) return
 
   router.delete(`/patterns/${pattern.id}`, {
     preserveScroll: true,
@@ -72,81 +79,31 @@ const deletePattern = (pattern: Pattern) => {
 }
 
 const getProductTypeLabel = (type: string) => {
-  const labels: Record<string, string> = {
-    mukena: 'Mukena',
-    daster: 'Daster',
-    gamis: 'Gamis',
-    jilbab: 'Jilbab',
-    lainnya: 'Lainnya',
-  }
-  return labels[type] || type
+  return productTypes.value[type] || type
 }
 
 const getProductTypeBadge = (type: string) => {
-  const colors: Record<string, string> = {
-    mukena: 'bg-purple-100 text-purple-800',
-    daster: 'bg-pink-100 text-pink-800',
-    gamis: 'bg-blue-100 text-blue-800',
-    jilbab: 'bg-green-100 text-green-800',
-    lainnya: 'bg-gray-100 text-gray-800',
+  const palette = [
+    'bg-purple-100 text-purple-800',
+    'bg-pink-100 text-pink-800',
+    'bg-blue-100 text-blue-800',
+    'bg-green-100 text-green-800',
+    'bg-yellow-100 text-yellow-800',
+    'bg-indigo-100 text-indigo-800',
+  ]
+
+  let hash = 0
+  for (let i = 0; i < type.length; i += 1) {
+    hash = (hash * 31 + type.charCodeAt(i)) % 2147483647
   }
-  return colors[type] || 'bg-gray-100 text-gray-800'
+
+  return palette[hash % palette.length] || 'bg-gray-100 text-gray-800'
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100">
-    <Head title="Data Pattern Produk" />
-
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
-              <h1 class="text-xl font-bold text-indigo-600">Fabriku</h1>
-            </div>
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                href="/dashboard"
-                class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/materials"
-                class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
-                Bahan Baku
-              </Link>
-              <Link
-                href="/patterns"
-                class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
-                Pattern
-              </Link>
-              <Link
-                href="/cutting-orders"
-                class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
-                Cutting Order
-              </Link>
-            </div>
-          </div>
-          <div class="flex items-center">
-            <span class="text-sm text-gray-700">{{ $page.props.auth.user?.name }}</span>
-            <Link
-              href="/logout"
-              method="post"
-              as="button"
-              class="ml-4 text-sm text-red-600 hover:text-red-800"
-            >
-              Logout
-            </Link>
-          </div>
-        </div>
-      </div>
-    </nav>
+  <AppLayout>
+    <Head :title="`Data ${patternLabel} Produk`" />
 
     <!-- Main Content -->
     <div class="py-6">
@@ -154,9 +111,9 @@ const getProductTypeBadge = (type: string) => {
         <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900">Data Pattern Produk</h2>
+            <h2 class="text-2xl font-bold text-gray-900">Data {{ patternLabel }} Produk</h2>
             <p class="mt-1 text-sm text-gray-600">
-              Template produk dengan kebutuhan bahan baku (BOM)
+              Template produk dengan kebutuhan {{ materialLabel.toLowerCase() }} (BOM)
             </p>
           </div>
           <Link
@@ -166,7 +123,7 @@ const getProductTypeBadge = (type: string) => {
             <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            Tambah Pattern
+            Tambah {{ patternLabel }}
           </Link>
         </div>
 
@@ -190,11 +147,9 @@ const getProductTypeBadge = (type: string) => {
                 class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
               >
                 <option value="">Semua Jenis</option>
-                <option value="mukena">Mukena</option>
-                <option value="daster">Daster</option>
-                <option value="gamis">Gamis</option>
-                <option value="jilbab">Jilbab</option>
-                <option value="lainnya">Lainnya</option>
+                <option v-for="(label, value) in productTypes" :key="value" :value="value">
+                  {{ label }}
+                </option>
               </select>
             </div>
             <div>
@@ -233,13 +188,13 @@ const getProductTypeBadge = (type: string) => {
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Pattern
+                  {{ patternLabel }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Jenis & Ukuran
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Material (BOM)
+                  {{ materialLabel }} (BOM)
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -252,8 +207,8 @@ const getProductTypeBadge = (type: string) => {
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-if="patterns.data.length === 0">
                 <td colspan="5" class="px-6 py-12 text-center text-sm text-gray-500">
-                  <p class="font-medium">Tidak ada data pattern</p>
-                  <p class="text-xs">Tambahkan pattern produk pertama Anda</p>
+                  <p class="font-medium">Tidak ada data {{ termLower('pattern', 'pattern') }}</p>
+                  <p class="text-xs">Tambahkan {{ termLower('pattern', 'pattern') }} produk pertama Anda</p>
                 </td>
               </tr>
               <tr v-for="pattern in patterns.data" :key="pattern.id" class="hover:bg-gray-50">
@@ -356,5 +311,5 @@ const getProductTypeBadge = (type: string) => {
         </div>
       </div>
     </div>
-  </div>
+  </AppLayout>
 </template>

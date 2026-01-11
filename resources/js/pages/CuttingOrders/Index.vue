@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { useBusinessContext } from '@/composables/useBusinessContext'
 
 interface Pattern {
   id: number
@@ -41,6 +43,12 @@ const props = defineProps<{
   }
 }>()
 
+const { term, termLower } = useBusinessContext()
+
+const preparationOrderLabel = computed(() => term('preparation_order', 'Cutting Order'))
+const preparationLabel = computed(() => term('preparation', 'Cutting/Pemotongan'))
+const patternLabel = computed(() => term('pattern', 'Pattern'))
+
 const search = ref(props.filters.search || '')
 const statusFilter = ref(props.filters.status || '')
 
@@ -66,7 +74,7 @@ const deleteCuttingOrder = (order: CuttingOrder) => {
     return
   }
 
-  if (!confirm(`Hapus cutting order ${order.order_number}?`)) return
+  if (!confirm(`Hapus ${termLower('preparation_order', 'cutting order')} ${order.order_number}?`)) return
 
   router.delete(`/cutting-orders/${order.id}`, {
     preserveScroll: true,
@@ -104,58 +112,8 @@ const formatDate = (date: string | null) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100">
-    <Head title="Data Cutting Order" />
-
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
-              <h1 class="text-xl font-bold text-indigo-600">Fabriku</h1>
-            </div>
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                href="/dashboard"
-                class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/materials"
-                class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
-                Bahan Baku
-              </Link>
-              <Link
-                href="/patterns"
-                class="text-gray-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
-                Pattern
-              </Link>
-              <Link
-                href="/cutting-orders"
-                class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
-                Cutting Order
-              </Link>
-            </div>
-          </div>
-          <div class="flex items-center">
-            <span class="text-sm text-gray-700">{{ $page.props.auth.user?.name }}</span>
-            <Link
-              href="/logout"
-              method="post"
-              as="button"
-              class="ml-4 text-sm text-red-600 hover:text-red-800"
-            >
-              Logout
-            </Link>
-          </div>
-        </div>
-      </div>
-    </nav>
+  <AppLayout>
+    <Head :title="`Data ${preparationOrderLabel}`" />
 
     <!-- Main Content -->
     <div class="py-6">
@@ -163,9 +121,9 @@ const formatDate = (date: string | null) => {
         <!-- Header -->
         <div class="mb-6 flex justify-between items-center">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900">Data Cutting Order</h2>
+            <h2 class="text-2xl font-bold text-gray-900">Data {{ preparationOrderLabel }}</h2>
             <p class="mt-1 text-sm text-gray-600">
-              Order pemotongan kain sesuai pattern
+              Kelola {{ preparationOrderLabel.toLowerCase() }} untuk proses {{ preparationLabel.toLowerCase() }}
             </p>
           </div>
           <Link
@@ -187,7 +145,7 @@ const formatDate = (date: string | null) => {
               <input
                 v-model="search"
                 type="text"
-                placeholder="Nomor order atau pattern..."
+                :placeholder="`Nomor order atau ${patternLabel.toLowerCase()}...`"
                 class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 @keyup.enter="applyFilters"
               />
@@ -233,7 +191,7 @@ const formatDate = (date: string | null) => {
                   No. Order
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Pattern
+                  {{ patternLabel }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Tanggal
@@ -245,7 +203,7 @@ const formatDate = (date: string | null) => {
                   Status
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Cutter
+                  Pelaksana
                 </th>
                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Aksi
@@ -255,8 +213,8 @@ const formatDate = (date: string | null) => {
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-if="cuttingOrders.data.length === 0">
                 <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
-                  <p class="font-medium">Tidak ada data cutting order</p>
-                  <p class="text-xs">Tambahkan cutting order pertama Anda</p>
+                  <p class="font-medium">Tidak ada data {{ termLower('preparation_order', 'cutting order') }}</p>
+                  <p class="text-xs">Tambahkan {{ termLower('preparation_order', 'cutting order') }} pertama Anda</p>
                 </td>
               </tr>
               <tr v-for="order in cuttingOrders.data" :key="order.id" class="hover:bg-gray-50">
@@ -340,5 +298,5 @@ const formatDate = (date: string | null) => {
         </div>
       </div>
     </div>
-  </div>
+  </AppLayout>
 </template>
