@@ -15,6 +15,9 @@ import {
   ClipboardList,
   ChefHat,
   Warehouse,
+  UserCircle,
+  ShoppingCart,
+  BarChart3,
   X,
 } from 'lucide-vue-next'
 
@@ -83,6 +86,39 @@ const menuItems = computed(() => {
         {
           name: 'Items',
           href: '/inventory/items',
+        },
+      ],
+    },
+    {
+      name: 'Customer',
+      href: '/customers',
+      icon: UserCircle,
+    },
+    {
+      name: 'Sales Order',
+      href: '/sales-orders',
+      icon: ShoppingCart,
+    },
+    {
+      name: 'Reports',
+      href: '/reports',
+      icon: BarChart3,
+      children: [
+        {
+          name: 'Material',
+          href: '/reports/material',
+        },
+        {
+          name: 'Inventory',
+          href: '/reports/inventory',
+        },
+        {
+          name: 'Penjualan',
+          href: '/reports/sales',
+        },
+        {
+          name: 'Produksi',
+          href: '/reports/production',
         },
       ],
     },

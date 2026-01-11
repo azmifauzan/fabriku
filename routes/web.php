@@ -45,4 +45,16 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::resource('locations', \App\Http\Controllers\InventoryLocationController::class);
         Route::resource('items', \App\Http\Controllers\InventoryItemController::class);
     });
+
+    // Sales Management
+    Route::resource('customers', \App\Http\Controllers\CustomerController::class);
+    Route::resource('sales-orders', \App\Http\Controllers\SalesOrderController::class);
+
+    // Reports
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('material', [\App\Http\Controllers\ReportController::class, 'material'])->name('material');
+        Route::get('inventory', [\App\Http\Controllers\ReportController::class, 'inventory'])->name('inventory');
+        Route::get('sales', [\App\Http\Controllers\ReportController::class, 'sales'])->name('sales');
+        Route::get('production', [\App\Http\Controllers\ReportController::class, 'production'])->name('production');
+    });
 });

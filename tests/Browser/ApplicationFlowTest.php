@@ -5,6 +5,7 @@ use App\Models\Pattern;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
 use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
@@ -309,7 +310,7 @@ it('can view pattern details with BOM cost calculation', function () {
         $material2->id => ['quantity_needed' => 1, 'notes' => 'Lining'],
     ]);
 
-    $page = visit('/patterns/' . $pattern->id . '/edit');
+    $page = visit('/patterns/'.$pattern->id.'/edit');
 
     $page->assertSee('Edit Pattern')
         ->assertSee('PTN-VIEW-001')
