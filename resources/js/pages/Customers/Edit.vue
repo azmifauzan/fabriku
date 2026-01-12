@@ -1,7 +1,12 @@
 <template>
     <AppLayout>
         <Head :title="`Edit Customer: ${customer.name}`" />
-        <CustomerForm :customer="customer" />
+        
+        <div class="py-6 px-6">
+            <div class="max-w-4xl mx-auto">
+                <CustomerForm :customer="customer" />
+            </div>
+        </div>
     </AppLayout>
 </template>
 

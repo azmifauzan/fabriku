@@ -57,10 +57,8 @@ const isEditing = !!props.customer?.id
   <div>
     <Head :title="isEditing ? 'Edit Customer' : 'Tambah Customer'" />
 
-    <div class="py-6 px-6">
-      <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <div class="mb-6 flex items-center justify-between">
+    <!-- Header -->
+    <div class="mb-6 flex items-center justify-between">
           <div>
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
               {{ isEditing ? 'Edit Customer' : 'Tambah Customer Baru' }}
@@ -240,7 +238,5 @@ const isEditing = !!props.customer?.id
             </button>
           </div>
         </form>
-      </div>
-    </div>
   </div>
 </template>

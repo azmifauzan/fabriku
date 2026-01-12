@@ -1,7 +1,12 @@
 <template>
     <AppLayout>
         <Head title="Tambah Customer" />
-        <CustomerForm />
+        
+        <div class="py-6 px-6">
+            <div class="max-w-4xl mx-auto">
+                <CustomerForm />
+            </div>
+        </div>
     </AppLayout>
 </template>
 
