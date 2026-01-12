@@ -131,26 +131,26 @@ const isLowStock = (material: Material) => {
         />
 
         <!-- Filters -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cari</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cari</label>
               <div class="relative">
                 <Search :size="18" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
                   v-model="search"
                   type="text"
                   placeholder="Nama atau kode..."
-                  class="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                  class="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                   @keyup.enter="applyFilters"
                 />
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jenis</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Jenis</label>
               <select
                 v-model="typeFilter"
-                class="w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
               >
                 <option value="">Semua Jenis</option>
                 <option value="kain">Kain</option>
@@ -161,10 +161,10 @@ const isLowStock = (material: Material) => {
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
               <select
                 v-model="statusFilter"
-                class="w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
               >
                 <option value="">Semua Status</option>
                 <option value="1">Aktif</option>
@@ -175,58 +175,70 @@ const isLowStock = (material: Material) => {
               <button
                 type="button"
                 @click="applyFilters"
-                class="flex-1 inline-flex justify-center items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                class="flex-1 inline-flex justify-center items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
               >
                 <Search :size="16" />
                 Filter
               </button>
               <button
+                v-if="search || typeFilter || statusFilter"
                 type="button"
                 @click="clearFilters"
-                class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-sm font-medium rounded-lg transition-colors"
+                class="inline-flex justify-center items-center px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-semibold rounded-lg transition-all shadow-sm"
+                title="Clear filters"
               >
-                <X :size="16" />
+                <X :size="18" />
               </button>
             </div>
           </div>
         </div>
 
         <!-- Table -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Kode / Nama
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Jenis
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stok
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Harga Standar
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              <tr v-if="materials.data.length === 0">
-                <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500">
-                  <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                  </svg>
-                  <p class="mt-2 font-medium">Tidak ada data bahan baku</p>
-                  <p class="text-xs">Tambahkan bahan baku pertama Anda</p>
-                </td>
-              </tr>
-              <tr v-for="material in materials.data" :key="material.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+          <!-- Table Info -->
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Menampilkan <span class="font-semibold">{{ materials.from }}</span> - <span class="font-semibold">{{ materials.to }}</span> dari <span class="font-semibold">{{ materials.total }}</span> bahan baku
+              </p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700/50">
+                <tr>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                    Kode / Nama
+                  </th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                    Jenis
+                  </th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                    Stok
+                  </th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                    Harga Standar
+                  </th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tr v-if="materials.data.length === 0">
+                  <td colspan="6" class="px-6 py-16 text-center">
+                    <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    <p class="mt-4 text-sm font-medium text-gray-900 dark:text-gray-100">Tidak ada data bahan baku</p>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tambahkan bahan baku pertama Anda</p>
+                  </td>
+                </tr>
+                <tr v-for="material in materials.data" :key="material.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                 <td class="px-6 py-4">
                   <div class="flex flex-col">
                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ material.code }}</div>
@@ -284,11 +296,11 @@ const isLowStock = (material: Material) => {
                     Nonaktif
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div class="flex justify-end gap-3">
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                  <div class="flex justify-end gap-2">
                     <Link
                       :href="`/materials/${material.id}/edit`"
-                      class="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg font-medium transition-colors"
                     >
                       <Edit :size="16" />
                       <span>Edit</span>
@@ -296,9 +308,8 @@ const isLowStock = (material: Material) => {
                     <button
                       type="button"
                       @click="deleteMaterial(material)"
-                      class="inline-flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       :disabled="material.receipts_count > 0"
-                      :class="{ 'opacity-50 cursor-not-allowed': material.receipts_count > 0 }"
                       :title="material.receipts_count > 0 ? 'Tidak bisa dihapus karena ada transaksi penerimaan' : 'Hapus'"
                     >
                       <Trash2 :size="16" />
@@ -309,29 +320,24 @@ const isLowStock = (material: Material) => {
               </tr>
             </tbody>
           </table>
+          </div>
 
           <!-- Pagination -->
-          <div v-if="materials.data.length > 0" class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
-            <div class="flex items-center justify-between">
+          <div v-if="materials.data.length > 0" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div class="text-sm text-gray-700 dark:text-gray-300">
-                Menampilkan
-                <span class="font-medium">{{ materials.from }}</span>
-                -
-                <span class="font-medium">{{ materials.to }}</span>
-                dari
-                <span class="font-medium">{{ materials.total }}</span>
-                data
+                <span class="font-medium">{{ materials.from }}</span> - <span class="font-medium">{{ materials.to }}</span> dari <span class="font-medium">{{ materials.total }}</span> data
               </div>
-              <div class="flex gap-2">
+              <div class="flex flex-wrap gap-2">
                 <Link
                   v-for="page in materials.last_page"
                   :key="page"
                   :href="`/materials?page=${page}`"
                   :class="[
-                    'px-3 py-1 text-sm rounded',
+                    'px-4 py-2 text-sm font-medium rounded-lg transition-all',
                     page === materials.current_page
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
                   ]"
                   preserve-state
                   preserve-scroll

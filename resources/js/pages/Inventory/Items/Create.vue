@@ -29,8 +29,8 @@ defineProps<Props>();
     <AppLayout>
         <Head title="Tambah Item Inventory" />
 
-        <div class="py-6">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <ItemForm
                     :locations="locations"
                     :patterns="patterns"

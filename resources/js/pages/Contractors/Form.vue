@@ -2,6 +2,8 @@
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
+import FormField from '@/components/FormField.vue'
+import FormSection from '@/components/FormSection.vue'
 import { useBusinessContext } from '@/composables/useBusinessContext'
 
 interface Contractor {
@@ -64,240 +66,180 @@ const isEditing = !!props.contractor?.id
   <AppLayout>
     <Head :title="isEditing ? `Edit ${contractorLabel}` : `Tambah ${contractorLabel}`" />
 
-    <!-- Page Content -->
-    <div class="py-12">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-          <div class="p-6 bg-white border-b border-gray-200">
-            <div class="mb-6 flex items-center justify-between">
-              <div>
-                <h2 class="text-2xl font-bold text-gray-900">
-                  {{ isEditing ? `Edit ${contractorLabel}` : `Tambah ${contractorLabel} Baru` }}
-                </h2>
-                <p class="mt-2 text-sm text-gray-600">
-                  {{ isEditing ? `Perbarui informasi ${contractorLabelLower}` : `Tambahkan ${contractorLabelLower} untuk produksi eksternal` }}
-                </p>
-              </div>
-              <Link
-                href="/contractors"
-                class="text-sm text-gray-600 hover:text-gray-900"
-              >
-                ← Kembali
-              </Link>
-            </div>
-
-            <form @submit.prevent="submit" class="space-y-6">
-              <!-- Basic Information -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Dasar</h3>
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                      Nama {{ contractorLabel }} <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                      v-model="form.name"
-                      type="text"
-                      required
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      :class="{ 'border-red-500': form.errors.name }"
-                    />
-                    <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                      Tipe <span class="text-red-500">*</span>
-                    </label>
-                    <select
-                      v-model="form.type"
-                      required
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      :class="{ 'border-red-500': form.errors.type }"
-                    >
-                      <option value="individual">Individual</option>
-                      <option value="company">Perusahaan</option>
-                    </select>
-                    <p v-if="form.errors.type" class="mt-1 text-sm text-red-600">{{ form.errors.type }}</p>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                      Spesialisasi <span class="text-red-500">*</span>
-                    </label>
-                    <select
-                      v-model="form.specialty"
-                      required
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      :class="{ 'border-red-500': form.errors.specialty }"
-                    >
-                      <option value="sewing">Penjahit</option>
-                      <option value="baking">Tukang Kue</option>
-                      <option value="crafting">Perajin</option>
-                      <option value="other">Lainnya</option>
-                    </select>
-                    <p v-if="form.errors.specialty" class="mt-1 text-sm text-red-600">{{ form.errors.specialty }}</p>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                      Status <span class="text-red-500">*</span>
-                    </label>
-                    <select
-                      v-model="form.status"
-                      required
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      :class="{ 'border-red-500': form.errors.status }"
-                    >
-                      <option value="active">Aktif</option>
-                      <option value="inactive">Non-Aktif</option>
-                    </select>
-                    <p v-if="form.errors.status" class="mt-1 text-sm text-red-600">{{ form.errors.status }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Contact Information -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Kontak</h3>
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                      Nama Kontak
-                    </label>
-                    <input
-                      v-model="form.contact_person"
-                      type="text"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      :class="{ 'border-red-500': form.errors.contact_person }"
-                    />
-                    <p v-if="form.errors.contact_person" class="mt-1 text-sm text-red-600">{{ form.errors.contact_person }}</p>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                      Telepon
-                    </label>
-                    <input
-                      v-model="form.phone"
-                      type="text"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      :class="{ 'border-red-500': form.errors.phone }"
-                    />
-                    <p v-if="form.errors.phone" class="mt-1 text-sm text-red-600">{{ form.errors.phone }}</p>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                      Email
-                    </label>
-                    <input
-                      v-model="form.email"
-                      type="email"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      :class="{ 'border-red-500': form.errors.email }"
-                    />
-                    <p v-if="form.errors.email" class="mt-1 text-sm text-red-600">{{ form.errors.email }}</p>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                      Alamat
-                    </label>
-                    <textarea
-                      v-model="form.address"
-                      rows="3"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      :class="{ 'border-red-500': form.errors.address }"
-                    ></textarea>
-                    <p v-if="form.errors.address" class="mt-1 text-sm text-red-600">{{ form.errors.address }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Pricing Information -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Harga</h3>
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                      Tarif per Piece (Rp)
-                    </label>
-                    <input
-                      v-model="form.rate_per_piece"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      :class="{ 'border-red-500': form.errors.rate_per_piece }"
-                    />
-                    <p v-if="form.errors.rate_per_piece" class="mt-1 text-sm text-red-600">{{ form.errors.rate_per_piece }}</p>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                      Tarif per Jam (Rp)
-                    </label>
-                    <input
-                      v-model="form.rate_per_hour"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      :class="{ 'border-red-500': form.errors.rate_per_hour }"
-                    />
-                    <p v-if="form.errors.rate_per_hour" class="mt-1 text-sm text-red-600">{{ form.errors.rate_per_hour }}</p>
-                  </div>
-
-                  <div class="sm:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700">
-                      Syarat Pembayaran
-                    </label>
-                    <textarea
-                      v-model="form.payment_terms"
-                      rows="2"
-                      placeholder="Contoh: 50% DP, 50% setelah selesai"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      :class="{ 'border-red-500': form.errors.payment_terms }"
-                    ></textarea>
-                    <p v-if="form.errors.payment_terms" class="mt-1 text-sm text-red-600">{{ form.errors.payment_terms }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Notes -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700">
-                  Catatan
-                </label>
-                <textarea
-                  v-model="form.notes"
-                  rows="3"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  :class="{ 'border-red-500': form.errors.notes }"
-                ></textarea>
-                <p v-if="form.errors.notes" class="mt-1 text-sm text-red-600">{{ form.errors.notes }}</p>
-              </div>
-
-              <!-- Submit Button -->
-              <div class="flex items-center justify-end gap-4">
-                <Link
-                  href="/contractors"
-                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                >
-                  Batal
-                </Link>
-                <button
-                  type="submit"
-                  :disabled="form.processing"
-                  class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {{ form.processing ? 'Menyimpan...' : (isEditing ? 'Update' : 'Simpan') }}
-                </button>
-              </div>
-            </form>
+    <div class="py-6 px-6">
+      <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6 flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+              {{ isEditing ? `Edit ${contractorLabel}` : `Tambah ${contractorLabel} Baru` }}
+            </h1>
+            <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+              {{ isEditing ? `Perbarui informasi ${contractorLabelLower}` : `Tambahkan ${contractorLabelLower} untuk produksi eksternal` }}
+            </p>
           </div>
+          <Link
+            href="/contractors"
+            class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 transition-colors"
+          >
+            ← Kembali
+          </Link>
         </div>
+
+        <form @submit.prevent="submit" class="space-y-6">
+          <!-- Basic Information -->
+          <FormSection title="Informasi Dasar" description="Data identitas kontraktor">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                v-model="form.name"
+                :label="`Nama ${contractorLabel}`"
+                type="text"
+                placeholder="Nama lengkap kontraktor"
+                :required="true"
+                :error="form.errors.name"
+              />
+
+              <FormField
+                v-model="form.type"
+                label="Tipe"
+                type="select"
+                :required="true"
+                :error="form.errors.type"
+                :options="[
+                  { value: 'individual', label: 'Individual' },
+                  { value: 'company', label: 'Perusahaan' }
+                ]"
+              />
+
+              <FormField
+                v-model="form.specialty"
+                label="Spesialisasi"
+                type="select"
+                :required="true"
+                :error="form.errors.specialty"
+                :options="[
+                  { value: 'sewing', label: 'Penjahit' },
+                  { value: 'baking', label: 'Tukang Kue' },
+                  { value: 'crafting', label: 'Perajin' },
+                  { value: 'other', label: 'Lainnya' }
+                ]"
+              />
+
+              <FormField
+                v-model="form.status"
+                label="Status"
+                type="select"
+                :required="true"
+                :error="form.errors.status"
+                :options="[
+                  { value: 'active', label: 'Aktif' },
+                  { value: 'inactive', label: 'Non-Aktif' }
+                ]"
+              />
+            </div>
+          </FormSection>
+
+          <!-- Contact Information -->
+          <FormSection title="Informasi Kontak" description="Detail kontak dan alamat">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                v-model="form.contact_person"
+                label="Nama Kontak"
+                type="text"
+                placeholder="Nama person in charge"
+                :error="form.errors.contact_person"
+              />
+
+              <FormField
+                v-model="form.phone"
+                label="Telepon"
+                type="tel"
+                placeholder="08xxxxxxxxxx"
+                :error="form.errors.phone"
+              />
+
+              <FormField
+                v-model="form.email"
+                label="Email"
+                type="email"
+                placeholder="email@example.com"
+                :error="form.errors.email"
+              />
+
+              <FormField
+                v-model="form.address"
+                label="Alamat"
+                type="textarea"
+                placeholder="Alamat lengkap"
+                :rows="3"
+                :error="form.errors.address"
+              />
+            </div>
+          </FormSection>
+
+          <!-- Pricing Information -->
+          <FormSection title="Informasi Harga" description="Tarif dan syarat pembayaran">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                v-model="form.rate_per_piece"
+                label="Tarif per Piece (Rp)"
+                type="number"
+                placeholder="0"
+                hint="Tarif per piece/unit produk"
+                :error="form.errors.rate_per_piece"
+              />
+
+              <FormField
+                v-model="form.rate_per_hour"
+                label="Tarif per Jam (Rp)"
+                type="number"
+                placeholder="0"
+                hint="Tarif per jam kerja"
+                :error="form.errors.rate_per_hour"
+              />
+
+              <div class="md:col-span-2">
+                <FormField
+                  v-model="form.payment_terms"
+                  label="Syarat Pembayaran"
+                  type="textarea"
+                  placeholder="Contoh: 50% DP, 50% setelah selesai"
+                  :rows="2"
+                  :error="form.errors.payment_terms"
+                />
+              </div>
+            </div>
+          </FormSection>
+
+          <!-- Notes -->
+          <FormSection title="Catatan" description="Informasi tambahan (opsional)">
+            <FormField
+              v-model="form.notes"
+              label="Catatan"
+              type="textarea"
+              placeholder="Catatan tambahan tentang kontraktor..."
+              :rows="3"
+              :error="form.errors.notes"
+            />
+          </FormSection>
+
+          <!-- Submit Button -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4">
+            <Link
+              href="/contractors"
+              class="order-2 sm:order-1 px-6 py-2.5 text-sm font-semibold text-center text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm"
+            >
+              Batal
+            </Link>
+            <button
+              type="submit"
+              :disabled="form.processing"
+              class="order-1 sm:order-2 px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 border border-transparent rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+            >
+              {{ form.processing ? 'Menyimpan...' : (isEditing ? 'Update' : 'Simpan') }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </AppLayout>

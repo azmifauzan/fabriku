@@ -50,14 +50,32 @@ const menuItems = computed(() => {
       icon: Home,
     },
     {
+      name: 'Master Data',
+      href: '/master-data',
+      icon: FileBox,
+      children: [
+        {
+          name: 'Lokasi Inventory',
+          href: '/inventory/locations',
+        },
+        {
+          name: 'Customer',
+          href: '/customers',
+        },
+        {
+          name: terminology.value.pattern || 'Pattern',
+          href: '/patterns',
+        },
+        {
+          name: terminology.value.contractor || 'Kontraktor',
+          href: '/contractors',
+        },
+      ],
+    },
+    {
       name: terminology.value.material || 'Bahan Baku',
       href: '/materials',
       icon: Package,
-    },
-    {
-      name: terminology.value.pattern || 'Pattern',
-      href: '/patterns',
-      icon: isFood ? BookOpen : ShirtIcon,
     },
     {
       name: terminology.value.preparation_order || 'Cutting Order',
@@ -65,34 +83,14 @@ const menuItems = computed(() => {
       icon: isFood ? ClipboardList : Scissors,
     },
     {
-      name: terminology.value.contractor || 'Kontraktor',
-      href: '/contractors',
-      icon: Users,
-    },
-    {
       name: terminology.value.production_order || 'Production Order',
       href: '/production-orders',
       icon: isFood ? ChefHat : FileBox,
     },
     {
-      name: 'Inventory',
-      href: '/inventory',
+      name: 'Inventory Items',
+      href: '/inventory/items',
       icon: Warehouse,
-      children: [
-        {
-          name: 'Lokasi',
-          href: '/inventory/locations',
-        },
-        {
-          name: 'Items',
-          href: '/inventory/items',
-        },
-      ],
-    },
-    {
-      name: 'Customer',
-      href: '/customers',
-      icon: UserCircle,
     },
     {
       name: 'Sales Order',

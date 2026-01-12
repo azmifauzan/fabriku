@@ -12,7 +12,7 @@ class MaterialController extends Controller
     public function index()
     {
         $materials = Material::query()
-            ->with('attributes')
+            ->with('materialAttributes')
             ->withCount('receipts')
             ->when(request('search'), function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
@@ -50,7 +50,7 @@ class MaterialController extends Controller
         if ($request->has('attributes') && is_array($request->attributes)) {
             foreach ($request->attributes as $attr) {
                 if (! empty($attr['name']) && ! empty($attr['value'])) {
-                    $material->attributes()->create([
+                    $material->materialAttributes()->create([
                         'attribute_name' => $attr['name'],
                         'attribute_value' => $attr['value'],
                     ]);
@@ -73,7 +73,7 @@ class MaterialController extends Controller
 
     public function edit(Material $material)
     {
-        $material->load('attributes');
+        $material->load('materialAttributes');
 
         return Inertia::render('Materials/Form', [
             'material' => $material,
@@ -87,13 +87,13 @@ class MaterialController extends Controller
         // Sync attributes
         if ($request->has('attributes')) {
             // Delete old attributes
-            $material->attributes()->delete();
+            $material->materialAttributes()->delete();
 
             // Create new attributes
             if (is_array($request->attributes)) {
                 foreach ($request->attributes as $attr) {
                     if (! empty($attr['name']) && ! empty($attr['value'])) {
-                        $material->attributes()->create([
+                        $material->materialAttributes()->create([
                             'attribute_name' => $attr['name'],
                             'attribute_value' => $attr['value'],
                         ]);

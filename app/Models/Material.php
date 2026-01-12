@@ -37,6 +37,13 @@ class Material extends Model
         ];
     }
 
+    protected $appends = ['attributes'];
+
+    public function getAttributesAttribute()
+    {
+        return $this->materialAttributes;
+    }
+
     protected static function booted(): void
     {
         static::addGlobalScope(new TenantScope);
@@ -58,7 +65,7 @@ class Material extends Model
         return $this->hasMany(MaterialReceipt::class);
     }
 
-    public function attributes(): HasMany
+    public function materialAttributes(): HasMany
     {
         return $this->hasMany(MaterialAttribute::class);
     }

@@ -110,39 +110,27 @@ const storageRequirements = [
 </script>
 
 <template>
-    <div>
-        <!-- Header -->
-        <div class="mb-6">
-            <Link
-                href="/inventory/items"
-                class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 mb-4"
-            >
-                <svg
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <!-- Header -->
+            <div class="mb-6 flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        {{ isEditing ? 'Edit Item Inventory' : 'Tambah Item Inventory' }}
+                    </h2>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        {{ isEditing ? 'Ubah informasi item' : 'Tambahkan item inventory baru' }}
+                    </p>
+                </div>
+                <Link
+                    href="/inventory/items"
+                    class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
                 >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15 19l-7-7 7-7"
-                    />
-                </svg>
-                Kembali ke Daftar
-            </Link>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-                {{ isEditing ? 'Edit Item Inventory' : 'Tambah Item Inventory' }}
-            </h2>
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                {{ isEditing ? 'Ubah informasi item' : 'Tambahkan item inventory baru' }}
-            </p>
-        </div>
+                    ← Kembali
+                </Link>
+            </div>
 
-        <!-- Form -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
-            <form @submit.prevent="submit" class="space-y-6 p-6">
+            <form @submit.prevent="submit" class="space-y-6">
                 <!-- Basic Information -->
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
@@ -629,17 +617,17 @@ const storageRequirements = [
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <Link
                         href="/inventory/items"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        class="order-2 sm:order-1 px-4 py-2 text-sm font-medium text-center text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                         Batal
                     </Link>
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="order-1 sm:order-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {{ form.processing ? 'Menyimpan...' : isEditing ? 'Update Item' : 'Tambah Item' }}
                     </button>

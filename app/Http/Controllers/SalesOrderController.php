@@ -80,8 +80,8 @@ class SalesOrderController extends Controller
             'customers' => Customer::where('is_active', true)->orderBy('name')->get(['id', 'code', 'name', 'type', 'discount_percentage']),
             'inventoryItems' => InventoryItem::with(['inventoryLocation', 'pattern'])
                 ->where('status', 'available')
-                ->where('quantity_available', '>', 0)
-                ->get(['id', 'sku', 'pattern_id', 'quantity_available', 'selling_price', 'inventory_location_id']),
+                ->whereColumn('current_stock', '>', 'reserved_stock')
+                ->get(['id', 'sku', 'pattern_id', 'current_stock', 'reserved_stock', 'selling_price', 'inventory_location_id']),
         ]);
     }
 
@@ -165,8 +165,8 @@ class SalesOrderController extends Controller
             'customers' => Customer::where('is_active', true)->orderBy('name')->get(['id', 'code', 'name', 'type', 'discount_percentage']),
             'inventoryItems' => InventoryItem::with(['inventoryLocation', 'pattern'])
                 ->where('status', 'available')
-                ->where('quantity_available', '>', 0)
-                ->get(['id', 'sku', 'pattern_id', 'quantity_available', 'selling_price', 'inventory_location_id']),
+                ->whereColumn('current_stock', '>', 'reserved_stock')
+                ->get(['id', 'sku', 'pattern_id', 'current_stock', 'reserved_stock', 'selling_price', 'inventory_location_id']),
         ]);
     }
 

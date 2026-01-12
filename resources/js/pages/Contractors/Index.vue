@@ -12,27 +12,27 @@
                 />
 
                 <!-- Filters and Search -->
-                <div class="mb-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                    <div class="p-6">
+                <div class="mb-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-xl border border-gray-200 dark:border-gray-700">
+                    <div class="p-5">
                         <form @submit.prevent="search" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Pencarian
                                 </label>
                                 <input
                                     v-model="form.search"
                                     type="text"
                                     placeholder="Nama, kontak, email, telepon..."
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                    class="mt-1 block w-full px-4 py-2.5 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all"
                                 />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Tipe
                                 </label>
                                 <select
                                     v-model="form.type"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                    class="mt-1 block w-full px-4 py-2.5 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all"
                                 >
                                     <option value="">Semua Tipe</option>
                                     <option value="individual">Individual</option>
@@ -40,12 +40,12 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Spesialisasi
                                 </label>
                                 <select
                                     v-model="form.specialty"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                    class="mt-1 block w-full px-4 py-2.5 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all"
                                 >
                                     <option value="">Semua Spesialisasi</option>
                                     <option value="sewing">Penjahit</option>
@@ -55,12 +55,12 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Status
                                 </label>
                                 <select
                                     v-model="form.status"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                    class="mt-1 block w-full px-4 py-2.5 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all"
                                 >
                                     <option value="">Semua Status</option>
                                     <option value="active">Aktif</option>
@@ -71,44 +71,37 @@
                     </div>
                 </div>
 
-                <!-- Actions -->
-                <div class="mb-6 flex items-center justify-between">
-                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                        Menampilkan {{ contractors.data.length }} dari {{ contractors.total }} {{ contractorLabelLower }}
-                    </div>
-                    <Link
-                        href="/contractors/create"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
-                    >
-                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Tambah {{ contractorLabel }}
-                    </Link>
-                </div>
-
                 <!-- Contractors Table -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-xl border border-gray-200 dark:border-gray-700">
+                    <!-- Table Info -->
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Menampilkan <span class="font-semibold">{{ contractors.data.length }}</span> dari <span class="font-semibold">{{ contractors.total }}</span> {{ contractorLabelLower }}
+                            </p>
+                        </div>
+                    </div>
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700/50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                         {{ contractorLabel }}
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                         Kontak
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                         Spesialisasi
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                         Tarif
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                         Status
                                     </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                         Aksi
                                     </th>
                                 </tr>
@@ -117,7 +110,7 @@
                                 <tr
                                     v-for="contractor in contractors.data"
                                     :key="contractor.id"
-                                    class="hover:bg-gray-50 dark:hover:bg-gray-700"
+                                    class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                                 >
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">

@@ -34,7 +34,7 @@ class CuttingOrderController extends Controller
     public function create()
     {
         $patterns = Pattern::query()
-            ->with(['materials.material'])
+            ->with('materials')
             ->where('is_active', true)
             ->select('id', 'code', 'name', 'product_type', 'size')
             ->orderBy('name')
@@ -70,10 +70,10 @@ class CuttingOrderController extends Controller
             return back()->with('error', 'Order dengan status '.$cuttingOrder->status.' tidak bisa diedit.');
         }
 
-        $cuttingOrder->load('pattern.materials.material');
+        $cuttingOrder->load('pattern.materials');
 
         $patterns = Pattern::query()
-            ->with(['materials.material'])
+            ->with('materials')
             ->where('is_active', true)
             ->select('id', 'code', 'name', 'product_type', 'size', 'estimated_cost')
             ->orderBy('name')

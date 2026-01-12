@@ -2,14 +2,8 @@
     <AppLayout>
         <Head title="Tambah Customer" />
 
-        <div class="py-6 px-6">
-            <div class="mx-auto max-w-4xl">
-                <PageHeader
-                    title="Tambah Customer Baru"
-                    description="Tambah data customer untuk penjualan produk"
-                    :back-link="{ href: '/customers', text: 'Kembali ke Daftar Customer' }"
-                />
-
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <CustomerForm />
             </div>
         </div>
@@ -19,6 +13,5 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import PageHeader from '@/components/PageHeader.vue';
 import CustomerForm from './Form.vue';
 </script>
