@@ -51,8 +51,8 @@ defineProps<Props>();
     <AppLayout>
         <Head title="Edit Item Inventory" />
 
-        <div class="py-6">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="py-6 px-6">
+            <div class="max-w-4xl mx-auto">
                 <ItemForm
                     :item="item"
                     :locations="locations"
