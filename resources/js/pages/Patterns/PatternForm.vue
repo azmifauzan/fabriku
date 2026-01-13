@@ -171,7 +171,7 @@ const goBack = () => {
                                         id="code"
                                         v-model="form.code"
                                         type="text"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                         required
                                     />
                                     <p v-if="form.errors.code" class="mt-1 text-sm text-red-600">
@@ -188,7 +188,7 @@ const goBack = () => {
                                         id="name"
                                         v-model="form.name"
                                         type="text"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                         required
                                     />
                                     <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">
@@ -204,7 +204,7 @@ const goBack = () => {
                                     <select
                                         id="product_type"
                                         v-model="form.product_type"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                         required
                                     >
                                         <option value="">-- Pilih Jenis Produk --</option>
@@ -225,7 +225,7 @@ const goBack = () => {
                                     <select
                                         id="size"
                                         v-model="form.size"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     >
                                         <option value="">-- Pilih Ukuran --</option>
                                         <option v-for="size in sizes" :key="size" :value="size">
@@ -247,7 +247,7 @@ const goBack = () => {
                                     id="description"
                                     v-model="form.description"
                                     rows="3"
-                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 ></textarea>
                                 <p v-if="form.errors.description" class="mt-1 text-sm text-red-600">
                                     {{ form.errors.description }}
@@ -304,7 +304,7 @@ const goBack = () => {
                                             <select
                                                 :id="`material-${index}`"
                                                 v-model="item.material_id"
-                                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                                 required
                                             >
                                                 <option :value="0">-- Pilih {{ materialLabel }} --</option>
@@ -328,7 +328,7 @@ const goBack = () => {
                                                 type="number"
                                                 step="0.01"
                                                 min="0"
-                                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                                 required
                                             />
                                             <p v-if="item.material_id > 0" class="mt-1 text-xs text-gray-500 dark:text-gray-400">

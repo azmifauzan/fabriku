@@ -126,23 +126,23 @@ const formatDate = (date: string | null) => {
         />
 
         <!-- Filters -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cari</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cari</label>
               <input
                 v-model="search"
                 type="text"
                 :placeholder="`Nomor order atau ${patternLabel.toLowerCase()}...`"
-                class="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                 @keyup.enter="applyFilters"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
               <select
                 v-model="statusFilter"
-                class="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
               >
                 <option value="">Semua Status</option>
                 <option value="draft">Draft</option>
@@ -155,57 +155,62 @@ const formatDate = (date: string | null) => {
               <button
                 type="button"
                 @click="applyFilters"
-                class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                class="flex-1 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
               >
                 Filter
               </button>
               <button
+                v-if="search || statusFilter"
                 type="button"
                 @click="clearFilters"
-                class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                class="px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-semibold rounded-lg transition-all shadow-sm"
+                title="Clear filters"
               >
-                Reset
+                ✕
               </button>
             </div>
           </div>
         </div>
 
         <!-- Table -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
           <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700/50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                   No. Order
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                   {{ patternLabel }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                   Tanggal
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                   Target Qty
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                   Status
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                   Pelaksana
                 </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                   Aksi
                 </th>
               </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               <tr v-if="cuttingOrders.data.length === 0">
-                <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-                  <p class="font-medium">Tidak ada data {{ termLower('preparation_order', 'cutting order') }}</p>
-                  <p class="text-xs">Tambahkan {{ termLower('preparation_order', 'cutting order') }} pertama Anda</p>
+                <td colspan="7" class="px-6 py-16 text-center">
+                  <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <p class="mt-4 text-sm font-medium text-gray-900 dark:text-gray-100">Tidak ada data {{ termLower('preparation_order', 'cutting order') }}</p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tambahkan {{ termLower('preparation_order', 'cutting order') }} pertama Anda</p>
                 </td>
               </tr>
-              <tr v-for="order in cuttingOrders.data" :key="order.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+              <tr v-for="order in cuttingOrders.data" :key="order.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ order.order_number }}</div>
                 </td>
@@ -261,22 +266,22 @@ const formatDate = (date: string | null) => {
           <!-- Pagination -->
           <div
             v-if="cuttingOrders.data.length > 0"
-            class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700"
+            class="px-6 py-4 border-t border-gray-200 dark:border-gray-700"
           >
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div class="text-sm text-gray-700 dark:text-gray-300">
-                Menampilkan {{ cuttingOrders.from }} - {{ cuttingOrders.to }} dari {{ cuttingOrders.total }} data
+                <span class="font-medium">{{ cuttingOrders.from }}</span> - <span class="font-medium">{{ cuttingOrders.to }}</span> dari <span class="font-medium">{{ cuttingOrders.total }}</span> data
               </div>
-              <div class="flex gap-2">
+              <div class="flex flex-wrap gap-2">
                 <Link
                   v-for="page in cuttingOrders.last_page"
                   :key="page"
                   :href="`/cutting-orders?page=${page}`"
                   :class="[
-                    'px-3 py-1 text-sm rounded',
+                    'px-4 py-2 text-sm font-medium rounded-lg transition-all',
                     page === cuttingOrders.current_page
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
                   ]"
                   preserve-state
                   preserve-scroll

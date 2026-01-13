@@ -23,7 +23,7 @@
                                     v-model="form.search"
                                     type="text"
                                     placeholder="Nama, kontak, email, telepon..."
-                                    class="mt-1 block w-full px-4 py-2.5 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 />
                             </div>
                             <div>
@@ -32,7 +32,7 @@
                                 </label>
                                 <select
                                     v-model="form.type"
-                                    class="mt-1 block w-full px-4 py-2.5 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 >
                                     <option value="">Semua Tipe</option>
                                     <option value="individual">Individual</option>
@@ -45,7 +45,7 @@
                                 </label>
                                 <select
                                     v-model="form.specialty"
-                                    class="mt-1 block w-full px-4 py-2.5 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 >
                                     <option value="">Semua Spesialisasi</option>
                                     <option value="sewing">Penjahit</option>
@@ -60,7 +60,7 @@
                                 </label>
                                 <select
                                     v-model="form.status"
-                                    class="mt-1 block w-full px-4 py-2.5 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 transition-all"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 >
                                     <option value="">Semua Status</option>
                                     <option value="active">Aktif</option>
@@ -205,22 +205,24 @@
                     
                     <!-- Pagination -->
                     <div v-if="contractors.links.length > 3" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                             <div class="text-sm text-gray-700 dark:text-gray-300">
-                                Menampilkan {{ contractors.from }} sampai {{ contractors.to }} dari {{ contractors.total }} hasil
+                                <span class="font-medium">{{ contractors.from }}</span> - <span class="font-medium">{{ contractors.to }}</span> dari <span class="font-medium">{{ contractors.total }}</span> data
                             </div>
-                            <div class="flex space-x-1">
+                            <div class="flex flex-wrap gap-2">
                                 <Link
                                     v-for="link in contractors.links"
                                     :key="link.label"
                                     :href="link.url"
                                     :class="[
-                                        'px-3 py-2 text-sm rounded-md',
+                                        'px-4 py-2 text-sm font-medium rounded-lg transition-all',
                                         link.active
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
+                                            ? 'bg-indigo-600 text-white shadow-sm'
+                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600',
                                         !link.url ? 'opacity-50 cursor-not-allowed' : ''
                                     ]"
+                                    preserve-state
+                                    preserve-scroll
                                 >
                                     {{ link.label.replace(/&laquo;|&raquo;/g, '') }}
                                 </Link>

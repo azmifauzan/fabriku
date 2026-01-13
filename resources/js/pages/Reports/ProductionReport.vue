@@ -186,7 +186,7 @@ const getEfficiencyClass = (efficiency: number) => {
                 </label>
                 <select
                   v-model="status"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                 >
                   <option value="">Semua Status</option>
                   <option value="completed">Completed</option>
@@ -201,7 +201,7 @@ const getEfficiencyClass = (efficiency: number) => {
                 </label>
                 <select
                   v-model="productionType"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                 >
                   <option value="">Semua Tipe</option>
                   <option value="internal">Internal</option>
@@ -215,7 +215,7 @@ const getEfficiencyClass = (efficiency: number) => {
                 <input
                   v-model="startDate"
                   type="date"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                 />
               </div>
               <div>
@@ -225,7 +225,7 @@ const getEfficiencyClass = (efficiency: number) => {
                 <input
                   v-model="endDate"
                   type="date"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                 />
               </div>
               <div class="flex items-end gap-2">
