@@ -174,7 +174,7 @@ const getStatusClass = (itemStatus: string) => {
                     v-model="search"
                     type="text"
                     placeholder="Nama atau SKU..."
-                    class="pl-10 w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    class="pl-10 w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                     @keyup.enter="applyFilter"
                   />
                 </div>
@@ -185,7 +185,7 @@ const getStatusClass = (itemStatus: string) => {
                 </label>
                 <select
                   v-model="status"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                 >
                   <option value="">Semua Status</option>
                   <option value="available">Available</option>
@@ -199,7 +199,7 @@ const getStatusClass = (itemStatus: string) => {
                 </label>
                 <select
                   v-model="category"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                 >
                   <option value="">Semua Kategori</option>
                   <option value="garment">Garment</option>

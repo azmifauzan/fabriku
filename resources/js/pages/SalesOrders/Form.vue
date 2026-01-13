@@ -12,7 +12,7 @@
                         <select
                             id="customer_id"
                             v-model="form.customer_id"
-                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-300 sm:text-sm"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                             :class="{ 'border-red-500': form.errors.customer_id }"
                         >
                             <option value="">Pilih Customer</option>
@@ -33,7 +33,7 @@
                             id="order_date"
                             v-model="form.order_date"
                             type="date"
-                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-300 sm:text-sm"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                             :class="{ 'border-red-500': form.errors.order_date }"
                         />
                         <p v-if="form.errors.order_date" class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -48,7 +48,7 @@
                         <select
                             id="channel"
                             v-model="form.channel"
-                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-300 sm:text-sm"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                             :class="{ 'border-red-500': form.errors.channel }"
                         >
                             <option value="">Pilih Channel</option>
@@ -69,7 +69,7 @@
                         <select
                             id="status"
                             v-model="form.status"
-                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-300 sm:text-sm"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                         >
                             <option value="draft">Draft</option>
                             <option value="confirmed">Dikonfirmasi</option>
@@ -129,7 +129,7 @@
                                     <select
                                         v-model="item.inventory_item_id"
                                         @change="onInventoryItemChange(index)"
-                                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-300 text-sm"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                         :class="{ 'border-red-500': form.errors[`items.${index}.inventory_item_id`] }"
                                     >
                                         <option value="">Pilih Produk</option>
@@ -147,7 +147,7 @@
                                         @input="calculateItemSubtotal(index)"
                                         type="number"
                                         min="1"
-                                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-300 text-sm text-right"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all text-right"
                                         :class="{ 'border-red-500': form.errors[`items.${index}.quantity`] }"
                                     />
                                     <p v-if="form.errors[`items.${index}.quantity`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
@@ -160,7 +160,7 @@
                                         @input="calculateItemSubtotal(index)"
                                         type="number"
                                         min="0"
-                                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-300 text-sm text-right"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all text-right"
                                         :class="{ 'border-red-500': form.errors[`items.${index}.unit_price`] }"
                                     />
                                     <p v-if="form.errors[`items.${index}.unit_price`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
@@ -173,7 +173,7 @@
                                         @input="calculateItemSubtotal(index)"
                                         type="number"
                                         min="0"
-                                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-300 text-sm text-right"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all text-right"
                                     />
                                 </td>
                                 <td class="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -217,7 +217,7 @@
                                     max="100"
                                     step="0.01"
                                     placeholder="0"
-                                    class="w-20 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-300 text-sm text-right"
+                                    class="w-20 px-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all text-right"
                                 />
                                 <span class="text-sm text-gray-700 dark:text-gray-300">%</span>
                             </div>
@@ -237,7 +237,7 @@
                             type="number"
                             min="0"
                             step="0.01"
-                            class="w-40 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-300 text-sm text-right"
+                            class="w-40 px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all text-right"
                         />
                     </div>
 

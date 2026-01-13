@@ -93,59 +93,70 @@ const capacityBarClass = (percentage: number) => {
 
         <div class="py-6 px-6">
             <div class="mx-auto max-w-7xl">
-                <PageHeader title="Lokasi Inventory" />
+                <PageHeader
+                    title="Lokasi Inventory"
+                    description="Kelola lokasi penyimpanan inventory di warehouse"
+                    create-link="/inventory/locations/create"
+                    create-text="Tambah Lokasi"
+                />
 
-                <!-- Filters & Actions -->
-                <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="flex flex-1 flex-col gap-4 sm:flex-row">
-                        <!-- Search -->
-                        <input
-                            v-model="search"
-                            type="text"
-                            placeholder="Cari nama, zona, atau rak..."
-                            @keyup.enter="applyFilters"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-64"
-                        />
+                <!-- Filters -->
+                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cari</label>
+                            <input
+                                v-model="search"
+                                type="text"
+                                placeholder="Cari nama, zona, atau rak..."
+                                @keyup.enter="applyFilters"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                            />
+                        </div>
 
-                        <!-- Status Filter -->
-                        <select
-                            v-model="statusFilter"
-                            @change="applyFilters"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-auto"
-                        >
-                            <option value="">Semua Status</option>
-                            <option value="active">Aktif</option>
-                            <option value="inactive">Tidak Aktif</option>
-                            <option value="maintenance">Maintenance</option>
-                        </select>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                            <select
+                                v-model="statusFilter"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                            >
+                                <option value="">Semua Status</option>
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Tidak Aktif</option>
+                                <option value="maintenance">Maintenance</option>
+                            </select>
+                        </div>
 
-                        <!-- Zone Filter -->
-                        <input
-                            v-model="zoneFilter"
-                            type="text"
-                            placeholder="Filter zona..."
-                            @keyup.enter="applyFilters"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-32"
-                        />
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Zona</label>
+                            <input
+                                v-model="zoneFilter"
+                                type="text"
+                                placeholder="Filter zona..."
+                                @keyup.enter="applyFilters"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                            />
+                        </div>
 
-                        <button
-                            v-if="search || statusFilter || zoneFilter"
-                            @click="clearFilters"
-                            class="rounded-md bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                        >
-                            Reset
-                        </button>
+                        <div class="flex items-end gap-2">
+                            <button
+                                type="button"
+                                @click="applyFilters"
+                                class="flex-1 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
+                            >
+                                Filter
+                            </button>
+                            <button
+                                v-if="search || statusFilter || zoneFilter"
+                                type="button"
+                                @click="clearFilters"
+                                class="px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-semibold rounded-lg transition-all shadow-sm"
+                                title="Clear filters"
+                            >
+                                ✕
+                            </button>
+                        </div>
                     </div>
-
-                    <Link
-                        href="/inventory/locations/create"
-                        class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-                    >
-                        <svg class="-ml-0.5 mr-1.5 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Tambah Lokasi
-                    </Link>
                 </div>
 
                 <!-- Locations Grid -->
@@ -223,22 +234,13 @@ const capacityBarClass = (percentage: number) => {
                 </div>
 
                 <!-- Empty State -->
-                <div v-else class="rounded-lg bg-white dark:bg-gray-800 p-12 text-center shadow-sm">
-                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                    <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">Belum ada lokasi</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Mulai dengan menambahkan lokasi inventory pertama.</p>
-                    <div class="mt-6">
-                        <Link
-                            href="/inventory/locations/create"
-                            class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-                        >
-                            <svg class="-ml-0.5 mr-1.5 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Tambah Lokasi
-                        </Link>
+                <div v-else class="bg-white dark:bg-gray-800 shadow-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div class="px-6 py-16 text-center">
+                        <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        <p class="mt-4 text-sm font-medium text-gray-900 dark:text-gray-100">Belum ada lokasi</p>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Mulai dengan menambahkan lokasi inventory pertama Anda</p>
                     </div>
                 </div>
 

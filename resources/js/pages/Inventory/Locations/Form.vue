@@ -77,7 +77,7 @@ const isEditing = !!props.location?.id;
                         type="text"
                         required
                         placeholder="Contoh: Rak A1"
-                        class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                         :class="{ 'border-red-300': form.errors.name }"
                     />
                     <p
@@ -101,7 +101,7 @@ const isEditing = !!props.location?.id;
                             id="zone"
                             v-model="form.zone"
                             required
-                            class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                             :class="{ 'border-red-300': form.errors.zone }"
                         >
                             <option value="">Pilih Zone</option>
@@ -130,7 +130,7 @@ const isEditing = !!props.location?.id;
                             type="text"
                             required
                             placeholder="Contoh: 1"
-                            class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                             :class="{ 'border-red-300': form.errors.rack }"
                         />
                         <p
@@ -158,7 +158,7 @@ const isEditing = !!props.location?.id;
                             required
                             min="1"
                             placeholder="100"
-                            class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                             :class="{ 'border-red-300': form.errors.capacity }"
                         />
                         <p
@@ -183,7 +183,7 @@ const isEditing = !!props.location?.id;
                             id="status"
                             v-model="form.status"
                             required
-                            class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                             :class="{ 'border-red-300': form.errors.status }"
                         >
                             <option

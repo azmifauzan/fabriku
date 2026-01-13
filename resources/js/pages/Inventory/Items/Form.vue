@@ -152,7 +152,7 @@ const storageRequirements = [
                                     type="text"
                                     required
                                     placeholder="Contoh: INV-001"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     :class="{ 'border-red-300': form.errors.sku }"
                                 />
                                 <p
@@ -176,7 +176,7 @@ const storageRequirements = [
                                     type="text"
                                     required
                                     placeholder="Contoh: Mukena Bali Putih - M"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     :class="{ 'border-red-300': form.errors.name }"
                                 />
                                 <p
@@ -201,7 +201,7 @@ const storageRequirements = [
                                     id="category"
                                     v-model="form.category"
                                     required
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     :class="{ 'border-red-300': form.errors.category }"
                                 >
                                     <option
@@ -230,7 +230,7 @@ const storageRequirements = [
                                 <select
                                     id="pattern_id"
                                     v-model="form.pattern_id"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     :class="{ 'border-red-300': form.errors.pattern_id }"
                                 >
                                     <option :value="null">Pilih Pattern (opsional)</option>
@@ -264,7 +264,7 @@ const storageRequirements = [
                                     id="inventory_location_id"
                                     v-model="form.inventory_location_id"
                                     required
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     :class="{ 'border-red-300': form.errors.inventory_location_id }"
                                 >
                                     <option :value="null">Pilih Lokasi</option>
@@ -295,7 +295,7 @@ const storageRequirements = [
                                     id="quality_grade"
                                     v-model="form.quality_grade"
                                     required
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     :class="{ 'border-red-300': form.errors.quality_grade }"
                                 >
                                     <option
@@ -336,7 +336,7 @@ const storageRequirements = [
                                 type="number"
                                 required
                                 min="0"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 :class="{ 'border-red-300': form.errors.current_stock }"
                             />
                             <p
@@ -359,7 +359,7 @@ const storageRequirements = [
                                 v-model.number="form.reserved_stock"
                                 type="number"
                                 min="0"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 :class="{ 'border-red-300': form.errors.reserved_stock }"
                             />
                             <p
@@ -383,7 +383,7 @@ const storageRequirements = [
                                 type="number"
                                 required
                                 min="0"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 :class="{ 'border-red-300': form.errors.minimum_stock }"
                             />
                             <p
@@ -416,7 +416,7 @@ const storageRequirements = [
                                 step="0.01"
                                 required
                                 min="0"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 :class="{ 'border-red-300': form.errors.unit_cost }"
                             />
                             <p
@@ -441,7 +441,7 @@ const storageRequirements = [
                                 step="0.01"
                                 required
                                 min="0"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 :class="{ 'border-red-300': form.errors.selling_price }"
                             />
                             <p
@@ -473,7 +473,7 @@ const storageRequirements = [
                                     v-model="form.batch_number"
                                     type="text"
                                     placeholder="Contoh: BATCH-2024-001"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     :class="{ 'border-red-300': form.errors.batch_number }"
                                 />
                                 <p
@@ -495,7 +495,7 @@ const storageRequirements = [
                                     id="status"
                                     v-model="form.status"
                                     required
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     :class="{ 'border-red-300': form.errors.status }"
                                 >
                                     <option
@@ -527,7 +527,7 @@ const storageRequirements = [
                                     id="production_date"
                                     v-model="form.production_date"
                                     type="date"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     :class="{ 'border-red-300': form.errors.production_date }"
                                 />
                                 <p
@@ -549,7 +549,7 @@ const storageRequirements = [
                                     id="expiry_date"
                                     v-model="form.expiry_date"
                                     type="date"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     :class="{ 'border-red-300': form.errors.expiry_date }"
                                 />
                                 <p
@@ -571,7 +571,7 @@ const storageRequirements = [
                             <select
                                 id="storage_requirements"
                                 v-model="form.storage_requirements"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 :class="{ 'border-red-300': form.errors.storage_requirements }"
                             >
                                 <option value="">Pilih Storage Requirement</option>

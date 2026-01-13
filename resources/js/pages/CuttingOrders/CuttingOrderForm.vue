@@ -188,7 +188,7 @@ watch(() => form.status, (newStatus) => {
                                     <select
                                         id="pattern_id"
                                         v-model="form.pattern_id"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                         :disabled="isEdit"
                                         required
                                     >
@@ -215,7 +215,7 @@ watch(() => form.status, (newStatus) => {
                                         v-model.number="form.planned_quantity"
                                         type="number"
                                         min="1"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                         required
                                     />
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -236,7 +236,7 @@ watch(() => form.status, (newStatus) => {
                                         v-model.number="form.actual_quantity"
                                         type="number"
                                         min="0"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     />
                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                         Jumlah produk yang berhasil diproses
@@ -254,7 +254,7 @@ watch(() => form.status, (newStatus) => {
                                     <select
                                         id="status"
                                         v-model="form.status"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                         :disabled="!canEditStatus"
                                         required
                                     >
@@ -278,7 +278,7 @@ watch(() => form.status, (newStatus) => {
                                     <select
                                         id="priority"
                                         v-model="form.priority"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                         required
                                     >
                                         <option v-for="option in priorityOptions" :key="option.value" :value="option.value">
@@ -299,7 +299,7 @@ watch(() => form.status, (newStatus) => {
                                         id="scheduled_date"
                                         v-model="form.scheduled_date"
                                         type="date"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                     />
                                     <p v-if="form.errors.scheduled_date" class="mt-1 text-sm text-red-600">
                                         {{ form.errors.scheduled_date }}
@@ -315,7 +315,7 @@ watch(() => form.status, (newStatus) => {
                                         id="completed_date"
                                         v-model="form.completed_date"
                                         type="date"
-                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                         :disabled="form.status !== 'completed'"
                                     />
                                     <p v-if="form.errors.completed_date" class="mt-1 text-sm text-red-600">
@@ -333,7 +333,7 @@ watch(() => form.status, (newStatus) => {
                                     id="notes"
                                     v-model="form.notes"
                                     rows="3"
-                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 ></textarea>
                                 <p v-if="form.errors.notes" class="mt-1 text-sm text-red-600">
                                     {{ form.errors.notes }}

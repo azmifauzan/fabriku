@@ -146,7 +146,7 @@ const isEditing = !!props.productionOrder?.id
                       v-model="form.cutting_result_id"
                       required
                       :disabled="isEditing"
-                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                       :class="{ 'border-red-500': form.errors.cutting_result_id, 'bg-gray-100 dark:bg-gray-600': isEditing }"
                     >
                       <option value="0" disabled>-- Pilih Hasil {{ preparationLabel }} --</option>
@@ -185,7 +185,7 @@ const isEditing = !!props.productionOrder?.id
                     <select
                       v-model="form.type"
                       required
-                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                       :class="{ 'border-red-500': form.errors.type }"
                     >
                       <option value="internal">Internal</option>
@@ -201,7 +201,7 @@ const isEditing = !!props.productionOrder?.id
                     <select
                       v-model="form.contractor_id"
                       :required="form.type === 'external'"
-                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                       :class="{ 'border-red-500': form.errors.contractor_id }"
                     >
                       <option :value="null" disabled>-- Pilih {{ contractorLabel }} --</option>
@@ -222,7 +222,7 @@ const isEditing = !!props.productionOrder?.id
                       required
                       min="1"
                       :max="availableQuantity || undefined"
-                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                       :class="{ 'border-red-500': form.errors.quantity_requested }"
                     />
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Tersedia: {{ availableQuantity }} pcs</p>
@@ -237,7 +237,7 @@ const isEditing = !!props.productionOrder?.id
                       v-model="form.requested_date"
                       type="date"
                       required
-                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                       :class="{ 'border-red-500': form.errors.requested_date }"
                     />
                     <p v-if="form.errors.requested_date" class="mt-1 text-sm text-red-600">{{ form.errors.requested_date }}</p>
@@ -250,7 +250,7 @@ const isEditing = !!props.productionOrder?.id
                     <input
                       v-model="form.promised_date"
                       type="date"
-                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                       :class="{ 'border-red-500': form.errors.promised_date }"
                     />
                     <p v-if="form.errors.promised_date" class="mt-1 text-sm text-red-600">{{ form.errors.promised_date }}</p>
@@ -288,7 +288,7 @@ const isEditing = !!props.productionOrder?.id
                     <select
                       v-model="form.priority"
                       required
-                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                       :class="{ 'border-red-500': form.errors.priority }"
                     >
                       <option value="low">Low</option>
@@ -307,7 +307,7 @@ const isEditing = !!props.productionOrder?.id
                       v-model.number="form.labor_cost"
                       type="number"
                       min="0"
-                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                       :class="{ 'border-red-500': form.errors.labor_cost }"
                     />
                     <p v-if="form.errors.labor_cost" class="mt-1 text-sm text-red-600">{{ form.errors.labor_cost }}</p>

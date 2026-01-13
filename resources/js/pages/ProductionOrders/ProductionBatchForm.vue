@@ -62,7 +62,7 @@ const submit = () => {
           min="1"
           :max="remaining || undefined"
           required
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
           :class="{ 'border-red-500': form.errors.quantity_received }"
         />
         <p class="mt-1 text-xs text-gray-500">Sisa target: {{ remaining }} pcs</p>
@@ -76,7 +76,7 @@ const submit = () => {
         <select
           v-model="form.grade"
           required
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
           :class="{ 'border-red-500': form.errors.grade }"
         >
           <option value="A">A</option>
@@ -95,7 +95,7 @@ const submit = () => {
           v-model="form.production_date"
           type="date"
           required
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
           :class="{ 'border-red-500': form.errors.production_date }"
         />
         <p v-if="form.errors.production_date" class="mt-1 text-sm text-red-600">{{ form.errors.production_date }}</p>
@@ -109,7 +109,7 @@ const submit = () => {
           v-model="form.received_date"
           type="date"
           required
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
           :class="{ 'border-red-500': form.errors.received_date }"
         />
         <p v-if="form.errors.received_date" class="mt-1 text-sm text-red-600">{{ form.errors.received_date }}</p>
@@ -123,7 +123,7 @@ const submit = () => {
           v-model.number="form.quantity_good"
           type="number"
           min="0"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
           :class="{ 'border-red-500': form.errors.quantity_good }"
         />
         <p v-if="form.errors.quantity_good" class="mt-1 text-sm text-red-600">{{ form.errors.quantity_good }}</p>
@@ -135,7 +135,7 @@ const submit = () => {
           v-model.number="form.quantity_defect"
           type="number"
           min="0"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
           :class="{ 'border-red-500': form.errors.quantity_defect }"
         />
         <p v-if="form.errors.quantity_defect" class="mt-1 text-sm text-red-600">{{ form.errors.quantity_defect }}</p>
@@ -148,7 +148,7 @@ const submit = () => {
           type="number"
           min="0"
           readonly
-          class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 dark:text-gray-400 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
           :class="{ 'border-red-500': form.errors.quantity_reject }"
         />
         <p v-if="form.errors.quantity_reject" class="mt-1 text-sm text-red-600">{{ form.errors.quantity_reject }}</p>
@@ -162,7 +162,7 @@ const submit = () => {
           v-model.number="form.labor_cost_actual"
           type="number"
           min="0"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
           :class="{ 'border-red-500': form.errors.labor_cost_actual }"
         />
         <p v-if="form.errors.labor_cost_actual" class="mt-1 text-sm text-red-600">{{ form.errors.labor_cost_actual }}</p>
@@ -174,7 +174,7 @@ const submit = () => {
           v-model.number="form.production_cost"
           type="number"
           min="0"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
           :class="{ 'border-red-500': form.errors.production_cost }"
         />
         <p v-if="form.errors.production_cost" class="mt-1 text-sm text-red-600">{{ form.errors.production_cost }}</p>
@@ -186,7 +186,7 @@ const submit = () => {
       <input
         v-model="form.expiry_date"
         type="date"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
         :class="{ 'border-red-500': form.errors.expiry_date }"
       />
       <p v-if="form.errors.expiry_date" class="mt-1 text-sm text-red-600">{{ form.errors.expiry_date }}</p>
@@ -197,7 +197,7 @@ const submit = () => {
       <textarea
         v-model="form.qc_notes"
         rows="3"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
         :class="{ 'border-red-500': form.errors.qc_notes }"
       ></textarea>
       <p v-if="form.errors.qc_notes" class="mt-1 text-sm text-red-600">{{ form.errors.qc_notes }}</p>
@@ -208,7 +208,7 @@ const submit = () => {
       <textarea
         v-model="form.defect_reasons"
         rows="2"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
         :class="{ 'border-red-500': form.errors.defect_reasons }"
       ></textarea>
       <p v-if="form.errors.defect_reasons" class="mt-1 text-sm text-red-600">{{ form.errors.defect_reasons }}</p>

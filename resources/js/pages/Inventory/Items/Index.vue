@@ -87,23 +87,27 @@ const isLowStock = (item: Item) => {
 
         <div class="py-6 px-6">
             <div class="mx-auto max-w-7xl">
-                <PageHeader title="Inventory Items" />
+                <PageHeader 
+                    title="Inventory Items" 
+                    create-link="/inventory/items/create"
+                    create-text="Tambah Item"
+                />
 
-                <!-- Filters & Actions -->
-                <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="flex flex-1 flex-col gap-4 sm:flex-row">
+                <!-- Filters -->
+                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
                         <input
                             v-model="search"
                             type="text"
                             placeholder="Cari SKU atau nama..."
                             @keyup.enter="applyFilters"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-64"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                         />
 
                         <select
                             v-model="statusFilter"
                             @change="applyFilters"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-auto"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                         >
                             <option value="">Semua Status</option>
                             <option value="available">Available</option>
@@ -116,35 +120,37 @@ const isLowStock = (item: Item) => {
                         <select
                             v-model="categoryFilter"
                             @change="applyFilters"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:w-auto"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                         >
                             <option value="">Semua Kategori</option>
                             <option value="garment">Garment</option>
                             <option value="food">Food</option>
                         </select>
 
-                        <button
-                            v-if="search || statusFilter || categoryFilter"
-                            @click="clearFilters"
-                            class="rounded-md bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                        >
-                            Reset
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button
+                                @click="applyFilters"
+                                class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+                            >
+                                Filter
+                            </button>
+                            <button
+                                v-if="search || statusFilter || categoryFilter"
+                                @click="clearFilters"
+                                class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+                            >
+                                <span class="text-base">✕</span>
+                                Clear
+                            </button>
+                        </div>
                     </div>
-
-                    <Link
-                        href="/inventory/items/create"
-                        class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-                    >
-                        Tambah Item
-                    </Link>
                 </div>
 
                 <!-- Items Table -->
-                <div v-if="items.data.length > 0" class="overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+                <div v-if="items.data.length > 0" class="bg-white dark:bg-gray-800 shadow-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700/50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">SKU</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Nama</th>
@@ -198,16 +204,13 @@ const isLowStock = (item: Item) => {
                 </div>
 
                 <!-- Empty State -->
-                <div v-else class="rounded-lg bg-white dark:bg-gray-800 p-12 text-center shadow-sm">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Belum ada inventory items</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Mulai dengan menambahkan item pertama.</p>
-                    <div class="mt-6">
-                        <Link
-                            href="/inventory/items/create"
-                            class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-                        >
-                            Tambah Item
-                        </Link>
+                <div v-else class="bg-white dark:bg-gray-800 shadow-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div class="px-6 py-16 text-center">
+                        <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Belum ada inventory items</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Mulai dengan menambahkan item pertama.</p>
                     </div>
                 </div>
             </div>

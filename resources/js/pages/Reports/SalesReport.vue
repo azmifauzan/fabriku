@@ -226,7 +226,7 @@ const getPaymentStatusClass = (paymentStatus: string) => {
                     v-model="search"
                     type="text"
                     placeholder="Order # atau customer..."
-                    class="pl-10 w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    class="pl-10 w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                     @keyup.enter="applyFilter"
                   />
                 </div>
@@ -237,7 +237,7 @@ const getPaymentStatusClass = (paymentStatus: string) => {
                 </label>
                 <select
                   v-model="status"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                 >
                   <option value="">Semua Status</option>
                   <option value="completed">Completed</option>
@@ -251,7 +251,7 @@ const getPaymentStatusClass = (paymentStatus: string) => {
                 </label>
                 <select
                   v-model="customerType"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                 >
                   <option value="">Semua Tipe</option>
                   <option value="retail">Retail</option>
@@ -266,7 +266,7 @@ const getPaymentStatusClass = (paymentStatus: string) => {
                 <input
                   v-model="startDate"
                   type="date"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                 />
               </div>
               <div>
@@ -276,7 +276,7 @@ const getPaymentStatusClass = (paymentStatus: string) => {
                 <input
                   v-model="endDate"
                   type="date"
-                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                 />
               </div>
               <div class="flex items-end gap-2">

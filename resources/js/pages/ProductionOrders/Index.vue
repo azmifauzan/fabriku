@@ -143,108 +143,100 @@ const getTypeLabel = (type: string) => {
         <PageHeader
           :title="productionOrderLabel"
           description="Kelola order produksi internal dan eksternal"
+          :create-link="create.url()"
+          create-text="Buat Order"
         />
 
         <!-- Filters -->
-        <div class="mb-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-          <div class="p-6">
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Pencarian
-                </label>
-                <input
-                  v-model="search"
-                  @input="applyFilters"
-                  type="text"
-                  :placeholder="`Order number, ${contractorLabelLower}...`"
-                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                Pencarian
+              </label>
+              <input
+                v-model="search"
+                @input="applyFilters"
+                type="text"
+                :placeholder="`Order number, ${contractorLabelLower}...`"
+                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+              />
+            </div>
 
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Status
-                </label>
-                <select
-                  v-model="statusFilter"
-                  @change="applyFilters"
-                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                  <option value="">Semua Status</option>
-                  <option value="draft">Draft</option>
-                  <option value="pending">Pending</option>
-                  <option value="sent">Dikirim</option>
-                  <option value="in_progress">Dalam Proses</option>
-                  <option value="completed">Selesai</option>
-                  <option value="cancelled">Dibatalkan</option>
-                </select>
-              </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                Status
+              </label>
+              <select
+                v-model="statusFilter"
+                @change="applyFilters"
+                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+              >
+                <option value="">Semua Status</option>
+                <option value="draft">Draft</option>
+                <option value="pending">Pending</option>
+                <option value="sent">Dikirim</option>
+                <option value="in_progress">Dalam Proses</option>
+                <option value="completed">Selesai</option>
+                <option value="cancelled">Dibatalkan</option>
+              </select>
+            </div>
 
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Tipe
-                </label>
-                <select
-                  v-model="typeFilter"
-                  @change="applyFilters"
-                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                  <option value="">Semua Tipe</option>
-                  <option value="internal">Internal</option>
-                  <option value="external">Eksternal</option>
-                </select>
-              </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                Tipe
+              </label>
+              <select
+                v-model="typeFilter"
+                @change="applyFilters"
+                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+              >
+                <option value="">Semua Tipe</option>
+                <option value="internal">Internal</option>
+                <option value="external">Eksternal</option>
+              </select>
+            </div>
 
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {{ contractorLabel }}
-                </label>
-                <select
-                  v-model="contractorFilter"
-                  @change="applyFilters"
-                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                  <option :value="''">Semua {{ contractorLabel }}</option>
-                  <option v-for="contractor in contractors" :key="contractor.id" :value="contractor.id">
-                    {{ contractor.name }}
-                  </option>
-                </select>
-              </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                {{ contractorLabel }}
+              </label>
+              <select
+                v-model="contractorFilter"
+                @change="applyFilters"
+                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+              >
+                <option :value="''">Semua {{ contractorLabel }}</option>
+                <option v-for="contractor in contractors" :key="contractor.id" :value="contractor.id">
+                  {{ contractor.name }}
+                </option>
+              </select>
+            </div>
 
-              <div class="flex items-end">
-                <button
-                  @click="clearFilters"
-                  class="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
-                >
-                  Reset Filter
-                </button>
-              </div>
+            <div class="flex items-end gap-2">
+              <button
+                @click="applyFilters"
+                class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+              >
+                Filter
+              </button>
+              <button
+                v-if="search || statusFilter || typeFilter || contractorFilter"
+                @click="clearFilters"
+                class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+              >
+                <span class="text-base">✕</span>
+                Clear
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Actions -->
-        <div class="mb-6 flex items-center justify-between">
-          <div class="text-sm text-gray-500 dark:text-gray-400">
-            Menampilkan {{ orders.from }} - {{ orders.to }} dari {{ orders.total }} orders
-          </div>
-          <Link
-            :href="create.url()"
-            class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700"
-          >
-            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Buat {{ productionOrderLabel }}
-          </Link>
-        </div>
-
         <!-- Orders Table -->
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead class="bg-gray-50 dark:bg-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700/50">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Order Number
@@ -274,8 +266,12 @@ const getTypeLabel = (type: string) => {
               </thead>
               <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 <tr v-if="orders.data.length === 0">
-                  <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                    Tidak ada data {{ termLower('production_order', 'production order') }}
+                  <td colspan="8" class="px-6 py-16 text-center">
+                    <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Tidak ada data {{ termLower('production_order', 'production order') }}</p>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Buat order produksi pertama Anda.</p>
                   </td>
                 </tr>
                 <tr v-for="order in orders.data" :key="order.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -349,48 +345,46 @@ const getTypeLabel = (type: string) => {
           </div>
 
           <!-- Pagination -->
-          <div v-if="orders.last_page > 1" class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
-            <div class="flex items-center justify-between">
-              <div class="flex-1 flex justify-between sm:hidden">
+          <div v-if="orders.last_page > 1" class="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="text-sm text-gray-700 dark:text-gray-300">
+                Menampilkan {{ orders.from }} - {{ orders.to }} dari {{ orders.total }} data
+              </div>
+              <div class="flex items-center gap-2">
                 <Link
                   v-if="orders.current_page > 1"
                   :href="`/production-orders?page=${orders.current_page - 1}`"
-                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all"
                 >
-                  Previous
+                  ← Prev
                 </Link>
+                <template v-for="page in orders.last_page" :key="page">
+                  <Link
+                    v-if="Math.abs(page - orders.current_page) <= 2 || page === 1 || page === orders.last_page"
+                    :href="`/production-orders?page=${page}`"
+                    :class="[
+                      'px-4 py-2 text-sm font-medium rounded-lg transition-all',
+                      page === orders.current_page
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                    ]"
+                  >
+                    {{ page }}
+                  </Link>
+                  <span
+                    v-else-if="Math.abs(page - orders.current_page) === 3"
+                    class="px-2 text-gray-500 dark:text-gray-400"
+                  >
+                    ...
+                  </span>
+                </template>
                 <Link
                   v-if="orders.current_page < orders.last_page"
                   :href="`/production-orders?page=${orders.current_page + 1}`"
-                  class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all"
                 >
-                  Next
+                  Next →
                 </Link>
-              </div>
-              <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                <div>
-                  <p class="text-sm text-gray-700 dark:text-gray-300">
-                    Halaman {{ orders.current_page }} dari {{ orders.last_page }}
-                  </p>
-                </div>
-                <div>
-                  <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                    <Link
-                      v-if="orders.current_page > 1"
-                      :href="`/production-orders?page=${orders.current_page - 1}`"
-                      class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
-                    >
-                      ←
-                    </Link>
-                    <Link
-                      v-if="orders.current_page < orders.last_page"
-                      :href="`/production-orders?page=${orders.current_page + 1}`"
-                      class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
-                    >
-                      →
-                    </Link>
-                  </nav>
-                </div>
               </div>
             </div>
           </div>
