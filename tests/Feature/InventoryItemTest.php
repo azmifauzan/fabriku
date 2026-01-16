@@ -77,9 +77,20 @@ it('can create new inventory item', function () {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('inventory_items', array_merge($itemData, [
+    $this->assertDatabaseHas('inventory_items', [
+        'production_order_id' => $this->productionOrder->id,
+        'sku' => 'TEST001',
+        'product_name' => 'Test Product',
+        'location_id' => $this->location->id,
+        'target_quantity' => 100,
+        'current_quantity' => 95,
+        'minimum_stock' => 10,
+        'unit_cost' => 25.50,
+        'selling_price' => 45.00,
+        'quality_grade' => 'grade_a',
+        'status' => 'available',
         'tenant_id' => $this->tenant->id,
-    ]));
+    ]);
 });
 
 it('validates required fields when creating item', function () {
@@ -139,8 +150,8 @@ it('can update inventory item', function () {
     $this->assertDatabaseHas('inventory_items', [
         'id' => $item->id,
         'tenant_id' => $this->tenant->id,
-        'name' => 'Updated Product Name',
-        'stock_quantity' => 200,
+        'product_name' => 'Updated Product Name',
+        'current_quantity' => 200,
         'minimum_stock' => 20,
         'quality_grade' => 'grade_b',
         'status' => 'reserved',
