@@ -72,7 +72,7 @@ class InventoryLocation extends Model
 
     public function inventoryItems(): HasMany
     {
-        return $this->hasMany(InventoryItem::class);
+        return $this->hasMany(InventoryItem::class, 'location_id');
     }
 
     // Helper methods

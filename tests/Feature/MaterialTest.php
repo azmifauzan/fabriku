@@ -14,6 +14,11 @@ beforeEach(function () {
         'role' => 'admin',
     ]);
     $this->actingAs($this->user);
+    
+    // Create a material type for tests
+    $this->materialType = \App\Models\MaterialType::factory()->create([
+        'tenant_id' => $this->tenant->id,
+    ]);
 });
 
 test('can list materials for current tenant only', function () {
@@ -100,6 +105,7 @@ test('code can be same across different tenants', function () {
     ]);
 
     $materialData = [
+        'material_type_id' => $this->materialType->id,
         'code' => 'MAT-001',
         'name' => 'Same Code Different Tenant',
         'unit' => 'meter',
@@ -118,6 +124,7 @@ test('can update material', function () {
     $material = Material::factory()->create(['tenant_id' => $this->tenant->id]);
 
     $updateData = [
+        'material_type_id' => $material->material_type_id,
         'code' => $material->code,
         'name' => 'Updated Material Name',
         'unit' => 'pcs',
@@ -184,6 +191,7 @@ test('material has low stock helper method', function () {
 
 test('material automatically gets tenant_id from authenticated user', function () {
     $materialData = [
+        'material_type_id' => $this->materialType->id,
         'code' => 'MAT-AUTO',
         'name' => 'Auto Tenant Material',
         'unit' => 'meter',
