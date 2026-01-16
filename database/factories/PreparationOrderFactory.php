@@ -23,7 +23,7 @@ class PreparationOrderFactory extends Factory
             'pattern_id' => \App\Models\Pattern::factory(),
             'preparation_date' => fake()->dateTimeBetween('-30 days', 'now'),
             'status' => fake()->randomElement($statuses),
-            'prepared_by' => \App\Models\Staff::factory(),
+            'prepared_by' => \App\Models\User::factory(),
             'output_quantity' => fake()->numberBetween(10, 200),
             'material_usage' => [
                 [
