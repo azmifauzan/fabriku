@@ -13,28 +13,26 @@ class MaterialController extends Controller
     public function index()
     {
         $materials = Material::query()
-            ->with('materialAttributes')
+            ->with(['materialAttributes', 'materialType'])
             ->withCount('receipts')
             ->when(request('search'), function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('code', 'like', "%{$search}%")
-                    ->orWhere('type', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%");
             })
-            ->when(request('type'), fn ($query, $type) => $query->where('type', $type))
-            ->when(request('is_active') !== null, fn ($query) => $query->where('is_active', request('is_active')))
+            ->when(request('material_type_id'), fn ($query, $typeId) => $query->where('material_type_id', $typeId))
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
-        $types = Material::query()
-            ->select('type')
-            ->distinct()
-            ->pluck('type');
+        $types = MaterialType::query()
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
 
         return Inertia::render('Materials/Index', [
             'materials' => $materials,
             'types' => $types,
-            'filters' => request()->only(['search', 'type', 'is_active']),
+            'filters' => request()->only(['search', 'material_type_id']),
         ]);
     }
 

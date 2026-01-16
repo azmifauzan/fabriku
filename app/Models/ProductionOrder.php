@@ -16,9 +16,10 @@ class ProductionOrder extends Model
     protected $fillable = [
         'tenant_id',
         'order_number',
-        'preparation_order_id',  // CHANGED from cutting_result_id
+        'preparation_order_id',
         'type',
         'contractor_id',
+        'quantity_requested',
         'quantity_produced',
         'quantity_good',
         'quantity_reject',

@@ -54,7 +54,7 @@ class SalesOrderController extends Controller
         $orders = $query->latest('order_date')->paginate(15);
 
         return Inertia::render('SalesOrders/Index', [
-            'salesOrders' => $orders,
+            'orders' => $orders,
             'filters' => $request->only(['search', 'status', 'payment_status', 'channel', 'start_date', 'end_date']),
             'stats' => [
                 'total_orders' => SalesOrder::count(),
@@ -70,7 +70,7 @@ class SalesOrderController extends Controller
         $salesOrder->load(['customer', 'items.inventoryItem.inventoryLocation', 'items.inventoryItem.pattern']);
 
         return Inertia::render('SalesOrders/Show', [
-            'salesOrder' => $salesOrder,
+            'order' => $salesOrder,
         ]);
     }
 

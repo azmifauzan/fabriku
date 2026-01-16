@@ -56,8 +56,8 @@ class PreparationOrder extends Model
                     ->latest('id')
                     ->first();
 
-                $nextNumber = $lastOrder ? ((int) substr($lastOrder->order_number, -3)) + 1 : 1;
-                $order->order_number = sprintf('PRP-%d-%03d', $year, $nextNumber);
+                $nextNumber = $lastOrder ? ((int) substr($lastOrder->order_number, -4)) + 1 : 1;
+                $order->order_number = sprintf('PRP-%d-%04d', $year, $nextNumber);
             }
         });
 

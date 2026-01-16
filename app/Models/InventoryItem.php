@@ -23,7 +23,9 @@ class InventoryItem extends Model
         'target_quantity',
         'current_quantity',
         'reserved_quantity',
+        'minimum_stock',
         'quality_grade',
+        'status',
         'unit_cost',
         'selling_price',
         'production_date',
@@ -38,8 +40,7 @@ class InventoryItem extends Model
             'unit_cost' => 'decimal:2',
             'selling_price' => 'decimal:2',
             'production_date' => 'date',
-            'expiry_date' => 'date',
-            'best_before_date' => 'date',
+            'expired_date' => 'date',
         ];
     }
 
@@ -60,8 +61,8 @@ class InventoryItem extends Model
 
         static::saving(function (InventoryItem $item) {
             // Auto-update status based on expiry for food items
-            if ($item->category === 'food' && $item->expiry_date) {
-                if ($item->expiry_date->isPast()) {
+            if ($item->expired_date) {
+                if ($item->expired_date->isPast()) {
                     $item->status = 'expired';
                 }
             }
@@ -86,7 +87,7 @@ class InventoryItem extends Model
 
     public function inventoryLocation(): BelongsTo
     {
-        return $this->belongsTo(InventoryLocation::class);
+        return $this->belongsTo(InventoryLocation::class, 'location_id');
     }
 
     public function location(): BelongsTo
@@ -102,17 +103,17 @@ class InventoryItem extends Model
 
     public function getIsLowStockAttribute(): bool
     {
-        return $this->current_quantity <= $this->target_quantity;
+        return $this->current_quantity <= $this->minimum_stock;
     }
 
     public function getTotalValueAttribute(): float
     {
-        return $this->current_stock * $this->unit_cost;
+        return $this->current_quantity * $this->unit_cost;
     }
 
     public function isLowStock(): bool
     {
-        return $this->current_stock <= $this->minimum_stock;
+        return $this->current_quantity <= $this->minimum_stock;
     }
 
     public function isExpiringSoon(int $days = 7): bool
@@ -198,11 +199,11 @@ class InventoryItem extends Model
 
     public function deductStock(int $quantity): bool
     {
-        if ($this->current_stock < $quantity) {
+        if ($this->current_quantity < $quantity) {
             return false;
         }
 
-        $this->decrement('current_stock', $quantity);
+        $this->decrement('current_quantity', $quantity);
 
         return true;
     }
@@ -253,7 +254,7 @@ class InventoryItem extends Model
 
     public function scopeInLocation($query, int $locationId)
     {
-        return $query->where('inventory_location_id', $locationId);
+        return $query->where('location_id', $locationId);
     }
 
     public function scopeByQualityGrade($query, string $grade)

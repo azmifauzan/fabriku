@@ -22,6 +22,7 @@ class Material extends Model
         'price_per_unit',
         'stock_quantity',
         'min_stock',
+        'reorder_point',
         'unit',
         'description',
     ];
@@ -32,6 +33,7 @@ class Material extends Model
             'price_per_unit' => 'decimal:2',
             'stock_quantity' => 'decimal:3',
             'min_stock' => 'decimal:3',
+            'reorder_point' => 'decimal:3',
         ];
     }
 

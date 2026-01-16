@@ -23,9 +23,9 @@ class DashboardController extends Controller
             'low_stock_materials' => Material::query()
                 ->whereRaw('stock_quantity <= min_stock')
                 ->count(),
-            'total_inventory' => InventoryItem::query()->sum('current_stock'),
+            'total_inventory' => InventoryItem::query()->sum('current_quantity'),
             'low_stock_inventory' => InventoryItem::query()
-                ->whereRaw('(current_stock - reserved_stock) <= minimum_stock')
+                ->whereRaw('(current_quantity - reserved_quantity) <= minimum_stock')
                 ->count(),
             'total_sales_month' => SalesOrder::query()
                 ->whereMonth('order_date', now()->month)
@@ -61,13 +61,13 @@ class DashboardController extends Controller
             ->join('inventory_items', 'sales_order_items.inventory_item_id', '=', 'inventory_items.id')
             ->select(
                 'inventory_items.sku',
-                'inventory_items.name',
+                'inventory_items.product_name as name',
                 DB::raw('SUM(sales_order_items.quantity) as total_sold'),
                 DB::raw('SUM(sales_order_items.subtotal) as total_revenue')
             )
             ->where('sales_orders.tenant_id', $tenantId)
             ->where('sales_orders.order_date', '>=', now()->subDays(30))
-            ->groupBy('inventory_items.id', 'inventory_items.sku', 'inventory_items.name')
+            ->groupBy('inventory_items.id', 'inventory_items.sku', 'inventory_items.product_name')
             ->orderByDesc('total_sold')
             ->limit(5)
             ->get();
@@ -119,8 +119,8 @@ class DashboardController extends Controller
             ->get();
 
         $lowStockInventory = InventoryItem::query()
-            ->whereRaw('(current_stock - reserved_stock) <= minimum_stock')
-            ->select('id', 'sku', 'name', 'current_stock', 'reserved_stock', 'minimum_stock')
+            ->whereRaw('(current_quantity - reserved_quantity) <= minimum_stock')
+            ->select('id', 'sku', 'product_name', 'current_quantity', 'reserved_quantity', 'minimum_stock')
             ->limit(5)
             ->get();
 

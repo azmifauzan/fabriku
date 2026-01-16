@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('patterns', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
-            $table->string('code')->unique();
+            $table->string('code');
             $table->string('name');
             $table->string('category')->nullable(); // mukena, gamis, cake, cookies, etc
             $table->string('size')->nullable(); // for garment: S,M,L,XL or all_size
@@ -24,6 +24,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
+            $table->unique(['tenant_id', 'code']);
             $table->index(['tenant_id', 'name']);
             $table->index(['tenant_id', 'category']);
         });
@@ -32,9 +33,9 @@ return new class extends Migration
         Schema::create('preparation_orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
-            $table->string('order_number')->unique();
+            $table->string('order_number');
             $table->foreignId('pattern_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('prepared_by')->nullable()->constrained('staff')->nullOnDelete();
+            $table->foreignId('prepared_by')->nullable()->constrained('users')->nullOnDelete();
             $table->integer('output_quantity');
             $table->json('material_usage')->nullable(); // actual material used: [{ material_id, quantity }]
             $table->decimal('waste_percentage', 5, 2)->default(0);
@@ -45,6 +46,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
+            $table->unique(['tenant_id', 'order_number']);
             $table->index(['tenant_id', 'status']);
             $table->index(['tenant_id', 'preparation_date']);
         });

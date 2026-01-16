@@ -26,17 +26,19 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('material_type_id')->constrained()->cascadeOnDelete();
-            $table->string('code')->unique();
+            $table->string('code');
             $table->string('name');
             $table->string('supplier_name')->nullable();
             $table->decimal('price_per_unit', 15, 2)->default(0);
             $table->decimal('stock_quantity', 15, 3)->default(0);
             $table->decimal('min_stock', 15, 3)->default(0);
+            $table->decimal('reorder_point', 15, 3)->nullable();
             $table->string('unit');
             $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
+            $table->unique(['tenant_id', 'code']);
             $table->index(['tenant_id', 'material_type_id']);
             $table->index(['tenant_id', 'name']);
         });
@@ -66,6 +68,7 @@ return new class extends Migration
             $table->date('receipt_date');
             $table->string('batch_number')->nullable();
             $table->date('expired_date')->nullable(); // for food materials
+            $table->foreignId('received_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('notes')->nullable();
             $table->timestamps();
 

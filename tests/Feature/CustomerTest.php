@@ -106,7 +106,7 @@ it('can delete a customer without orders', function () {
     $response = $this->delete(route('customers.destroy', $customer));
 
     $response->assertRedirect();
-    $this->assertDatabaseMissing('customers', ['id' => $customer->id]);
+    $this->assertSoftDeleted('customers', ['id' => $customer->id]);
 });
 
 it('cannot delete a customer with sales orders', function () {
