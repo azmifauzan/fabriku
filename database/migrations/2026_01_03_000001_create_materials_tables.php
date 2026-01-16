@@ -26,7 +26,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('material_type_id')->constrained()->cascadeOnDelete();
-            $table->string('code')->unique();
+            $table->string('code');
             $table->string('name');
             $table->string('supplier_name')->nullable();
             $table->decimal('price_per_unit', 15, 2)->default(0);
@@ -38,6 +38,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
+            $table->unique(['tenant_id', 'code']);
             $table->index(['tenant_id', 'material_type_id']);
             $table->index(['tenant_id', 'name']);
         });
