@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('capacity')->nullable();
             $table->enum('status', ['active', 'inactive', 'maintenance'])->default('active');
             $table->text('description')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
