@@ -29,7 +29,7 @@ class PreparationOrderController extends Controller
             ->when($request->search, fn ($q) => $q->where('order_number', 'like', "%{$request->search}%"))
             ->when($request->status, fn ($q) => $q->where('status', $request->status))
             ->when($request->pattern_id, fn ($q) => $q->where('pattern_id', $request->pattern_id))
-            ->latest('order_date')
+            ->latest('preparation_date')
             ->paginate(15)
             ->withQueryString();
 

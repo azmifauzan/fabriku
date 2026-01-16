@@ -11,11 +11,22 @@ class StorePreparationOrderRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        // Map order_date to preparation_date for backwards compatibility
+        if ($this->has('order_date') && !$this->has('preparation_date')) {
+            $this->merge([
+                'preparation_date' => $this->order_date,
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [
             'pattern_id' => 'nullable|exists:patterns,id',
             'order_date' => 'required|date',
+            'preparation_date' => 'sometimes|date',
             'prepared_by' => 'nullable|exists:users,id',
             'output_quantity' => 'required|numeric|min:0.01',
             'output_unit' => 'required|string|max:20',

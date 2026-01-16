@@ -69,7 +69,7 @@ test('auto generates order number', function () {
         'order_number' => null,
     ]);
 
-    expect($order->order_number)->toMatch('/^PRP-\d{4}-\d{3}$/');
+    expect($order->order_number)->toMatch('/^PRP-\d{4}-\d{4}$/');
 });
 
 test('auto deducts material stock when completed', function () {

@@ -32,7 +32,7 @@ return new class extends Migration
         Schema::create('preparation_orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
-            $table->string('order_number')->unique();
+            $table->string('order_number');
             $table->foreignId('pattern_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('prepared_by')->nullable()->constrained('staff')->nullOnDelete();
             $table->integer('output_quantity');
@@ -45,6 +45,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
+            $table->unique(['tenant_id', 'order_number']);
             $table->index(['tenant_id', 'status']);
             $table->index(['tenant_id', 'preparation_date']);
         });
