@@ -25,6 +25,7 @@ class StoreProductionOrderRequest extends FormRequest
             'preparation_order_id' => ['required', 'exists:preparation_orders,id'],
             'type' => ['required', 'string', Rule::in(['internal', 'external'])],
             'contractor_id' => ['nullable', 'exists:contractors,id', 'required_if:type,external'],
+            'quantity_requested' => ['required', 'integer', 'min:1'],
             'estimated_completion_date' => ['nullable', 'date', 'after_or_equal:today'],
             'labor_cost' => ['nullable', 'numeric', 'min:0'],
             'priority' => ['required', 'string', Rule::in(['low', 'normal', 'high', 'urgent'])],
