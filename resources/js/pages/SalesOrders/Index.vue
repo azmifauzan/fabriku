@@ -256,26 +256,31 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Link
-                                            :href="`/sales-orders/${order.id}`"
-                                            class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3"
-                                        >
-                                            Detail
-                                        </Link>
-                                        <Link
-                                            v-if="order.status === 'draft' || order.status === 'confirmed'"
-                                            :href="`/sales-orders/${order.id}/edit`"
-                                            class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-3"
-                                        >
-                                            Edit
-                                        </Link>
-                                        <button
-                                            v-if="order.status === 'draft'"
-                                            @click="deleteOrder(order)"
-                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                        >
-                                            Hapus
-                                        </button>
+                                        <div class="flex justify-end gap-2">
+                                            <Link
+                                                :href="`/sales-orders/${order.id}`"
+                                                class="inline-flex items-center justify-center p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                                                title="Lihat detail sales order"
+                                            >
+                                                <Eye :size="18" />
+                                            </Link>
+                                            <Link
+                                                v-if="order.status === 'draft' || order.status === 'confirmed'"
+                                                :href="`/sales-orders/${order.id}/edit`"
+                                                class="inline-flex items-center justify-center p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                                title="Edit sales order"
+                                            >
+                                                <Edit :size="18" />
+                                            </Link>
+                                            <button
+                                                v-if="order.status === 'draft'"
+                                                @click="deleteOrder(order)"
+                                                class="inline-flex items-center justify-center p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                                title="Hapus sales order"
+                                            >
+                                                <Trash2 :size="18" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -338,6 +343,7 @@ import { router, Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
+import { Eye, Edit, Trash2 } from 'lucide-vue-next';
 
 const props = defineProps({
     orders: Object,
