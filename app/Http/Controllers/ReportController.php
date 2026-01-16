@@ -18,7 +18,7 @@ class ReportController extends Controller
     public function material(Request $request): Response
     {
         $query = Material::query()
-            ->with(['receipts' => function ($query) use ($request) {
+            ->with(['materialType', 'receipts' => function ($query) use ($request) {
                 if ($request->filled('start_date')) {
                     $query->where('receipt_date', '>=', $request->start_date);
                 }
@@ -28,7 +28,7 @@ class ReportController extends Controller
             }]);
 
         if ($request->filled('material_type')) {
-            $query->where('type', $request->material_type);
+            $query->where('material_type_id', $request->material_type);
         }
 
         if ($request->filled('search')) {
@@ -46,8 +46,8 @@ class ReportController extends Controller
                 'id' => $material->id,
                 'code' => $material->code,
                 'name' => $material->name,
-                'type' => $material->type,
-                'current_stock' => $material->quantity,
+                'type' => $material->materialType?->name,
+                'current_stock' => $material->stock_quantity,
                 'unit' => $material->unit,
                 'total_received' => $totalReceived,
                 'total_cost' => $totalCost,
@@ -68,39 +68,64 @@ class ReportController extends Controller
     public function inventory(Request $request): Response
     {
         $query = InventoryItem::query()
-            ->with(['location:id,name', 'pattern:id,name']);
+            ->with([
+                'location:id,name',
+                'tenant:id,business_category',
+                'productionOrder.preparationOrder.pattern:id,name',
+            ]);
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            match ($request->status) {
+                'available' => $query
+                    ->where('current_quantity', '>', 0)
+                    ->whereColumn('current_quantity', '>', 'minimum_stock'),
+                'low_stock' => $query
+                    ->where('current_quantity', '>', 0)
+                    ->whereColumn('current_quantity', '<=', 'minimum_stock'),
+                'out_of_stock' => $query->where('current_quantity', '=', 0),
+                default => null,
+            };
         }
 
         if ($request->filled('category')) {
-            $query->where('category', $request->category);
+            $query->whereHas('tenant', function ($tenantQuery) use ($request) {
+                $tenantQuery->where('business_category', $request->category);
+            });
         }
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('name', 'ilike', "%{$request->search}%")
+                $q->where('product_name', 'ilike', "%{$request->search}%")
                     ->orWhere('sku', 'ilike', "%{$request->search}%");
             });
         }
 
         $items = $query->get()->map(function ($item) {
+            $quantity = (int) $item->current_quantity;
+            $minimumStock = (int) $item->minimum_stock;
+            $availableQuantity = max(0, $quantity - (int) $item->reserved_quantity);
+
+            $computedStatus = match (true) {
+                $quantity === 0 => 'out_of_stock',
+                $quantity <= $minimumStock => 'low_stock',
+                default => 'available',
+            };
+
             return [
                 'id' => $item->id,
                 'sku' => $item->sku,
                 'name' => $item->name,
-                'category' => $item->category,
-                'quantity' => $item->quantity,
+                'category' => $item->tenant?->business_category ?? 'other',
+                'quantity' => $quantity,
                 'reserved_quantity' => $item->reserved_quantity,
-                'available_quantity' => $item->available_quantity,
-                'minimum_stock' => $item->minimum_stock,
-                'unit_price' => $item->unit_price,
-                'total_value' => $item->quantity * $item->unit_price,
-                'status' => $item->status,
+                'available_quantity' => $availableQuantity,
+                'minimum_stock' => $minimumStock,
+                'unit_price' => (float) $item->unit_cost,
+                'total_value' => $quantity * (float) $item->unit_cost,
+                'status' => $computedStatus,
                 'location' => $item->location?->name,
-                'pattern' => $item->pattern?->name,
-                'is_low_stock' => $item->available_quantity < $item->minimum_stock,
+                'pattern' => $item->productionOrder?->preparationOrder?->pattern?->name,
+                'is_low_stock' => $quantity > 0 && $quantity <= $minimumStock,
                 'production_date' => $item->production_date?->format('Y-m-d'),
                 'expired_date' => $item->expired_date?->format('Y-m-d'),
             ];
@@ -128,7 +153,7 @@ class ReportController extends Controller
     public function sales(Request $request): Response
     {
         $query = SalesOrder::query()
-            ->with(['customer:id,name,type', 'items.inventoryItem:id,sku,name']);
+            ->with(['customer:id,name,type', 'items.inventoryItem:id,sku,product_name']);
 
         // Date filter
         $startDate = $request->filled('start_date')

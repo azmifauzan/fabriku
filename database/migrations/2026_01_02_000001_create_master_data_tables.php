@@ -14,16 +14,14 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->string('code')->unique();
             $table->string('name');
-            $table->string('role'); // production, quality_control, warehouse, etc
+            $table->string('position')->nullable(); // production, quality_control, warehouse, etc
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
-            $table->enum('employment_type', ['full_time', 'part_time', 'freelance'])->default('full_time');
-            $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->text('notes')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['tenant_id', 'status']);
+            $table->index(['tenant_id', 'is_active']);
         });
 
         // Contractors (external production)

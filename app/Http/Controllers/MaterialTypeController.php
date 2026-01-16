@@ -76,7 +76,7 @@ class MaterialTypeController extends Controller
     public function destroy(MaterialType $materialType)
     {
         // Check if any materials use this type
-        if (\App\Models\Material::where('type', $materialType->code)->exists()) {
+        if (\App\Models\Material::where('material_type_id', $materialType->id)->exists()) {
             return back()->with('error', 'Jenis bahan tidak bisa dihapus karena masih digunakan oleh bahan baku.');
         }
 

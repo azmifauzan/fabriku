@@ -16,20 +16,15 @@ class InventoryItemController extends Controller
     public function index(Request $request)
     {
         $query = InventoryItem::query()
-            ->with(['inventoryLocation', 'pattern', 'productionOrder']);
+            ->with(['inventoryLocation', 'productionOrder.preparationOrder.pattern']);
 
         // Search functionality
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('sku', 'LIKE', "%{$search}%")
-                    ->orWhere('name', 'LIKE', "%{$search}%")
-                    ->orWhere('batch_number', 'LIKE', "%{$search}%");
+                    ->orWhere('product_name', 'LIKE', "%{$search}%")
+                    ->orWhere('product_code', 'LIKE', "%{$search}%");
             });
-        }
-
-        // Filter by category
-        if ($category = $request->get('category')) {
-            $query->where('category', $category);
         }
 
         // Filter by status
@@ -38,8 +33,9 @@ class InventoryItemController extends Controller
         }
 
         // Filter by location
-        if ($locationId = $request->get('location_id')) {
-            $query->where('inventory_location_id', $locationId);
+        $locationId = $request->get('location_id') ?? $request->get('inventory_location_id');
+        if ($locationId) {
+            $query->where('location_id', $locationId);
         }
 
         // Filter by quality grade (mainly for garment)
@@ -70,13 +66,13 @@ class InventoryItemController extends Controller
         return Inertia::render('Inventory/Items/Index', [
             'items' => $items,
             'filters' => $request->only([
-                'search', 'category', 'status', 'location_id',
+                'search', 'status', 'location_id', 'inventory_location_id',
                 'quality_grade', 'low_stock', 'expiring_soon', 'expired',
             ]),
             'locations' => InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'zone', 'rack']),
             'stats' => [
                 'total_items' => InventoryItem::count(),
-                'total_stock' => InventoryItem::sum('current_stock'),
+                'total_stock' => InventoryItem::sum('current_quantity'),
                 'low_stock_count' => InventoryItem::lowStock()->count(),
                 'expiring_soon_count' => InventoryItem::expiring(7)->count(),
                 'expired_count' => InventoryItem::expired()->count(),
@@ -201,14 +197,14 @@ class InventoryItemController extends Controller
 
         switch ($request->type) {
             case 'add':
-                $inventoryItem->increment('current_stock', $request->quantity);
+                $inventoryItem->increment('current_quantity', $request->quantity);
                 break;
             case 'subtract':
                 $newStock = max(0, $oldStock - $request->quantity);
-                $inventoryItem->update(['current_stock' => $newStock]);
+                $inventoryItem->update(['current_quantity' => $newStock]);
                 break;
             case 'set':
-                $inventoryItem->update(['current_stock' => $request->quantity]);
+                $inventoryItem->update(['current_quantity' => $request->quantity]);
                 break;
         }
 
@@ -253,7 +249,7 @@ class InventoryItemController extends Controller
         ]);
 
         $oldLocation = $inventoryItem->inventoryLocation;
-        $inventoryItem->update(['inventory_location_id' => $request->location_id]);
+        $inventoryItem->update(['location_id' => $request->location_id]);
 
         // Log location change
         // StockMovement::create([...]);

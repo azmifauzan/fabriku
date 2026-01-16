@@ -18,8 +18,8 @@ class InventoryObserver
             $this->triggerLowStockAlert($item);
         }
 
-        // Check for expiring soon (food items only)
-        if ($item->category === 'food' && $item->expiry_date) {
+        // Check for expiring soon (perishable items only)
+        if ($item->expiry_date) {
             if ($item->isExpiringSoon(7)) {
                 $this->triggerExpiryAlert($item);
             }
@@ -41,8 +41,8 @@ class InventoryObserver
             'tenant_id' => $item->tenant_id,
             'item_id' => $item->id,
             'sku' => $item->sku,
-            'name' => $item->name,
-            'current_stock' => $item->current_stock,
+            'product_name' => $item->product_name,
+            'current_quantity' => $item->current_quantity,
             'minimum_stock' => $item->minimum_stock,
             'available_stock' => $item->getAvailableStockAttribute(),
         ]);
@@ -63,10 +63,10 @@ class InventoryObserver
             'tenant_id' => $item->tenant_id,
             'item_id' => $item->id,
             'sku' => $item->sku,
-            'name' => $item->name,
-            'expiry_date' => $item->expiry_date->toDateString(),
+            'product_name' => $item->product_name,
+            'expired_date' => $item->expiry_date->toDateString(),
             'days_until_expiry' => $daysUntilExpiry,
-            'current_stock' => $item->current_stock,
+            'current_quantity' => $item->current_quantity,
         ]);
 
         // TODO: Send urgent email notification
@@ -86,7 +86,7 @@ class InventoryObserver
                 'tenant_id' => $item->tenant_id,
                 'item_id' => $item->id,
                 'sku' => $item->sku,
-                'reserved_stock' => $item->reserved_stock,
+                'reserved_quantity' => $item->reserved_quantity,
             ]);
 
             // Prevent deletion

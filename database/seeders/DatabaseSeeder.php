@@ -62,20 +62,18 @@ class DatabaseSeeder extends Seeder
             'tenant_id' => $tenantGarment->id,
             'code' => 'STF-001',
             'name' => 'Siti Nurhaliza',
-            'role' => 'cutting',
+            'position' => 'Cutting',
             'phone' => '08123456789',
-            'employment_type' => 'full_time',
-            'status' => 'active',
+            'is_active' => true,
         ]);
 
         $staffQC = Staff::create([
             'tenant_id' => $tenantGarment->id,
             'code' => 'STF-002',
             'name' => 'Ahmad Yani',
-            'role' => 'quality_control',
+            'position' => 'Quality Control',
             'phone' => '08123456790',
-            'employment_type' => 'full_time',
-            'status' => 'active',
+            'is_active' => true,
         ]);
 
         // 4. Create Contractors
@@ -492,20 +490,18 @@ class DatabaseSeeder extends Seeder
             'tenant_id' => $tenantFood->id,
             'code' => 'STF-F001',
             'name' => 'Ibu Ratna',
-            'role' => 'mixing',
+            'position' => 'Mixing',
             'phone' => '08111223344',
-            'employment_type' => 'full_time',
-            'status' => 'active',
+            'is_active' => true,
         ]);
 
         $staffBaking = Staff::create([
             'tenant_id' => $tenantFood->id,
             'code' => 'STF-F002',
             'name' => 'Ibu Dewi',
-            'role' => 'baking',
+            'position' => 'Baking',
             'phone' => '08222334455',
-            'employment_type' => 'full_time',
-            'status' => 'active',
+            'is_active' => true,
         ]);
 
         // Contractors for Food
