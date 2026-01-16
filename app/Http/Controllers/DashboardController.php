@@ -23,9 +23,9 @@ class DashboardController extends Controller
             'low_stock_materials' => Material::query()
                 ->whereRaw('stock_quantity <= min_stock')
                 ->count(),
-            'total_inventory' => InventoryItem::query()->sum('current_stock'),
+            'total_inventory' => InventoryItem::query()->sum('current_quantity'),
             'low_stock_inventory' => InventoryItem::query()
-                ->whereRaw('(current_stock - reserved_stock) <= minimum_stock')
+                ->whereRaw('(current_quantity - reserved_quantity) <= minimum_stock')
                 ->count(),
             'total_sales_month' => SalesOrder::query()
                 ->whereMonth('order_date', now()->month)
@@ -119,8 +119,8 @@ class DashboardController extends Controller
             ->get();
 
         $lowStockInventory = InventoryItem::query()
-            ->whereRaw('(current_stock - reserved_stock) <= minimum_stock')
-            ->select('id', 'sku', 'name', 'current_stock', 'reserved_stock', 'minimum_stock')
+            ->whereRaw('(current_quantity - reserved_quantity) <= minimum_stock')
+            ->select('id', 'sku', 'product_name', 'current_quantity', 'reserved_quantity', 'minimum_stock')
             ->limit(5)
             ->get();
 
