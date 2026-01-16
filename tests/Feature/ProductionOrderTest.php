@@ -171,7 +171,7 @@ test('can delete production order when status is draft and no batches', function
     $response = $this->delete(route('production-orders.destroy', $order));
 
     $response->assertRedirect(route('production-orders.index'));
-    $this->assertDatabaseMissing('production_orders', ['id' => $order->id]);
+    $this->assertSoftDeleted('production_orders', ['id' => $order->id]);
 });
 
 test('cannot delete production order with batches', function () {
