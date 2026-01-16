@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('patterns', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
-            $table->string('code')->unique();
+            $table->string('code');
             $table->string('name');
             $table->string('category')->nullable(); // mukena, gamis, cake, cookies, etc
             $table->string('size')->nullable(); // for garment: S,M,L,XL or all_size
@@ -24,6 +24,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
+            $table->unique(['tenant_id', 'code']);
             $table->index(['tenant_id', 'name']);
             $table->index(['tenant_id', 'category']);
         });

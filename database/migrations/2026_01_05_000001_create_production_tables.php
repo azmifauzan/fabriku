@@ -44,9 +44,17 @@ return new class extends Migration
             $table->string('batch_number')->unique();
             $table->integer('quantity_received');
             $table->integer('quantity_good')->default(0);
-            $table->integer('quantity_grade_b')->default(0);
+            $table->integer('quantity_defect')->default(0);
             $table->integer('quantity_reject')->default(0);
+            $table->string('grade')->nullable();
+            $table->decimal('labor_cost_actual', 15, 2)->nullable();
+            $table->decimal('production_cost', 15, 2)->nullable();
+            $table->date('production_date')->nullable();
             $table->date('received_date');
+            $table->date('expiry_date')->nullable();
+            $table->text('qc_notes')->nullable();
+            $table->text('defect_reasons')->nullable();
+            $table->json('qc_checklist')->nullable();
             $table->foreignId('received_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('notes')->nullable();
             $table->timestamps();
