@@ -34,7 +34,7 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->string('order_number');
             $table->foreignId('pattern_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('prepared_by')->nullable()->constrained('staff')->nullOnDelete();
+            $table->foreignId('prepared_by')->nullable()->constrained('users')->nullOnDelete();
             $table->integer('output_quantity');
             $table->json('material_usage')->nullable(); // actual material used: [{ material_id, quantity }]
             $table->decimal('waste_percentage', 5, 2)->default(0);
