@@ -27,10 +27,12 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     // Material Management
     Route::resource('materials', \App\Http\Controllers\MaterialController::class);
     Route::resource('material-receipts', \App\Http\Controllers\MaterialReceiptController::class);
+    Route::resource('material-types', \App\Http\Controllers\MaterialTypeController::class);
+    Route::resource('staff', \App\Http\Controllers\StaffController::class);
 
-    // Pattern & Cutting Management
+    // Pattern & Preparation Management (renamed from Cutting)
     Route::resource('patterns', \App\Http\Controllers\PatternController::class);
-    Route::resource('cutting-orders', \App\Http\Controllers\CuttingOrderController::class);
+    Route::resource('preparation-orders', \App\Http\Controllers\PreparationOrderController::class);
 
     // Production Management
     Route::resource('contractors', \App\Http\Controllers\ContractorController::class);
@@ -39,6 +41,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         ->name('production-orders.send');
     Route::post('production-orders/{production_order}/receive', [\App\Http\Controllers\ProductionOrderController::class, 'receive'])
         ->name('production-orders.receive');
+    Route::post('production-orders/{production_order}/mark-complete', [\App\Http\Controllers\ProductionOrderController::class, 'markComplete'])
+        ->name('production-orders.mark-complete');
 
     // Inventory Management
     Route::prefix('inventory')->name('inventory.')->group(function () {

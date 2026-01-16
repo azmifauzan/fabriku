@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
+import { useSweetAlert } from '@/composables/useSweetAlert';
 
 interface Location {
     id: number;
@@ -35,6 +36,8 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const { confirmDelete, showSuccess } = useSweetAlert();
+
 const search = ref(props.filters.search || '');
 const statusFilter = ref(props.filters.status || '');
 const zoneFilter = ref(props.filters.zone || '');
@@ -57,12 +60,20 @@ const clearFilters = () => {
     router.get('/inventory/locations');
 };
 
-const deleteLocation = (location: Location) => {
-    if (!confirm(`Hapus lokasi ${location.name}?`)) return;
-    
-    router.delete(`/inventory/locations/${location.id}`, {
-        preserveScroll: true,
-    });
+const deleteLocation = async (location: Location) => {
+    const result = await confirmDelete(
+        'Hapus Lokasi Inventory',
+        `Apakah Anda yakin ingin menghapus lokasi "${location.name}"?`
+    );
+
+    if (result.isConfirmed) {
+        router.delete(`/inventory/locations/${location.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                showSuccess('Berhasil!', 'Lokasi inventory berhasil dihapus');
+            }
+        });
+    }
 };
 
 const statusBadgeClass = (status: string) => {

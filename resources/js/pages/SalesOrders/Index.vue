@@ -337,12 +337,15 @@ import { ref, watch } from 'vue';
 import { router, Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
+import { useSweetAlert } from '@/composables/useSweetAlert';
 
 const props = defineProps({
     salesOrders: Object,
     stats: Object,
     filters: Object
 });
+
+const { confirmDelete, showSuccess } = useSweetAlert();
 
 const form = ref({
     search: props.filters.search || '',
@@ -372,9 +375,18 @@ function clearFilters() {
     router.get('/sales-orders');
 }
 
-function deleteOrder(order) {
-    if (confirm(`Yakin ingin menghapus pesanan ${order.order_number}?`)) {
-        router.delete(`/sales-orders/${order.id}`);
+async function deleteOrder(order) {
+    const result = await confirmDelete(
+        'Hapus Sales Order',
+        `Apakah Anda yakin ingin menghapus pesanan ${order.order_number}?`
+    );
+
+    if (result.isConfirmed) {
+        router.delete(`/sales-orders/${order.id}`, {
+            onSuccess: () => {
+                showSuccess('Berhasil!', 'Sales order berhasil dihapus');
+            }
+        });
     }
 }
 </script>

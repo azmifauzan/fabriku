@@ -16,23 +16,18 @@ class InventoryItem extends Model
     protected $fillable = [
         'tenant_id',
         'sku',
-        'name',
-        'description',
-        'pattern_id',
-        'attributes',
-        'category',
-        'current_stock',
-        'reserved_stock',
-        'minimum_stock',
+        'production_order_id',
+        'location_id',
+        'product_name',
+        'product_code',
+        'target_quantity',
+        'current_quantity',
+        'reserved_quantity',
+        'quality_grade',
         'unit_cost',
         'selling_price',
-        'inventory_location_id',
-        'batch_number',
         'production_date',
-        'expiry_date',
-        'best_before_date',
-        'quality_grade',
-        'status',
+        'expired_date',
         'notes',
     ];
 
@@ -84,20 +79,30 @@ class InventoryItem extends Model
         return $this->belongsTo(Pattern::class);
     }
 
+    public function productionOrder(): BelongsTo
+    {
+        return $this->belongsTo(ProductionOrder::class);
+    }
+
     public function inventoryLocation(): BelongsTo
     {
         return $this->belongsTo(InventoryLocation::class);
     }
 
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(InventoryLocation::class, 'location_id');
+    }
+
     // Helper methods
     public function getAvailableStockAttribute(): int
     {
-        return max(0, $this->current_stock - $this->reserved_stock);
+        return max(0, $this->current_quantity - $this->reserved_quantity);
     }
 
     public function getIsLowStockAttribute(): bool
     {
-        return $this->current_stock <= $this->minimum_stock;
+        return $this->current_quantity <= $this->target_quantity;
     }
 
     public function getTotalValueAttribute(): float
@@ -175,18 +180,18 @@ class InventoryItem extends Model
             return false;
         }
 
-        $this->increment('reserved_stock', $quantity);
+        $this->increment('reserved_quantity', $quantity);
 
         return true;
     }
 
     public function releaseReservedStock(int $quantity): bool
     {
-        if ($this->reserved_stock < $quantity) {
+        if ($this->reserved_quantity < $quantity) {
             return false;
         }
 
-        $this->decrement('reserved_stock', $quantity);
+        $this->decrement('reserved_quantity', $quantity);
 
         return true;
     }
@@ -230,20 +235,20 @@ class InventoryItem extends Model
 
     public function scopeExpiring($query, int $days = 7)
     {
-        return $query->whereNotNull('expiry_date')
-            ->where('expiry_date', '<=', now()->addDays($days))
-            ->where('expiry_date', '>', now());
+        return $query->whereNotNull('expired_date')
+            ->where('expired_date', '<=', now()->addDays($days))
+            ->where('expired_date', '>', now());
     }
 
     public function scopeExpired($query)
     {
-        return $query->whereNotNull('expiry_date')
-            ->where('expiry_date', '<', now());
+        return $query->whereNotNull('expired_date')
+            ->where('expired_date', '<', now());
     }
 
     public function scopeLowStock($query)
     {
-        return $query->whereRaw('current_stock <= minimum_stock');
+        return $query->whereRaw('current_quantity <= target_quantity');
     }
 
     public function scopeInLocation($query, int $locationId)

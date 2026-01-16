@@ -5,6 +5,8 @@ import { create } from '@/actions/App/Http/Controllers/ProductionOrderController
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useBusinessContext } from '@/composables/useBusinessContext'
+import { useSweetAlert } from '@/composables/useSweetAlert'
+import { Eye, Edit, Trash2 } from 'lucide-vue-next'
 
 interface Pattern {
   id: number
@@ -12,15 +14,10 @@ interface Pattern {
   name: string
 }
 
-interface CuttingOrder {
+interface PreparationOrder {
   id: number
   order_number: string
   pattern: Pattern
-}
-
-interface CuttingResult {
-  id: number
-  cutting_order: CuttingOrder
 }
 
 interface Contractor {
@@ -31,13 +28,13 @@ interface Contractor {
 interface ProductionOrder {
   id: number
   order_number: string
-  cutting_result: CuttingResult
+  preparation_order: PreparationOrder
   contractor: Contractor | null
-  requested_date: string
-  promised_date: string | null
-  quantity_requested: number
+  estimated_completion_date: string | null
   type: string
   status: string
+  priority: string
+  created_at: string
 }
 
 interface PaginatedOrders {
@@ -61,8 +58,9 @@ const props = defineProps<{
 }>()
 
 const { term, termLower } = useBusinessContext()
+const { confirmDelete, showSuccess, showWarning } = useSweetAlert()
 
-const productionOrderLabel = computed(() => term('production_order', 'Production Order'))
+const productionOrderLabel = computed(() => 'Production Order')
 const contractorLabel = computed(() => term('contractor', 'Kontraktor'))
 const contractorLabelLower = computed(() => termLower('contractor', 'kontraktor'))
 const patternLabel = computed(() => term('pattern', 'Pattern'))
@@ -92,17 +90,25 @@ const clearFilters = () => {
   applyFilters()
 }
 
-const deleteOrder = (order: ProductionOrder) => {
+const deleteOrder = async (order: ProductionOrder) => {
   if (order.status !== 'draft') {
-    alert('Hanya order dengan status draft yang bisa dihapus')
+    showWarning('Tidak Bisa Dihapus', 'Hanya order dengan status draft yang bisa dihapus')
     return
   }
 
-  if (!confirm(`Hapus ${termLower('production_order', 'production order')} ${order.order_number}?`)) return
+  const result = await confirmDelete(
+    `Hapus ${productionOrderLabel.value}`,
+    `Apakah Anda yakin ingin menghapus ${termLower('production_order', 'production order')} ${order.order_number}?`
+  )
 
-  router.delete(`/production-orders/${order.id}`, {
-    preserveScroll: true,
-  })
+  if (result.isConfirmed) {
+    router.delete(`/production-orders/${order.id}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        showSuccess('Berhasil!', `${productionOrderLabel.value} berhasil dihapus`)
+      }
+    })
+  }
 }
 
 const getStatusBadge = (status: string) => {
@@ -131,6 +137,22 @@ const getStatusLabel = (status: string) => {
 
 const getTypeLabel = (type: string) => {
   return type === 'internal' ? 'Internal' : 'Eksternal'
+}
+
+const markComplete = async (order: ProductionOrder) => {
+  const result = await useSweetAlert().confirmAction(
+    'Tandai Selesai?',
+    `Tandai ${productionOrderLabel.value} ${order.order_number} sebagai selesai?`
+  )
+
+  if (result.isConfirmed) {
+    router.post(`/production-orders/${order.id}/mark-complete`, {}, {
+      preserveScroll: true,
+      onSuccess: () => {
+        showSuccess('Berhasil!', `${productionOrderLabel.value} ditandai selesai`)
+      }
+    })
+  }
 }
 </script>
 
@@ -245,6 +267,9 @@ const getTypeLabel = (type: string) => {
                     {{ patternLabel }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Tipe
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -255,9 +280,6 @@ const getTypeLabel = (type: string) => {
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Target Date
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Status
                   </th>
                   <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Aksi
@@ -280,16 +302,26 @@ const getTypeLabel = (type: string) => {
                       {{ order.order_number }}
                     </div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
-                      {{ new Date(order.requested_date).toLocaleDateString('id-ID') }}
+                      {{ new Date(order.created_at).toLocaleDateString('id-ID') }}
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900 dark:text-gray-100">
-                      {{ order.cutting_result.cutting_order.pattern.name }}
+                      {{ order.preparation_order.pattern?.name || 'N/A' }}
                     </div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
-                      {{ order.cutting_result.cutting_order.pattern.code }}
+                      {{ order.preparation_order.pattern?.code || '-' }}
                     </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span 
+                      :class="[
+                        'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full',
+                        getStatusBadge(order.status)
+                      ]"
+                    >
+                      {{ getStatusLabel(order.status) }}
+                    </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span class="text-sm text-gray-900 dark:text-gray-100">
@@ -302,40 +334,47 @@ const getTypeLabel = (type: string) => {
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                    {{ order.quantity_requested }} pcs
+                    {{ order.preparation_order.output_quantity }} pcs
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {{ order.promised_date ? new Date(order.promised_date).toLocaleDateString('id-ID') : '-' }}
+                    {{ order.estimated_completion_date ? new Date(order.estimated_completion_date).toLocaleDateString('id-ID') : '-' }}
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span
-                      :class="getStatusBadge(order.status)"
-                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                    >
-                      {{ getStatusLabel(order.status) }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div class="flex items-center justify-end gap-2">
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                    <div class="flex justify-end gap-2">
                       <Link
                         :href="`/production-orders/${order.id}`"
-                        class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg font-medium transition-colors"
                       >
-                        Detail
+                        <Eye :size="16" />
+                        <span>Detail</span>
                       </Link>
+                      <button
+                        v-if="['sent', 'in_progress'].includes(order.status)"
+                        type="button"
+                        @click="markComplete(order)"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg font-medium transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" :width="16" :height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        <span>Complete</span>
+                      </button>
                       <Link
                         v-if="order.status === 'draft'"
                         :href="`/production-orders/${order.id}/edit`"
-                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg font-medium transition-colors"
                       >
-                        Edit
+                        <Edit :size="16" />
+                        <span>Edit</span>
                       </Link>
                       <button
                         v-if="order.status === 'draft'"
+                        type="button"
                         @click="deleteOrder(order)"
-                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg font-medium transition-colors"
                       >
-                        Hapus
+                        <Trash2 :size="16" />
+                        <span>Hapus</span>
                       </button>
                     </div>
                   </td>

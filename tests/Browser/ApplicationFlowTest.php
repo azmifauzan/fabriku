@@ -66,10 +66,10 @@ it('can navigate through all menu items', function () {
         ->assertPathIs('/patterns')
         ->assertSee('Data Pattern Produk');
 
-    // Test navigation to Cutting Orders
-    $page->click('a[href="/cutting-orders"]')
-        ->assertPathIs('/cutting-orders')
-        ->assertSee('Data Cutting Order');
+    // Test navigation to Preparation Orders
+    $page->click('a[href="/preparation-orders"]')
+        ->assertPathIs('/preparation-orders')
+        ->assertSee('Data Preparation Order');
 
     // Test navigation back to Dashboard
     $page->click('a[href="/dashboard"]')
@@ -180,11 +180,11 @@ it('can create a cutting order', function () {
         'notes' => 'Main fabric',
     ]);
 
-    $page = visit('/cutting-orders');
+    $page = visit('/preparation-orders');
 
-    $page->assertSee('Data Cutting Order')
-        ->click('a[href="/cutting-orders/create"]')
-        ->assertPathIs('/cutting-orders/create')
+    $page->assertSee('Data Preparation Order')
+        ->click('a[href="/preparation-orders/create"]')
+        ->assertPathIs('/preparation-orders/create')
         ->assertSee('Buat Cutting Order Baru')
         ->assertDontSee('dark') // Ensure no dark theme
         ->assertNoJavascriptErrors();
@@ -201,7 +201,7 @@ it('can create a cutting order', function () {
     // Submit the form
     $page->click('button[type="submit"]:has-text("Simpan")')
         ->wait(2000) // Wait for redirect
-        ->assertPathIs('/cutting-orders')
+        ->assertPathIs('/preparation-orders')
         ->assertSee('Pattern for Cutting')
         ->assertNoJavascriptErrors();
 });
@@ -233,7 +233,7 @@ it('displays material stock sufficiency warnings in cutting order form', functio
         'notes' => 'Main fabric',
     ]);
 
-    $page = visit('/cutting-orders/create');
+    $page = visit('/preparation-orders/create');
 
     $page->select('pattern_id', (string) $pattern->id)
         ->wait(500)

@@ -9,20 +9,19 @@ class MaterialFactory extends Factory
 {
     public function definition(): array
     {
-        $types = ['kain', 'benang', 'aksesoris', 'kancing', 'resleting'];
         $units = ['meter', 'roll', 'pcs', 'kg'];
 
         return [
             'tenant_id' => Tenant::factory(),
+            'material_type_id' => \App\Models\MaterialType::factory(),
             'code' => strtoupper(fake()->unique()->lexify('MAT-???-###')),
             'name' => fake()->words(3, true),
-            'type' => fake()->randomElement($types),
-            'description' => fake()->optional()->sentence(),
+            'supplier_name' => fake()->optional()->company(),
+            'price_per_unit' => fake()->randomFloat(2, 10000, 500000),
+            'stock_quantity' => 0,
+            'min_stock' => fake()->randomFloat(2, 10, 100),
             'unit' => fake()->randomElement($units),
-            'standard_price' => fake()->randomFloat(2, 10000, 500000),
-            'current_stock' => 0,
-            'reorder_point' => fake()->randomFloat(2, 10, 100),
-            'is_active' => true,
+            'description' => fake()->optional()->sentence(),
         ];
     }
 
@@ -30,13 +29,6 @@ class MaterialFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'tenant_id' => $tenantId,
-        ]);
-    }
-
-    public function inactive(): self
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_active' => false,
         ]);
     }
 }

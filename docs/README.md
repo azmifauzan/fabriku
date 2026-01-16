@@ -62,15 +62,17 @@ Namun terminologi dan business rules disesuaikan per kategori.
 
 ## 📁 Documentation Structure
 
+- **[User Manual](08-user-manual.md)** - 📖 **Panduan lengkap cara menggunakan aplikasi** (START HERE!)
 - [01-business-requirements.md](01-business-requirements.md) - User stories & business rules
 - [02-system-architecture.md](02-system-architecture.md) - Technical architecture & patterns
 - [03-database-schema.md](03-database-schema.md) - Database design & ERD
 - [04-api-endpoints.md](04-api-endpoints.md) - API specifications
 - [05-user-flows.md](05-user-flows.md) - User journey & UI flows
 - [06-mvp-development-plan.md](06-mvp-development-plan.md) - Implementation roadmap
-- [07-frontend-ui-architecture.md](07-frontend-ui-architecture.md) - ⭐ **Frontend UI/UX** - Layout system, mobile-first design, dark mode
+- [07-frontend-ui-architecture.md](07-frontend-ui-architecture.md) - Frontend UI/UX - Layout system, mobile-first design, dark mode
 - [multi-category-architecture.md](multi-category-architecture.md) - Multi-category design patterns
 - [phase-2-summary.md](phase-2-summary.md) - Phase 2 completion summary
+- [refactoring-preparation-simplification.md](refactoring-preparation-simplification.md) - Preparation simplification (BOM removal)
 
 ## 🚀 Development Progress
 
@@ -85,19 +87,22 @@ Namun terminologi dan business rules disesuaikan per kategori.
 - Stock tracking
 - 12 tests passing ✅
 
-### 🔄 Phase 3: Pattern/Recipe & Preparation (In Progress)
-- Pattern/Recipe library dengan BOM
-- Preparation/Cutting orders
-- Material usage & efficiency tracking
-- 20 tests passing (backend complete) ✅
-- Frontend components (3/4 done)
-- UI/UX modernization complete ✅:
+### 🔄 Phase 3: Pattern/Recipe & Preparation (Completed ✅)
+- Pattern/Recipe library dengan spesifikasi lengkap
+- Preparation orders (simplified - manual material input)
+- Material usage tracking dengan auto deduct stock
+- Pattern sebagai referensi (optional, tidak auto-fill)
+- Status workflow dengan validation
+- 33 tests passing ✅
+- UI/UX modernization complete:
   - Mobile-first responsive layout
   - Collapsible sidebar navigation
   - Dark/light theme support
   - Lucide icon integration
+  - Consistent styling
 
-### 📋 Next Phases
+### 📋 Current Focus
+- **Production Management** (Phase 4) - Next up!
 - Phase 4: Production Management (Sewing/Baking)
 - Phase 5: Inventory Management
 - Phase 6: Sales Management

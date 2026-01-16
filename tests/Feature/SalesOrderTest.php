@@ -19,9 +19,8 @@ beforeEach(function () {
     $this->pattern = Pattern::factory()->create(['tenant_id' => $this->tenant->id]);
     $this->inventoryItem = InventoryItem::factory()->create([
         'tenant_id' => $this->tenant->id,
-        'inventory_location_id' => $this->location->id,
-        'pattern_id' => $this->pattern->id,
-        'current_stock' => 100,
+        'location_id' => $this->location->id,
+        'current_quantity' => 100,
         'selling_price' => 150000,
     ]);
 });

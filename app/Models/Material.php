@@ -7,41 +7,32 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Material extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
+        'material_type_id',
         'code',
         'name',
-        'type',
-        'description',
+        'supplier_name',
+        'price_per_unit',
+        'stock_quantity',
+        'min_stock',
         'unit',
-        'standard_price',
-        'current_stock',
-        'reorder_point',
-        'is_active',
-        'attributes',
+        'description',
     ];
 
     protected function casts(): array
     {
         return [
-            'standard_price' => 'decimal:2',
-            'current_stock' => 'decimal:2',
-            'reorder_point' => 'decimal:2',
-            'is_active' => 'boolean',
-            'attributes' => 'array',
+            'price_per_unit' => 'decimal:2',
+            'stock_quantity' => 'decimal:3',
+            'min_stock' => 'decimal:3',
         ];
-    }
-
-    protected $appends = ['attributes'];
-
-    public function getAttributesAttribute()
-    {
-        return $this->materialAttributes;
     }
 
     protected static function booted(): void
@@ -60,6 +51,11 @@ class Material extends Model
         return $this->belongsTo(Tenant::class);
     }
 
+    public function materialType(): BelongsTo
+    {
+        return $this->belongsTo(MaterialType::class);
+    }
+
     public function receipts(): HasMany
     {
         return $this->hasMany(MaterialReceipt::class);
@@ -72,6 +68,6 @@ class Material extends Model
 
     public function isLowStock(): bool
     {
-        return $this->current_stock <= $this->reorder_point;
+        return $this->stock_quantity <= $this->min_stock;
     }
 }

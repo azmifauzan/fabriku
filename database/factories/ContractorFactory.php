@@ -16,13 +16,14 @@ class ContractorFactory extends Factory
 
         return [
             'tenant_id' => Tenant::factory(),
+            'code' => strtoupper(fake()->unique()->lexify('CTR-???-###')),
             'name' => $type === 'company' ? fake()->company() : fake()->name(),
+            'type' => $type,
+            'specialty' => $specialty,
             'contact_person' => fake()->name(),
             'phone' => fake()->phoneNumber(),
             'email' => fake()->optional(0.7)->safeEmail(),
             'address' => fake()->optional(0.8)->address(),
-            'type' => $type,
-            'specialty' => $specialty,
             'rate_per_piece' => fake()->optional(0.6)->randomFloat(2, 1000, 50000),
             'rate_per_hour' => fake()->optional(0.4)->randomFloat(2, 15000, 100000),
             'status' => 'active',

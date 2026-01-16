@@ -6,7 +6,7 @@ use App\Http\Requests\StoreProductionBatchRequest;
 use App\Http\Requests\StoreProductionOrderRequest;
 use App\Http\Requests\UpdateProductionOrderRequest;
 use App\Models\Contractor;
-use App\Models\CuttingResult;
+use App\Models\PreparationOrder;
 use App\Models\ProductionOrder;
 use App\Services\ProductionService;
 use Inertia\Inertia;
@@ -16,7 +16,7 @@ class ProductionOrderController extends Controller
     public function index()
     {
         $orders = ProductionOrder::query()
-            ->with(['cuttingResult.cuttingOrder.pattern', 'contractor'])
+            ->with(['preparationOrder.pattern', 'contractor'])
             ->when(request('search'), function ($query, $search) {
                 $query->where('order_number', 'like', "%{$search}%")
                     ->orWhereHas('contractor', fn ($q) => $q->where('name', 'like', "%{$search}%"));
@@ -39,9 +39,9 @@ class ProductionOrderController extends Controller
 
     public function create()
     {
-        $cuttingResults = CuttingResult::query()
-            ->with(['cuttingOrder.pattern'])
-            ->whereHas('cuttingOrder', fn ($q) => $q->where('status', 'completed'))
+        $preparationOrders = PreparationOrder::query()
+            ->with(['pattern'])
+            ->where('status', 'completed')
             ->whereDoesntHave('productionOrders')
             ->latest()
             ->get();
@@ -49,7 +49,7 @@ class ProductionOrderController extends Controller
         $contractors = Contractor::active()->get(['id', 'name', 'type', 'specialty', 'rate_per_piece', 'rate_per_hour']);
 
         return Inertia::render('ProductionOrders/Form', [
-            'cuttingResults' => $cuttingResults,
+            'preparationOrders' => $preparationOrders,
             'contractors' => $contractors,
         ]);
     }
@@ -70,7 +70,7 @@ class ProductionOrderController extends Controller
     public function show(ProductionOrder $productionOrder)
     {
         $productionOrder->load([
-            'cuttingResult.cuttingOrder.pattern',
+            'preparationOrder.pattern',
             'contractor',
             'batches' => fn ($query) => $query->latest(),
         ]);
@@ -89,9 +89,9 @@ class ProductionOrderController extends Controller
             return back()->with('error', "{$productionOrderLabel} tidak dapat diedit karena statusnya sudah completed atau cancelled.");
         }
 
-        $cuttingResults = CuttingResult::query()
-            ->with(['cuttingOrder.pattern'])
-            ->whereHas('cuttingOrder', fn ($q) => $q->where('status', 'completed'))
+        $preparationOrders = PreparationOrder::query()
+            ->with(['pattern'])
+            ->where('status', 'completed')
             ->where(function ($query) use ($productionOrder) {
                 $query->whereDoesntHave('productionOrders')
                     ->orWhereHas('productionOrders', fn ($q) => $q->whereKey($productionOrder->id));
@@ -103,7 +103,7 @@ class ProductionOrderController extends Controller
 
         return Inertia::render('ProductionOrders/Form', [
             'productionOrder' => $productionOrder,
-            'cuttingResults' => $cuttingResults,
+            'preparationOrders' => $preparationOrders,
             'contractors' => $contractors,
         ]);
     }
@@ -166,5 +166,18 @@ class ProductionOrderController extends Controller
 
         return redirect()->route('production-orders.show', $productionOrder)
             ->with('success', "{$productionOrderLabel} berhasil diterima (Batch {$batch->batch_number}).");
+    }
+
+    public function markComplete(ProductionOrder $productionOrder)
+    {
+        $productionOrder->update([
+            'status' => 'completed',
+            'completed_date' => now(),
+        ]);
+
+        $tenant = auth()->user()?->tenant;
+        $productionOrderLabel = $tenant?->getTerminology('production_order') ?? 'Production order';
+
+        return back()->with('success', "{$productionOrderLabel} berhasil ditandai complete.");
     }
 }

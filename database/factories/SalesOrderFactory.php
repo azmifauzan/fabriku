@@ -17,35 +17,30 @@ class SalesOrderFactory extends Factory
     public function definition(): array
     {
         $channels = ['offline', 'online', 'reseller', 'marketplace'];
-        $statuses = ['draft', 'confirmed', 'processing', 'shipped', 'completed'];
-        $paymentMethods = ['cash', 'transfer', 'credit_card', 'qris', 'cod'];
-        $paymentStatuses = ['unpaid', 'partial', 'paid'];
 
         $subtotal = fake()->randomFloat(2, 100000, 5000000);
-        $discountPercentage = fake()->randomElement([0, 5, 10, 15]);
-        $discountAmount = $subtotal * ($discountPercentage / 100);
+        $discountAmount = fake()->randomFloat(2, 0, $subtotal * 0.2);
         $taxAmount = 0;
-        $totalAmount = $subtotal - $discountAmount + $taxAmount;
+        $shippingCost = fake()->randomFloat(2, 0, 50000);
+        $totalAmount = $subtotal - $discountAmount + $taxAmount + $shippingCost;
 
         return [
             'tenant_id' => 1,
+            'order_number' => strtoupper(fake()->unique()->bothify('SO-######')),
             'customer_id' => \App\Models\Customer::factory(),
             'order_date' => fake()->dateTimeBetween('-3 months', 'now'),
-            'channel' => fake()->randomElement($channels),
-            'status' => fake()->randomElement($statuses),
+            'delivery_date' => fake()->optional()->dateTimeBetween('now', '+30 days'),
+            'sales_channel' => fake()->randomElement($channels),
             'subtotal' => $subtotal,
-            'discount_amount' => $discountAmount,
-            'discount_percentage' => $discountPercentage,
-            'tax_amount' => $taxAmount,
-            'total_amount' => $totalAmount,
-            'payment_method' => fake()->randomElement($paymentMethods),
-            'payment_status' => fake()->randomElement($paymentStatuses),
+            'discount' => $discountAmount,
+            'tax' => $taxAmount,
+            'shipping_cost' => fake()->randomFloat(2, 0, 50000),
+            'total' => $totalAmount,
+            'payment_status' => fake()->randomElement(['pending', 'partial', 'paid']),
             'paid_amount' => fake()->randomElement([0, $totalAmount / 2, $totalAmount]),
-            'payment_due_date' => fake()->optional()->dateTimeBetween('now', '+30 days'),
-            'shipped_date' => fake()->optional()->dateTimeBetween('-1 month', 'now'),
-            'completed_date' => fake()->optional()->dateTimeBetween('-1 month', 'now'),
-            'notes' => fake()->optional()->sentence(),
+            'fulfillment_status' => fake()->randomElement(['pending', 'processing', 'shipped', 'delivered']),
             'shipping_address' => fake()->optional()->address(),
+            'notes' => fake()->optional()->sentence(),
         ];
     }
 

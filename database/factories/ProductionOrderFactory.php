@@ -3,32 +3,27 @@
 namespace Database\Factories;
 
 use App\Models\Contractor;
-use App\Models\CuttingResult;
+use App\Models\PreparationOrder;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Carbon;
 
 class ProductionOrderFactory extends Factory
 {
     public function definition(): array
     {
-        $requestedDate = fake()->dateTimeBetween('-1 month', 'now');
-        $promisedDate = fake()->optional(0.7)->dateTimeBetween($requestedDate, '+2 weeks');
+        $estimatedCompletion = fake()->optional(0.7)->dateTimeBetween('now', '+2 weeks');
         $type = fake()->randomElement(['internal', 'external']);
-        $quantityRequested = fake()->numberBetween(50, 500);
 
         return [
             'tenant_id' => Tenant::factory(),
-            'cutting_result_id' => CuttingResult::factory(),
+            'preparation_order_id' => PreparationOrder::factory(),
             'type' => $type,
             'contractor_id' => $type === 'external' ? Contractor::factory() : null,
-            'quantity_requested' => $quantityRequested,
             'quantity_produced' => 0,
             'quantity_good' => 0,
             'quantity_reject' => 0,
             'labor_cost' => fake()->randomFloat(2, 100000, 2000000),
-            'requested_date' => $requestedDate,
-            'promised_date' => $promisedDate,
+            'estimated_completion_date' => $estimatedCompletion,
             'sent_date' => null,
             'completed_date' => null,
             'status' => 'draft',
@@ -65,20 +60,19 @@ class ProductionOrderFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => 'sent',
-            'sent_date' => fake()->dateTimeBetween($attributes['requested_date'], 'now'),
+            'sent_date' => fake()->dateTimeBetween('-1 week', 'now'),
         ]);
     }
 
     public function inProgress(): self
     {
         return $this->state(function (array $attributes) {
-            $requestedDate = Carbon::parse($attributes['requested_date'] ?? now()->subWeeks(2));
-            $sentDate = fake()->dateTimeBetween($requestedDate, 'now');
+            $sentDate = fake()->dateTimeBetween('-2 weeks', 'now');
 
             return [
                 'status' => 'in_progress',
                 'sent_date' => $sentDate,
-                'quantity_produced' => fake()->numberBetween(1, $attributes['quantity_requested']),
+                'quantity_produced' => fake()->numberBetween(50, 300),
             ];
         });
     }
@@ -88,17 +82,17 @@ class ProductionOrderFactory extends Factory
         $efficiency = fake()->randomFloat(2, 85, 98); // 85-98% efficiency
 
         return $this->state(function (array $attributes) use ($efficiency) {
-            $requestedDate = Carbon::parse($attributes['requested_date'] ?? now()->subWeeks(3));
-            $sentDate = fake()->dateTimeBetween($requestedDate, 'now');
+            $sentDate = fake()->dateTimeBetween('-3 weeks', '-1 week');
             $completedDate = fake()->dateTimeBetween($sentDate, 'now');
+            $quantityProduced = fake()->numberBetween(50, 500);
 
             return [
                 'status' => 'completed',
                 'sent_date' => $sentDate,
                 'completed_date' => $completedDate,
-                'quantity_produced' => $attributes['quantity_requested'],
-                'quantity_good' => (int) ($attributes['quantity_requested'] * $efficiency / 100),
-                'quantity_reject' => fake()->numberBetween(0, (int) ($attributes['quantity_requested'] * 0.05)),
+                'quantity_produced' => $quantityProduced,
+                'quantity_good' => (int) ($quantityProduced * $efficiency / 100),
+                'quantity_reject' => fake()->numberBetween(0, (int) ($quantityProduced * 0.05)),
                 'completion_notes' => fake()->optional(0.6)->sentence(),
             ];
         });

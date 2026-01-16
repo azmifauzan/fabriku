@@ -22,27 +22,18 @@ class StoreInventoryItemRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'production_order_id' => 'required|exists:production_orders,id',
             'sku' => 'required|string|max:100|unique:inventory_items,sku,NULL,id,tenant_id,'.auth()->user()->tenant_id,
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'category' => 'required|in:garment,food,craft,other',
-            'pattern_id' => 'required|exists:patterns,id',
-            'production_batch_id' => 'nullable|exists:production_batches,id',
             'inventory_location_id' => 'required|exists:inventory_locations,id',
+            'target_quantity' => 'required|integer|min:0',
             'current_stock' => 'required|integer|min:0',
-            'reserved_stock' => 'integer|min:0',
             'minimum_stock' => 'integer|min:0',
-            'maximum_stock' => 'nullable|integer|min:0|gte:minimum_stock',
             'unit_cost' => 'required|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',
-            'weight_per_unit' => 'nullable|numeric|min:0',
-            'dimensions' => 'nullable|string|max:50',
             'production_date' => 'nullable|date',
-            'expiry_date' => 'nullable|date|after:production_date',
-            'batch_number' => 'nullable|string|max:100',
-            'quality_grade' => 'nullable|in:A,B,C',
+            'quality_grade' => 'nullable|in:grade_a,grade_b,reject',
             'status' => 'required|in:available,reserved,damaged,expired',
-            'storage_requirements' => 'nullable|in:frozen,chilled,room_temp,dry_place,climate_controlled',
             'notes' => 'nullable|string|max:1000',
         ];
     }
@@ -50,12 +41,10 @@ class StoreInventoryItemRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'production_order_id.required' => 'Production order harus dipilih.',
+            'production_order_id.exists' => 'Production order tidak ditemukan.',
             'sku.unique' => 'SKU sudah digunakan.',
-            'pattern_id.exists' => 'Pattern tidak ditemukan.',
-            'production_batch_id.exists' => 'Production batch tidak ditemukan.',
             'inventory_location_id.exists' => 'Lokasi inventory tidak ditemukan.',
-            'maximum_stock.gte' => 'Maksimal stock harus lebih besar atau sama dengan minimal stock.',
-            'expiry_date.after' => 'Tanggal expired harus setelah tanggal produksi.',
         ];
     }
 }

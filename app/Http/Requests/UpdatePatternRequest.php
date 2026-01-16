@@ -14,27 +14,22 @@ class UpdatePatternRequest extends FormRequest
 
     public function rules(): array
     {
+        $tenant = auth()->user()->tenant;
+
         return [
             'code' => [
                 'required',
                 'string',
                 'max:50',
                 Rule::unique('patterns', 'code')
-                    ->where('tenant_id', auth()->user()->tenant_id)
+                    ->where('tenant_id', $tenant->id)
                     ->ignore($this->route('pattern')),
             ],
             'name' => 'required|string|max:255',
-            'product_type' => 'required|in:mukena,daster,gamis,jilbab,lainnya',
-            'size' => 'nullable|in:XS,S,M,L,XL,XXL,XXXL,all_size',
+            'category' => 'required|in:garment,food,craft,cosmetic,other',
+            'size' => 'nullable|string|max:50',
             'description' => 'nullable|string',
-            'estimated_time' => 'nullable|numeric|min:0',
-            'standard_waste_percentage' => 'nullable|numeric|min:0|max:100',
             'image_url' => 'nullable|url',
-            'is_active' => 'boolean',
-            'materials' => 'nullable|array',
-            'materials.*.material_id' => 'required|exists:materials,id',
-            'materials.*.quantity_needed' => 'required|numeric|min:0',
-            'materials.*.notes' => 'nullable|string',
         ];
     }
 }

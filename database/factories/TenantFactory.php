@@ -16,18 +16,12 @@ class TenantFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->company();
-
         return [
-            'name' => $name,
-            'slug' => str($name)->slug(),
-            'email' => fake()->companyEmail(),
-            'phone' => fake()->phoneNumber(),
-            'address' => fake()->address(),
-            'is_active' => true,
+            'name' => fake()->company(),
+            'business_category' => fake()->randomElement(['garment', 'food']),
             'subscription_plan' => 'trial',
             'subscription_expires_at' => now()->addDays(30),
-            'settings' => [],
+            'is_active' => true,
         ];
     }
 

@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { useBusinessContext } from '@/composables/useBusinessContext'
+import { useSweetAlert } from '@/composables/useSweetAlert'
 import ProductionBatchForm from './ProductionBatchForm.vue'
 
 interface Pattern {
@@ -11,49 +12,23 @@ interface Pattern {
   name: string
 }
 
-interface CuttingOrder {
+interface PreparationOrder {
   id: number
   order_number: string
   pattern: Pattern
 }
 
-interface CuttingResult {
-  id: number
-  cutting_order: CuttingOrder
-}
-
-interface Contractor {
-  id: number
-  name: string
-}
-
-interface ProductionBatch {
-  id: number
-  batch_number: string
-  quantity_received: number
-  quantity_good: number
-  quantity_defect: number
-  quantity_reject: number
-  grade: string
-  production_date: string
-  received_date: string
-  expiry_date: string | null
-  qc_notes: string | null
-}
-
 interface ProductionOrder {
   id: number
   order_number: string
-  cutting_result: CuttingResult
+  preparation_order: PreparationOrder
   contractor: Contractor | null
   type: string
   status: string
-  quantity_requested: number
   quantity_produced: number
   quantity_good: number
   quantity_reject: number
-  requested_date: string
-  promised_date: string | null
+  estimated_completion_date: string | null
   sent_date: string | null
   completed_date: string | null
   notes: string | null
@@ -65,8 +40,9 @@ const props = defineProps<{
 }>()
 
 const { term, termLower } = useBusinessContext()
+const { confirmDelete, showSuccess } = useSweetAlert()
 
-const productionOrderLabel = computed(() => term('production_order', 'Production Order'))
+const productionOrderLabel = computed(() => 'Production Order')
 const contractorLabel = computed(() => term('contractor', 'Kontraktor'))
 
 const showReceive = ref(false)
@@ -83,10 +59,20 @@ const canReceive = computed(() => {
   return ['sent', 'in_progress'].includes(props.order.status)
 })
 
-const sendOrder = () => {
-  if (!confirm(`Kirim ${termLower('production_order', 'production order')} ${props.order.order_number}?`)) return
+const sendOrder = async () => {
+  const result = await confirmDelete(
+    `Kirim ${productionOrderLabel.value}`,
+    `Apakah Anda yakin ingin mengirim ${termLower('production_order', 'production order')} ${props.order.order_number}?`
+  )
 
-  router.post(`/production-orders/${props.order.id}/send`, {}, { preserveScroll: true })
+  if (result.isConfirmed) {
+    router.post(`/production-orders/${props.order.id}/send`, {}, { 
+      preserveScroll: true,
+      onSuccess: () => {
+        showSuccess('Berhasil!', `${productionOrderLabel.value} berhasil dikirim`)
+      }
+    })
+  }
 }
 
 const statusBadge = (status: string) => {
@@ -126,7 +112,7 @@ const statusLabel = (status: string) => {
               {{ productionOrderLabel }} {{ order.order_number }}
             </h2>
             <p class="mt-2 text-sm text-gray-600">
-              {{ order.cutting_result.cutting_order.order_number }} — {{ order.cutting_result.cutting_order.pattern.name }}
+              {{ order.preparation_order.order_number }} — {{ order.preparation_order.pattern?.name || 'No Pattern' }}
             </p>
           </div>
           <div class="flex items-center gap-3">
@@ -170,20 +156,12 @@ const statusLabel = (status: string) => {
                   <p class="text-sm font-medium text-gray-900">{{ order.contractor?.name || '-' }}</p>
                 </div>
                 <div class="bg-gray-50 rounded-lg p-4">
-                  <p class="text-xs text-gray-500">Tanggal Diminta</p>
-                  <p class="text-sm font-medium text-gray-900">{{ new Date(order.requested_date).toLocaleDateString('id-ID') }}</p>
-                </div>
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <p class="text-xs text-gray-500">Tanggal Janji</p>
-                  <p class="text-sm font-medium text-gray-900">{{ order.promised_date ? new Date(order.promised_date).toLocaleDateString('id-ID') : '-' }}</p>
+                  <p class="text-xs text-gray-500">Tanggal Estimasi Selesai</p>
+                  <p class="text-sm font-medium text-gray-900">{{ order.estimated_completion_date ? new Date(order.estimated_completion_date).toLocaleDateString('id-ID') : '-' }}</p>
                 </div>
               </div>
 
-              <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div class="bg-blue-50 rounded-lg p-4">
-                  <p class="text-xs text-gray-600">Target</p>
-                  <p class="text-lg font-bold text-blue-700">{{ order.quantity_requested }} pcs</p>
-                </div>
+              <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div class="bg-green-50 rounded-lg p-4">
                   <p class="text-xs text-gray-600">Diterima (total)</p>
                   <p class="text-lg font-bold text-green-700">{{ order.quantity_produced }} pcs</p>

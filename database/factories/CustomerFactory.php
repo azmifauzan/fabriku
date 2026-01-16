@@ -16,8 +16,7 @@ class CustomerFactory extends Factory
      */
     public function definition(): array
     {
-        $types = ['retail', 'reseller', 'online'];
-        $paymentTerms = ['cash', 'credit_7', 'credit_14', 'credit_30'];
+        $types = ['retail', 'reseller', 'corporate'];
 
         return [
             'tenant_id' => 1,
@@ -27,19 +26,7 @@ class CustomerFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'email' => fake()->optional()->safeEmail(),
             'address' => fake()->optional()->address(),
-            'city' => fake()->optional()->city(),
-            'province' => fake()->optional()->state(),
-            'discount_percentage' => fake()->randomElement([0, 5, 10, 15]),
-            'payment_term' => fake()->randomElement($paymentTerms),
             'notes' => fake()->optional()->sentence(),
-            'is_active' => true,
         ];
-    }
-
-    public function inactive(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_active' => false,
-        ]);
     }
 }

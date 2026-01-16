@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateInventoryItemRequest;
 use App\Models\InventoryItem;
 use App\Models\InventoryLocation;
 use App\Models\Pattern;
+use App\Models\ProductionOrder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -15,7 +16,7 @@ class InventoryItemController extends Controller
     public function index(Request $request)
     {
         $query = InventoryItem::query()
-            ->with(['inventoryLocation', 'pattern']);
+            ->with(['inventoryLocation', 'pattern', 'productionOrder']);
 
         // Search functionality
         if ($search = $request->get('search')) {
@@ -83,16 +84,16 @@ class InventoryItemController extends Controller
         ]);
     }
 
-    public function show(InventoryItem $inventoryItem)
+    public function show(InventoryItem $item)
     {
-        $inventoryItem->load(['inventoryLocation', 'pattern', 'tenant']);
+        $item->load([
+            'inventoryLocation',
+            'productionOrder.preparationOrder.pattern',
+            'tenant',
+        ]);
 
         return Inertia::render('Inventory/Items/Show', [
-            'item' => $inventoryItem,
-            'relatedItems' => InventoryItem::where('pattern_id', $inventoryItem->pattern_id)
-                ->where('id', '!=', $inventoryItem->id)
-                ->limit(5)
-                ->get(),
+            'item' => $item,
         ]);
     }
 
@@ -100,10 +101,16 @@ class InventoryItemController extends Controller
     {
         $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'zone', 'rack']);
         $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'product_type']);
+        // Only show completed or sent production orders for inventory
+        $productionOrders = ProductionOrder::whereIn('status', ['completed', 'sent'])
+            ->with(['preparationOrder.pattern'])
+            ->orderBy('completed_date', 'desc')
+            ->get(['id', 'order_number', 'preparation_order_id', 'quantity_good', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status']);
 
         return Inertia::render('Inventory/Items/Create', [
             'locations' => $locations,
             'patterns' => $patterns,
+            'productionOrders' => $productionOrders,
             'categories' => [
                 'garment' => 'Garment',
                 'food' => 'Makanan',
@@ -132,11 +139,17 @@ class InventoryItemController extends Controller
     {
         $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'zone', 'rack']);
         $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'product_type']);
+        // Only show completed or sent production orders for inventory
+        $productionOrders = ProductionOrder::whereIn('status', ['completed', 'sent'])
+            ->with(['preparationOrder.pattern'])
+            ->orderBy('completed_date', 'desc')
+            ->get(['id', 'order_number', 'preparation_order_id', 'quantity_good', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status']);
 
         return Inertia::render('Inventory/Items/Edit', [
-            'item' => $inventoryItem,
+            'item' => $inventoryItem->load('productionOrder.preparationOrder.pattern'),
             'locations' => $locations,
             'patterns' => $patterns,
+            'productionOrders' => $productionOrders,
             'categories' => [
                 'garment' => 'Garment',
                 'food' => 'Makanan',
@@ -152,23 +165,23 @@ class InventoryItemController extends Controller
         ]);
     }
 
-    public function update(UpdateInventoryItemRequest $request, InventoryItem $inventoryItem)
+    public function update(UpdateInventoryItemRequest $request, InventoryItem $item)
     {
-        $inventoryItem->update($request->validated());
+        $item->update($request->validated());
 
         return redirect()
-            ->route('inventory.items.show', $inventoryItem)
+            ->route('inventory.items.index')
             ->with('success', 'Inventory item berhasil diperbarui.');
     }
 
-    public function destroy(InventoryItem $inventoryItem)
+    public function destroy(InventoryItem $item)
     {
         // Check if item has reserved stock (pending sales)
-        if ($inventoryItem->reserved_stock > 0) {
+        if ($item->reserved_stock > 0) {
             return back()->with('error', 'Cannot delete item with reserved stock.');
         }
 
-        $inventoryItem->delete();
+        $item->delete();
 
         return redirect()
             ->route('inventory.items.index')

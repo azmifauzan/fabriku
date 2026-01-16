@@ -6,32 +6,31 @@ use App\Models\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pattern extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
         'code',
         'name',
-        'product_type',
+        'category',
         'size',
+        'output_quantity',
         'description',
-        'estimated_time',
-        'standard_waste_percentage',
-        'image_url',
-        'is_active',
+        'material_requirements',
+        'estimated_labor_cost',
+        'instructions',
     ];
 
     protected function casts(): array
     {
         return [
-            'estimated_time' => 'decimal:2',
-            'standard_waste_percentage' => 'decimal:2',
-            'is_active' => 'boolean',
+            'material_requirements' => 'array',
+            'estimated_labor_cost' => 'decimal:2',
         ];
     }
 
@@ -51,22 +50,15 @@ class Pattern extends Model
         return $this->belongsTo(Tenant::class);
     }
 
-    public function materials(): BelongsToMany
+    // Removed: materials() relationship - no more BOM
+
+    public function preparationOrders(): HasMany
     {
-        return $this->belongsToMany(Material::class, 'pattern_materials')
-            ->withPivot('quantity_needed', 'notes')
-            ->withTimestamps();
+        return $this->hasMany(PreparationOrder::class);
     }
 
-    public function cuttingOrders(): HasMany
+    public function canBeDeleted(): bool
     {
-        return $this->hasMany(CuttingOrder::class);
-    }
-
-    public function calculateMaterialCost(): float
-    {
-        return $this->materials->sum(function ($material) {
-            return (float) $material->standard_price * (float) $material->pivot->quantity_needed;
-        });
+        return $this->preparationOrders()->doesntExist();
     }
 }

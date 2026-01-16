@@ -17,14 +17,15 @@ class StoreMaterialRequest extends FormRequest
         $tenantId = auth()->user()->tenant_id;
 
         return [
+            'material_type_id' => ['required', 'exists:material_types,id'],
             'code' => ['required', 'string', 'max:50', Rule::unique('materials')->where('tenant_id', $tenantId)],
             'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'string', 'max:50'],
-            'description' => ['nullable', 'string'],
+            'supplier_name' => ['nullable', 'string', 'max:255'],
+            'price_per_unit' => ['nullable', 'numeric', 'min:0'],
+            'stock_quantity' => ['nullable', 'numeric', 'min:0'],
+            'min_stock' => ['nullable', 'numeric', 'min:0'],
             'unit' => ['required', 'string', 'max:20'],
-            'standard_price' => ['nullable', 'numeric', 'min:0'],
-            'reorder_point' => ['nullable', 'numeric', 'min:0'],
-            'is_active' => ['sometimes', 'boolean'],
+            'description' => ['nullable', 'string'],
         ];
     }
 }
