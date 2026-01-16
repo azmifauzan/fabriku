@@ -15,7 +15,9 @@ class InventoryLocation extends Model
 
     protected $fillable = [
         'tenant_id',
+        'code',
         'name',
+        'type',
         'zone',
         'rack',
         'description',
@@ -43,7 +45,23 @@ class InventoryLocation extends Model
             if (! $location->tenant_id) {
                 $location->tenant_id = auth()->user()->tenant_id;
             }
+            
+            if (empty($location->code)) {
+                $location->code = self::generateCode();
+            }
         });
+    }
+    
+    public static function generateCode(): string
+    {
+        $lastLocation = self::withoutGlobalScope(TenantScope::class)
+            ->where('tenant_id', auth()->user()->tenant_id)
+            ->latest('id')
+            ->first();
+
+        $nextNumber = $lastLocation ? (int) substr($lastLocation->code, -4) + 1 : 1;
+
+        return 'LOC-'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 
     // Relationships
