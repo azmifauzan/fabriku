@@ -87,14 +87,14 @@ class InventoryLocation extends Model
             return PHP_INT_MAX; // Unlimited capacity
         }
 
-        $usedCapacity = $this->inventoryItems()->sum('current_stock');
+        $usedCapacity = $this->inventoryItems()->sum('current_quantity');
 
         return max(0, $this->capacity - $usedCapacity);
     }
 
     public function getUsedCapacityAttribute(): int
     {
-        return $this->inventoryItems()->sum('current_stock');
+        return $this->inventoryItems()->sum('current_quantity');
     }
 
     public function isAvailable(): bool
@@ -123,7 +123,7 @@ class InventoryLocation extends Model
         return $query->active()
             ->where(function ($q) {
                 $q->whereNull('capacity')
-                    ->orWhereRaw('capacity > (SELECT COALESCE(SUM(current_stock), 0) FROM inventory_items WHERE inventory_location_id = inventory_locations.id)');
+                    ->orWhereRaw('capacity > (SELECT COALESCE(SUM(current_quantity), 0) FROM inventory_items WHERE location_id = inventory_locations.id)');
             });
     }
 }
