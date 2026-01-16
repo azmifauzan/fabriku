@@ -103,17 +103,17 @@ class InventoryItem extends Model
 
     public function getIsLowStockAttribute(): bool
     {
-        return $this->current_quantity <= $this->target_quantity;
+        return $this->current_quantity <= $this->minimum_stock;
     }
 
     public function getTotalValueAttribute(): float
     {
-        return $this->current_stock * $this->unit_cost;
+        return $this->current_quantity * $this->unit_cost;
     }
 
     public function isLowStock(): bool
     {
-        return $this->current_stock <= $this->minimum_stock;
+        return $this->current_quantity <= $this->minimum_stock;
     }
 
     public function isExpiringSoon(int $days = 7): bool
@@ -199,11 +199,11 @@ class InventoryItem extends Model
 
     public function deductStock(int $quantity): bool
     {
-        if ($this->current_stock < $quantity) {
+        if ($this->current_quantity < $quantity) {
             return false;
         }
 
-        $this->decrement('current_stock', $quantity);
+        $this->decrement('current_quantity', $quantity);
 
         return true;
     }
