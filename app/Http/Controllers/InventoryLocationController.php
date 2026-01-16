@@ -62,8 +62,8 @@ class InventoryLocationController extends Controller
             'recentItems' => $location->inventoryItems,
             'stats' => [
                 'total_items' => $location->inventoryItems()->count(),
-                'total_stock' => $location->inventoryItems()->sum('current_stock'),
-                'total_value' => $location->inventoryItems()->sum(\DB::raw('current_stock * unit_cost')),
+                'total_stock' => $location->inventoryItems()->sum('current_quantity'),
+                'total_value' => $location->inventoryItems()->sum(\DB::raw('current_quantity * unit_cost')),
                 'low_stock_items' => $location->inventoryItems()->lowStock()->count(),
                 'available_capacity' => $location->available_capacity,
                 'used_capacity' => $location->used_capacity,

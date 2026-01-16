@@ -97,8 +97,8 @@ it('validates required fields when creating item', function () {
     $response = $this->post('/inventory/items', []);
 
     $response->assertSessionHasErrors([
-        'production_order_id', 'sku', 'name',
-        'location_id', 'target_quantity', 'stock_quantity', 'unit_cost',
+        'production_order_id', 'sku', 'product_name',
+        'location_id', 'target_quantity', 'current_quantity', 'unit_cost', 'status',
     ]);
 });
 
