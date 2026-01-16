@@ -34,7 +34,9 @@ return new class extends Migration
             $table->integer('target_quantity');
             $table->integer('current_quantity');
             $table->integer('reserved_quantity')->default(0);
+            $table->integer('minimum_stock')->default(0);
             $table->string('quality_grade')->default('A'); // A, B, Reject
+            $table->enum('status', ['available', 'reserved', 'damaged', 'expired'])->default('available');
             $table->decimal('unit_cost', 15, 2);
             $table->decimal('selling_price', 15, 2)->nullable();
             $table->date('production_date');
