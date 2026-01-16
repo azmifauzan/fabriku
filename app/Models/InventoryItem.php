@@ -86,7 +86,7 @@ class InventoryItem extends Model
 
     public function inventoryLocation(): BelongsTo
     {
-        return $this->belongsTo(InventoryLocation::class);
+        return $this->belongsTo(InventoryLocation::class, 'location_id');
     }
 
     public function location(): BelongsTo
