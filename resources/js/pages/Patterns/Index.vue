@@ -271,21 +271,19 @@ const getProductTypeBadge = (type: string) => {
                   <div class="flex justify-end gap-2">
                     <Link
                       :href="`/patterns/${pattern.id}/edit`"
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg font-medium transition-colors"
+                      class="inline-flex items-center justify-center p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                      :title="`Edit ${patternLabelLower}`"
                     >
-                      <Edit :size="16" />
-                      <span>Edit</span>
+                      <Edit :size="18" />
                     </Link>
                     <button
                       type="button"
                       @click="deletePattern(pattern)"
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg font-medium transition-colors"
+                      class="inline-flex items-center justify-center p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       :disabled="pattern.preparation_orders_count > 0"
-                      :class="{ 'opacity-50 cursor-not-allowed': pattern.preparation_orders_count > 0 }"
-                      :title="pattern.preparation_orders_count > 0 ? 'Tidak bisa dihapus, sudah ada preparation order' : 'Hapus'"
+                      :title="pattern.preparation_orders_count > 0 ? 'Tidak bisa dihapus, sudah ada preparation order' : `Hapus ${patternLabelLower}`"
                     >
-                      <Trash2 :size="16" />
-                      <span>Hapus</span>
+                      <Trash2 :size="18" />
                     </button>
                   </div>
                 </td>

@@ -256,26 +256,31 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Link
-                                            :href="`/sales-orders/${order.id}`"
-                                            class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3"
-                                        >
-                                            Detail
-                                        </Link>
-                                        <Link
-                                            v-if="order.status === 'draft' || order.status === 'confirmed'"
-                                            :href="`/sales-orders/${order.id}/edit`"
-                                            class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-3"
-                                        >
-                                            Edit
-                                        </Link>
-                                        <button
-                                            v-if="order.status === 'draft'"
-                                            @click="deleteOrder(order)"
-                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                        >
-                                            Hapus
-                                        </button>
+                                        <div class="flex justify-end gap-2">
+                                            <Link
+                                                :href="`/sales-orders/${order.id}`"
+                                                class="inline-flex items-center justify-center p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                                                title="Lihat detail sales order"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" :width="18" :height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            </Link>
+                                            <Link
+                                                v-if="order.status === 'draft' || order.status === 'confirmed'"
+                                                :href="`/sales-orders/${order.id}/edit`"
+                                                class="inline-flex items-center justify-center p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                                title="Edit sales order"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" :width="18" :height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                                            </Link>
+                                            <button
+                                                v-if="order.status === 'draft'"
+                                                @click="deleteOrder(order)"
+                                                class="inline-flex items-center justify-center p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                                title="Hapus sales order"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" :width="18" :height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
