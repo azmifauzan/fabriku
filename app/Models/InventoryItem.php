@@ -40,8 +40,7 @@ class InventoryItem extends Model
             'unit_cost' => 'decimal:2',
             'selling_price' => 'decimal:2',
             'production_date' => 'date',
-            'expiry_date' => 'date',
-            'best_before_date' => 'date',
+            'expired_date' => 'date',
         ];
     }
 
@@ -62,8 +61,8 @@ class InventoryItem extends Model
 
         static::saving(function (InventoryItem $item) {
             // Auto-update status based on expiry for food items
-            if ($item->category === 'food' && $item->expiry_date) {
-                if ($item->expiry_date->isPast()) {
+            if ($item->expired_date) {
+                if ($item->expired_date->isPast()) {
                     $item->status = 'expired';
                 }
             }
