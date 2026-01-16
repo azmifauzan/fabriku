@@ -169,7 +169,7 @@ it('can delete inventory item', function () {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseMissing('inventory_items', [
+    $this->assertSoftDeleted('inventory_items', [
         'id' => $item->id,
     ]);
 });
