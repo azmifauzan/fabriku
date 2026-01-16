@@ -39,7 +39,7 @@ return new class extends Migration
             $table->enum('status', ['available', 'reserved', 'damaged', 'expired'])->default('available');
             $table->decimal('unit_cost', 15, 2);
             $table->decimal('selling_price', 15, 2)->nullable();
-            $table->date('production_date');
+            $table->date('production_date')->nullable();
             $table->date('expired_date')->nullable(); // for food products
             $table->text('notes')->nullable();
             $table->timestamps();
