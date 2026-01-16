@@ -6,7 +6,6 @@ interface ProductionOrder {
   id: number
   type: string
   status: string
-  quantity_requested: number
   quantity_produced: number
 }
 
@@ -28,8 +27,6 @@ const form = useForm({
   qc_notes: '' as string,
   defect_reasons: '' as string,
 })
-
-const remaining = computed(() => Math.max(0, props.order.quantity_requested - props.order.quantity_produced))
 
 watch(
   () => [form.quantity_received, form.quantity_good, form.quantity_defect],

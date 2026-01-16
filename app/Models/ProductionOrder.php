@@ -7,24 +7,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductionOrder extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
         'order_number',
-        'cutting_result_id',
+        'preparation_order_id',  // CHANGED from cutting_result_id
         'type',
         'contractor_id',
-        'quantity_requested',
         'quantity_produced',
         'quantity_good',
         'quantity_reject',
         'labor_cost',
-        'requested_date',
-        'promised_date',
+        'estimated_completion_date',
         'sent_date',
         'completed_date',
         'status',
@@ -36,8 +35,7 @@ class ProductionOrder extends Model
     protected function casts(): array
     {
         return [
-            'requested_date' => 'date',
-            'promised_date' => 'date',
+            'estimated_completion_date' => 'date',
             'sent_date' => 'date',
             'completed_date' => 'date',
             'labor_cost' => 'decimal:2',
@@ -72,9 +70,9 @@ class ProductionOrder extends Model
         return $this->belongsTo(Tenant::class);
     }
 
-    public function cuttingResult(): BelongsTo
+    public function preparationOrder(): BelongsTo
     {
-        return $this->belongsTo(CuttingResult::class);
+        return $this->belongsTo(PreparationOrder::class);
     }
 
     public function contractor(): BelongsTo
@@ -150,11 +148,11 @@ class ProductionOrder extends Model
 
     public function efficiency(): float
     {
-        if ($this->quantity_requested === 0) {
+        if ($this->quantity_produced === 0) {
             return 0;
         }
 
-        return round(($this->quantity_good / $this->quantity_requested) * 100, 2);
+        return round(($this->quantity_good / $this->quantity_produced) * 100, 2);
     }
 
     // Scopes

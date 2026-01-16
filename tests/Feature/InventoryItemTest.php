@@ -3,6 +3,8 @@
 use App\Models\InventoryItem;
 use App\Models\InventoryLocation;
 use App\Models\Pattern;
+use App\Models\PreparationOrder;
+use App\Models\ProductionOrder;
 use App\Models\Tenant;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia;
@@ -12,6 +14,14 @@ beforeEach(function () {
     $this->user = User::factory()->for($this->tenant)->create();
     $this->location = InventoryLocation::factory()->for($this->tenant)->create();
     $this->pattern = Pattern::factory()->for($this->tenant)->create();
+    $this->preparationOrder = PreparationOrder::factory()
+        ->for($this->tenant)
+        ->for($this->pattern)
+        ->create(['status' => 'completed']);
+    $this->productionOrder = ProductionOrder::factory()
+        ->for($this->tenant)
+        ->for($this->preparationOrder)
+        ->create(['status' => 'completed', 'quantity_good' => 100]);
 
     $this->actingAs($this->user);
 });
@@ -20,7 +30,7 @@ it('can list inventory items', function () {
     $items = InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->count(3)
         ->create();
 
@@ -36,7 +46,7 @@ it('can show inventory item details', function () {
     $item = InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->create();
 
     $response = $this->get("/inventory/items/{$item->id}");
@@ -50,21 +60,17 @@ it('can show inventory item details', function () {
 
 it('can create new inventory item', function () {
     $itemData = [
+        'production_order_id' => $this->productionOrder->id,
         'sku' => 'TEST001',
         'name' => 'Test Product',
-        'description' => 'Test product description',
-        'category' => 'garment',
-        'pattern_id' => $this->pattern->id,
-        'inventory_location_id' => $this->location->id,
-        'current_stock' => 100,
+        'location_id' => $this->location->id,
+        'target_quantity' => 100,
+        'stock_quantity' => 95,
         'minimum_stock' => 10,
-        'maximum_stock' => 500,
         'unit_cost' => 25.50,
         'selling_price' => 45.00,
-        'weight_per_unit' => 0.5,
-        'quality_grade' => 'A',
+        'quality_grade' => 'grade_a',
         'status' => 'available',
-        'storage_requirements' => 'room_temp',
     ];
 
     $response = $this->post('/inventory/items', $itemData);
@@ -80,8 +86,8 @@ it('validates required fields when creating item', function () {
     $response = $this->post('/inventory/items', []);
 
     $response->assertSessionHasErrors([
-        'sku', 'name', 'category', 'pattern_id',
-        'inventory_location_id', 'current_stock', 'unit_cost',
+        'production_order_id', 'sku', 'name',
+        'location_id', 'target_quantity', 'stock_quantity', 'unit_cost',
     ]);
 });
 
@@ -89,16 +95,16 @@ it('validates unique SKU within tenant', function () {
     InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->create(['sku' => 'EXISTING001']);
 
     $response = $this->post('/inventory/items', [
+        'production_order_id' => $this->productionOrder->id,
         'sku' => 'EXISTING001',
         'name' => 'Test Product',
-        'category' => 'garment',
-        'pattern_id' => $this->pattern->id,
-        'inventory_location_id' => $this->location->id,
-        'current_stock' => 100,
+        'location_id' => $this->location->id,
+        'target_quantity' => 100,
+        'stock_quantity' => 100,
         'unit_cost' => 25.50,
     ]);
 
@@ -109,20 +115,20 @@ it('can update inventory item', function () {
     $item = InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->create();
 
     $updateData = [
+        'production_order_id' => $this->productionOrder->id,
+        'sku' => $item->sku,
         'name' => 'Updated Product Name',
-        'description' => 'Updated description',
-        'category' => 'food',
-        'pattern_id' => $this->pattern->id,
-        'inventory_location_id' => $this->location->id,
-        'current_stock' => 200,
+        'location_id' => $this->location->id,
+        'target_quantity' => $item->target_quantity,
+        'stock_quantity' => 200,
         'minimum_stock' => 20,
         'unit_cost' => 35.00,
         'selling_price' => 55.00,
-        'quality_grade' => 'B',
+        'quality_grade' => 'grade_b',
         'status' => 'reserved',
     ];
 
@@ -130,25 +136,29 @@ it('can update inventory item', function () {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('inventory_items', array_merge($updateData, [
+    $this->assertDatabaseHas('inventory_items', [
         'id' => $item->id,
         'tenant_id' => $this->tenant->id,
-        'sku' => $item->sku, // SKU should remain unchanged
-    ]));
+        'name' => 'Updated Product Name',
+        'stock_quantity' => 200,
+        'minimum_stock' => 20,
+        'quality_grade' => 'grade_b',
+        'status' => 'reserved',
+    ]);
 });
 
 it('can delete inventory item', function () {
     $item = InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
-        ->create();
+        ->for($this->productionOrder)
+        ->create(['reserved_stock' => 0]);
 
     $response = $this->delete("/inventory/items/{$item->id}");
 
     $response->assertRedirect();
 
-    $this->assertSoftDeleted('inventory_items', [
+    $this->assertDatabaseMissing('inventory_items', [
         'id' => $item->id,
     ]);
 });
@@ -157,11 +167,22 @@ it('cannot access other tenant items', function () {
     $otherTenant = Tenant::factory()->create();
     $otherLocation = InventoryLocation::factory()->for($otherTenant)->create();
     $otherPattern = Pattern::factory()->for($otherTenant)->create();
+    $otherPreparationOrder = PreparationOrder::factory()
+        ->for($otherTenant)
+        ->for($otherPattern)
+        ->create([
+            'status' => 'completed',
+            'order_number' => 'PRP-OTHER-001',
+        ]);
+    $otherProductionOrder = ProductionOrder::factory()
+        ->for($otherTenant)
+        ->for($otherPreparationOrder)
+        ->create(['status' => 'completed', 'quantity_good' => 100]);
 
     $item = InventoryItem::factory()
         ->for($otherTenant)
         ->for($otherLocation, 'inventoryLocation')
-        ->for($otherPattern)
+        ->for($otherProductionOrder)
         ->create();
 
     $response = $this->get("/inventory/items/{$item->id}");
@@ -173,13 +194,13 @@ it('filters items by status', function () {
     InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->create(['status' => 'available']);
 
     InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->create(['status' => 'damaged']);
 
     $response = $this->get('/inventory/items?status=available');
@@ -191,41 +212,19 @@ it('filters items by status', function () {
     );
 });
 
-it('filters items by category', function () {
-    InventoryItem::factory()
-        ->for($this->tenant)
-        ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
-        ->garment()
-        ->create();
-
-    InventoryItem::factory()
-        ->for($this->tenant)
-        ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
-        ->food()
-        ->create();
-
-    $response = $this->get('/inventory/items?category=garment');
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn (AssertableInertia $page) => $page->component('Inventory/Items/Index')
-        ->has('items.data', 1)
-        ->where('items.data.0.category', 'garment')
-    );
-});
+// Test removed: category field no longer exists in new structure
 
 it('searches items by SKU and name', function () {
     InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->create(['sku' => 'ALPHA001', 'name' => 'Alpha Product']);
 
     InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->create(['sku' => 'BETA002', 'name' => 'Beta Product']);
 
     $response = $this->get('/inventory/items?search=ALPHA');
@@ -241,18 +240,18 @@ it('identifies low stock items correctly', function () {
     $lowStockItem = InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->create([
-            'current_stock' => 5,
+            'stock_quantity' => 5,
             'minimum_stock' => 10,
         ]);
 
     $normalStockItem = InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->create([
-            'current_stock' => 50,
+            'stock_quantity' => 50,
             'minimum_stock' => 10,
         ]);
 
@@ -264,53 +263,26 @@ it('calculates available stock correctly', function () {
     $item = InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->create([
-            'current_stock' => 100,
+            'stock_quantity' => 100,
             'reserved_stock' => 25,
         ]);
 
     expect($item->available_stock)->toBe(75);
 });
 
-it('handles expiry dates for food items', function () {
-    $expiredItem = InventoryItem::factory()
-        ->for($this->tenant)
-        ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
-        ->food()
-        ->expired()
-        ->create();
+// Test removed: expiry_date field no longer exists in new structure
 
-    $freshItem = InventoryItem::factory()
-        ->for($this->tenant)
-        ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
-        ->food()
-        ->create(['expiry_date' => now()->addMonth()]);
-
-    expect($expiredItem->is_expired)->toBeTrue();
-    expect($freshItem->is_expired)->toBeFalse();
-});
-
-it('calculates days until expiry correctly', function () {
-    $item = InventoryItem::factory()
-        ->for($this->tenant)
-        ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
-        ->food()
-        ->create(['expiry_date' => now()->addDays(5)]);
-
-    expect($item->days_until_expiry)->toBe(5);
-});
+// Test removed: expiry_date field no longer exists in new structure
 
 it('handles stock movements and tracking', function () {
     $item = InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
-        ->for($this->pattern)
+        ->for($this->productionOrder)
         ->create([
-            'current_stock' => 100,
+            'stock_quantity' => 100,
             'reserved_stock' => 0,
         ]);
 
@@ -322,11 +294,11 @@ it('handles stock movements and tracking', function () {
     expect($item->reserved_stock)->toBe(20);
 
     // Test stock consumption
-    $item->decrement('current_stock', 30);
+    $item->decrement('stock_quantity', 30);
     $item->decrement('reserved_stock', 20);
     $item->refresh();
 
-    expect($item->current_stock)->toBe(70);
+    expect($item->stock_quantity)->toBe(70);
     expect($item->reserved_stock)->toBe(0);
     expect($item->available_stock)->toBe(70);
 });

@@ -6,10 +6,12 @@ Database schema untuk Fabriku menggunakan PostgreSQL dengan multi-tenancy archit
 **Design Philosophy**: Schema dirancang **category-agnostic** (tidak spesifik garment saja) untuk mendukung berbagai jenis bisnis UMKM. Terminologi menggunakan istilah generik yang bisa diaplikasikan untuk garment, makanan/kue, craft, dll.
 
 **Supported Categories** (MVP):
-1. **Garment** - Pattern, Cutting, Sewing
-2. **Food/Kue** - Recipe, Preparation, Baking/Cooking
+1. **Garment** - Pattern, Cutting (Preparation), Sewing (Production)
+2. **Food/Kue** - Recipe, Mixing/Prep (Preparation), Baking/Cooking (Production)
+3. **Craft** - Template, Assembly Prep (Preparation), Assembly (Production)
+4. **Cosmetic** - Formula, Formulation (Preparation), Production
 
-**Future Categories**: Craft, Cosmetics, dll
+**Simplified Approach**: No Bill of Materials (BOM), no presisi tracking - cocok untuk UMKM yang masih manual.
 
 ## Entity Relationship Diagram (ERD)
 
@@ -33,17 +35,12 @@ Database schema untuk Fabriku menggunakan PostgreSQL dengan multi-tenancy archit
 │         │ (1:N)                                   │
 │  ┌──────┴──────────────┐                        │
 │  │ material_receipts   │                        │
-│  └──────┬──────────────┘                        │
-│         │                                         │
-│         │ (N:1)                                   │
-│  ┌──────┴──────────────┐                        │
-│  │  cutting_orders     │                        │
-│  └──────┬──────────────┘                        │
-│         │                                         │
-│         │ (1:N)                                   │
-│  ┌──────┴──────────────┐                        │
-│  │  cutting_results    │                        │
-│  └──────┬──────────────┘                        │
+│  └─────────────────────┘                        │
+│                                                   │
+│  ┌─────────────────────┐                        │
+│  │ preparation_orders  │  ← Generic: Cutting/   │
+│  │ (materials_used)    │    Mixing/Assembly     │
+│  └──────┬──────────────┘    Auto deduct stock   │
 │         │                                         │
 │         │ (N:1)                                   │
 │  ┌──────┴──────────────┐                        │
@@ -217,23 +214,26 @@ CREATE INDEX idx_material_receipts_batch_number ON material_receipts(batch_numbe
 ```
 
 ### 5. patterns
-Pola/resep produk (universal - garment patterns atau food recipes).
+Template produk (universal - garment patterns, food recipes, craft templates, dll).
+
+**Category Values**: 'garment', 'food', 'craft', 'cosmetic', 'other'
 
 **Product Type Examples**:
-- **Garment**: 'mukena', 'daster', 'gamis', 'jilbab', 'lainnya'
-- **Kue**: 'cake', 'brownies', 'cookies', 'roti', 'kue_kering', 'lainnya'
+- **Garment**: 'mukena', 'daster', 'gamis', 'jilbab', 'kemeja', 'celana', dll
+- **Food**: 'cake', 'brownies', 'cookies', 'roti', 'kue_kering', 'martabak', dll
+- **Craft**: 'gelang', 'tas', 'gantungan_kunci', 'bros', 'rajutan', dll
+- **Cosmetic**: 'sabun', 'lotion', 'lip_balm', 'scrub', 'body_butter', dll
 
 ```sql
 CREATE TABLE patterns (
     id BIGSERIAL PRIMARY KEY,
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    code VARCHAR(50) NOT NULL,  -- MKN-001, CAKE-001, dll
-    name VARCHAR(255) NOT NULL,  -- 'Mukena Dewasa', 'Brownies Coklat'
-    product_type VARCHAR(100) NOT NULL,  -- enum disesuaikan kategori
-    size VARCHAR(50),  -- 'all_size', 'L', 'XL' untuk garment; '24cm', '1 loyang' untuk kue
+    code VARCHAR(50) NOT NULL,  -- MKN-001, CAKE-001, BRG-001, SBN-001, dll
+    name VARCHAR(255) NOT NULL,  -- 'Mukena Dewasa', 'Brownies Coklat', 'Gelang Rajut'
+    category VARCHAR(50) NOT NULL DEFAULT 'other',  -- garment/food/craft/cosmetic/other
+    product_type VARCHAR(100) NOT NULL,  -- disesuaikan kategori
+    size VARCHAR(50),  -- 'all_size', 'L', 'XL' untuk garment; '24cm', '1kg' untuk food
     description TEXT,
-    estimated_time INTEGER,  -- waktu produksi dalam menit
-    standard_waste_percentage DECIMAL(5,2),  -- persentase waste standar
     image_url VARCHAR(500),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -242,83 +242,89 @@ CREATE TABLE patterns (
 );
 
 CREATE INDEX idx_patterns_tenant_id ON patterns(tenant_id);
+CREATE INDEX idx_patterns_category ON patterns(category);
 CREATE INDEX idx_patterns_product_type ON patterns(product_type);
 ```
 
-### 5.1 pattern_materials
-Bill of Materials (BOM) - kebutuhan bahan untuk setiap pattern/recipe.
+**Notes**:
+- **NO Bill of Materials (BOM)** - UMKM tidak perlu presisi pabrik
+- Pattern hanya template produk, bukan resep detail
+- Materials yang dipakai dicatat di `preparation_orders.materials_used` (flexible)
+
+### 6. preparation_orders
+Order persiapan bahan sebelum produksi (universal untuk semua kategori).
+
+**Terminology per Category**:
+- **Garment**: Cutting (pemotongan kain)
+- **Food**: Mixing/Prep (persiapan adonan/bahan)
+- **Craft**: Assembly Prep (persiapan komponen)
+- **Cosmetic**: Formulation (mixing formula)
+
+**Key Features**:
+- Pattern optional (bisa prep tanpa pattern)
+- Materials used stored as JSON (flexible, tidak terikat BOM)
+- Auto deduct material stock saat status = 'completed'
+- Output unit flexible (pieces/kg/batch/liter/dll)
 
 ```sql
-CREATE TABLE pattern_materials (
-    id BIGSERIAL PRIMARY KEY,
-    pattern_id BIGINT NOT NULL REFERENCES patterns(id) ON DELETE CASCADE,
-    material_id BIGINT NOT NULL REFERENCES materials(id) ON DELETE RESTRICT,
-    quantity_needed DECIMAL(10,2) NOT NULL,  -- 2.5 meter, 0.5 kg, dll
-    notes TEXT,  -- 'untuk atasan dan bawahan', 'bisa diganti margarin', dll
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT pattern_materials_unique UNIQUE (pattern_id, material_id)
-);
-
-CREATE INDEX idx_pattern_materials_pattern_id ON pattern_materials(pattern_id);
-CREATE INDEX idx_pattern_materials_material_id ON pattern_materials(material_id);
-```
-
-### 6. cutting_orders
-Order pemotongan kain.
-
-```sql
-CREATE TABLE cutting_orders (
+CREATE TABLE preparation_orders (
     id BIGSERIAL PRIMARY KEY,
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    order_number VARCHAR(50) NOT NULL,
-    material_receipt_id BIGINT NOT NULL REFERENCES material_receipts(id) ON DELETE RESTRICT,
-    pattern_id BIGINT NOT NULL REFERENCES patterns(id) ON DELETE RESTRICT,
+    order_number VARCHAR(50) NOT NULL,  -- PRP-2026-001
+    pattern_id BIGINT REFERENCES patterns(id) ON DELETE RESTRICT,  -- NULLABLE
     order_date DATE NOT NULL,
-    material_used DECIMAL(15,2) NOT NULL,
-    target_pieces INTEGER NOT NULL,
-    status VARCHAR(50) DEFAULT 'pending',
-    assigned_to BIGINT REFERENCES users(id),
+    status VARCHAR(50) DEFAULT 'draft',  -- draft/in_progress/completed/cancelled
+    prepared_by BIGINT REFERENCES users(id),
+    output_quantity DECIMAL(10,2) NOT NULL,  -- berapa jadi (5 pieces, 2.5 kg, 3 batch, dll)
+    output_unit VARCHAR(20) DEFAULT 'pieces',  -- pieces/kg/batch/liter/gram/pcs/dll
+    materials_used JSONB NOT NULL,  -- [{material_id, material_name, quantity, unit}]
+    notes TEXT,
     started_at TIMESTAMP,
     completed_at TIMESTAMP,
-    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT cutting_orders_tenant_number_unique UNIQUE (tenant_id, order_number)
+    CONSTRAINT preparation_orders_tenant_number_unique UNIQUE (tenant_id, order_number)
 );
 
-CREATE INDEX idx_cutting_orders_tenant_id ON cutting_orders(tenant_id);
-CREATE INDEX idx_cutting_orders_status ON cutting_orders(status);
-CREATE INDEX idx_cutting_orders_order_date ON cutting_orders(order_date);
+CREATE INDEX idx_preparation_orders_tenant_id ON preparation_orders(tenant_id);
+CREATE INDEX idx_preparation_orders_status ON preparation_orders(status);
+CREATE INDEX idx_preparation_orders_order_date ON preparation_orders(order_date);
+CREATE INDEX idx_preparation_orders_pattern_id ON preparation_orders(pattern_id);
 ```
 
-**Status values**: `pending`, `in_progress`, `completed`, `cancelled`
+**Status values**: `draft`, `in_progress`, `completed`, `cancelled`
 
-### 7. cutting_results
-Hasil pemotongan kain.
-
-```sql
-CREATE TABLE cutting_results (
-    id BIGSERIAL PRIMARY KEY,
-    tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    cutting_order_id BIGINT NOT NULL REFERENCES cutting_orders(id) ON DELETE CASCADE,
-    actual_pieces INTEGER NOT NULL,
-    good_pieces INTEGER NOT NULL,
-    defect_pieces INTEGER DEFAULT 0,
-    waste_material DECIMAL(10,2) DEFAULT 0,
-    efficiency_percentage DECIMAL(5,2),
-    quality_grade VARCHAR(20),
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_cutting_results_tenant_id ON cutting_results(tenant_id);
-CREATE INDEX idx_cutting_results_cutting_order_id ON cutting_results(cutting_order_id);
+**materials_used JSON structure**:
+```json
+[
+  {
+    "material_id": 1,
+    "material_name": "Kain Katun Putih",
+    "quantity": 5.0,
+    "unit": "meter"
+  },
+  {
+    "material_id": 2,
+    "material_name": "Benang Jahit Hitam",
+    "quantity": 2.0,
+    "unit": "roll"
+  }
+]
 ```
 
-### 8. contractors
-Pihak ketiga untuk jahit outsourcing.
+**Stock Deduction Logic**:
+- When status changes to 'completed', loop through materials_used
+- Deduct each material.quantity from materials.current_stock
+- Log transaction untuk audit trail (optional)
+
+### 7. contractors
+Pihak ketiga untuk outsourcing produksi (universal).
+
+**Type Examples**:
+- **Garment**: penjahit, bordir, sablon
+- **Food**: dapur sharing, packaging, catering
+- **Craft**: pengrajin, assembler
+- **Cosmetic**: lab produksi, packaging
 
 ```sql
 CREATE TABLE contractors (
@@ -326,10 +332,11 @@ CREATE TABLE contractors (
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     code VARCHAR(50) NOT NULL,
     name VARCHAR(255) NOT NULL,
+    type VARCHAR(50),  -- 'penjahit', 'dapur', 'pengrajin', 'lab', dll
     contact_person VARCHAR(255),
     phone VARCHAR(50),
     address TEXT,
-    price_per_piece DECIMAL(15,2),
+    price_per_unit DECIMAL(15,2),  -- per piece/kg/batch/dll
     rating DECIMAL(3,2),
     is_active BOOLEAN DEFAULT TRUE,
     notes TEXT,
@@ -339,25 +346,34 @@ CREATE TABLE contractors (
 );
 
 CREATE INDEX idx_contractors_tenant_id ON contractors(tenant_id);
+CREATE INDEX idx_contractors_type ON contractors(type);
 CREATE INDEX idx_contractors_is_active ON contractors(is_active);
 ```
 
-### 9. production_orders
-Order produksi jahit (internal & eksternal).
+### 8. production_orders
+Order produksi (internal & eksternal) - universal untuk semua kategori.
+
+**Production Type Examples**:
+- **Garment**: Sewing (jahit), Embroidery (bordir), Printing (sablon)
+- **Food**: Baking (panggang), Cooking (masak), Frying (goreng)
+- **Craft**: Assembly (rakit), Weaving (rajut), Carving (ukir)
+- **Cosmetic**: Mixing (campur), Filling (isi), Packaging (kemas)
 
 ```sql
 CREATE TABLE production_orders (
     id BIGSERIAL PRIMARY KEY,
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    order_number VARCHAR(50) NOT NULL,
-    cutting_result_id BIGINT NOT NULL REFERENCES cutting_results(id) ON DELETE RESTRICT,
-    production_type VARCHAR(20) NOT NULL,
-    contractor_id BIGINT REFERENCES contractors(id) ON DELETE RESTRICT,
+    order_number VARCHAR(50) NOT NULL,  -- PO-2026-001
+    preparation_order_id BIGINT REFERENCES preparation_orders(id) ON DELETE RESTRICT,  -- NULLABLE
+    production_type VARCHAR(50) NOT NULL,  -- 'internal' or 'external'
+    contractor_id BIGINT REFERENCES contractors(id) ON DELETE RESTRICT,  -- for external
     order_date DATE NOT NULL,
-    pieces_quantity INTEGER NOT NULL,
-    cost_per_piece DECIMAL(15,2),
+    quantity_target DECIMAL(10,2) NOT NULL,
+    quantity_unit VARCHAR(20) DEFAULT 'pieces',
+    quantity_completed DECIMAL(10,2) DEFAULT 0,
+    cost_per_unit DECIMAL(15,2),
     total_cost DECIMAL(15,2),
-    status VARCHAR(50) DEFAULT 'pending',
+    status VARCHAR(50) DEFAULT 'draft',
     sent_at TIMESTAMP,
     expected_return_date DATE,
     notes TEXT,
@@ -372,9 +388,9 @@ CREATE INDEX idx_production_orders_production_type ON production_orders(producti
 ```
 
 **production_type values**: `internal`, `external`
-**Status values**: `pending`, `in_progress`, `completed`, `returned`, `cancelled`
+**Status values**: `draft`, `pending`, `in_progress`, `completed`, `returned`, `cancelled`
 
-### 10. production_batches
+### 9. production_batches
 Batch hasil produksi jahit yang dikembalikan.
 
 ```sql

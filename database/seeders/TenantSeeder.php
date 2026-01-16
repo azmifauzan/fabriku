@@ -62,8 +62,8 @@ class TenantSeeder extends Seeder
         // Create staff users
         User::create([
             'tenant_id' => $garmentTenant->id,
-            'name' => 'Staff Cutting',
-            'email' => 'cutting@konveksi.com',
+            'name' => 'Staff Preparation',
+            'email' => 'preparation@konveksi.com',
             'password' => Hash::make('password'),
             'role' => 'production_staff',
             'phone' => '081234567892',

@@ -1,10 +1,9 @@
 <?php
 
 use App\Models\Contractor;
-use App\Models\CuttingOrder;
-use App\Models\CuttingResult;
 use App\Models\Material;
 use App\Models\Pattern;
+use App\Models\PreparationOrder;
 use App\Models\ProductionBatch;
 use App\Models\ProductionOrder;
 use App\Models\Tenant;
@@ -23,40 +22,39 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-function createCompletedCuttingResultForTenant(int $tenantId): CuttingResult
+function createCompletedPreparationOrderForTenant(int $tenantId): PreparationOrder
 {
-    $pattern = Pattern::factory()->create(['tenant_id' => $tenantId]);
-    $cuttingOrder = CuttingOrder::factory()->create([
+    $pattern = Pattern::factory()->create(['tenant_id' => $tenantId, 'category' => 'garment']);
+    $material = Material::factory()->create(['tenant_id' => $tenantId]);
+
+    return PreparationOrder::factory()->create([
         'tenant_id' => $tenantId,
         'pattern_id' => $pattern->id,
         'status' => 'completed',
-    ]);
-
-    $material = Material::factory()->create(['tenant_id' => $tenantId]);
-
-    return CuttingResult::factory()->create([
-        'tenant_id' => $tenantId,
-        'cutting_order_id' => $cuttingOrder->id,
-        'material_id' => $material->id,
-        'actual_quantity' => 120,
-        'defect_quantity' => 5,
+        'output_quantity' => 120,
+        'material_usage' => [
+            [
+                'material_id' => $material->id,
+                'quantity' => 10,
+            ],
+        ],
     ]);
 }
 
 test('can list production orders for current tenant only', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedPreparationOrderForTenant($this->tenant->id);
 
     ProductionOrder::factory()->count(3)->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
     ]);
 
     // Create orders for another tenant (should not be visible)
     $otherTenant = Tenant::factory()->create();
-    $otherCuttingResult = createCompletedCuttingResultForTenant($otherTenant->id);
+    $otherPreparationOrder = createCompletedPreparationOrderForTenant($otherTenant->id);
     ProductionOrder::factory()->count(2)->create([
         'tenant_id' => $otherTenant->id,
-        'cutting_result_id' => $otherCuttingResult->id,
+        'preparation_order_id' => $otherPreparationOrder->id,
     ]);
 
     $response = $this->get(route('production-orders.index'));
@@ -69,10 +67,10 @@ test('can list production orders for current tenant only', function () {
 });
 
 test('can create a production order', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedPreparationOrderForTenant($this->tenant->id);
 
     $orderData = [
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'type' => 'internal',
         'contractor_id' => null,
         'requested_date' => now()->format('Y-m-d'),
@@ -88,7 +86,7 @@ test('can create a production order', function () {
         ->assertSessionHas('success');
 
     $this->assertDatabaseHas('production_orders', [
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'quantity_requested' => 100,
         'status' => 'draft',
         'tenant_id' => $this->tenant->id,
@@ -96,11 +94,11 @@ test('can create a production order', function () {
 });
 
 test('production order auto-generates order number', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
 
     $order = ProductionOrder::create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'type' => 'internal',
         'contractor_id' => null,
         'requested_date' => now(),
@@ -114,16 +112,16 @@ test('production order auto-generates order number', function () {
 });
 
 test('can update production order when status allows', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
 
     $order = ProductionOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'status' => 'draft',
     ]);
 
     $response = $this->put(route('production-orders.update', $order), [
-        'cutting_result_id' => $order->cutting_result_id,
+        'preparation_order_id' => $order->preparation_order_id,
         'type' => $order->type,
         'contractor_id' => $order->contractor_id,
         'requested_date' => $order->requested_date->format('Y-m-d'),
@@ -142,14 +140,14 @@ test('can update production order when status allows', function () {
 });
 
 test('cannot update production order when completed', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
     $order = ProductionOrder::factory()->completed()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
     ]);
 
     $response = $this->put(route('production-orders.update', $order), [
-        'cutting_result_id' => $order->cutting_result_id,
+        'preparation_order_id' => $order->preparation_order_id,
         'type' => $order->type,
         'contractor_id' => $order->contractor_id,
         'requested_date' => $order->requested_date->format('Y-m-d'),
@@ -163,10 +161,10 @@ test('cannot update production order when completed', function () {
 });
 
 test('can delete production order when status is draft and no batches', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
     $order = ProductionOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'status' => 'draft',
     ]);
 
@@ -177,10 +175,10 @@ test('can delete production order when status is draft and no batches', function
 });
 
 test('cannot delete production order with batches', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
     $order = ProductionOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'status' => 'draft',
     ]);
 
@@ -196,16 +194,16 @@ test('cannot delete production order with batches', function () {
 });
 
 test('can filter production orders by status', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
 
     ProductionOrder::factory()->count(2)->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'status' => 'draft',
     ]);
     ProductionOrder::factory()->count(3)->inProgress()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
     ]);
 
     $response = $this->get(route('production-orders.index', ['status' => 'draft']));
@@ -221,16 +219,16 @@ test('can filter production orders by contractor', function () {
     $contractor1 = Contractor::factory()->create(['tenant_id' => $this->tenant->id]);
     $contractor2 = Contractor::factory()->create(['tenant_id' => $this->tenant->id]);
 
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
 
     ProductionOrder::factory()->count(2)->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'contractor_id' => $contractor1->id,
     ]);
     ProductionOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'contractor_id' => $contractor2->id,
     ]);
 
@@ -244,20 +242,20 @@ test('can filter production orders by contractor', function () {
 });
 
 test('production order status helpers work correctly', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
 
     $draft = ProductionOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'status' => 'draft',
     ]);
     $inProgress = ProductionOrder::factory()->inProgress()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
     ]);
     $completed = ProductionOrder::factory()->completed()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
     ]);
 
     expect($draft->isDraft())->toBeTrue();
@@ -274,21 +272,21 @@ test('production order status helpers work correctly', function () {
 });
 
 test('production order scopes work correctly', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
 
     ProductionOrder::factory()->count(2)->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'status' => 'draft',
     ]);
     ProductionOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'status' => 'pending',
     ]);
     ProductionOrder::factory()->inProgress()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
     ]);
 
     expect(ProductionOrder::byStatus('draft')->count())->toBe(2);
@@ -297,10 +295,10 @@ test('production order scopes work correctly', function () {
 });
 
 test('production batch auto-generates batch number', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
     $order = ProductionOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'status' => 'sent',
     ]);
 
@@ -314,17 +312,16 @@ test('production batch auto-generates batch number', function () {
         'grade' => 'A',
         'production_date' => now(),
         'received_date' => now(),
-        'received_by' => $this->user->id,
     ]);
 
     expect($batch->batch_number)->toMatch('/PB-\d{4}-\d{3}/');
 });
 
 test('production batch quality helpers work correctly', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
     $order = ProductionOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
     ]);
 
     $gradeA = ProductionBatch::factory()->gradeA()->create([
@@ -348,12 +345,12 @@ test('production batch quality helpers work correctly', function () {
 });
 
 test('can send external production order', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
     $contractor = Contractor::factory()->create(['tenant_id' => $this->tenant->id]);
 
     $order = ProductionOrder::factory()->external()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'contractor_id' => $contractor->id,
         'status' => 'draft',
     ]);
@@ -368,12 +365,12 @@ test('can send external production order', function () {
 });
 
 test('can receive a production batch and completes order when target reached', function () {
-    $cuttingResult = createCompletedCuttingResultForTenant($this->tenant->id);
+    $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
     $contractor = Contractor::factory()->create(['tenant_id' => $this->tenant->id]);
 
     $order = ProductionOrder::factory()->external()->create([
         'tenant_id' => $this->tenant->id,
-        'cutting_result_id' => $cuttingResult->id,
+        'preparation_order_id' => $preparationOrder->id,
         'contractor_id' => $contractor->id,
         'status' => 'sent',
         'quantity_requested' => 100,
@@ -400,7 +397,6 @@ test('can receive a production batch and completes order when target reached', f
         'quantity_defect' => 3,
         'quantity_reject' => 2,
         'grade' => 'A',
-        'received_by' => $this->user->id,
     ]);
 
     $this->assertDatabaseHas('production_orders', [

@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useSweetAlert } from '@/composables/useSweetAlert'
 import { Edit, Trash2, Search, X, Eye } from 'lucide-vue-next'
 
 interface Customer {
@@ -41,6 +42,8 @@ const props = defineProps<{
   }
 }>()
 
+const { confirmDelete, showSuccess } = useSweetAlert()
+
 const search = ref(props.filters.search || '')
 const typeFilter = ref(props.filters.type || '')
 const statusFilter = ref(props.filters.is_active || '')
@@ -63,12 +66,20 @@ const clearFilters = () => {
   applyFilters()
 }
 
-const deleteCustomer = (customer: Customer) => {
-  if (!confirm(`Hapus customer ${customer.name}?`)) return
+const deleteCustomer = async (customer: Customer) => {
+  const result = await confirmDelete(
+    'Hapus Customer',
+    `Apakah Anda yakin ingin menghapus customer "${customer.name}"?`
+  )
 
-  router.delete(`/customers/${customer.id}`, {
-    preserveScroll: true,
-  })
+  if (result.isConfirmed) {
+    router.delete(`/customers/${customer.id}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        showSuccess('Berhasil!', 'Customer berhasil dihapus')
+      }
+    })
+  }
 }
 
 const getTypeLabel = (type: string) => {

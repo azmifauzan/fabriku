@@ -17,20 +17,17 @@ class PatternFactory extends Factory
      */
     public function definition(): array
     {
-        $productTypes = ['mukena', 'daster', 'gamis', 'jilbab', 'lainnya'];
-        $sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'all_size'];
-
         return [
             'tenant_id' => Tenant::factory(),
-            'code' => strtoupper(fake()->unique()->bothify('???-###')),
+            'code' => strtoupper(fake()->unique()->bothify('PTN-###')),
             'name' => fake()->words(3, true),
-            'product_type' => fake()->randomElement($productTypes),
-            'size' => fake()->optional()->randomElement($sizes),
+            'category' => fake()->optional()->randomElement(['mukena', 'gamis', 'cake', 'cookies']),
+            'size' => fake()->optional()->randomElement(['S', 'M', 'L', 'XL', 'all_size']),
+            'output_quantity' => fake()->numberBetween(1, 10),
             'description' => fake()->optional()->sentence(),
-            'estimated_time' => fake()->numberBetween(20, 120),
-            'standard_waste_percentage' => fake()->randomFloat(2, 3, 10),
-            'image_url' => fake()->optional()->imageUrl(),
-            'is_active' => fake()->boolean(80),
+            'material_requirements' => null,
+            'estimated_labor_cost' => fake()->randomFloat(2, 5000, 50000),
+            'instructions' => fake()->optional()->sentence(),
         ];
     }
 }

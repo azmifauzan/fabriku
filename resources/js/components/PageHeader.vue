@@ -19,8 +19,11 @@ defineProps<{
         {{ description || subtitle }}
       </p>
     </div>
+    <div v-if="$slots.actions" class="flex gap-2">
+      <slot name="actions" />
+    </div>
     <Link
-      v-if="createLink"
+      v-else-if="createLink"
       :href="createLink"
       class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
     >

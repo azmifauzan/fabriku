@@ -4,7 +4,7 @@ import { computed } from 'vue'
 interface Props {
   label: string
   modelValue?: string | number | boolean
-  type?: 'text' | 'email' | 'tel' | 'number' | 'textarea' | 'select' | 'checkbox'
+  type?: 'text' | 'email' | 'tel' | 'number' | 'date' | 'textarea' | 'select' | 'checkbox'
   placeholder?: string
   required?: boolean
   error?: string
@@ -50,14 +50,19 @@ const labelClasses = 'block text-sm font-semibold text-gray-700 dark:text-gray-2
 
 <template>
   <div class="space-y-2">
-    <label v-if="label" :class="labelClasses">
+    <label v-if="label && type !== 'checkbox'" :class="labelClasses">
       {{ label }}
       <span v-if="required" class="text-red-500 ml-1">*</span>
     </label>
 
-    <!-- Text/Email/Tel/Number Input -->
+    <div v-if="type === 'checkbox'" :class="labelClasses">
+      {{ label }}
+      <span v-if="required" class="text-red-500 ml-1">*</span>
+    </div>
+
+    <!-- Text/Email/Tel/Number/Date Input -->
     <input
-      v-if="['text', 'email', 'tel', 'number'].includes(type)"
+      v-if="['text', 'email', 'tel', 'number', 'date'].includes(type)"
       v-model="inputValue as string | number"
       :type="type"
       :placeholder="placeholder"
@@ -93,15 +98,20 @@ const labelClasses = 'block text-sm font-semibold text-gray-700 dark:text-gray-2
     </select>
 
     <!-- Checkbox -->
-    <label v-else-if="type === 'checkbox'" class="flex items-center cursor-pointer">
-      <input
-        v-model="inputValue as boolean"
-        type="checkbox"
-        :disabled="disabled"
-        class="w-5 h-5 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:ring-2 dark:bg-gray-700 disabled:cursor-not-allowed"
-      />
-      <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ label }}</span>
-    </label>
+    <div v-else-if="type === 'checkbox'">
+      <label class="flex items-center cursor-pointer gap-3">
+        <input
+          v-model="inputValue as boolean"
+          type="checkbox"
+          :disabled="disabled"
+          class="w-5 h-5 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 focus:ring-2 dark:bg-gray-700 disabled:cursor-not-allowed flex-shrink-0"
+        />
+        <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+          {{ label }}
+          <span v-if="required" class="text-red-500 ml-1">*</span>
+        </span>
+      </label>
+    </div>
 
     <!-- Error Message -->
     <p v-if="error" class="text-sm text-red-600 dark:text-red-400 flex items-start gap-1">

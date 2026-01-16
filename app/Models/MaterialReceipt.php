@@ -56,7 +56,7 @@ class MaterialReceipt extends Model
 
         static::created(function (MaterialReceipt $receipt) {
             // Update material stock
-            $receipt->material->increment('current_stock', $receipt->quantity);
+            $receipt->material->increment('stock_quantity', $receipt->quantity);
         });
     }
 

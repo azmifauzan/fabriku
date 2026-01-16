@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CuttingOrder;
 use App\Models\InventoryItem;
 use App\Models\Material;
+use App\Models\PreparationOrder;
 use App\Models\ProductionOrder;
 use App\Models\SalesOrder;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $stats = [
             'total_materials' => Material::query()->count(),
             'low_stock_materials' => Material::query()
-                ->whereRaw('current_stock <= reorder_point')
+                ->whereRaw('stock_quantity <= min_stock')
                 ->count(),
             'total_inventory' => InventoryItem::query()->sum('current_stock'),
             'low_stock_inventory' => InventoryItem::query()
@@ -38,7 +38,7 @@ class DashboardController extends Controller
             'pending_production' => ProductionOrder::query()
                 ->whereIn('status', ['draft', 'pending', 'in_progress'])
                 ->count(),
-            'pending_cutting' => CuttingOrder::query()
+            'pending_preparation' => PreparationOrder::query()
                 ->whereIn('status', ['draft', 'in_progress'])
                 ->count(),
         ];
@@ -92,16 +92,16 @@ class DashboardController extends Controller
 
         // Recent production
         $recentProduction = ProductionOrder::query()
-            ->with('cuttingResult.cuttingOrder.pattern:id,name')
-            ->select('id', 'order_number', 'cutting_result_id', 'quantity_requested', 'status', 'created_at')
+            ->with('preparationOrder.pattern:id,name')
+            ->select('id', 'order_number', 'preparation_order_id', 'quantity_produced', 'status', 'created_at')
             ->latest()
             ->limit(5)
             ->get()
             ->map(fn ($order) => [
                 'type' => 'production',
                 'description' => "Production {$order->order_number}".
-                    ($order->cuttingResult?->cuttingOrder?->pattern ? " - {$order->cuttingResult->cuttingOrder->pattern->name}" : ''),
-                'quantity' => $order->quantity_requested,
+                    ($order->preparationOrder?->pattern ? " - {$order->preparationOrder->pattern->name}" : ''),
+                'quantity' => $order->quantity_produced,
                 'status' => $order->status,
                 'date' => $order->created_at,
             ]);
@@ -113,8 +113,8 @@ class DashboardController extends Controller
 
         // Low Stock Alerts
         $lowStockMaterials = Material::query()
-            ->whereRaw('current_stock <= reorder_point')
-            ->select('id', 'code', 'name', 'current_stock', 'unit', 'reorder_point')
+            ->whereRaw('stock_quantity <= min_stock')
+            ->select('id', 'code', 'name', 'stock_quantity', 'unit', 'min_stock')
             ->limit(5)
             ->get();
 

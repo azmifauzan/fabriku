@@ -10,18 +10,11 @@ interface Pattern {
   name: string
 }
 
-interface CuttingOrder {
+interface PreparationOrder {
   id: number
   order_number: string
+  output_quantity: number
   pattern: Pattern
-}
-
-interface CuttingResult {
-  id: number
-  cutting_order_id: number
-  actual_quantity: number
-  defect_quantity: number
-  cutting_order: CuttingOrder
 }
 
 interface Contractor {
@@ -36,12 +29,10 @@ interface Contractor {
 interface ProductionOrder {
   id?: number
   order_number: string
-  cutting_result_id: number
+  preparation_order_id: number
   contractor_id: number | null
   type: string
-  quantity_requested: number
-  requested_date: string
-  promised_date: string | null
+  estimated_completion_date: string | null
   status: string
   notes: string
   labor_cost: number | null
@@ -49,25 +40,23 @@ interface ProductionOrder {
 }
 
 const props = defineProps<{
-  cuttingResults: CuttingResult[]
+  preparationOrders: PreparationOrder[]
   contractors: Contractor[]
   productionOrder?: ProductionOrder
 }>()
 
 const form = useForm({
-  cutting_result_id: props.productionOrder?.cutting_result_id || 0,
+  preparation_order_id: props.productionOrder?.preparation_order_id || 0,
   type: props.productionOrder?.type || 'internal',
   contractor_id: props.productionOrder?.contractor_id || null,
-  quantity_requested: props.productionOrder?.quantity_requested || 0,
-  requested_date: props.productionOrder?.requested_date || new Date().toISOString().split('T')[0],
-  promised_date: props.productionOrder?.promised_date || '',
-  labor_cost: props.productionOrder?.labor_cost ?? null,
+  estimated_completion_date: props.productionOrder?.estimated_completion_date || '',
+  labor_cost: props.productionOrder?.labor_cost ?? 0,
   priority: props.productionOrder?.priority || 'normal',
   notes: props.productionOrder?.notes || '',
 })
 
-const selectedCuttingResult = computed(() => {
-  return props.cuttingResults.find(cr => cr.id === form.cutting_result_id)
+const selectedPreparationOrder = computed(() => {
+  return props.preparationOrders.find(po => po.id === form.preparation_order_id)
 })
 
 const selectedContractor = computed(() => {
@@ -75,19 +64,14 @@ const selectedContractor = computed(() => {
 })
 
 const availableQuantity = computed(() => {
-  if (!selectedCuttingResult.value) return 0
-  return selectedCuttingResult.value.actual_quantity - selectedCuttingResult.value.defect_quantity
-})
-
-const estimatedCost = computed(() => {
-  if (!selectedContractor.value || form.type !== 'external') return 0
-  return selectedContractor.value.rate_per_piece * form.quantity_requested
+  if (!selectedPreparationOrder.value) return 0
+  return selectedPreparationOrder.value.output_quantity
 })
 
 const { term, termLower } = useBusinessContext()
 
-const productionOrderLabel = computed(() => term('production_order', 'Production Order'))
-const productionOrderLabelLower = computed(() => termLower('production_order', 'production order'))
+const productionOrderLabel = computed(() => 'Production Order')
+const productionOrderLabelLower = computed(() => 'production order')
 const preparationLabel = computed(() => term('preparation', 'Persiapan'))
 const contractorLabel = computed(() => term('contractor', 'Kontraktor'))
 const patternLabel = computed(() => term('pattern', 'Pattern'))
@@ -134,7 +118,7 @@ const isEditing = !!props.productionOrder?.id
             </div>
 
             <form @submit.prevent="submit" class="space-y-6">
-              <!-- Cutting Result Selection -->
+              <!-- Preparation Order Selection -->
               <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Hasil {{ preparationLabel }}</h3>
                 <div class="grid grid-cols-1 gap-4">
@@ -143,31 +127,31 @@ const isEditing = !!props.productionOrder?.id
                       Pilih Hasil {{ preparationLabel }} <span class="text-red-500">*</span>
                     </label>
                     <select
-                      v-model="form.cutting_result_id"
+                      v-model="form.preparation_order_id"
                       required
                       :disabled="isEditing"
                       class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                      :class="{ 'border-red-500': form.errors.cutting_result_id, 'bg-gray-100 dark:bg-gray-600': isEditing }"
+                      :class="{ 'border-red-500': form.errors.preparation_order_id, 'bg-gray-100 dark:bg-gray-600': isEditing }"
                     >
                       <option value="0" disabled>-- Pilih Hasil {{ preparationLabel }} --</option>
-                      <option v-for="cr in cuttingResults" :key="cr.id" :value="cr.id">
-                        {{ cr.cutting_order.order_number }} - {{ cr.cutting_order.pattern.name }} ({{ cr.actual_quantity - cr.defect_quantity }} pcs good)
+                      <option v-for="po in preparationOrders" :key="po.id" :value="po.id">
+                        {{ po.order_number }} - {{ po.pattern?.name || 'N/A' }} ({{ po.output_quantity }} pcs)
                       </option>
                     </select>
-                    <p v-if="form.errors.cutting_result_id" class="mt-1 text-sm text-red-600">{{ form.errors.cutting_result_id }}</p>
+                    <p v-if="form.errors.preparation_order_id" class="mt-1 text-sm text-red-600">{{ form.errors.preparation_order_id }}</p>
                   </div>
 
-                  <!-- Cutting Result Info -->
-                  <div v-if="selectedCuttingResult" class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
+                  <!-- Preparation Order Info -->
+                  <div v-if="selectedPreparationOrder" class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
                     <div class="grid grid-cols-2 gap-4">
                       <div>
                         <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ patternLabel }}</p>
-                        <p class="text-sm text-gray-900 dark:text-white">{{ selectedCuttingResult.cutting_order.pattern.name }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedCuttingResult.cutting_order.pattern.code }}</p>
+                        <p class="text-sm text-gray-900 dark:text-white">{{ selectedPreparationOrder.pattern?.name || 'N/A' }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedPreparationOrder.pattern?.code || '-' }}</p>
                       </div>
                       <div>
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Good Pieces</p>
-                        <p class="text-lg font-bold text-green-600 dark:text-green-400">{{ selectedCuttingResult.actual_quantity - selectedCuttingResult.defect_quantity }} pcs</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Output Quantity</p>
+                        <p class="text-lg font-bold text-green-600 dark:text-green-400">{{ selectedPreparationOrder.output_quantity }} pcs</p>
                       </div>
                     </div>
                   </div>
@@ -214,65 +198,15 @@ const isEditing = !!props.productionOrder?.id
 
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Jumlah Diminta <span class="text-red-500">*</span>
+                      Tanggal Estimasi Selesai
                     </label>
                     <input
-                      v-model.number="form.quantity_requested"
-                      type="number"
-                      required
-                      min="1"
-                      :max="availableQuantity || undefined"
-                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                      :class="{ 'border-red-500': form.errors.quantity_requested }"
-                    />
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Tersedia: {{ availableQuantity }} pcs</p>
-                    <p v-if="form.errors.quantity_requested" class="mt-1 text-sm text-red-600">{{ form.errors.quantity_requested }}</p>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Tanggal Diminta <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                      v-model="form.requested_date"
-                      type="date"
-                      required
-                      class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                      :class="{ 'border-red-500': form.errors.requested_date }"
-                    />
-                    <p v-if="form.errors.requested_date" class="mt-1 text-sm text-red-600">{{ form.errors.requested_date }}</p>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Tanggal Janji
-                    </label>
-                    <input
-                      v-model="form.promised_date"
+                      v-model="form.estimated_completion_date"
                       type="date"
                       class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                      :class="{ 'border-red-500': form.errors.promised_date }"
+                      :class="{ 'border-red-500': form.errors.estimated_completion_date }"
                     />
-                    <p v-if="form.errors.promised_date" class="mt-1 text-sm text-red-600">{{ form.errors.promised_date }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Cost Estimation -->
-              <div v-if="form.type === 'external' && selectedContractor && form.quantity_requested > 0" class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Estimasi Biaya</h3>
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Tarif per Piece</p>
-                    <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                      Rp {{ selectedContractor.rate_per_piece.toLocaleString('id-ID') }}
-                    </p>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Total Estimasi</p>
-                    <p class="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                      Rp {{ estimatedCost.toLocaleString('id-ID') }}
-                    </p>
+                    <p v-if="form.errors.estimated_completion_date" class="mt-1 text-sm text-red-600">{{ form.errors.estimated_completion_date }}</p>
                   </div>
                 </div>
               </div>
@@ -315,7 +249,8 @@ const isEditing = !!props.productionOrder?.id
                 </div>
               </div>
 
-              <!-- Notes -->\n              <div>
+              <!-- Notes -->
+              <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Catatan
                 </label>

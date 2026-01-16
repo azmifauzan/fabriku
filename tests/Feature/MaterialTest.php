@@ -53,26 +53,16 @@ test('can search materials by name or code', function () {
     expect($materials['data'][0]['name'])->toContain('Katun');
 });
 
-test('can filter materials by type', function () {
-    Material::factory()->count(2)->create(['tenant_id' => $this->tenant->id, 'type' => 'kain']);
-    Material::factory()->create(['tenant_id' => $this->tenant->id, 'type' => 'benang']);
-
-    $response = $this->get(route('materials.index', ['type' => 'kain']));
-
-    $response->assertOk();
-    $materials = $response->viewData('page')['props']['materials'];
-    expect($materials['total'])->toBe(2);
-});
-
 test('can create new material', function () {
+    $materialType = \App\Models\MaterialType::factory()->create(['tenant_id' => $this->tenant->id]);
+
     $materialData = [
+        'material_type_id' => $materialType->id,
         'code' => 'MAT-001',
         'name' => 'Test Material',
-        'type' => 'kain',
         'unit' => 'meter',
-        'standard_price' => 50000,
-        'reorder_point' => 50,
-        'is_active' => true,
+        'price_per_unit' => 50000,
+        'min_stock' => 50,
     ];
 
     $response = $this->post(route('materials.store'), $materialData);
@@ -94,7 +84,6 @@ test('code must be unique per tenant', function () {
     $materialData = [
         'code' => 'MAT-001',
         'name' => 'Duplicate Material',
-        'type' => 'kain',
         'unit' => 'meter',
     ];
 
@@ -113,7 +102,6 @@ test('code can be same across different tenants', function () {
     $materialData = [
         'code' => 'MAT-001',
         'name' => 'Same Code Different Tenant',
-        'type' => 'kain',
         'unit' => 'meter',
     ];
 
@@ -132,7 +120,6 @@ test('can update material', function () {
     $updateData = [
         'code' => $material->code,
         'name' => 'Updated Material Name',
-        'type' => 'benang',
         'unit' => 'pcs',
         'standard_price' => 75000,
     ];
@@ -143,7 +130,6 @@ test('can update material', function () {
     $this->assertDatabaseHas('materials', [
         'id' => $material->id,
         'name' => 'Updated Material Name',
-        'type' => 'benang',
     ]);
 });
 
@@ -154,7 +140,6 @@ test('cannot update material from another tenant', function () {
     $updateData = [
         'code' => $material->code,
         'name' => 'Hacked Material',
-        'type' => 'kain',
         'unit' => 'meter',
     ];
 
@@ -169,7 +154,7 @@ test('can delete material without receipts', function () {
     $response = $this->delete(route('materials.destroy', $material));
 
     $response->assertRedirect(route('materials.index'));
-    $this->assertDatabaseMissing('materials', ['id' => $material->id]);
+    $this->assertSoftDeleted('materials', ['id' => $material->id]);
 });
 
 test('cannot delete material with receipts', function () {
@@ -187,13 +172,13 @@ test('cannot delete material with receipts', function () {
 test('material has low stock helper method', function () {
     $material = Material::factory()->create([
         'tenant_id' => $this->tenant->id,
-        'current_stock' => 10,
+        'stock_quantity' => 10,
         'reorder_point' => 50,
     ]);
 
     expect($material->isLowStock())->toBeTrue();
 
-    $material->current_stock = 100;
+    $material->stock_quantity = 100;
     expect($material->isLowStock())->toBeFalse();
 });
 
@@ -201,7 +186,6 @@ test('material automatically gets tenant_id from authenticated user', function (
     $materialData = [
         'code' => 'MAT-AUTO',
         'name' => 'Auto Tenant Material',
-        'type' => 'kain',
         'unit' => 'meter',
     ];
 

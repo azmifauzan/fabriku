@@ -34,7 +34,7 @@ interface Stats {
   total_sales_month: number
   total_sales_count: number
   pending_production: number
-  pending_cutting: number
+  pending_preparation: number
 }
 
 interface TopProduct {
@@ -206,7 +206,7 @@ const getStatusBadgeClass = (status: string) => {
                     {{ stats.pending_production }}
                   </dd>
                   <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    {{ stats.pending_cutting }} cutting
+                    {{ stats.pending_preparation }} preparation
                   </p>
                 </div>
               </div>

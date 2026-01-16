@@ -29,18 +29,19 @@ Platform ini mengelola workflow universal: **Bahan Baku → Pattern/Resep → Pe
 - Alert untuk reorder point dan expired date (makanan)
 - Material attributes yang fleksibel per kategori
 
-### 📋 Pattern/Resep & BOM Management
-- **Pattern Library** (Garment): Pola dengan ukuran dan kebutuhan kain
-- **Recipe Library** (Makanan): Resep dengan serving size dan komposisi bahan
-- Bill of Materials (BOM) dengan cost calculation otomatis
-- Interactive BOM builder di frontend
+### 📋 Pattern/Resep Management
+- **Pattern Library** (Garment): Pola dengan ukuran dan spesifikasi
+- **Recipe Library** (Makanan): Resep dengan serving size dan output
+- Pattern/Recipe sebagai referensi untuk preparation (tidak wajib)
 - Support untuk berbagai product types per kategori
+- Estimasi kebutuhan material (opsional)
 
-### ✂️ Proses Persiapan (Multi-Kategori)
-- **Cutting Orders** (Garment): Pemotongan kain berdasarkan pattern
-- **Preparation Orders** (Makanan): Mixing/persiapan bahan berdasarkan resep
-- Material usage tracking dan stock sufficiency check
-- Waste/efficiency calculation
+### ✂️ Proses Persiapan (Simplified - Multi-Kategori)
+- **Preparation Orders** (Garment: Cutting | Makanan: Mixing/Prep)
+- Manual material usage input (flexible & practical)
+- Pattern/Recipe sebagai referensi (optional)
+- Output quantity tracking
+- **Auto deduct stock** saat status completed
 - Status workflow dengan guards (draft, in_progress, completed, cancelled)
 
 ### 🧵 Manajemen Produksi (Coming in Phase 4)
@@ -242,6 +243,7 @@ npm run format
 
 Dokumentasi lengkap tersedia di folder `docs/`:
 
+- **[User Manual](docs/08-user-manual.md)** - 📖 **Panduan lengkap cara menggunakan aplikasi**
 - [README](docs/README.md) - Project overview dan category comparison
 - [Business Requirements](docs/01-business-requirements.md) - Kebutuhan bisnis multi-category
 - [System Architecture](docs/02-system-architecture.md) - Arsitektur sistem dan design patterns
@@ -249,7 +251,9 @@ Dokumentasi lengkap tersedia di folder `docs/`:
 - [API Endpoints](docs/04-api-endpoints.md) - Dokumentasi API lengkap
 - [User Flows](docs/05-user-flows.md) - Alur kerja pengguna per kategori
 - [MVP Development Plan](docs/06-mvp-development-plan.md) - Rencana implementasi MVP
+- [Frontend UI Architecture](docs/07-frontend-ui-architecture.md) - UI/UX design system
 - [Multi-Category Architecture](docs/multi-category-architecture.md) - Panduan arsitektur multi-kategori
+- [Refactoring Summary](docs/refactoring-preparation-simplification.md) - Preparation simplification
 
 ## 🏢 Multi-Kategori Bisnis
 
@@ -398,12 +402,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ Category-specific material attributes (warna, expired date, dll)
 
 ### ✅ Phase 3: Pattern/Recipe & Preparation (Completed)
-- ✅ Pattern/Recipe library dengan BOM
-- ✅ Interactive BOM builder
-- ✅ Cutting/Preparation orders
-- ✅ Material usage tracking
-- ✅ Waste/efficiency calculation
-- ✅ Real-time cost calculation
+- ✅ Pattern/Recipe library dengan spesifikasi lengkap
+- ✅ Preparation orders (simplified - manual material input)
+- ✅ Material usage tracking dengan auto deduct stock
+- ✅ Pattern sebagai referensi (optional, tidak auto-fill)
+- ✅ Status workflow (draft → in_progress → completed)
+- ✅ Stock availability validation
+- ✅ 33 tests passing ✅
+- ✅ UI/UX modernization complete:
+  - Mobile-first responsive layout
+  - Collapsible sidebar navigation
+  - Dark/light theme support
+  - Lucide icon integration
+  - Consistent styling dengan Material
 
 ### 🔄 Phase 4: Production Management (In Progress)
 - 🔄 Contractors/Partners management

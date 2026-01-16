@@ -10,6 +10,11 @@ interface MaterialAttribute {
   attribute_value: string
 }
 
+interface MaterialType {
+  code: string
+  name: string
+}
+
 interface Material {
   id?: number
   code: string
@@ -25,21 +30,24 @@ interface Material {
 
 const props = defineProps<{
   material?: Material
+  materialTypes: MaterialType[]
 }>()
 
 const form = useForm({
   code: props.material?.code || '',
   name: props.material?.name || '',
-  type: props.material?.type || 'kain',
+  type: props.material?.type || (props.materialTypes[0]?.code || 'kain'),
   quantity: props.material?.current_stock || '0',
   unit: props.material?.unit || 'meter',
   standard_price: props.material?.standard_price || '0',
   reorder_point: props.material?.reorder_point || '0',
   is_active: props.material?.is_active ?? true,
-  attributes: props.material?.attributes?.map(attr => ({
-    name: attr.attribute_name,
-    value: attr.attribute_value
-  })) || [],
+  attributes: props.material?.attributes
+    ?.filter((attr): attr is MaterialAttribute => attr != null)
+    .map(attr => ({
+      name: attr.attribute_name || '',
+      value: attr.attribute_value || ''
+    })) || [],
 })
 
 const addAttribute = () => {
@@ -118,13 +126,10 @@ const isEditing = !!props.material?.id
                 type="select"
                 :required="true"
                 :error="form.errors.type"
-                :options="[
-                  { value: 'kain', label: 'Kain' },
-                  { value: 'benang', label: 'Benang' },
-                  { value: 'aksesoris', label: 'Aksesoris' },
-                  { value: 'kemasan', label: 'Kemasan' },
-                  { value: 'lainnya', label: 'Lainnya' }
-                ]"
+                :options="materialTypes.map(type => ({
+                  value: type.code,
+                  label: type.name
+                }))"
               />
 
               <FormField
@@ -152,16 +157,16 @@ const isEditing = !!props.material?.id
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 v-model="form.quantity"
-                label="Jumlah Stok Awal"
+                label="Jumlah Stok"
                 type="number"
                 placeholder="0"
                 :error="form.errors.quantity"
-                hint="Stok awal bahan baku (opsional)"
+                hint="Stok bahan baku saat ini"
               />
 
               <FormField
                 v-model="form.standard_price"
-                label="Harga Standar (Rp)"
+                label="Harga (Rp)"
                 type="number"
                 placeholder="0"
                 :error="form.errors.standard_price"
@@ -177,10 +182,13 @@ const isEditing = !!props.material?.id
                 hint="Peringatan stok rendah (opsional)"
               />
 
-              <div class="flex items-center pt-8">
+              <div class="space-y-2">
+                <div class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Bahan baku aktif (dapat digunakan untuk produksi)
+                </div>
                 <FormField
                   v-model="form.is_active"
-                  label="Bahan baku aktif (dapat digunakan untuk produksi)"
+                  label="Aktif"
                   type="checkbox"
                 />
               </div>
@@ -205,7 +213,7 @@ const isEditing = !!props.material?.id
 
               <div v-if="form.attributes.length > 0" class="space-y-3">
                 <div
-                  v-for="(attr, index) in form.attributes"
+                  v-for="(attr, index) in form.attributes.filter((a) => a)"
                   :key="index"
                   class="flex gap-3 items-start p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
                 >

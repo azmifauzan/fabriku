@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import { useBusinessContext } from '@/composables/useBusinessContext';
 
@@ -17,23 +17,35 @@ interface Pattern {
     product_type: string;
 }
 
+interface PreparationOrder {
+    pattern: Pattern;
+}
+
+interface ProductionOrder {
+    id: number;
+    order_number: string;
+    preparation_order_id: number;
+    quantity_good: number;
+    labor_cost: string;
+    completed_date: string;
+    estimated_completion_date: string;
+    status: string;
+    preparation_order?: PreparationOrder;
+}
+
 interface Item {
     id?: number;
     sku: string;
     name: string;
-    category: string;
+    production_order_id?: number;
     inventory_location_id: number;
-    pattern_id?: number;
+    target_quantity: number;
     current_stock: number;
-    reserved_stock: number;
     minimum_stock: number;
     unit_cost: string;
     selling_price: string;
-    quality_grade: string;
-    batch_number?: string;
+    quality_grade?: string;
     production_date?: string;
-    expiry_date?: string;
-    storage_requirements?: string;
     status: string;
     notes?: string;
 }
@@ -41,31 +53,72 @@ interface Item {
 const props = defineProps<{
     item?: Item;
     locations: Location[];
-    patterns: Pattern[];
+    productionOrders: ProductionOrder[];
 }>();
 
-const { terminology, tenant } = useBusinessContext();
+const { tenant } = useBusinessContext();
 
-const isFood = computed(() => tenant.value?.business_category === 'food');
+const isGarment = computed(() => tenant.value?.business_category === 'garment');
 
 const form = useForm({
+    production_order_id: props.item?.production_order_id || null,
     sku: props.item?.sku || '',
     name: props.item?.name || '',
-    category: props.item?.category || 'finished_goods',
     inventory_location_id: props.item?.inventory_location_id || null,
-    pattern_id: props.item?.pattern_id || null,
+    target_quantity: props.item?.target_quantity || 0,
     current_stock: props.item?.current_stock || 0,
-    reserved_stock: props.item?.reserved_stock || 0,
     minimum_stock: props.item?.minimum_stock || 10,
     unit_cost: props.item?.unit_cost || '0',
     selling_price: props.item?.selling_price || '0',
     quality_grade: props.item?.quality_grade || 'grade_a',
-    batch_number: props.item?.batch_number || '',
     production_date: props.item?.production_date || '',
-    expiry_date: props.item?.expiry_date || '',
-    storage_requirements: props.item?.storage_requirements || '',
     status: props.item?.status || 'available',
     notes: props.item?.notes || '',
+});
+
+// Auto-populate fields when production order is selected
+const selectedProductionOrder = computed(() => {
+    if (!form.production_order_id) return null;
+    return props.productionOrders.find(po => po.id === form.production_order_id);
+});
+
+watch(() => form.production_order_id, (newValue) => {
+    if (newValue && selectedProductionOrder.value) {
+        const po = selectedProductionOrder.value;
+        
+        // Auto-populate target quantity from production order
+        form.target_quantity = po.quantity_good || 0;
+        
+        // Auto-populate production date from estimated completion date
+        if (po.completed_date) {
+            form.production_date = po.completed_date;
+        } else if (po.estimated_completion_date) {
+            form.production_date = po.estimated_completion_date;
+        }
+        
+        // Auto-populate SKU and name from pattern if available
+        if (po.preparation_order?.pattern) {
+            const pattern = po.preparation_order.pattern;
+            form.sku = `${po.order_number}`;
+            form.name = `${pattern.name}`;
+        }
+    }
+});
+
+// Auto-calculate unit cost when production order changes
+watch([() => form.production_order_id], () => {
+    if (selectedProductionOrder.value) {
+        // Unit cost = (Material cost + Labor cost) / Quantity
+        // For now, we'll use labor cost from production order
+        // Material cost would need to be calculated from preparation order
+        const laborCost = parseFloat(selectedProductionOrder.value.labor_cost || '0');
+        const quantity = selectedProductionOrder.value.quantity_good || 1;
+        
+        // TODO: Add material cost calculation from preparation order's BOM
+        const materialCost = 0; // Placeholder
+        
+        form.unit_cost = ((materialCost + laborCost) / quantity).toFixed(2);
+    }
 });
 
 const submit = () => {
@@ -82,12 +135,6 @@ const submit = () => {
 
 const isEditing = !!props.item?.id;
 
-const categories = [
-    { value: 'finished_goods', label: 'Barang Jadi' },
-    { value: 'work_in_progress', label: 'Work in Progress' },
-    { value: 'raw_materials', label: 'Bahan Mentah' },
-];
-
 const qualityGrades = [
     { value: 'grade_a', label: 'Grade A' },
     { value: 'grade_b', label: 'Grade B' },
@@ -99,13 +146,6 @@ const statuses = [
     { value: 'reserved', label: 'Reserved' },
     { value: 'damaged', label: 'Damaged' },
     { value: 'expired', label: 'Expired' },
-];
-
-const storageRequirements = [
-    { value: 'room_temp', label: 'Room Temperature' },
-    { value: 'cool', label: 'Cool (15-20°C)' },
-    { value: 'chilled', label: 'Chilled (2-8°C)' },
-    { value: 'frozen', label: 'Frozen (<0°C)' },
 ];
 </script>
 
@@ -119,7 +159,7 @@ const storageRequirements = [
                         {{ isEditing ? 'Edit Item Inventory' : 'Tambah Item Inventory' }}
                     </h2>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        {{ isEditing ? 'Ubah informasi item' : 'Tambahkan item inventory baru' }}
+                        {{ isEditing ? 'Ubah informasi item' : 'Tambahkan item inventory baru dari hasil produksi' }}
                     </p>
                 </div>
                 <Link
@@ -131,188 +171,98 @@ const storageRequirements = [
             </div>
 
             <form @submit.prevent="submit" class="space-y-6">
+                <!-- Production Order Selection -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                        Pilih Production Order
+                    </h3>
+                    <div>
+                        <label
+                            for="production_order_id"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >
+                            Production Order <span class="text-red-500">*</span>
+                        </label>
+                        <select
+                            id="production_order_id"
+                            v-model="form.production_order_id"
+                            required
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                            :class="{ 'border-red-300': form.errors.production_order_id }"
+                        >
+                            <option :value="null">Pilih Production Order</option>
+                            <option
+                                v-for="po in productionOrders"
+                                :key="po.id"
+                                :value="po.id"
+                            >
+                                {{ po.order_number }} - {{ po.preparation_order?.pattern?.name || 'N/A' }} ({{ po.quantity_good }} pcs) - [{{ po.status }}]
+                            </option>
+                        </select>
+                        <p
+                            v-if="form.errors.production_order_id"
+                            class="mt-1 text-sm text-red-600 dark:text-red-400"
+                        >
+                            {{ form.errors.production_order_id }}
+                        </p>
+                        <p v-if="selectedProductionOrder" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            Tanggal: {{ selectedProductionOrder.completed_date || selectedProductionOrder.estimated_completion_date }}
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Basic Information -->
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                         Informasi Dasar
                     </h3>
-                    <div class="space-y-4">
-                        <!-- SKU & Name -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label
-                                    for="sku"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    SKU <span class="text-red-500">*</span>
-                                </label>
-                                <input
-                                    id="sku"
-                                    v-model="form.sku"
-                                    type="text"
-                                    required
-                                    placeholder="Contoh: INV-001"
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                    :class="{ 'border-red-300': form.errors.sku }"
-                                />
-                                <p
-                                    v-if="form.errors.sku"
-                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                >
-                                    {{ form.errors.sku }}
-                                </p>
-                            </div>
-
-                            <div>
-                                <label
-                                    for="name"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    Nama Item <span class="text-red-500">*</span>
-                                </label>
-                                <input
-                                    id="name"
-                                    v-model="form.name"
-                                    type="text"
-                                    required
-                                    placeholder="Contoh: Mukena Bali Putih - M"
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                    :class="{ 'border-red-300': form.errors.name }"
-                                />
-                                <p
-                                    v-if="form.errors.name"
-                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                >
-                                    {{ form.errors.name }}
-                                </p>
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label
+                                for="sku"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                SKU <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                id="sku"
+                                v-model="form.sku"
+                                type="text"
+                                required
+                                placeholder="Contoh: PO-2024-001"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                :class="{ 'border-red-300': form.errors.sku }"
+                            />
+                            <p
+                                v-if="form.errors.sku"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400"
+                            >
+                                {{ form.errors.sku }}
+                            </p>
                         </div>
 
-                        <!-- Category & Pattern -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label
-                                    for="category"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    Kategori <span class="text-red-500">*</span>
-                                </label>
-                                <select
-                                    id="category"
-                                    v-model="form.category"
-                                    required
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                    :class="{ 'border-red-300': form.errors.category }"
-                                >
-                                    <option
-                                        v-for="cat in categories"
-                                        :key="cat.value"
-                                        :value="cat.value"
-                                    >
-                                        {{ cat.label }}
-                                    </option>
-                                </select>
-                                <p
-                                    v-if="form.errors.category"
-                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                >
-                                    {{ form.errors.category }}
-                                </p>
-                            </div>
-
-                            <div>
-                                <label
-                                    for="pattern_id"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    {{ terminology.pattern || 'Pattern' }}
-                                </label>
-                                <select
-                                    id="pattern_id"
-                                    v-model="form.pattern_id"
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                    :class="{ 'border-red-300': form.errors.pattern_id }"
-                                >
-                                    <option :value="null">Pilih Pattern (opsional)</option>
-                                    <option
-                                        v-for="pattern in patterns"
-                                        :key="pattern.id"
-                                        :value="pattern.id"
-                                    >
-                                        {{ pattern.code }} - {{ pattern.name }}
-                                    </option>
-                                </select>
-                                <p
-                                    v-if="form.errors.pattern_id"
-                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                >
-                                    {{ form.errors.pattern_id }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Location & Quality Grade -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label
-                                    for="inventory_location_id"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    Lokasi <span class="text-red-500">*</span>
-                                </label>
-                                <select
-                                    id="inventory_location_id"
-                                    v-model="form.inventory_location_id"
-                                    required
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                    :class="{ 'border-red-300': form.errors.inventory_location_id }"
-                                >
-                                    <option :value="null">Pilih Lokasi</option>
-                                    <option
-                                        v-for="location in locations"
-                                        :key="location.id"
-                                        :value="location.id"
-                                    >
-                                        {{ location.name }} ({{ location.zone }}-{{ location.rack }})
-                                    </option>
-                                </select>
-                                <p
-                                    v-if="form.errors.inventory_location_id"
-                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                >
-                                    {{ form.errors.inventory_location_id }}
-                                </p>
-                            </div>
-
-                            <div v-if="!isFood">
-                                <label
-                                    for="quality_grade"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    Quality Grade <span class="text-red-500">*</span>
-                                </label>
-                                <select
-                                    id="quality_grade"
-                                    v-model="form.quality_grade"
-                                    required
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                    :class="{ 'border-red-300': form.errors.quality_grade }"
-                                >
-                                    <option
-                                        v-for="grade in qualityGrades"
-                                        :key="grade.value"
-                                        :value="grade.value"
-                                    >
-                                        {{ grade.label }}
-                                    </option>
-                                </select>
-                                <p
-                                    v-if="form.errors.quality_grade"
-                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                >
-                                    {{ form.errors.quality_grade }}
-                                </p>
-                            </div>
+                        <div>
+                            <label
+                                for="name"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                Nama Item <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                id="name"
+                                v-model="form.name"
+                                type="text"
+                                required
+                                placeholder="Contoh: Mukena Bali Putih - M"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                :class="{ 'border-red-300': form.errors.name }"
+                            />
+                            <p
+                                v-if="form.errors.name"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400"
+                            >
+                                {{ form.errors.name }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -320,15 +270,43 @@ const storageRequirements = [
                 <!-- Stock Information -->
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                        Informasi Stock
+                        Data Stock
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label
+                                for="target_quantity"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                Target Produksi <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                id="target_quantity"
+                                v-model.number="form.target_quantity"
+                                type="number"
+                                required
+                                min="0"
+                                readonly
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all bg-gray-50 dark:bg-gray-800"
+                                :class="{ 'border-red-300': form.errors.target_quantity }"
+                            />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Dari production order
+                            </p>
+                            <p
+                                v-if="form.errors.target_quantity"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400"
+                            >
+                                {{ form.errors.target_quantity }}
+                            </p>
+                        </div>
+
                         <div>
                             <label
                                 for="current_stock"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300"
                             >
-                                Stock Saat Ini <span class="text-red-500">*</span>
+                                Hasil Produksi Aktual <span class="text-red-500">*</span>
                             </label>
                             <input
                                 id="current_stock"
@@ -339,34 +317,14 @@ const storageRequirements = [
                                 class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 :class="{ 'border-red-300': form.errors.current_stock }"
                             />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Jumlah barang jadi yang sebenarnya
+                            </p>
                             <p
                                 v-if="form.errors.current_stock"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
                                 {{ form.errors.current_stock }}
-                            </p>
-                        </div>
-
-                        <div>
-                            <label
-                                for="reserved_stock"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                Stock Reserved
-                            </label>
-                            <input
-                                id="reserved_stock"
-                                v-model.number="form.reserved_stock"
-                                type="number"
-                                min="0"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                :class="{ 'border-red-300': form.errors.reserved_stock }"
-                            />
-                            <p
-                                v-if="form.errors.reserved_stock"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400"
-                            >
-                                {{ form.errors.reserved_stock }}
                             </p>
                         </div>
 
@@ -416,9 +374,13 @@ const storageRequirements = [
                                 step="0.01"
                                 required
                                 min="0"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                readonly
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all bg-gray-50 dark:bg-gray-800"
                                 :class="{ 'border-red-300': form.errors.unit_cost }"
                             />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Dihitung otomatis dari biaya bahan + biaya produksi
+                            </p>
                             <p
                                 v-if="form.errors.unit_cost"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
@@ -460,27 +422,65 @@ const storageRequirements = [
                         Informasi Tambahan
                     </h3>
                     <div class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label
-                                    for="batch_number"
+                                    for="inventory_location_id"
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >
-                                    Batch Number
+                                    Lokasi <span class="text-red-500">*</span>
                                 </label>
-                                <input
-                                    id="batch_number"
-                                    v-model="form.batch_number"
-                                    type="text"
-                                    placeholder="Contoh: BATCH-2024-001"
+                                <select
+                                    id="inventory_location_id"
+                                    v-model="form.inventory_location_id"
+                                    required
                                     class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                    :class="{ 'border-red-300': form.errors.batch_number }"
-                                />
+                                    :class="{ 'border-red-300': form.errors.inventory_location_id }"
+                                >
+                                    <option :value="null">Pilih Lokasi</option>
+                                    <option
+                                        v-for="location in locations"
+                                        :key="location.id"
+                                        :value="location.id"
+                                    >
+                                        {{ location.name }} ({{ location.zone }}-{{ location.rack }})
+                                    </option>
+                                </select>
                                 <p
-                                    v-if="form.errors.batch_number"
+                                    v-if="form.errors.inventory_location_id"
                                     class="mt-1 text-sm text-red-600 dark:text-red-400"
                                 >
-                                    {{ form.errors.batch_number }}
+                                    {{ form.errors.inventory_location_id }}
+                                </p>
+                            </div>
+
+                            <div v-if="isGarment">
+                                <label
+                                    for="quality_grade"
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                                >
+                                    Quality Grade <span class="text-red-500">*</span>
+                                </label>
+                                <select
+                                    id="quality_grade"
+                                    v-model="form.quality_grade"
+                                    required
+                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                    :class="{ 'border-red-300': form.errors.quality_grade }"
+                                >
+                                    <option
+                                        v-for="grade in qualityGrades"
+                                        :key="grade.value"
+                                        :value="grade.value"
+                                    >
+                                        {{ grade.label }}
+                                    </option>
+                                </select>
+                                <p
+                                    v-if="form.errors.quality_grade"
+                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
+                                >
+                                    {{ form.errors.quality_grade }}
                                 </p>
                             </div>
 
@@ -515,79 +515,29 @@ const storageRequirements = [
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label
-                                    for="production_date"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    Tanggal Produksi
-                                </label>
-                                <input
-                                    id="production_date"
-                                    v-model="form.production_date"
-                                    type="date"
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                    :class="{ 'border-red-300': form.errors.production_date }"
-                                />
-                                <p
-                                    v-if="form.errors.production_date"
-                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                >
-                                    {{ form.errors.production_date }}
-                                </p>
-                            </div>
-
-                            <div v-if="isFood">
-                                <label
-                                    for="expiry_date"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    Tanggal Kadaluarsa
-                                </label>
-                                <input
-                                    id="expiry_date"
-                                    v-model="form.expiry_date"
-                                    type="date"
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                    :class="{ 'border-red-300': form.errors.expiry_date }"
-                                />
-                                <p
-                                    v-if="form.errors.expiry_date"
-                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                >
-                                    {{ form.errors.expiry_date }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div v-if="isFood">
+                        <div>
                             <label
-                                for="storage_requirements"
+                                for="production_date"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300"
                             >
-                                Storage Requirements
+                                Tanggal Produksi
                             </label>
-                            <select
-                                id="storage_requirements"
-                                v-model="form.storage_requirements"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                :class="{ 'border-red-300': form.errors.storage_requirements }"
-                            >
-                                <option value="">Pilih Storage Requirement</option>
-                                <option
-                                    v-for="req in storageRequirements"
-                                    :key="req.value"
-                                    :value="req.value"
-                                >
-                                    {{ req.label }}
-                                </option>
-                            </select>
+                            <input
+                                id="production_date"
+                                v-model="form.production_date"
+                                type="date"
+                                readonly
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all bg-gray-50 dark:bg-gray-800"
+                                :class="{ 'border-red-300': form.errors.production_date }"
+                            />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Dari tanggal estimasi selesai di production order
+                            </p>
                             <p
-                                v-if="form.errors.storage_requirements"
+                                v-if="form.errors.production_date"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400"
                             >
-                                {{ form.errors.storage_requirements }}
+                                {{ form.errors.production_date }}
                             </p>
                         </div>
 

@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useSweetAlert } from '@/composables/useSweetAlert'
 import { Edit, Trash2, Search, X, AlertTriangle } from 'lucide-vue-next'
 
 interface MaterialAttribute {
@@ -45,6 +46,8 @@ const props = defineProps<{
   }
 }>()
 
+const { confirmDelete, showSuccess } = useSweetAlert()
+
 const search = ref(props.filters.search || '')
 const typeFilter = ref(props.filters.type || '')
 const statusFilter = ref(props.filters.is_active || '')
@@ -67,12 +70,20 @@ const clearFilters = () => {
   applyFilters()
 }
 
-const deleteMaterial = (material: Material) => {
-  if (!confirm(`Hapus material ${material.name}?`)) return
+const deleteMaterial = async (material: Material) => {
+  const result = await confirmDelete(
+    'Hapus Bahan Baku',
+    `Apakah Anda yakin ingin menghapus bahan baku "${material.name}"?`
+  )
 
-  router.delete(`/materials/${material.id}`, {
-    preserveScroll: true,
-  })
+  if (result.isConfirmed) {
+    router.delete(`/materials/${material.id}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        showSuccess('Berhasil!', 'Bahan baku berhasil dihapus')
+      }
+    })
+  }
 }
 
 const formatCurrency = (value: string) => {

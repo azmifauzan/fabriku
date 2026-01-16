@@ -23,8 +23,8 @@ return [
             'terminology' => [
                 'material' => 'Bahan Baku',
                 'pattern' => 'Pattern/Pola',
-                'preparation' => 'Cutting/Pemotongan',
-                'preparation_order' => 'Cutting Order',
+                'preparation' => 'Preparation/Persiapan',
+                'preparation_order' => 'Preparation Order',
                 'production' => 'Jahit/Sewing',
                 'production_order' => 'Sewing Order',
                 'contractor' => 'Penjahit/Kontraktor',

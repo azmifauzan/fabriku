@@ -12,6 +12,7 @@ interface Item {
     current_stock: number;
     reserved_stock: number;
     minimum_stock: number;
+    target_quantity?: number;
     unit_cost: number;
     selling_price: number;
     quality_grade: string;
@@ -19,6 +20,10 @@ interface Item {
     inventory_location?: {
         id: number;
         name: string;
+    };
+    production_order?: {
+        id: number;
+        order_number: string;
     };
     expiry_date?: string;
 }
@@ -88,59 +93,67 @@ const isLowStock = (item: Item) => {
         <div class="py-6 px-6">
             <div class="mx-auto max-w-7xl">
                 <PageHeader 
-                    title="Inventory Items" 
+                    title="Inventory Items"
+                    description="Kelola barang jadi hasil produksi"
                     create-link="/inventory/items/create"
                     create-text="Tambah Item"
                 />
 
                 <!-- Filters -->
                 <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
-                        <input
-                            v-model="search"
-                            type="text"
-                            placeholder="Cari SKU atau nama..."
-                            @keyup.enter="applyFilters"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                        />
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cari</label>
+                            <input
+                                v-model="search"
+                                type="text"
+                                placeholder="Cari SKU atau nama..."
+                                @keyup.enter="applyFilters"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                            />
+                        </div>
 
-                        <select
-                            v-model="statusFilter"
-                            @change="applyFilters"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                        >
-                            <option value="">Semua Status</option>
-                            <option value="available">Available</option>
-                            <option value="reserved">Reserved</option>
-                            <option value="sold">Sold</option>
-                            <option value="damaged">Damaged</option>
-                            <option value="expired">Expired</option>
-                        </select>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                            <select
+                                v-model="statusFilter"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                            >
+                                <option value="">Semua Status</option>
+                                <option value="available">Available</option>
+                                <option value="reserved">Reserved</option>
+                                <option value="sold">Sold</option>
+                                <option value="damaged">Damaged</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                        </div>
 
-                        <select
-                            v-model="categoryFilter"
-                            @change="applyFilters"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                        >
-                            <option value="">Semua Kategori</option>
-                            <option value="garment">Garment</option>
-                            <option value="food">Food</option>
-                        </select>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kategori</label>
+                            <select
+                                v-model="categoryFilter"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                            >
+                                <option value="">Semua Kategori</option>
+                                <option value="garment">Garment</option>
+                                <option value="food">Food</option>
+                            </select>
+                        </div>
 
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-end gap-2">
                             <button
                                 @click="applyFilters"
-                                class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+                                class="flex-1 px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
                             >
                                 Filter
                             </button>
                             <button
                                 v-if="search || statusFilter || categoryFilter"
                                 @click="clearFilters"
-                                class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+                                class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                title="Clear filters"
                             >
-                                <span class="text-base">✕</span>
-                                Clear
+                                ✕
                             </button>
                         </div>
                     </div>
@@ -153,9 +166,11 @@ const isLowStock = (item: Item) => {
                             <thead class="bg-gray-50 dark:bg-gray-700/50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">SKU</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Nama</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Nama Item</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Production Order</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Lokasi</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Stok</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Target</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Hasil Aktual</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Grade</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Status</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Aksi</th>
@@ -175,14 +190,20 @@ const isLowStock = (item: Item) => {
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                        {{ item.production_order?.order_number || '-' }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                         {{ item.inventory_location?.name || '-' }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                        {{ item.target_quantity || '-' }}
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                         {{ item.current_stock }}
                                         <span v-if="item.reserved_stock > 0" class="text-gray-500 dark:text-gray-400">({{ item.reserved_stock }} reserved)</span>
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                        {{ item.quality_grade }}
+                                        {{ item.quality_grade || '-' }}
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4">
                                         <span :class="statusBadgeClass(item.status)" class="inline-flex rounded-full px-2 py-1 text-xs font-semibold">

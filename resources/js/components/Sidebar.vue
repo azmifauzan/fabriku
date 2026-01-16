@@ -7,17 +7,18 @@ import {
   ChevronDown,
   Home,
   Package,
-  Scissors,
+  CheckCircle2,
+  Factory,
   ShirtIcon,
   Users,
-  FileBox,
+  Briefcase,
   BookOpen,
   ClipboardList,
-  ChefHat,
   Warehouse,
   UserCircle,
   ShoppingCart,
   BarChart3,
+  Settings,
   X,
 } from 'lucide-vue-next'
 
@@ -52,8 +53,16 @@ const menuItems = computed(() => {
     {
       name: 'Master Data',
       href: '/master-data',
-      icon: FileBox,
+      icon: Settings,
       children: [
+        {
+          name: 'Jenis Bahan',
+          href: '/material-types',
+        },
+        {
+          name: 'Staff',
+          href: '/staff',
+        },
         {
           name: 'Lokasi Inventory',
           href: '/inventory/locations',
@@ -78,14 +87,14 @@ const menuItems = computed(() => {
       icon: Package,
     },
     {
-      name: terminology.value.preparation_order || 'Cutting Order',
-      href: '/cutting-orders',
-      icon: isFood ? ClipboardList : Scissors,
+      name: 'Preparation',
+      href: '/preparation-orders',
+      icon: CheckCircle2,
     },
     {
-      name: terminology.value.production_order || 'Production Order',
+      name: 'Production Order',
       href: '/production-orders',
-      icon: isFood ? ChefHat : FileBox,
+      icon: Factory,
     },
     {
       name: 'Inventory Items',

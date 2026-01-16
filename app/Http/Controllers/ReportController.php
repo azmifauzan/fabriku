@@ -218,7 +218,7 @@ class ReportController extends Controller
     public function production(Request $request): Response
     {
         $query = ProductionOrder::query()
-            ->with(['cuttingResult.cuttingOrder.pattern:id,name,category', 'contractor:id,name,type']);
+            ->with(['preparationOrder.pattern:id,name,category', 'contractor:id,name,type']);
 
         // Date filter
         if ($request->filled('start_date')) {
@@ -238,7 +238,7 @@ class ReportController extends Controller
         }
 
         $orders = $query->latest()->get()->map(function ($order) {
-            $pattern = $order->cuttingResult?->cuttingOrder?->pattern;
+            $pattern = $order->preparationOrder?->pattern;
             $efficiency = $order->quantity_requested > 0
                 ? ($order->quantity_good / $order->quantity_requested) * 100
                 : 0;

@@ -3,7 +3,9 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useSweetAlert } from '@/composables/useSweetAlert'
 import { useBusinessContext } from '@/composables/useBusinessContext'
+import { Edit, Trash2 } from 'lucide-vue-next'
 
 interface PatternMaterial {
   id: number
@@ -22,7 +24,7 @@ interface Pattern {
   product_type: string
   size: string | null
   is_active: boolean
-  cutting_orders_count: number
+  preparation_orders_count: number
   materials: PatternMaterial[]
 }
 
@@ -36,6 +38,7 @@ interface PaginatedPatterns {
 }
 
 const { productTypes, term, termLower } = useBusinessContext()
+const { confirmDelete, showSuccess } = useSweetAlert()
 
 const patternLabel = computed(() => term('pattern', 'Pattern'))
 const materialLabel = computed(() => term('material', 'Bahan Baku'))
@@ -71,12 +74,20 @@ const clearFilters = () => {
   applyFilters()
 }
 
-const deletePattern = (pattern: Pattern) => {
-  if (!confirm(`Hapus ${termLower('pattern', 'pattern')} ${pattern.name}?`)) return
+const deletePattern = async (pattern: Pattern) => {
+  const result = await confirmDelete(
+    `Hapus ${patternLabel.value}`,
+    `Apakah Anda yakin ingin menghapus ${termLower('pattern', 'pattern')} "${pattern.name}"?`
+  )
 
-  router.delete(`/patterns/${pattern.id}`, {
-    preserveScroll: true,
-  })
+  if (result.isConfirmed) {
+    router.delete(`/patterns/${pattern.id}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        showSuccess('Berhasil!', `${patternLabel.value} berhasil dihapus`)
+      }
+    })
+  }
 }
 
 const getProductTypeLabel = (type: string) => {
@@ -252,23 +263,25 @@ const getProductTypeBadge = (type: string) => {
                     Nonaktif
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                   <div class="flex justify-end gap-2">
                     <Link
                       :href="`/patterns/${pattern.id}/edit`"
-                      class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg font-medium transition-colors"
                     >
-                      Edit
+                      <Edit :size="16" />
+                      <span>Edit</span>
                     </Link>
                     <button
                       type="button"
                       @click="deletePattern(pattern)"
-                      class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                      :disabled="pattern.cutting_orders_count > 0"
-                      :class="{ 'opacity-50 cursor-not-allowed': pattern.cutting_orders_count > 0 }"
-                      :title="pattern.cutting_orders_count > 0 ? 'Tidak bisa dihapus, sudah ada cutting order' : 'Hapus'"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg font-medium transition-colors"
+                      :disabled="pattern.preparation_orders_count > 0"
+                      :class="{ 'opacity-50 cursor-not-allowed': pattern.preparation_orders_count > 0 }"
+                      :title="pattern.preparation_orders_count > 0 ? 'Tidak bisa dihapus, sudah ada preparation order' : 'Hapus'"
                     >
-                      Hapus
+                      <Trash2 :size="16" />
+                      <span>Hapus</span>
                     </button>
                   </div>
                 </td>

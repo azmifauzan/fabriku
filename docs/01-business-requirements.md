@@ -38,27 +38,31 @@ Fabriku adalah aplikasi SaaS (Software as a Service) yang dirancang untuk memban
 **User Story**: Sebagai pemilik usaha, saya ingin membuat template produk dengan kebutuhan bahan agar bisa menghitung biaya produksi dengan akurat.
 
 **Functional Requirements**:
-- Library pola/resep produk:
-  - **Garment**: Pattern untuk mukena, daster, gamis dengan ukuran dan kebutuhan kain/benang
-  - **Kue**: Resep untuk brownies, cookies, cake dengan komposisi bahan dan takaran
-- Bill of Materials (BOM) - daftar bahan dan jumlah yang dibutuhkan
-- Estimasi waktu produksi
-- Persentase waste/sisa standar
+- Library pola/resep produk (template produk):
+  - **Garment**: Pattern untuk mukena, daster, gamis dengan ukuran
+  - **Kue**: Resep untuk brownies, cookies, cake
+  - **Craft**: Template untuk gelang, tas, gantungan kunci
+  - **Cosmetic**: Formula untuk sabun, lotion, lip balm
+- Informasi produk: kode, nama, kategori, tipe produk, deskripsi
 - Foto produk
-- Kategori produk (garment, makanan, dll)
+- **TIDAK ada Bill of Materials (BOM)** - UMKM tidak perlu presisi pabrik
+- Kategori produk (garment, food, craft, cosmetic, other)
 
-### 3. Proses Pemotongan/Persiapan (Cutting/Preparation)
-**User Story**: Sebagai staff produksi, saya ingin mencatat proses persiapan bahan agar dapat mengetahui efisiensi penggunaan bahan.
+### 3. Proses Persiapan (Preparation Process)
+**User Story**: Sebagai staff produksi, saya ingin mencatat proses persiapan bahan dengan sederhana - bahan apa yang dipakai dan jadi berapa pcs.
 
 **Functional Requirements**:
-- Pencatatan proses persiapan berdasarkan pola/resep:
-  - **Garment**: Pemotongan kain berdasarkan pattern
-  - **Kue**: Persiapan/mixing bahan berdasarkan resep
-- Input: bahan baku yang digunakan
-- Output: jumlah hasil persiapan (pieces/batch)
-- Tracking waste/sisa bahan
-- Kalkulasi efisiensi penggunaan bahan
-- Link ke pola/resep library
+- Pencatatan proses persiapan (universal untuk semua kategori):
+  - **Garment**: Pemotongan kain (cutting)
+  - **Kue**: Persiapan/mixing adonan
+  - **Craft**: Assembly preparation komponen
+  - **Cosmetic**: Formulation mixing
+- Input: bahan baku yang digunakan (flexible - pilih material & input quantity manual)
+- Output: jumlah hasil persiapan dengan unit flexible (pieces/kg/batch/liter/dll)
+- **Auto stock deduction** dari materials saat proses selesai
+- Pattern/template optional (bisa prep tanpa pattern)
+- Notes untuk catatan tambahan
+- **TIDAK ada tracking waste/efficiency** - terlalu kompleks untuk UMKM
 
 ### 4. Manajemen Produksi
 **User Story**: Sebagai supervisor produksi, saya ingin melacak proses produksi baik internal maupun eksternal agar dapat mengontrol timeline.

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreMaterialRequest;
 use App\Http\Requests\UpdateMaterialRequest;
 use App\Models\Material;
+use App\Models\MaterialType;
 use Inertia\Inertia;
 
 class MaterialController extends Controller
@@ -39,12 +40,27 @@ class MaterialController extends Controller
 
     public function create()
     {
-        return Inertia::render('Materials/Form');
+        $materialTypes = MaterialType::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['code', 'name']);
+
+        return Inertia::render('Materials/Form', [
+            'materialTypes' => $materialTypes,
+        ]);
     }
 
     public function store(StoreMaterialRequest $request)
     {
-        $material = Material::create($request->safe()->except('attributes'));
+        $data = $request->safe()->except(['attributes', 'quantity']);
+
+        // Map quantity to current_stock
+        if ($request->has('quantity')) {
+            $data['current_stock'] = $request->quantity;
+        }
+
+        $material = Material::create($data);
 
         // Save attributes if provided
         if ($request->has('attributes') && is_array($request->attributes)) {
@@ -75,14 +91,28 @@ class MaterialController extends Controller
     {
         $material->load('materialAttributes');
 
+        $materialTypes = MaterialType::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['code', 'name']);
+
         return Inertia::render('Materials/Form', [
             'material' => $material,
+            'materialTypes' => $materialTypes,
         ]);
     }
 
     public function update(UpdateMaterialRequest $request, Material $material)
     {
-        $material->update($request->safe()->except('attributes'));
+        $data = $request->safe()->except(['attributes', 'quantity']);
+
+        // Map quantity to current_stock
+        if ($request->has('quantity')) {
+            $data['current_stock'] = $request->quantity;
+        }
+
+        $material->update($data);
 
         // Sync attributes
         if ($request->has('attributes')) {

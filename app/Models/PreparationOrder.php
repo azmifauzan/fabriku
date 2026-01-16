@@ -3,36 +3,38 @@
 namespace App\Models;
 
 use App\Models\Scopes\TenantScope;
+use App\Services\MaterialStockService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class CuttingOrder extends Model
+class PreparationOrder extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
         'order_number',
         'pattern_id',
-        'order_date',
-        'target_date',
-        'target_quantity',
+        'prepared_by',
+        'output_quantity',
+        'material_usage',
+        'waste_percentage',
         'status',
-        'cutter_id',
-        'started_at',
-        'completed_at',
+        'preparation_date',
+        'completed_date',
         'notes',
     ];
 
     protected function casts(): array
     {
         return [
-            'order_date' => 'date',
-            'target_date' => 'date',
-            'started_at' => 'date',
-            'completed_at' => 'date',
+            'preparation_date' => 'date',
+            'completed_date' => 'date',
+            'material_usage' => 'array',
+            'waste_percentage' => 'decimal:2',
         ];
     }
 
@@ -40,22 +42,29 @@ class CuttingOrder extends Model
     {
         static::addGlobalScope(new TenantScope);
 
-        static::creating(function (CuttingOrder $order) {
+        static::creating(function (PreparationOrder $order) {
             if (auth()->check() && ! $order->tenant_id) {
                 $order->tenant_id = auth()->user()->tenant_id;
             }
 
             // Auto-generate order number
-            if (! $order->order_number) {
+            if (! $order->order_number && $order->tenant_id) {
                 $year = now()->year;
-                $lastOrder = CuttingOrder::withoutGlobalScope(TenantScope::class)
-                    ->where('tenant_id', auth()->user()->tenant_id)
+                $lastOrder = PreparationOrder::withoutGlobalScope(TenantScope::class)
+                    ->where('tenant_id', $order->tenant_id)
                     ->whereYear('created_at', $year)
                     ->latest('id')
                     ->first();
 
                 $nextNumber = $lastOrder ? ((int) substr($lastOrder->order_number, -3)) + 1 : 1;
-                $order->order_number = sprintf('CO-%d-%03d', $year, $nextNumber);
+                $order->order_number = sprintf('PRP-%d-%03d', $year, $nextNumber);
+            }
+        });
+
+        // Auto deduct stock when status changed to completed
+        static::updating(function (PreparationOrder $order) {
+            if ($order->isDirty('status') && $order->status === 'completed' && $order->getOriginal('status') !== 'completed') {
+                app(MaterialStockService::class)->deductStock($order);
             }
         });
     }
@@ -70,14 +79,9 @@ class CuttingOrder extends Model
         return $this->belongsTo(Pattern::class);
     }
 
-    public function cutter(): BelongsTo
+    public function preparedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'cutter_id');
-    }
-
-    public function results(): HasMany
-    {
-        return $this->hasMany(CuttingResult::class);
+        return $this->belongsTo(Staff::class, 'prepared_by');
     }
 
     public function productionOrders(): HasMany
@@ -107,6 +111,6 @@ class CuttingOrder extends Model
 
     public function canBeDeleted(): bool
     {
-        return $this->status === 'draft';
+        return $this->status === 'draft' && $this->productionOrders()->doesntExist();
     }
 }

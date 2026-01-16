@@ -1261,6 +1261,166 @@ git merge feature/material-management
 
 **Delivery Date**: ~End of January 2026
 
+---
+
+## 🔄 Phase 3.5: Simplify Preparation Process (REFACTORING)
+
+### Background
+After Phase 3 completion, kita menyadari pendekatan BOM (Bill of Materials) terlalu kompleks dan presisi untuk UMKM yang masih manual. Mereka tidak perlu tracking se-detail pabrik.
+
+### Simplified Approach
+**From**: Pattern with BOM → Cutting Order → Cutting Result (efficiency tracking)
+**To**: Pattern (template only) → Preparation Order (simple input-output)
+
+### Changes Overview
+
+#### Database Changes
+1. **DROP Tables** (too complex):
+   - ❌ `pattern_materials` (BOM table)
+   - ❌ `cutting_results` (detailed tracking)
+
+2. **MODIFY `patterns` table**:
+   - ➕ Add `category` field (garment/food/craft/cosmetic/other)
+   - ➖ Remove `estimated_time`
+   - ➖ Remove `standard_waste_percentage`
+   - Result: Simple product template only
+
+3. **RENAME & MODIFY `cutting_orders` → `preparation_orders`**:
+   - More generic naming for all categories
+   - ➕ Add `output_quantity` (DECIMAL)
+   - ➕ Add `output_unit` (VARCHAR - pieces/kg/batch/liter/dll)
+   - ➕ Add `materials_used` (JSONB - flexible material tracking)
+   - ➖ Remove `target_quantity`
+   - ➖ Remove relationship to `material_receipt_id`
+   - ➕ Make `pattern_id` NULLABLE (bisa prep tanpa pattern)
+   - Auto stock deduction from materials_used when completed
+
+#### Backend Changes
+1. **Models**:
+   - Remove `Pattern->materials()` BOM relationship
+   - Rename `CuttingOrder` → `PreparationOrder`
+   - Remove `CuttingResult` model
+   - Add stock deduction logic in `PreparationOrder`
+
+2. **Controllers**:
+   - Rename `CuttingOrderController` → `PreparationOrderController`
+   - Update all CRUD methods
+   - Add MaterialStockService for stock deduction
+
+3. **Routes**:
+   - Change `/cutting-orders` → `/preparation-orders`
+   - Update route names
+
+4. **Tests**:
+   - Update/rewrite 20 tests for new structure
+   - Add tests for stock deduction logic
+   - Test multi-category scenarios
+
+#### Frontend Changes
+1. **Components**:
+   - Remove BOM builder from PatternForm
+   - Rename `CuttingOrders/` → `PreparationOrders/`
+   - Create new PreparationOrderForm with:
+     - Material selector (multiple materials)
+     - Quantity input per material (manual, not from BOM)
+     - Output quantity & unit input
+     - Real-time stock availability check
+     - Auto-calculate which materials will be deducted
+
+2. **Navigation**:
+   - Update sidebar menu items
+   - Change "Cutting Orders" → "Preparation"
+
+#### Implementation Steps
+
+**Step 1: Database Migration** (30 mins)
+```bash
+# Create migrations
+php artisan make:migration add_category_to_patterns_table
+php artisan make:migration rename_cutting_orders_to_preparation_orders
+php artisan make:migration drop_pattern_materials_table
+php artisan make:migration drop_cutting_results_table
+
+# Run migrations
+php artisan migrate
+```
+
+**Step 2: Backend Refactoring** (2-3 hours)
+- Update Pattern model
+- Rename/refactor CuttingOrder → PreparationOrder
+- Create MaterialStockService
+- Update controllers, requests, factories
+- Update seeders
+
+**Step 3: Update Tests** (1-2 hours)
+- Modify existing 20 tests
+- Add new tests for stock deduction
+- Ensure all pass
+
+**Step 4: Frontend Refactoring** (2-3 hours)
+- Simplify PatternForm (remove BOM)
+- Create new PreparationOrderForm
+- Update routes & navigation
+- Build assets
+
+**Step 5: Validation** (1 hour)
+- Run get_errors
+- Run pint
+- Run all tests
+- Manual browser testing
+- Git commit & push
+
+**Total Estimated Time**: 6-9 hours (1 working day)
+
+### Benefits of Simplification
+1. ✅ **Easier for UMKM** - no presisi tracking needed
+2. ✅ **Flexible** - materials_used JSON allows any combination
+3. ✅ **Auto stock deduction** - no manual tracking
+4. ✅ **Multi-category** - works for garment, food, craft, cosmetic
+5. ✅ **Less code** - simpler maintenance
+6. ✅ **Faster data entry** - staff just input what they used
+
+### Multi-Category Examples
+
+**Garment (Cutting)**:
+```json
+{
+  "pattern": "Mukena Jumbo",
+  "materials_used": [
+    {"material_id": 1, "name": "Kain Katun", "quantity": 5, "unit": "meter"},
+    {"material_id": 2, "name": "Benang", "quantity": 2, "unit": "roll"}
+  ],
+  "output": {"quantity": 5, "unit": "pieces"}
+}
+```
+
+**Food (Mixing)**:
+```json
+{
+  "pattern": "Brownies Panggang",
+  "materials_used": [
+    {"material_id": 10, "name": "Tepung", "quantity": 2, "unit": "kg"},
+    {"material_id": 11, "name": "Coklat Bubuk", "quantity": 0.5, "unit": "kg"},
+    {"material_id": 12, "name": "Telur", "quantity": 20, "unit": "butir"}
+  ],
+  "output": {"quantity": 4, "unit": "batch"}
+}
+```
+
+**Craft (Assembly Prep)**:
+```json
+{
+  "pattern": "Gelang Rajut",
+  "materials_used": [
+    {"material_id": 20, "name": "Benang Rajut Merah", "quantity": 50, "unit": "gram"},
+    {"material_id": 21, "name": "Manik-manik", "quantity": 100, "unit": "pcs"}
+  ],
+  "output": {"quantity": 20, "unit": "pieces"}
+}
+```
+
+---
+
 ## Conclusion
 
 MVP ini dirancang untuk dapat diimplementasikan dalam 3 minggu dengan fokus pada core features yang essential. Setelah MVP selesai dan divalidasi dengan user testing, kita dapat iterasi dan menambahkan fitur-fitur advanced di phase berikutnya.

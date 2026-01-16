@@ -73,9 +73,10 @@ class ProductionService
             $order->quantity_good += $batch->quantity_good;
             $order->quantity_reject += $batch->quantity_reject;
 
-            $completed = $order->quantity_produced >= $order->quantity_requested;
-
-            $order->status = $completed ? 'completed' : 'in_progress';
+            // Status will remain 'in_progress' until manually marked as completed
+            if ($order->status !== 'completed') {
+                $order->status = 'in_progress';
+            }
             $order->sent_date = $order->sent_date ?? $batch->production_date;
 
             if ($completed) {

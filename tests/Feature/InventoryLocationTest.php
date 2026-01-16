@@ -175,12 +175,12 @@ it('calculates available capacity correctly', function () {
     \App\Models\InventoryItem::factory()
         ->for($this->tenant)
         ->for($location, 'inventoryLocation')
-        ->create(['current_stock' => 200]);
+        ->create(['stock_quantity' => 200]);
 
     \App\Models\InventoryItem::factory()
         ->for($this->tenant)
         ->for($location, 'inventoryLocation')
-        ->create(['current_stock' => 300]);
+        ->create(['stock_quantity' => 300]);
 
     $location->refresh();
 

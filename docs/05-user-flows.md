@@ -1,7 +1,9 @@
 # User Flows - Fabriku
 
+> **Note**: Dokumen ini menjelaskan alur teknis. Untuk panduan penggunaan aplikasi, lihat **[User Manual](08-user-manual.md)**.
+
 ## Overview
-Dokumen ini menjelaskan alur kerja pengguna (user flows) untuk berbagai proses bisnis di aplikasi Fabriku.
+Dokumen ini menjelaskan alur kerja pengguna (user flows) untuk berbagai proses bisnis di aplikasi Fabriku setelah **Preparation Simplification** (removal of BOM & cutting_results).
 
 ## User Roles & Permissions
 
@@ -78,60 +80,64 @@ Dokumen ini menjelaskan alur kerja pengguna (user flows) untuk berbagai proses b
 
 ---
 
-### Flow 2: Cutting Process
+### Flow 2: Preparation Process (Simplified)
 
 **Actor**: Production Staff
 
 **Precondition**: 
 - Material tersedia di gudang
-- Pola/pattern sudah dibuat
+- Pattern sudah dibuat (optional)
 
-**Steps**:
-1. Navigate to "Produksi" → "Pemotongan" → "Order Baru"
-2. System menampilkan form cutting order
+**New Simplified Flow**:
+
+1. Navigate to "Preparation Order" → "Tambah Preparation"
+2. System menampilkan form preparation order
 3. User input data:
-   - Nomor order (auto-generated)
-   - Pilih material receipt (dari dropdown)
-   - Pilih pola/pattern
-   - Jumlah material yang akan digunakan
-   - Target jumlah pieces
-   - Assign ke operator (opsional)
+   - Nomor order (auto-generated: PRP-2026-001)
+   - Pilih pattern (optional - hanya sebagai referensi)
    - Tanggal order
-   - Catatan
-4. System kalkulasi estimasi:
-   - Estimasi pieces yang akan dihasilkan
-   - Estimasi efisiensi
-5. User click "Buat Order"
+   - Penanggung jawab (staff)
+   - **Materials Used** (Manual Input):
+     - Click "+ Tambah Material"
+     - Pilih material (dropdown shows current stock)
+     - Input quantity yang digunakan
+     - Unit auto-populate dari material
+     - Repeat untuk material lainnya
+   - **Output**:
+     - Output quantity (hasil prep)
+     - Output unit (pieces, kg, batch, dll)
+   - Status (draft, in_progress, completed, cancelled)
+   - Catatan (optional)
+4. System validasi:
+   - Check stock availability
+   - If insufficient → Error, tidak bisa save
+5. User click "Simpan"
 6. System:
-   - Simpan cutting order (status: pending)
-   - Reserve material
+   - Simpan preparation order
+   - **IF status = Completed**:
+     - Auto deduct stock material
+     - Update material current_stock
+   - **IF status = Draft or In Progress**:
+     - Only save order, stock not deducted yet
 7. System redirect ke detail order
 
-**During Cutting**:
-8. Operator start cutting → Click "Mulai Pemotongan"
-9. System update status ke "in_progress" dan catat waktu mulai
+**Status Workflow**:
+- **Draft**: Planning phase, stock NOT deducted
+- **In Progress**: Work started, stock NOT deducted
+- **Completed**: Work done, stock AUTO DEDUCTED ✅
+- **Cancelled**: Order cancelled
 
-**After Cutting**:
-10. Operator click "Selesai & Input Hasil"
-11. System tampilkan form hasil:
-    - Jumlah pieces actual
-    - Jumlah pieces bagus
-    - Jumlah pieces cacat
-    - Sisa material (waste)
-    - Grade kualitas
-    - Catatan
-12. User input hasil dan click "Simpan"
-13. System:
-    - Simpan cutting result
-    - Kalkulasi efisiensi actual
-    - Update status ke "completed"
-    - Kurangi stok material
-    - Generate notification
-14. System redirect ke detail hasil
+**Key Changes from Old Flow**:
+- ❌ No more BOM/pattern_materials table
+- ❌ No more cutting_results table
+- ✅ Direct manual input of materials used
+- ✅ Pattern is optional reference only (not auto-fill)
+- ✅ Simpler, more flexible
+- ✅ Auto deduct on completed (via Observer)
 
 **Postcondition**: 
-- Cutting order completed
-- Material berkurang
+- Preparation order saved
+- Stock deducted (if status = completed)
 - Ready untuk production order
 
 ---
