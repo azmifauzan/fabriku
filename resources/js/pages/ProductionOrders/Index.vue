@@ -6,7 +6,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useBusinessContext } from '@/composables/useBusinessContext'
 import { useSweetAlert } from '@/composables/useSweetAlert'
-import { Eye, Edit, Trash2 } from 'lucide-vue-next'
+import { Eye, Edit, Trash2, Check } from 'lucide-vue-next'
 
 interface Pattern {
   id: number
@@ -355,9 +355,7 @@ const markComplete = async (order: ProductionOrder) => {
                         class="inline-flex items-center justify-center p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
                         title="Tandai selesai"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" :width="18" :height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
+                        <Check :size="18" />
                       </button>
                       <Link
                         v-if="order.status === 'draft'"
