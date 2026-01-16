@@ -188,18 +188,18 @@ const deleteStaff = async (staff: Staff) => {
                     <div class="flex justify-end gap-2">
                       <Link
                         :href="`/staff/${item.id}/edit`"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg font-medium transition-colors"
+                        class="inline-flex items-center justify-center p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                        title="Edit staff"
                       >
-                        <SquarePen :size="16" />
-                        <span>Edit</span>
+                        <SquarePen :size="18" />
                       </Link>
                       <button
                         type="button"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg font-medium transition-colors"
+                        class="inline-flex items-center justify-center p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                         @click="deleteStaff(item)"
+                        title="Hapus staff"
                       >
-                        <Trash2 :size="16" />
-                        <span>Hapus</span>
+                        <Trash2 :size="18" />
                       </button>
                     </div>
                   </td>

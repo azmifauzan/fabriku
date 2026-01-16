@@ -4,6 +4,7 @@ import { ref } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
+import { Eye, Edit, Trash2 } from 'lucide-vue-next';
 
 interface Location {
     id: number;
@@ -223,21 +224,24 @@ const capacityBarClass = (percentage: number) => {
                             <div class="mt-4 flex items-center gap-2">
                                 <Link
                                     :href="`/inventory/locations/${location.id}`"
-                                    class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
+                                    class="inline-flex items-center justify-center p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                    title="Lihat detail lokasi"
                                 >
-                                    Detail
+                                    <Eye :size="18" />
                                 </Link>
                                 <Link
                                     :href="`/inventory/locations/${location.id}/edit`"
-                                    class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-500"
+                                    class="inline-flex items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30 rounded-lg transition-colors"
+                                    title="Edit lokasi"
                                 >
-                                    Edit
+                                    <Edit :size="18" />
                                 </Link>
                                 <button
                                     @click="deleteLocation(location)"
-                                    class="text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-500"
+                                    class="inline-flex items-center justify-center p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                    title="Hapus lokasi"
                                 >
-                                    Hapus
+                                    <Trash2 :size="18" />
                                 </button>
                             </div>
                         </div>

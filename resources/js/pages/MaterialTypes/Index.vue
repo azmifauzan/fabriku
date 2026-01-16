@@ -185,14 +185,16 @@ const deleteMaterialType = async (materialType: MaterialType) => {
                     <div class="flex justify-end gap-2">
                       <Link
                         :href="`/material-types/${materialType.id}/edit`"
-                        class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+                        class="inline-flex items-center justify-center p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                        title="Edit tipe bahan baku"
                       >
                         <SquarePen :size="18" />
                       </Link>
                       <button
                         type="button"
-                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                        class="inline-flex items-center justify-center p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                         @click="deleteMaterialType(materialType)"
+                        title="Hapus tipe bahan baku"
                       >
                         <Trash2 :size="18" />
                       </button>
