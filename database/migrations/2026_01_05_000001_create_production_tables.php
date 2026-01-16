@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('preparation_order_id')->constrained()->cascadeOnDelete();
             $table->enum('type', ['internal', 'external'])->default('internal');
             $table->foreignId('contractor_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->integer('quantity_requested')->default(0);
             $table->integer('quantity_produced')->default(0);
             $table->integer('quantity_good')->default(0);
             $table->integer('quantity_reject')->default(0);
