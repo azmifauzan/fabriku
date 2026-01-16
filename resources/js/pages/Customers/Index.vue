@@ -276,25 +276,25 @@ const getPaymentTermLabel = (term: string) => {
                     <div class="flex justify-end gap-2">
                       <Link
                         :href="`/customers/${customer.id}`"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg font-medium transition-colors"
+                        class="inline-flex items-center justify-center p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                        title="Lihat detail customer"
                       >
-                        <Eye :size="16" />
-                        <span>Detail</span>
+                        <Eye :size="18" />
                       </Link>
                       <Link
                         :href="`/customers/${customer.id}/edit`"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg font-medium transition-colors"
+                        class="inline-flex items-center justify-center p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                        title="Edit customer"
                       >
-                        <Edit :size="16" />
-                        <span>Edit</span>
+                        <Edit :size="18" />
                       </Link>
                       <button
                         type="button"
                         @click="deleteCustomer(customer)"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg font-medium transition-colors"
+                        class="inline-flex items-center justify-center p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                        title="Hapus customer"
                       >
-                        <Trash2 :size="16" />
-                        <span>Hapus</span>
+                        <Trash2 :size="18" />
                       </button>
                     </div>
                   </td>

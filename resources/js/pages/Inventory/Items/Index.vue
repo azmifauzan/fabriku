@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
+import { Eye } from 'lucide-vue-next';
 
 interface Item {
     id: number;
@@ -213,9 +214,10 @@ const isLowStock = (item: Item) => {
                                     <td class="whitespace-nowrap px-6 py-4 text-sm">
                                         <Link
                                             :href="`/inventory/items/${item.id}`"
-                                            class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
+                                            class="inline-flex items-center justify-center p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                            title="Lihat detail item"
                                         >
-                                            Detail
+                                            <Eye :size="18" />
                                         </Link>
                                     </td>
                                 </tr>
