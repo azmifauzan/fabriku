@@ -59,6 +59,8 @@ class SalesOrderController extends Controller
             'stats' => [
                 'total_orders' => SalesOrder::count(),
                 'draft_orders' => SalesOrder::where('status', 'draft')->count(),
+                'pending_orders' => SalesOrder::whereIn('status', ['confirmed', 'processing'])->count(),
+                'completed_orders' => SalesOrder::where('status', 'completed')->count(),
                 'pending_payment' => SalesOrder::where('payment_status', 'unpaid')->count(),
                 'total_revenue' => SalesOrder::where('status', 'completed')->sum('total_amount'),
             ],

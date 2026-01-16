@@ -15,6 +15,7 @@ class MaterialType extends Model
         'tenant_id',
         'code',
         'name',
+        'unit',
         'description',
         'is_active',
         'sort_order',

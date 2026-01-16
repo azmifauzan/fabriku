@@ -37,6 +37,7 @@ class MaterialTypeController extends Controller
         $validated = $request->validate([
             'code' => ['required', 'string', 'max:50', 'unique:material_types,code,NULL,id,tenant_id,'.auth()->user()->tenant_id],
             'name' => ['required', 'string', 'max:255'],
+            'unit' => ['required', 'string', 'max:50'],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
@@ -60,6 +61,7 @@ class MaterialTypeController extends Controller
         $validated = $request->validate([
             'code' => ['required', 'string', 'max:50', 'unique:material_types,code,'.$materialType->id.',id,tenant_id,'.auth()->user()->tenant_id],
             'name' => ['required', 'string', 'max:255'],
+            'unit' => ['required', 'string', 'max:50'],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],

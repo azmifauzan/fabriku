@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('product_name');
             $table->string('product_code')->nullable();
             $table->integer('target_quantity');
-            $table->integer('current_quantity');
+            $table->integer('current_stock');
             $table->integer('reserved_quantity')->default(0);
             $table->integer('minimum_stock')->default(0);
             $table->string('quality_grade')->default('A'); // A, B, Reject

@@ -95,6 +95,10 @@ const getProductTypeLabel = (type: string) => {
 }
 
 const getProductTypeBadge = (type: string) => {
+  if (!type) {
+    return 'bg-gray-100 text-gray-800 dark:bg-gray-800/40 dark:text-gray-300'
+  }
+
   const palette = [
     'bg-purple-100 text-purple-800 dark:bg-purple-800/20 dark:text-purple-300',
     'bg-pink-100 text-pink-800 dark:bg-pink-800/20 dark:text-pink-300',

@@ -133,6 +133,13 @@ Setiap implementasi wajib melalui validasi:
 3. ✅ **Feature Tests** - Pest tests dengan coverage 80%+
 4. ✅ **Browser Tests** - Manual/automated UI testing
 
+## 🗄️ Database Migration Workflow (Dev)
+
+Untuk perubahan schema selama development:
+- Jangan buat migration baru untuk mengubah tabel yang sudah ada.
+- Update migration existing yang paling relevan (biasanya migration `create_*` yang pertama kali membuat tabel).
+- Jalankan `php artisan migrate:fresh` (tambahkan `--seed` jika butuh data awal).
+
 ## 🤝 Contributing
 
 Development mengikuti Laravel best practices dengan focus pada:

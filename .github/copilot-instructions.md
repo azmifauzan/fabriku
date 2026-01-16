@@ -208,6 +208,11 @@ Code is only "complete" when:
 - Stick to existing directory structure; don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
 
+## Database Migrations (Development Workflow)
+- When changing an existing table during development, do **not** create a new “patch” migration.
+- Instead, update the original/earliest relevant migration(s) and run `php artisan migrate:fresh` (and `--seed` if needed).
+- Keep migrations consistent with the current schema expectations so fresh installs/tests match production intent.
+
 ## Frontend Bundling
 - If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
 
