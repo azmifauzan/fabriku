@@ -61,13 +61,13 @@ class DashboardController extends Controller
             ->join('inventory_items', 'sales_order_items.inventory_item_id', '=', 'inventory_items.id')
             ->select(
                 'inventory_items.sku',
-                'inventory_items.name',
+                'inventory_items.product_name as name',
                 DB::raw('SUM(sales_order_items.quantity) as total_sold'),
                 DB::raw('SUM(sales_order_items.subtotal) as total_revenue')
             )
             ->where('sales_orders.tenant_id', $tenantId)
             ->where('sales_orders.order_date', '>=', now()->subDays(30))
-            ->groupBy('inventory_items.id', 'inventory_items.sku', 'inventory_items.name')
+            ->groupBy('inventory_items.id', 'inventory_items.sku', 'inventory_items.product_name')
             ->orderByDesc('total_sold')
             ->limit(5)
             ->get();
