@@ -163,7 +163,7 @@ it('can delete inventory item', function () {
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
-        ->create(['reserved_stock' => 0]);
+        ->create(['reserved_quantity' => 0]);
 
     $response = $this->delete("/inventory/items/{$item->id}");
 
@@ -230,13 +230,13 @@ it('searches items by SKU and name', function () {
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
-        ->create(['sku' => 'ALPHA001', 'name' => 'Alpha Product']);
+        ->create(['sku' => 'ALPHA001', 'product_name' => 'Alpha Product']);
 
     InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
-        ->create(['sku' => 'BETA002', 'name' => 'Beta Product']);
+        ->create(['sku' => 'BETA002', 'product_name' => 'Beta Product']);
 
     $response = $this->get('/inventory/items?search=ALPHA');
 
@@ -253,7 +253,7 @@ it('identifies low stock items correctly', function () {
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
         ->create([
-            'stock_quantity' => 5,
+            'current_quantity' => 5,
             'minimum_stock' => 10,
         ]);
 
@@ -262,7 +262,7 @@ it('identifies low stock items correctly', function () {
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
         ->create([
-            'stock_quantity' => 50,
+            'current_quantity' => 50,
             'minimum_stock' => 10,
         ]);
 
@@ -276,8 +276,8 @@ it('calculates available stock correctly', function () {
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
         ->create([
-            'stock_quantity' => 100,
-            'reserved_stock' => 25,
+            'current_quantity' => 100,
+            'reserved_quantity' => 25,
         ]);
 
     expect($item->available_stock)->toBe(75);
@@ -293,23 +293,23 @@ it('handles stock movements and tracking', function () {
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
         ->create([
-            'stock_quantity' => 100,
-            'reserved_stock' => 0,
+            'current_quantity' => 100,
+            'reserved_quantity' => 0,
         ]);
 
     // Test stock reservation
-    $item->increment('reserved_stock', 20);
+    $item->increment('reserved_quantity', 20);
     $item->refresh();
 
     expect($item->available_stock)->toBe(80);
-    expect($item->reserved_stock)->toBe(20);
+    expect($item->reserved_quantity)->toBe(20);
 
     // Test stock consumption
-    $item->decrement('stock_quantity', 30);
-    $item->decrement('reserved_stock', 20);
+    $item->decrement('current_quantity', 30);
+    $item->decrement('reserved_quantity', 20);
     $item->refresh();
 
-    expect($item->stock_quantity)->toBe(70);
-    expect($item->reserved_stock)->toBe(0);
+    expect($item->current_quantity)->toBe(70);
+    expect($item->reserved_quantity)->toBe(0);
     expect($item->available_stock)->toBe(70);
 });
