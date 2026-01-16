@@ -216,7 +216,7 @@ it('can delete a draft sales order', function () {
     $response = $this->delete(route('sales-orders.destroy', $order));
 
     $response->assertRedirect();
-    $this->assertDatabaseMissing('sales_orders', ['id' => $order->id]);
+    $this->assertSoftDeleted('sales_orders', ['id' => $order->id]);
 });
 
 it('cannot delete completed sales order', function () {
