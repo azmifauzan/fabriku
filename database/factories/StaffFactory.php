@@ -20,12 +20,10 @@ class StaffFactory extends Factory
             'tenant_id' => \App\Models\Tenant::factory(),
             'code' => fake()->unique()->numerify('STF-###'),
             'name' => fake()->name(),
-            'role' => fake()->randomElement(['production', 'quality_control', 'packaging', 'warehouse', 'supervisor']),
+            'position' => fake()->randomElement(['production', 'quality_control', 'packaging', 'warehouse', 'supervisor']),
             'phone' => fake()->phoneNumber(),
             'email' => fake()->unique()->safeEmail(),
-            'employment_type' => fake()->randomElement(['full_time', 'part_time', 'freelance']),
-            'status' => 'active',
-            'notes' => fake()->optional()->sentence(),
+            'is_active' => true,
         ];
     }
 }

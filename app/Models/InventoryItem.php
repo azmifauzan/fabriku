@@ -21,7 +21,7 @@ class InventoryItem extends Model
         'product_name',
         'product_code',
         'target_quantity',
-        'current_stock',
+        'current_quantity',
         'reserved_quantity',
         'minimum_stock',
         'quality_grade',
@@ -33,10 +33,19 @@ class InventoryItem extends Model
         'notes',
     ];
 
+    protected $appends = [
+        'current_stock',
+        'reserved_stock',
+        'inventory_location_id',
+        'name',
+        'pattern',
+        'batch_number',
+        'expiry_date',
+    ];
+
     protected function casts(): array
     {
         return [
-            'attributes' => 'array',
             'unit_cost' => 'decimal:2',
             'selling_price' => 'decimal:2',
             'production_date' => 'date',
@@ -75,11 +84,6 @@ class InventoryItem extends Model
         return $this->belongsTo(Tenant::class);
     }
 
-    public function pattern(): BelongsTo
-    {
-        return $this->belongsTo(Pattern::class);
-    }
-
     public function productionOrder(): BelongsTo
     {
         return $this->belongsTo(ProductionOrder::class);
@@ -98,59 +102,54 @@ class InventoryItem extends Model
     // Helper methods
     public function getAvailableStockAttribute(): int
     {
-        return max(0, $this->current_stock - $this->reserved_quantity);
+        return max(0, $this->current_quantity - $this->reserved_quantity);
     }
 
     public function getIsLowStockAttribute(): bool
     {
-        return $this->current_stock <= $this->minimum_stock;
+        return $this->current_quantity <= $this->minimum_stock;
     }
 
     public function getTotalValueAttribute(): float
     {
-        return $this->current_stock * $this->unit_cost;
+        return $this->current_quantity * $this->unit_cost;
     }
 
     public function isLowStock(): bool
     {
-        return $this->current_stock <= $this->minimum_stock;
+        return $this->current_quantity <= $this->minimum_stock;
     }
 
     public function isExpiringSoon(int $days = 7): bool
     {
-        if (! $this->expiry_date) {
+        if (! $this->expired_date) {
             return false;
         }
 
-        return $this->expiry_date->diffInDays(now()) <= $days;
+        return $this->expired_date->diffInDays(now()) <= $days;
     }
 
     public function isExpired(): bool
     {
-        if (! $this->expiry_date) {
+        if (! $this->expired_date) {
             return false;
         }
 
-        return $this->expiry_date->isPast();
+        return $this->expired_date->isPast();
     }
 
     public function getDaysUntilExpiryAttribute(): ?int
     {
-        if (! $this->expiry_date) {
+        if (! $this->expired_date) {
             return null;
         }
 
-        return max(0, $this->expiry_date->diffInDays(now()));
+        return max(0, $this->expired_date->diffInDays(now()));
     }
 
     public function getCategoryLabelAttribute(): string
     {
-        return match ($this->category) {
-            'garment' => 'Garment',
-            'food' => 'Makanan',
-            'craft' => 'Kerajinan',
-            default => 'Lainnya',
-        };
+        return $this->tenant?->getCategoryLabel() ?? 'Lainnya';
     }
 
     public function getQualityGradeLabelAttribute(): string
@@ -199,28 +198,43 @@ class InventoryItem extends Model
 
     public function deductStock(int $quantity): bool
     {
-        if ($this->current_stock < $quantity) {
+        if ($this->current_quantity < $quantity) {
             return false;
         }
 
-        $this->decrement('current_stock', $quantity);
+        $this->decrement('current_quantity', $quantity);
 
         return true;
+    }
+
+    public function getCurrentStockAttribute(): int
+    {
+        return (int) ($this->attributes['current_quantity'] ?? 0);
+    }
+
+    public function setCurrentStockAttribute(int $value): void
+    {
+        $this->attributes['current_quantity'] = $value;
+    }
+
+    public function getReservedStockAttribute(): int
+    {
+        return (int) ($this->attributes['reserved_quantity'] ?? 0);
+    }
+
+    public function setReservedStockAttribute(int $value): void
+    {
+        $this->attributes['reserved_quantity'] = $value;
     }
 
     // Static methods
     public static function generateSku(InventoryItem $item): string
     {
-        $prefix = match ($item->category) {
-            'garment' => 'GRM',
-            'food' => 'FOOD',
-            'craft' => 'CRF',
-            default => 'ITM',
-        };
+        $count = static::withoutGlobalScope(TenantScope::class)
+            ->where('tenant_id', $item->tenant_id)
+            ->count() + 1;
 
-        $count = static::where('category', $item->category)->count() + 1;
-
-        return $prefix.'-'.str_pad($count, 6, '0', STR_PAD_LEFT);
+        return 'INV-'.str_pad($count, 6, '0', STR_PAD_LEFT);
     }
 
     // Scopes
@@ -231,7 +245,9 @@ class InventoryItem extends Model
 
     public function scopeByCategory($query, string $category)
     {
-        return $query->where('category', $category);
+        return $query->whereHas('tenant', function ($tenantQuery) use ($category) {
+            $tenantQuery->where('business_category', $category);
+        });
     }
 
     public function scopeExpiring($query, int $days = 7)
@@ -249,7 +265,42 @@ class InventoryItem extends Model
 
     public function scopeLowStock($query)
     {
-        return $query->whereRaw('current_stock <= target_quantity');
+        return $query->whereColumn('current_quantity', '<=', 'minimum_stock');
+    }
+
+    public function getInventoryLocationIdAttribute(): ?int
+    {
+        return $this->location_id;
+    }
+
+    public function setInventoryLocationIdAttribute(?int $value): void
+    {
+        $this->attributes['location_id'] = $value;
+    }
+
+    public function getNameAttribute(): string
+    {
+        return (string) ($this->product_name ?? '');
+    }
+
+    public function setNameAttribute(string $value): void
+    {
+        $this->attributes['product_name'] = $value;
+    }
+
+    public function getPatternAttribute(): ?Pattern
+    {
+        return $this->productionOrder?->preparationOrder?->pattern;
+    }
+
+    public function getBatchNumberAttribute(): ?string
+    {
+        return null;
+    }
+
+    public function getExpiryDateAttribute(): mixed
+    {
+        return $this->expired_date;
     }
 
     public function scopeInLocation($query, int $locationId)

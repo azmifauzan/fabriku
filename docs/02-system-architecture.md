@@ -141,6 +141,15 @@ app/
 
 **Multi-Tenancy Strategy**: Database per tenant (isolated data)
 
+#### Database Migration Workflow (Development)
+
+Selama fase development (sebelum production), perubahan schema mengikuti aturan berikut:
+- Jangan buat migration baru untuk mengubah tabel yang sudah ada.
+- Update migration existing yang paling relevan (biasanya migration `create_*` yang pertama kali membuat tabel).
+- Selalu validasi dengan `php artisan migrate:fresh` (tambahkan `--seed` jika butuh demo data).
+
+Tujuannya: memastikan fresh install & test environment selalu konsisten dengan schema terbaru.
+
 **Core Tables**:
 1. **tenants** - Tenant/organization information
 2. **users** - User accounts

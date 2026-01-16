@@ -69,7 +69,7 @@ class SalesOrderController extends Controller
 
     public function show(SalesOrder $salesOrder)
     {
-        $salesOrder->load(['customer', 'items.inventoryItem.inventoryLocation', 'items.inventoryItem.pattern']);
+        $salesOrder->load(['customer', 'items.inventoryItem.inventoryLocation', 'items.inventoryItem.productionOrder.preparationOrder.pattern']);
 
         return Inertia::render('SalesOrders/Show', [
             'order' => $salesOrder,
@@ -80,10 +80,10 @@ class SalesOrderController extends Controller
     {
         return Inertia::render('SalesOrders/Create', [
             'customers' => Customer::where('is_active', true)->orderBy('name')->get(['id', 'code', 'name', 'type', 'discount_percentage']),
-            'inventoryItems' => InventoryItem::with(['inventoryLocation', 'pattern'])
+            'inventoryItems' => InventoryItem::with(['inventoryLocation', 'productionOrder.preparationOrder.pattern'])
                 ->where('status', 'available')
-                ->whereColumn('current_stock', '>', 'reserved_stock')
-                ->get(['id', 'sku', 'pattern_id', 'current_stock', 'reserved_stock', 'selling_price', 'inventory_location_id']),
+                ->whereColumn('current_quantity', '>', 'reserved_quantity')
+                ->get(['id', 'sku', 'production_order_id', 'location_id', 'current_quantity', 'reserved_quantity', 'selling_price', 'product_name', 'product_code']),
         ]);
     }
 
@@ -165,10 +165,10 @@ class SalesOrderController extends Controller
         return Inertia::render('SalesOrders/Edit', [
             'salesOrder' => $salesOrder,
             'customers' => Customer::where('is_active', true)->orderBy('name')->get(['id', 'code', 'name', 'type', 'discount_percentage']),
-            'inventoryItems' => InventoryItem::with(['inventoryLocation', 'pattern'])
+            'inventoryItems' => InventoryItem::with(['inventoryLocation', 'productionOrder.preparationOrder.pattern'])
                 ->where('status', 'available')
-                ->whereColumn('current_stock', '>', 'reserved_stock')
-                ->get(['id', 'sku', 'pattern_id', 'current_stock', 'reserved_stock', 'selling_price', 'inventory_location_id']),
+                ->whereColumn('current_quantity', '>', 'reserved_quantity')
+                ->get(['id', 'sku', 'production_order_id', 'location_id', 'current_quantity', 'reserved_quantity', 'selling_price', 'product_name', 'product_code']),
         ]);
     }
 

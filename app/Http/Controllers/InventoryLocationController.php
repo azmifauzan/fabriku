@@ -53,7 +53,7 @@ class InventoryLocationController extends Controller
     {
         $location->load([
             'inventoryItems' => function ($query) {
-                $query->with('pattern')->latest()->limit(10);
+                $query->with('productionOrder.preparationOrder.pattern')->latest()->limit(10);
             },
         ]);
 
