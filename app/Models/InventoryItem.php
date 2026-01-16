@@ -253,7 +253,7 @@ class InventoryItem extends Model
 
     public function scopeInLocation($query, int $locationId)
     {
-        return $query->where('inventory_location_id', $locationId);
+        return $query->where('location_id', $locationId);
     }
 
     public function scopeByQualityGrade($query, string $grade)

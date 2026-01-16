@@ -16,6 +16,7 @@ class Contractor extends Model
 
     protected $fillable = [
         'tenant_id',
+        'code',
         'name',
         'contact_person',
         'phone',
@@ -45,7 +46,23 @@ class Contractor extends Model
             if (! $contractor->tenant_id) {
                 $contractor->tenant_id = auth()->user()->tenant_id;
             }
+            
+            if (empty($contractor->code)) {
+                $contractor->code = self::generateCode();
+            }
         });
+    }
+    
+    public static function generateCode(): string
+    {
+        $lastContractor = self::withoutGlobalScope(TenantScope::class)
+            ->where('tenant_id', auth()->user()->tenant_id)
+            ->latest('id')
+            ->first();
+
+        $nextNumber = $lastContractor ? (int) substr($lastContractor->code, -4) + 1 : 1;
+
+        return 'CNT-'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 
     // Relationships
