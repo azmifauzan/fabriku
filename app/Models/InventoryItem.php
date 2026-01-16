@@ -21,7 +21,7 @@ class InventoryItem extends Model
         'product_name',
         'product_code',
         'target_quantity',
-        'current_quantity',
+        'current_stock',
         'reserved_quantity',
         'minimum_stock',
         'quality_grade',
@@ -98,22 +98,22 @@ class InventoryItem extends Model
     // Helper methods
     public function getAvailableStockAttribute(): int
     {
-        return max(0, $this->current_quantity - $this->reserved_quantity);
+        return max(0, $this->current_stock - $this->reserved_quantity);
     }
 
     public function getIsLowStockAttribute(): bool
     {
-        return $this->current_quantity <= $this->minimum_stock;
+        return $this->current_stock <= $this->minimum_stock;
     }
 
     public function getTotalValueAttribute(): float
     {
-        return $this->current_quantity * $this->unit_cost;
+        return $this->current_stock * $this->unit_cost;
     }
 
     public function isLowStock(): bool
     {
-        return $this->current_quantity <= $this->minimum_stock;
+        return $this->current_stock <= $this->minimum_stock;
     }
 
     public function isExpiringSoon(int $days = 7): bool
@@ -199,11 +199,11 @@ class InventoryItem extends Model
 
     public function deductStock(int $quantity): bool
     {
-        if ($this->current_quantity < $quantity) {
+        if ($this->current_stock < $quantity) {
             return false;
         }
 
-        $this->decrement('current_quantity', $quantity);
+        $this->decrement('current_stock', $quantity);
 
         return true;
     }
@@ -249,7 +249,7 @@ class InventoryItem extends Model
 
     public function scopeLowStock($query)
     {
-        return $query->whereRaw('current_quantity <= target_quantity');
+        return $query->whereRaw('current_stock <= target_quantity');
     }
 
     public function scopeInLocation($query, int $locationId)

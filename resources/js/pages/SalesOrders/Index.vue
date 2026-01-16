@@ -194,7 +194,7 @@
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 <tr
-                                    v-for="order in salesOrders.data"
+                                    v-for="order in orders.data"
                                     :key="order.id"
                                     class="hover:bg-gray-50 dark:hover:bg-gray-700"
                                 >
@@ -283,26 +283,26 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div v-if="salesOrders.links.length > 3" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                    <div v-if="orders.links.length > 3" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                             <div class="text-sm text-gray-700 dark:text-gray-300">
-                                Menampilkan {{ salesOrders.from }} sampai {{ salesOrders.to }} dari {{ salesOrders.total }} data
+                                Menampilkan {{ orders.from }} sampai {{ orders.to }} dari {{ orders.total }} data
                             </div>
                             <div class="flex items-center gap-2">
                                 <Link
-                                    v-if="salesOrders.current_page > 1"
-                                    :href="`/sales-orders?page=${salesOrders.current_page - 1}`"
+                                    v-if="orders.current_page > 1"
+                                    :href="`/sales-orders?page=${orders.current_page - 1}`"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all"
                                 >
                                     ← Prev
                                 </Link>
-                                <template v-for="page in salesOrders.last_page" :key="page">
+                                <template v-for="page in orders.last_page" :key="page">
                                     <Link
-                                        v-if="Math.abs(page - salesOrders.current_page) <= 2 || page === 1 || page === salesOrders.last_page"
+                                        v-if="Math.abs(page - orders.current_page) <= 2 || page === 1 || page === orders.last_page"
                                         :href="`/sales-orders?page=${page}`"
                                         :class="[
                                             'px-4 py-2 text-sm font-medium rounded-lg transition-all',
-                                            page === salesOrders.current_page
+                                            page === orders.current_page
                                                 ? 'bg-indigo-600 text-white shadow-sm'
                                                 : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                                         ]"
@@ -310,15 +310,15 @@
                                         {{ page }}
                                     </Link>
                                     <span
-                                        v-else-if="Math.abs(page - salesOrders.current_page) === 3"
+                                        v-else-if="Math.abs(page - orders.current_page) === 3"
                                         class="px-2 text-gray-500 dark:text-gray-400"
                                     >
                                         ...
                                     </span>
                                 </template>
                                 <Link
-                                    v-if="salesOrders.current_page < salesOrders.last_page"
-                                    :href="`/sales-orders?page=${salesOrders.current_page + 1}`"
+                                    v-if="orders.current_page < orders.last_page"
+                                    :href="`/sales-orders?page=${orders.current_page + 1}`"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all"
                                 >
                                     Next →
@@ -340,7 +340,7 @@ import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 
 const props = defineProps({
-    salesOrders: Object,
+    orders: Object,
     stats: Object,
     filters: Object
 });

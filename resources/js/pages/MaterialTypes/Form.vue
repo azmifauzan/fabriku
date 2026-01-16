@@ -8,6 +8,7 @@ interface MaterialType {
   id?: number
   code: string
   name: string
+  unit: string
   description: string | null
   sort_order: number
   is_active: boolean
@@ -20,6 +21,7 @@ const props = defineProps<{
 const form = useForm({
   code: props.materialType?.code || '',
   name: props.materialType?.name || '',
+  unit: props.materialType?.unit || '',
   description: props.materialType?.description || '',
   sort_order: props.materialType?.sort_order || 0,
   is_active: props.materialType?.is_active ?? true,
@@ -85,6 +87,16 @@ const isEditing = !!props.materialType?.id
                 placeholder="Contoh: Kain"
                 :required="true"
                 :error="form.errors.name"
+              />
+
+              <FormField
+                v-model="form.unit"
+                label="Satuan"
+                type="text"
+                placeholder="Contoh: meter, kg, pcs"
+                :required="true"
+                :error="form.errors.unit"
+                hint="Satuan default untuk jenis bahan ini"
               />
 
               <div class="md:col-span-2">
