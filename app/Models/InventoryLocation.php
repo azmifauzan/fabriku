@@ -7,15 +7,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class InventoryLocation extends Model
 {
     /** @use HasFactory<\Database\Factories\InventoryLocationFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
+        'code',
         'name',
+        'type',
         'zone',
         'rack',
         'description',
@@ -43,7 +46,23 @@ class InventoryLocation extends Model
             if (! $location->tenant_id) {
                 $location->tenant_id = auth()->user()->tenant_id;
             }
+            
+            if (empty($location->code)) {
+                $location->code = self::generateCode();
+            }
         });
+    }
+    
+    public static function generateCode(): string
+    {
+        $lastLocation = self::withoutGlobalScope(TenantScope::class)
+            ->where('tenant_id', auth()->user()->tenant_id)
+            ->latest('id')
+            ->first();
+
+        $nextNumber = $lastLocation ? (int) substr($lastLocation->code, -4) + 1 : 1;
+
+        return 'LOC-'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 
     // Relationships
@@ -54,7 +73,7 @@ class InventoryLocation extends Model
 
     public function inventoryItems(): HasMany
     {
-        return $this->hasMany(InventoryItem::class);
+        return $this->hasMany(InventoryItem::class, 'location_id');
     }
 
     // Helper methods
@@ -69,14 +88,14 @@ class InventoryLocation extends Model
             return PHP_INT_MAX; // Unlimited capacity
         }
 
-        $usedCapacity = $this->inventoryItems()->sum('current_stock');
+        $usedCapacity = $this->inventoryItems()->sum('current_quantity');
 
         return max(0, $this->capacity - $usedCapacity);
     }
 
     public function getUsedCapacityAttribute(): int
     {
-        return $this->inventoryItems()->sum('current_stock');
+        return $this->inventoryItems()->sum('current_quantity');
     }
 
     public function isAvailable(): bool
@@ -105,7 +124,7 @@ class InventoryLocation extends Model
         return $query->active()
             ->where(function ($q) {
                 $q->whereNull('capacity')
-                    ->orWhereRaw('capacity > (SELECT COALESCE(SUM(current_stock), 0) FROM inventory_items WHERE inventory_location_id = inventory_locations.id)');
+                    ->orWhereRaw('capacity > (SELECT COALESCE(SUM(current_quantity), 0) FROM inventory_items WHERE location_id = inventory_locations.id)');
             });
     }
 }

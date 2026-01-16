@@ -104,7 +104,7 @@ test('can delete contractor without production orders', function () {
     $response = $this->delete(route('contractors.destroy', $contractor));
 
     $response->assertRedirect(route('contractors.index'));
-    $this->assertDatabaseMissing('contractors', ['id' => $contractor->id]);
+    $this->assertSoftDeleted('contractors', ['id' => $contractor->id]);
 });
 
 test('cannot delete contractor with production orders', function () {

@@ -24,6 +24,8 @@ class SalesOrderItemFactory extends Factory
         return [
             'sales_order_id' => \App\Models\SalesOrder::factory(),
             'inventory_item_id' => \App\Models\InventoryItem::factory(),
+            'product_name' => fake()->words(3, true),
+            'sku' => strtoupper(fake()->bothify('SKU-####-???')),
             'quantity' => $quantity,
             'unit_price' => $unitPrice,
             'discount_amount' => $discountAmount,

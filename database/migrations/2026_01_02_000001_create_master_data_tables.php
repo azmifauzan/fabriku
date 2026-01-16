@@ -58,6 +58,11 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
+            $table->string('city')->nullable();
+            $table->string('province')->nullable();
+            $table->decimal('discount_percentage', 5, 2)->default(0);
+            $table->string('payment_term')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();

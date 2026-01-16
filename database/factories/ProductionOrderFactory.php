@@ -13,12 +13,15 @@ class ProductionOrderFactory extends Factory
     {
         $estimatedCompletion = fake()->optional(0.7)->dateTimeBetween('now', '+2 weeks');
         $type = fake()->randomElement(['internal', 'external']);
+        $quantityRequested = fake()->numberBetween(50, 500);
 
         return [
             'tenant_id' => Tenant::factory(),
+            'order_number' => strtoupper(fake()->unique()->bothify('PO-####-####')),
             'preparation_order_id' => PreparationOrder::factory(),
             'type' => $type,
             'contractor_id' => $type === 'external' ? Contractor::factory() : null,
+            'quantity_requested' => $quantityRequested,
             'quantity_produced' => 0,
             'quantity_good' => 0,
             'quantity_reject' => 0,

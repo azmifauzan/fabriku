@@ -14,10 +14,15 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->string('code')->unique();
             $table->string('name');
+            $table->string('zone')->nullable(); // A, B, C, D, E etc
+            $table->string('rack')->nullable();
             $table->string('type')->default('rack'); // rack, shelf, bin, etc
             $table->integer('capacity')->nullable();
+            $table->enum('status', ['active', 'inactive', 'maintenance'])->default('active');
             $table->text('description')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['tenant_id', 'name']);
         });
@@ -34,10 +39,12 @@ return new class extends Migration
             $table->integer('target_quantity');
             $table->integer('current_quantity');
             $table->integer('reserved_quantity')->default(0);
+            $table->integer('minimum_stock')->default(0);
             $table->string('quality_grade')->default('A'); // A, B, Reject
+            $table->enum('status', ['available', 'reserved', 'damaged', 'expired'])->default('available');
             $table->decimal('unit_cost', 15, 2);
             $table->decimal('selling_price', 15, 2)->nullable();
-            $table->date('production_date');
+            $table->date('production_date')->nullable();
             $table->date('expired_date')->nullable(); // for food products
             $table->text('notes')->nullable();
             $table->timestamps();

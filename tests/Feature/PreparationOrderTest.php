@@ -69,7 +69,7 @@ test('auto generates order number', function () {
         'order_number' => null,
     ]);
 
-    expect($order->order_number)->toMatch('/^PRP-\d{4}-\d{3}$/');
+    expect($order->order_number)->toMatch('/^PRP-\d{4}-\d{4}$/');
 });
 
 test('auto deducts material stock when completed', function () {
@@ -80,7 +80,7 @@ test('auto deducts material stock when completed', function () {
 
     $order = PreparationOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
-        'materials_used' => [
+        'material_usage' => [
             [
                 'material_id' => $material->id,
                 'quantity' => 10,
@@ -153,11 +153,11 @@ test('can update preparation order', function () {
 
     $response = $this->put("/preparation-orders/{$order->id}", [
         'pattern_id' => $order->pattern_id,
-        'order_date' => $order->order_date->toDateString(),
+        'order_date' => $order->preparation_date->toDateString(),
         'prepared_by' => $order->prepared_by,
         'output_quantity' => 20,
         'output_unit' => 'pieces',
-        'materials_used' => [
+        'material_usage' => [
             [
                 'material_id' => $material->id,
                 'material_name' => $material->name,

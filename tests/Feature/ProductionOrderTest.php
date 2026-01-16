@@ -124,8 +124,6 @@ test('can update production order when status allows', function () {
         'preparation_order_id' => $order->preparation_order_id,
         'type' => $order->type,
         'contractor_id' => $order->contractor_id,
-        'requested_date' => $order->requested_date->format('Y-m-d'),
-        'promised_date' => $order->promised_date?->format('Y-m-d'),
         'quantity_requested' => 200,
         'status' => 'pending',
         'priority' => 'high',
@@ -150,8 +148,6 @@ test('cannot update production order when completed', function () {
         'preparation_order_id' => $order->preparation_order_id,
         'type' => $order->type,
         'contractor_id' => $order->contractor_id,
-        'requested_date' => $order->requested_date->format('Y-m-d'),
-        'promised_date' => $order->promised_date?->format('Y-m-d'),
         'quantity_requested' => 200,
         'status' => 'completed',
         'priority' => 'normal',
@@ -171,7 +167,7 @@ test('can delete production order when status is draft and no batches', function
     $response = $this->delete(route('production-orders.destroy', $order));
 
     $response->assertRedirect(route('production-orders.index'));
-    $this->assertDatabaseMissing('production_orders', ['id' => $order->id]);
+    $this->assertSoftDeleted('production_orders', ['id' => $order->id]);
 });
 
 test('cannot delete production order with batches', function () {

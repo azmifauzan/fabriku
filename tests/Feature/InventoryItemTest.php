@@ -77,17 +77,28 @@ it('can create new inventory item', function () {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('inventory_items', array_merge($itemData, [
+    $this->assertDatabaseHas('inventory_items', [
+        'production_order_id' => $this->productionOrder->id,
+        'sku' => 'TEST001',
+        'product_name' => 'Test Product',
+        'location_id' => $this->location->id,
+        'target_quantity' => 100,
+        'current_quantity' => 95,
+        'minimum_stock' => 10,
+        'unit_cost' => 25.50,
+        'selling_price' => 45.00,
+        'quality_grade' => 'grade_a',
+        'status' => 'available',
         'tenant_id' => $this->tenant->id,
-    ]));
+    ]);
 });
 
 it('validates required fields when creating item', function () {
     $response = $this->post('/inventory/items', []);
 
     $response->assertSessionHasErrors([
-        'production_order_id', 'sku', 'name',
-        'location_id', 'target_quantity', 'stock_quantity', 'unit_cost',
+        'production_order_id', 'sku', 'product_name',
+        'location_id', 'target_quantity', 'current_quantity', 'unit_cost', 'status',
     ]);
 });
 
@@ -139,8 +150,8 @@ it('can update inventory item', function () {
     $this->assertDatabaseHas('inventory_items', [
         'id' => $item->id,
         'tenant_id' => $this->tenant->id,
-        'name' => 'Updated Product Name',
-        'stock_quantity' => 200,
+        'product_name' => 'Updated Product Name',
+        'current_quantity' => 200,
         'minimum_stock' => 20,
         'quality_grade' => 'grade_b',
         'status' => 'reserved',
@@ -152,13 +163,13 @@ it('can delete inventory item', function () {
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
-        ->create(['reserved_stock' => 0]);
+        ->create(['reserved_quantity' => 0]);
 
     $response = $this->delete("/inventory/items/{$item->id}");
 
     $response->assertRedirect();
 
-    $this->assertDatabaseMissing('inventory_items', [
+    $this->assertSoftDeleted('inventory_items', [
         'id' => $item->id,
     ]);
 });
@@ -219,13 +230,13 @@ it('searches items by SKU and name', function () {
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
-        ->create(['sku' => 'ALPHA001', 'name' => 'Alpha Product']);
+        ->create(['sku' => 'ALPHA001', 'product_name' => 'Alpha Product']);
 
     InventoryItem::factory()
         ->for($this->tenant)
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
-        ->create(['sku' => 'BETA002', 'name' => 'Beta Product']);
+        ->create(['sku' => 'BETA002', 'product_name' => 'Beta Product']);
 
     $response = $this->get('/inventory/items?search=ALPHA');
 
@@ -242,7 +253,7 @@ it('identifies low stock items correctly', function () {
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
         ->create([
-            'stock_quantity' => 5,
+            'current_quantity' => 5,
             'minimum_stock' => 10,
         ]);
 
@@ -251,7 +262,7 @@ it('identifies low stock items correctly', function () {
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
         ->create([
-            'stock_quantity' => 50,
+            'current_quantity' => 50,
             'minimum_stock' => 10,
         ]);
 
@@ -265,8 +276,8 @@ it('calculates available stock correctly', function () {
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
         ->create([
-            'stock_quantity' => 100,
-            'reserved_stock' => 25,
+            'current_quantity' => 100,
+            'reserved_quantity' => 25,
         ]);
 
     expect($item->available_stock)->toBe(75);
@@ -282,23 +293,23 @@ it('handles stock movements and tracking', function () {
         ->for($this->location, 'inventoryLocation')
         ->for($this->productionOrder)
         ->create([
-            'stock_quantity' => 100,
-            'reserved_stock' => 0,
+            'current_quantity' => 100,
+            'reserved_quantity' => 0,
         ]);
 
     // Test stock reservation
-    $item->increment('reserved_stock', 20);
+    $item->increment('reserved_quantity', 20);
     $item->refresh();
 
     expect($item->available_stock)->toBe(80);
-    expect($item->reserved_stock)->toBe(20);
+    expect($item->reserved_quantity)->toBe(20);
 
     // Test stock consumption
-    $item->decrement('stock_quantity', 30);
-    $item->decrement('reserved_stock', 20);
+    $item->decrement('current_quantity', 30);
+    $item->decrement('reserved_quantity', 20);
     $item->refresh();
 
-    expect($item->stock_quantity)->toBe(70);
-    expect($item->reserved_stock)->toBe(0);
+    expect($item->current_quantity)->toBe(70);
+    expect($item->reserved_quantity)->toBe(0);
     expect($item->available_stock)->toBe(70);
 });
