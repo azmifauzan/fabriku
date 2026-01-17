@@ -1,61 +1,54 @@
-import { computed } from 'vue'
-import { usePage } from '@inertiajs/vue3'
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-type TerminologyKey =
-  | 'material'
-  | 'pattern'
-  | 'preparation'
-  | 'preparation_order'
-  | 'production'
-  | 'production_order'
-  | 'contractor'
+type TerminologyKey = 'material' | 'pattern' | 'preparation' | 'preparation_order' | 'production' | 'production_order' | 'contractor';
 
 type TenantProps = {
-  business_category?: string | null
-  category_label?: string | null
-  terminology?: Partial<Record<TerminologyKey, string>>
-  category_config?: {
-    product_types?: Record<string, string>
-    sizes?: string[]
-  } | null
-} | null
+    business_category?: string | null;
+    category_label?: string | null;
+    terminology?: Partial<Record<TerminologyKey, string>>;
+    category_config?: {
+        product_types?: Record<string, string>;
+        sizes?: string[];
+    } | null;
+} | null;
 
 export function useBusinessContext() {
-  const page = usePage<{ tenant?: TenantProps }>()
+    const page = usePage<{ tenant?: TenantProps }>();
 
-  const tenant = computed(() => page.props.tenant ?? null)
+    const tenant = computed(() => page.props.tenant ?? null);
 
-  const terminology = computed<Partial<Record<TerminologyKey, string>>>(() => {
-    return tenant.value?.terminology ?? {}
-  })
+    const terminology = computed<Partial<Record<TerminologyKey, string>>>(() => {
+        return tenant.value?.terminology ?? {};
+    });
 
-  const categoryConfig = computed(() => {
-    return tenant.value?.category_config ?? null
-  })
+    const categoryConfig = computed(() => {
+        return tenant.value?.category_config ?? null;
+    });
 
-  const productTypes = computed<Record<string, string>>(() => {
-    return categoryConfig.value?.product_types ?? {}
-  })
+    const productTypes = computed<Record<string, string>>(() => {
+        return categoryConfig.value?.product_types ?? {};
+    });
 
-  const sizes = computed<string[]>(() => {
-    return categoryConfig.value?.sizes ?? []
-  })
+    const sizes = computed<string[]>(() => {
+        return categoryConfig.value?.sizes ?? [];
+    });
 
-  const term = (key: TerminologyKey, fallback: string): string => {
-    return terminology.value[key] || fallback
-  }
+    const term = (key: TerminologyKey, fallback: string): string => {
+        return terminology.value[key] || fallback;
+    };
 
-  const termLower = (key: TerminologyKey, fallback: string): string => {
-    return term(key, fallback).toLowerCase()
-  }
+    const termLower = (key: TerminologyKey, fallback: string): string => {
+        return term(key, fallback).toLowerCase();
+    };
 
-  return {
-    tenant,
-    terminology,
-    categoryConfig,
-    productTypes,
-    sizes,
-    term,
-    termLower,
-  }
+    return {
+        tenant,
+        terminology,
+        categoryConfig,
+        productTypes,
+        sizes,
+        term,
+        termLower,
+    };
 }

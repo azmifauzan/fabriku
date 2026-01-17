@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { Head } from '@inertiajs/vue3';
 import ItemForm from './Form.vue';
 
 interface Location {
@@ -29,12 +29,9 @@ defineProps<Props>();
     <AppLayout>
         <Head title="Tambah Item Inventory" />
 
-        <div class="py-6 px-6">
-            <div class="max-w-4xl mx-auto">
-                <ItemForm
-                    :locations="locations"
-                    :patterns="patterns"
-                />
+        <div class="px-6 py-6">
+            <div class="mx-auto max-w-4xl">
+                <ItemForm :locations="locations" :patterns="patterns" />
             </div>
         </div>
     </AppLayout>

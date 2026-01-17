@@ -30,6 +30,13 @@ class InventoryLocationController extends Controller
 
         $locations = $query->latest()->paginate(15);
 
+        // Map is_active boolean to status string for frontend
+        $locations->getCollection()->transform(function ($location) {
+            $location->status = $location->is_active ? 'active' : 'inactive';
+
+            return $location;
+        });
+
         return Inertia::render('Inventory/Locations/Index', [
             'locations' => $locations,
             'filters' => $request->only(['search', 'is_active']),
@@ -43,6 +50,9 @@ class InventoryLocationController extends Controller
                 $query->with('productionOrder.preparationOrder.pattern')->latest()->limit(10);
             },
         ]);
+
+        // Map is_active boolean to status string for frontend
+        $location->status = $location->is_active ? 'active' : 'inactive';
 
         return Inertia::render('Inventory/Locations/Show', [
             'location' => $location,
