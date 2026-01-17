@@ -37,7 +37,7 @@ interface PreparationOrder {
     order_number: string;
     pattern: Pattern | null;
     prepared_by_staff: Staff | null;
-    order_date: string;
+    preparation_date: string;
     output_quantity: number;
     output_unit: string;
     materials_used: Material[];
@@ -144,7 +144,11 @@ const handleDelete = async () => {
                             <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
                                 <p class="mb-1 text-xs text-gray-500 dark:text-gray-400">Tanggal Order</p>
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ new Date(order.order_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) }}
+                                    {{
+                                        order.preparation_date
+                                            ? new Date(order.preparation_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                                            : '-'
+                                    }}
                                 </p>
                             </div>
 

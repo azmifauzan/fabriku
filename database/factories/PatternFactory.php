@@ -21,12 +21,11 @@ class PatternFactory extends Factory
             'tenant_id' => Tenant::factory(),
             'code' => strtoupper(fake()->unique()->bothify('PTN-###')),
             'name' => fake()->words(3, true),
-            'category' => fake()->optional()->randomElement(['mukena', 'gamis', 'cake', 'cookies']),
             'output_quantity' => fake()->numberBetween(1, 10),
             'description' => fake()->optional()->sentence(),
-            'material_requirements' => null,
             'estimated_labor_cost' => fake()->randomFloat(2, 5000, 50000),
             'instructions' => fake()->optional()->sentence(),
+            'is_active' => true,
         ];
     }
 }

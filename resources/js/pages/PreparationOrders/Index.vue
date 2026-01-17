@@ -175,11 +175,13 @@ const statusLabels: Record<string, string> = {
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900 dark:text-gray-100">
                                             {{
-                                                new Date(order.order_date).toLocaleDateString('id-ID', {
-                                                    day: 'numeric',
-                                                    month: 'short',
-                                                    year: 'numeric',
-                                                })
+                                                order.preparation_date
+                                                    ? new Date(order.preparation_date).toLocaleDateString('id-ID', {
+                                                          day: 'numeric',
+                                                          month: 'short',
+                                                          year: 'numeric',
+                                                      })
+                                                    : '-'
                                             }}
                                         </div>
                                     </td>

@@ -23,6 +23,7 @@ interface Pattern {
     name: string;
     preparation_orders_count: number;
     materials: PatternMaterial[];
+    is_active: boolean;
 }
 
 interface PaginatedPatterns {
@@ -142,8 +143,8 @@ const deletePattern = async (pattern: Pattern) => {
                                 <th class="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
                                     {{ patternLabel }}
                                 </th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
-                                    {{ materialLabel }} (BOM)
+                                <th class="px-6 py-4 text-center text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
+                                    Status
                                 </th>
                                 <th class="px-6 py-4 text-right text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
                                     Aksi
@@ -185,15 +186,17 @@ const deletePattern = async (pattern: Pattern) => {
                                         <div class="text-sm text-gray-500 dark:text-gray-400">{{ pattern.name }}</div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900 dark:text-gray-100">
-                                        <div v-if="pattern.materials && pattern.materials.length > 0" class="space-y-1">
-                                            <div v-for="material in pattern.materials" :key="material.id" class="text-xs">
-                                                • {{ material.code }}: {{ material.pivot.quantity_needed }} {{ material.unit }}
-                                            </div>
-                                        </div>
-                                        <span v-else class="text-gray-400">Belum ada BOM</span>
-                                    </div>
+                                <td class="px-6 py-4 text-center">
+                                    <span
+                                        :class="[
+                                            'inline-flex rounded-full px-3 py-1 text-xs font-semibold',
+                                            pattern.is_active
+                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                                : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400',
+                                        ]"
+                                    >
+                                        {{ pattern.is_active ? 'Aktif' : 'Nonaktif' }}
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm whitespace-nowrap">
                                     <div class="flex justify-end gap-2">
