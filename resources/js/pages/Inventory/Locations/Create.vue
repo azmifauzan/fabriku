@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { Head } from '@inertiajs/vue3';
 import LocationForm from './Form.vue';
 
 interface Props {
@@ -15,12 +15,9 @@ defineProps<Props>();
     <AppLayout>
         <Head title="Tambah Lokasi Inventory" />
 
-        <div class="py-6 px-6">
-            <div class="max-w-4xl mx-auto">
-                <LocationForm
-                    :zones="zones"
-                    :statuses="statuses"
-                />
+        <div class="px-6 py-6">
+            <div class="mx-auto max-w-4xl">
+                <LocationForm :zones="zones" :statuses="statuses" />
             </div>
         </div>
     </AppLayout>

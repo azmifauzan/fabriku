@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
-import { Eye, Edit, Trash2, Search, X } from 'lucide-vue-next';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { Edit, Eye, Search, Trash2, X } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 interface Location {
     id: number;
@@ -43,13 +43,17 @@ const statusFilter = ref(props.filters.is_active || '');
 
 const applyFilters = () => {
     const isActiveValue = statusFilter.value ? (statusFilter.value === 'true' ? 'true' : 'false') : undefined;
-    router.get('/inventory/locations', {
-        search: search.value || undefined,
-        is_active: isActiveValue,
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-    });
+    router.get(
+        '/inventory/locations',
+        {
+            search: search.value || undefined,
+            is_active: isActiveValue,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+        },
+    );
 };
 
 const clearFilters = () => {
@@ -59,17 +63,14 @@ const clearFilters = () => {
 };
 
 const deleteLocation = async (location: Location) => {
-    const result = await confirmDelete(
-        'Hapus Lokasi Inventory',
-        `Apakah Anda yakin ingin menghapus lokasi "${location.name}"?`
-    );
+    const result = await confirmDelete('Hapus Lokasi Inventory', `Apakah Anda yakin ingin menghapus lokasi "${location.name}"?`);
 
     if (result.isConfirmed) {
         router.delete(`/inventory/locations/${location.id}`, {
             preserveScroll: true,
             onSuccess: () => {
                 showSuccess('Berhasil!', 'Lokasi inventory berhasil dihapus');
-            }
+            },
         });
     }
 };
@@ -100,7 +101,7 @@ const capacityBarClass = (percentage: number) => {
     <AppLayout>
         <Head title="Lokasi Inventory" />
 
-        <div class="py-6 px-6">
+        <div class="px-6 py-6">
             <div class="mx-auto max-w-7xl">
                 <PageHeader
                     title="Lokasi Inventory"
@@ -110,26 +111,26 @@ const capacityBarClass = (percentage: number) => {
                 />
 
                 <!-- Filters -->
-                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cari</label>
+                            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Cari</label>
                             <div class="relative">
-                                <Search :size="18" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                <Search :size="18" class="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-400" />
                                 <input
                                     v-model="search"
                                     type="text"
                                     placeholder="Nama atau rak..."
-                                    class="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                    class="w-full rounded-lg border border-gray-300 py-2.5 pr-3 pl-10 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     @keyup.enter="applyFilters"
                                 />
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
                             <select
                                 v-model="statusFilter"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
                                 <option value="">Semua Status</option>
                                 <option value="true">Aktif</option>
@@ -140,7 +141,7 @@ const capacityBarClass = (percentage: number) => {
                             <button
                                 type="button"
                                 @click="applyFilters"
-                                class="flex-1 inline-flex justify-center items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
+                                class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md"
                             >
                                 <Search :size="16" />
                                 Filter
@@ -149,7 +150,7 @@ const capacityBarClass = (percentage: number) => {
                                 v-if="search || statusFilter"
                                 type="button"
                                 @click="clearFilters"
-                                class="inline-flex justify-center items-center px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-semibold rounded-lg transition-all shadow-sm"
+                                class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                                 title="Clear filters"
                             >
                                 <X :size="18" />
@@ -159,12 +160,14 @@ const capacityBarClass = (percentage: number) => {
                 </div>
 
                 <!-- Table -->
-                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <!-- Table Info -->
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
                         <div class="flex items-center justify-between">
                             <p class="text-sm text-gray-700 dark:text-gray-300">
-                                Menampilkan <span class="font-semibold">{{ locations.from }}</span> - <span class="font-semibold">{{ locations.to }}</span> dari <span class="font-semibold">{{ locations.total }}</span> lokasi
+                                Menampilkan <span class="font-semibold">{{ locations.from }}</span> -
+                                <span class="font-semibold">{{ locations.to }}</span> dari
+                                <span class="font-semibold">{{ locations.total }}</span> lokasi
                             </p>
                         </div>
                     </div>
@@ -173,25 +176,25 @@ const capacityBarClass = (percentage: number) => {
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700/50">
                                 <tr>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
                                         Nama
                                     </th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
                                         Kapasitas
                                     </th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
                                         Status
                                     </th>
-                                    <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-right text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
                                         Aksi
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                                 <tr
                                     v-for="location in locations.data"
                                     :key="location.id"
-                                    class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                    class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
                                 >
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="text-sm font-medium text-gray-900 dark:text-white">
@@ -200,7 +203,7 @@ const capacityBarClass = (percentage: number) => {
                                     </td>
                                     <td class="px-6 py-4">
                                         <div v-if="location.capacity" class="w-32">
-                                            <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+                                            <div class="mb-1 flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
                                                 <span>{{ location.current_capacity || 0 }}/{{ location.capacity }}</span>
                                                 <span>{{ capacityPercentage(location) }}%</span>
                                             </div>
@@ -217,30 +220,30 @@ const capacityBarClass = (percentage: number) => {
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
                                             :class="statusBadgeClass(location.status)"
-                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                            class="inline-flex rounded-full px-2 text-xs leading-5 font-semibold"
                                         >
                                             {{ location.status === 'active' ? 'Aktif' : 'Tidak Aktif' }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
                                         <div class="flex justify-end gap-2">
                                             <Link
                                                 :href="`/inventory/locations/${location.id}`"
-                                                class="inline-flex items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700"
                                                 title="Lihat detail lokasi"
                                             >
                                                 <Eye :size="18" />
                                             </Link>
                                             <Link
                                                 :href="`/inventory/locations/${location.id}/edit`"
-                                                class="inline-flex items-center justify-center p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
                                                 title="Edit lokasi"
                                             >
                                                 <Edit :size="18" />
                                             </Link>
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center justify-center p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
                                                 @click="deleteLocation(location)"
                                                 title="Hapus lokasi"
                                             >
@@ -251,8 +254,18 @@ const capacityBarClass = (percentage: number) => {
                                 </tr>
                                 <tr v-if="locations.data.length === 0">
                                     <td colspan="4" class="px-6 py-16 text-center">
-                                        <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        <svg
+                                            class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                            />
                                         </svg>
                                         <p class="mt-4 text-sm font-medium text-gray-900 dark:text-gray-100">Tidak ada data lokasi</p>
                                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tambahkan lokasi inventory pertama Anda</p>
@@ -263,10 +276,11 @@ const capacityBarClass = (percentage: number) => {
                     </div>
 
                     <!-- Pagination -->
-                    <div v-if="locations.data.length > 0" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div v-if="locations.data.length > 0" class="border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+                        <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
                             <div class="text-sm text-gray-700 dark:text-gray-300">
-                                <span class="font-medium">{{ locations.from }}</span> - <span class="font-medium">{{ locations.to }}</span> dari <span class="font-medium">{{ locations.total }}</span> data
+                                <span class="font-medium">{{ locations.from }}</span> - <span class="font-medium">{{ locations.to }}</span> dari
+                                <span class="font-medium">{{ locations.total }}</span> data
                             </div>
                             <div class="flex flex-wrap gap-2">
                                 <Link
@@ -274,10 +288,10 @@ const capacityBarClass = (percentage: number) => {
                                     :key="page"
                                     :href="`/inventory/locations?page=${page}`"
                                     :class="[
-                                        'px-4 py-2 text-sm font-medium rounded-lg transition-all',
+                                        'rounded-lg px-4 py-2 text-sm font-medium transition-all',
                                         page === locations.current_page
                                             ? 'bg-indigo-600 text-white shadow-sm'
-                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+                                            : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
                                     ]"
                                     preserve-state
                                     preserve-scroll

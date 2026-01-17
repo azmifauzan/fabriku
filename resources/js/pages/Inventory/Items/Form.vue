@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
-import { Link, useForm } from '@inertiajs/vue3';
 import { useBusinessContext } from '@/composables/useBusinessContext';
+import { Link, useForm } from '@inertiajs/vue3';
+import { computed, watch } from 'vue';
 
 interface Location {
     id: number;
@@ -79,31 +79,34 @@ const form = useForm({
 // Auto-populate fields when production order is selected
 const selectedProductionOrder = computed(() => {
     if (!form.production_order_id) return null;
-    return props.productionOrders.find(po => po.id === form.production_order_id);
+    return props.productionOrders.find((po) => po.id === form.production_order_id);
 });
 
-watch(() => form.production_order_id, (newValue) => {
-    if (newValue && selectedProductionOrder.value) {
-        const po = selectedProductionOrder.value;
-        
-        // Auto-populate target quantity from production order
-        form.target_quantity = po.quantity_good || 0;
-        
-        // Auto-populate production date from estimated completion date
-        if (po.completed_date) {
-            form.production_date = po.completed_date;
-        } else if (po.estimated_completion_date) {
-            form.production_date = po.estimated_completion_date;
+watch(
+    () => form.production_order_id,
+    (newValue) => {
+        if (newValue && selectedProductionOrder.value) {
+            const po = selectedProductionOrder.value;
+
+            // Auto-populate target quantity from production order
+            form.target_quantity = po.quantity_good || 0;
+
+            // Auto-populate production date from estimated completion date
+            if (po.completed_date) {
+                form.production_date = po.completed_date;
+            } else if (po.estimated_completion_date) {
+                form.production_date = po.estimated_completion_date;
+            }
+
+            // Auto-populate SKU and name from pattern if available
+            if (po.preparation_order?.pattern) {
+                const pattern = po.preparation_order.pattern;
+                form.sku = `${po.order_number}`;
+                form.name = `${pattern.name}`;
+            }
         }
-        
-        // Auto-populate SKU and name from pattern if available
-        if (po.preparation_order?.pattern) {
-            const pattern = po.preparation_order.pattern;
-            form.sku = `${po.order_number}`;
-            form.name = `${pattern.name}`;
-        }
-    }
-});
+    },
+);
 
 // Auto-calculate unit cost when production order changes
 watch([() => form.production_order_id], () => {
@@ -113,10 +116,10 @@ watch([() => form.production_order_id], () => {
         // Material cost would need to be calculated from preparation order
         const laborCost = parseFloat(selectedProductionOrder.value.labor_cost || '0');
         const quantity = selectedProductionOrder.value.quantity_good || 1;
-        
+
         // TODO: Add material cost calculation from preparation order's BOM
         const materialCost = 0; // Placeholder
-        
+
         form.unit_cost = ((materialCost + laborCost) / quantity).toFixed(2);
     }
 });
@@ -150,8 +153,8 @@ const statuses = [
 </script>
 
 <template>
-    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
+        <div class="border-b border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
             <!-- Header -->
             <div class="mb-6 flex items-center justify-between">
                 <div>
@@ -162,10 +165,7 @@ const statuses = [
                         {{ isEditing ? 'Ubah informasi item' : 'Tambahkan item inventory baru dari hasil produksi' }}
                     </p>
                 </div>
-                <Link
-                    href="/inventory/items"
-                    class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
-                >
+                <Link href="/inventory/items" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">
                     ← Kembali
                 </Link>
             </div>
@@ -173,36 +173,26 @@ const statuses = [
             <form @submit.prevent="submit" class="space-y-6">
                 <!-- Production Order Selection -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                        Pilih Production Order
-                    </h3>
+                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Pilih Production Order</h3>
                     <div>
-                        <label
-                            for="production_order_id"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >
+                        <label for="production_order_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Production Order <span class="text-red-500">*</span>
                         </label>
                         <select
                             id="production_order_id"
                             v-model="form.production_order_id"
                             required
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             :class="{ 'border-red-300': form.errors.production_order_id }"
                         >
                             <option :value="null">Pilih Production Order</option>
-                            <option
-                                v-for="po in productionOrders"
-                                :key="po.id"
-                                :value="po.id"
-                            >
-                                {{ po.order_number }} - {{ po.preparation_order?.pattern?.name || 'N/A' }} ({{ po.quantity_good }} pcs) - [{{ po.status }}]
+                            <option v-for="po in productionOrders" :key="po.id" :value="po.id">
+                                {{ po.order_number }} - {{ po.preparation_order?.pattern?.name || 'N/A' }} ({{ po.quantity_good }} pcs) - [{{
+                                    po.status
+                                }}]
                             </option>
                         </select>
-                        <p
-                            v-if="form.errors.production_order_id"
-                            class="mt-1 text-sm text-red-600 dark:text-red-400"
-                        >
+                        <p v-if="form.errors.production_order_id" class="mt-1 text-sm text-red-600 dark:text-red-400">
                             {{ form.errors.production_order_id }}
                         </p>
                         <p v-if="selectedProductionOrder" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -213,15 +203,10 @@ const statuses = [
 
                 <!-- Basic Information -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                        Informasi Dasar
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Informasi Dasar</h3>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
-                            <label
-                                for="sku"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
+                            <label for="sku" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 SKU <span class="text-red-500">*</span>
                             </label>
                             <input
@@ -230,22 +215,16 @@ const statuses = [
                                 type="text"
                                 required
                                 placeholder="Contoh: PO-2024-001"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 :class="{ 'border-red-300': form.errors.sku }"
                             />
-                            <p
-                                v-if="form.errors.sku"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400"
-                            >
+                            <p v-if="form.errors.sku" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.sku }}
                             </p>
                         </div>
 
                         <div>
-                            <label
-                                for="name"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
+                            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Nama Item <span class="text-red-500">*</span>
                             </label>
                             <input
@@ -254,13 +233,10 @@ const statuses = [
                                 type="text"
                                 required
                                 placeholder="Contoh: Mukena Bali Putih - M"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 :class="{ 'border-red-300': form.errors.name }"
                             />
-                            <p
-                                v-if="form.errors.name"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400"
-                            >
+                            <p v-if="form.errors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.name }}
                             </p>
                         </div>
@@ -269,15 +245,10 @@ const statuses = [
 
                 <!-- Stock Information -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                        Data Stock
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Data Stock</h3>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
-                            <label
-                                for="target_quantity"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
+                            <label for="target_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Target Produksi <span class="text-red-500">*</span>
                             </label>
                             <input
@@ -287,25 +258,17 @@ const statuses = [
                                 required
                                 min="0"
                                 readonly
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all bg-gray-50 dark:bg-gray-800"
+                                class="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:bg-gray-800 dark:text-white"
                                 :class="{ 'border-red-300': form.errors.target_quantity }"
                             />
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Dari production order
-                            </p>
-                            <p
-                                v-if="form.errors.target_quantity"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400"
-                            >
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Dari production order</p>
+                            <p v-if="form.errors.target_quantity" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.target_quantity }}
                             </p>
                         </div>
 
                         <div>
-                            <label
-                                for="current_stock"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
+                            <label for="current_stock" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Hasil Produksi Aktual <span class="text-red-500">*</span>
                             </label>
                             <input
@@ -314,25 +277,17 @@ const statuses = [
                                 type="number"
                                 required
                                 min="0"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 :class="{ 'border-red-300': form.errors.current_stock }"
                             />
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Jumlah barang jadi yang sebenarnya
-                            </p>
-                            <p
-                                v-if="form.errors.current_stock"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400"
-                            >
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Jumlah barang jadi yang sebenarnya</p>
+                            <p v-if="form.errors.current_stock" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.current_stock }}
                             </p>
                         </div>
 
                         <div>
-                            <label
-                                for="minimum_stock"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
+                            <label for="minimum_stock" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Minimum Stock <span class="text-red-500">*</span>
                             </label>
                             <input
@@ -341,13 +296,10 @@ const statuses = [
                                 type="number"
                                 required
                                 min="0"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 :class="{ 'border-red-300': form.errors.minimum_stock }"
                             />
-                            <p
-                                v-if="form.errors.minimum_stock"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400"
-                            >
+                            <p v-if="form.errors.minimum_stock" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.minimum_stock }}
                             </p>
                         </div>
@@ -356,15 +308,10 @@ const statuses = [
 
                 <!-- Pricing -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                        Harga
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Harga</h3>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
-                            <label
-                                for="unit_cost"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
+                            <label for="unit_cost" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Harga Modal (COGS) <span class="text-red-500">*</span>
                             </label>
                             <input
@@ -375,25 +322,17 @@ const statuses = [
                                 required
                                 min="0"
                                 readonly
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all bg-gray-50 dark:bg-gray-800"
+                                class="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:bg-gray-800 dark:text-white"
                                 :class="{ 'border-red-300': form.errors.unit_cost }"
                             />
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Dihitung otomatis dari biaya bahan + biaya produksi
-                            </p>
-                            <p
-                                v-if="form.errors.unit_cost"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400"
-                            >
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Dihitung otomatis dari biaya bahan + biaya produksi</p>
+                            <p v-if="form.errors.unit_cost" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.unit_cost }}
                             </p>
                         </div>
 
                         <div>
-                            <label
-                                for="selling_price"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
+                            <label for="selling_price" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Harga Jual <span class="text-red-500">*</span>
                             </label>
                             <input
@@ -403,13 +342,10 @@ const statuses = [
                                 step="0.01"
                                 required
                                 min="0"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 :class="{ 'border-red-300': form.errors.selling_price }"
                             />
-                            <p
-                                v-if="form.errors.selling_price"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400"
-                            >
+                            <p v-if="form.errors.selling_price" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.selling_price }}
                             </p>
                         </div>
@@ -418,148 +354,98 @@ const statuses = [
 
                 <!-- Additional Info -->
                 <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                        Informasi Tambahan
-                    </h3>
+                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Informasi Tambahan</h3>
                     <div class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                             <div>
-                                <label
-                                    for="inventory_location_id"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
+                                <label for="inventory_location_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Lokasi <span class="text-red-500">*</span>
                                 </label>
                                 <select
                                     id="inventory_location_id"
                                     v-model="form.inventory_location_id"
                                     required
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     :class="{ 'border-red-300': form.errors.inventory_location_id }"
                                 >
                                     <option :value="null">Pilih Lokasi</option>
-                                    <option
-                                        v-for="location in locations"
-                                        :key="location.id"
-                                        :value="location.id"
-                                    >
+                                    <option v-for="location in locations" :key="location.id" :value="location.id">
                                         {{ location.name }} ({{ location.zone }}-{{ location.rack }})
                                     </option>
                                 </select>
-                                <p
-                                    v-if="form.errors.inventory_location_id"
-                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                >
+                                <p v-if="form.errors.inventory_location_id" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                     {{ form.errors.inventory_location_id }}
                                 </p>
                             </div>
 
                             <div v-if="isGarment">
-                                <label
-                                    for="quality_grade"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
+                                <label for="quality_grade" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Quality Grade <span class="text-red-500">*</span>
                                 </label>
                                 <select
                                     id="quality_grade"
                                     v-model="form.quality_grade"
                                     required
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     :class="{ 'border-red-300': form.errors.quality_grade }"
                                 >
-                                    <option
-                                        v-for="grade in qualityGrades"
-                                        :key="grade.value"
-                                        :value="grade.value"
-                                    >
+                                    <option v-for="grade in qualityGrades" :key="grade.value" :value="grade.value">
                                         {{ grade.label }}
                                     </option>
                                 </select>
-                                <p
-                                    v-if="form.errors.quality_grade"
-                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                >
+                                <p v-if="form.errors.quality_grade" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                     {{ form.errors.quality_grade }}
                                 </p>
                             </div>
 
                             <div>
-                                <label
-                                    for="status"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
+                                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Status <span class="text-red-500">*</span>
                                 </label>
                                 <select
                                     id="status"
                                     v-model="form.status"
                                     required
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     :class="{ 'border-red-300': form.errors.status }"
                                 >
-                                    <option
-                                        v-for="status in statuses"
-                                        :key="status.value"
-                                        :value="status.value"
-                                    >
+                                    <option v-for="status in statuses" :key="status.value" :value="status.value">
                                         {{ status.label }}
                                     </option>
                                 </select>
-                                <p
-                                    v-if="form.errors.status"
-                                    class="mt-1 text-sm text-red-600 dark:text-red-400"
-                                >
+                                <p v-if="form.errors.status" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                     {{ form.errors.status }}
                                 </p>
                             </div>
                         </div>
 
                         <div>
-                            <label
-                                for="production_date"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                Tanggal Produksi
-                            </label>
+                            <label for="production_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300"> Tanggal Produksi </label>
                             <input
                                 id="production_date"
                                 v-model="form.production_date"
                                 type="date"
                                 readonly
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all bg-gray-50 dark:bg-gray-800"
+                                class="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:bg-gray-800 dark:text-white"
                                 :class="{ 'border-red-300': form.errors.production_date }"
                             />
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Dari tanggal estimasi selesai di production order
-                            </p>
-                            <p
-                                v-if="form.errors.production_date"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400"
-                            >
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Dari tanggal estimasi selesai di production order</p>
+                            <p v-if="form.errors.production_date" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.production_date }}
                             </p>
                         </div>
 
                         <div>
-                            <label
-                                for="notes"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                Catatan
-                            </label>
+                            <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300"> Catatan </label>
                             <textarea
                                 id="notes"
                                 v-model="form.notes"
                                 rows="3"
                                 placeholder="Catatan tambahan (opsional)"
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 :class="{ 'border-red-300': form.errors.notes }"
                             />
-                            <p
-                                v-if="form.errors.notes"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400"
-                            >
+                            <p v-if="form.errors.notes" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.notes }}
                             </p>
                         </div>
@@ -567,17 +453,19 @@ const statuses = [
                 </div>
 
                 <!-- Actions -->
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div
+                    class="flex flex-col items-stretch justify-end gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center dark:border-gray-700"
+                >
                     <Link
                         href="/inventory/items"
-                        class="order-2 sm:order-1 px-4 py-2 text-sm font-medium text-center text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        class="order-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none sm:order-1 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                     >
                         Batal
                     </Link>
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="order-1 sm:order-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="order-1 rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:order-2"
                     >
                         {{ form.processing ? 'Menyimpan...' : isEditing ? 'Update Item' : 'Tambah Item' }}
                     </button>
