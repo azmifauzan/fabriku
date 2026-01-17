@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Material;
 use App\Models\Pattern;
 use App\Models\Tenant;
 use Illuminate\Database\Seeder;
@@ -19,70 +18,41 @@ class PatternSeeder extends Seeder
             return;
         }
 
-        // Get materials
-        $kainKatun = Material::where('tenant_id', $tenant->id)->where('code', 'KA-001')->first();
-        $kainWolfis = Material::where('tenant_id', $tenant->id)->where('code', 'KA-002')->first();
-        $benang = Material::where('tenant_id', $tenant->id)->where('code', 'BN-001')->first();
-        $resleting = Material::where('tenant_id', $tenant->id)->where('code', 'AK-001')->first();
-
         // Pattern 1: Mukena Dewasa
-        $mukena = Pattern::create([
+        Pattern::create([
             'tenant_id' => $tenant->id,
             'code' => 'MKN-001',
             'name' => 'Mukena Dewasa Katun Rayon',
-            'product_type' => 'mukena',
+            'output_quantity' => 1,
             'description' => 'Mukena dewasa bahan katun rayon premium, nyaman digunakan',
-            'estimated_time' => 45,
-            'standard_waste_percentage' => 5,
+            'estimated_labor_cost' => 15000,
+            'instructions' => 'Jahit mukena dewasa sesuai pattern standar',
             'is_active' => true,
         ]);
 
-        if ($kainKatun) {
-            $mukena->materials()->attach($kainKatun->id, [
-                'quantity_needed' => 2.5,
-                'notes' => 'Untuk atasan dan bawahan',
-            ]);
-        }
-
-        if ($benang) {
-            $mukena->materials()->attach($benang->id, [
-                'quantity_needed' => 0.1,
-                'notes' => 'Benang jahit',
-            ]);
-        }
-
         // Pattern 2: Daster Dewasa
-        $daster = Pattern::create([
+        Pattern::create([
             'tenant_id' => $tenant->id,
             'code' => 'DST-001',
             'name' => 'Daster Dewasa Wolfis',
-            'product_type' => 'daster',
+            'output_quantity' => 1,
             'description' => 'Daster dewasa bahan wolfis, adem dan nyaman',
-            'estimated_time' => 30,
-            'standard_waste_percentage' => 4,
+            'estimated_labor_cost' => 12000,
+            'instructions' => 'Jahit daster dewasa dengan resleting depan',
             'is_active' => true,
         ]);
 
-        if ($kainWolfis) {
-            $daster->materials()->attach($kainWolfis->id, [
-                'quantity_needed' => 2.0,
-                'notes' => 'Bahan utama',
-            ]);
-        }
-
-        if ($benang) {
-            $daster->materials()->attach($benang->id, [
-                'quantity_needed' => 0.08,
-                'notes' => 'Benang jahit',
-            ]);
-        }
-
-        if ($resleting) {
-            $daster->materials()->attach($resleting->id, [
-                'quantity_needed' => 1,
-                'notes' => 'Resleting depan',
-            ]);
-        }
+        // Pattern 3: Gamis
+        Pattern::create([
+            'tenant_id' => $tenant->id,
+            'code' => 'GMS-001',
+            'name' => 'Gamis Casual',
+            'output_quantity' => 1,
+            'description' => 'Gamis casual untuk harian',
+            'estimated_labor_cost' => 18000,
+            'instructions' => 'Jahit gamis casual dengan detail sesuai pattern',
+            'is_active' => true,
+        ]);
 
         $this->command->info('Patterns seeded successfully!');
     }

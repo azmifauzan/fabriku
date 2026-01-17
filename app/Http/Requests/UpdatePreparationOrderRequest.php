@@ -11,10 +11,27 @@ class UpdatePreparationOrderRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        // Map order_date to preparation_date for backwards compatibility
+        if ($this->has('order_date') && ! $this->has('preparation_date')) {
+            $this->merge([
+                'preparation_date' => $this->order_date,
+            ]);
+        }
+
+        // Map materials_used to material_usage for database storage
+        if ($this->has('materials_used')) {
+            $this->merge([
+                'material_usage' => $this->materials_used,
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [
-            'pattern_id' => 'nullable|exists:patterns,id',
+            'pattern_id' => 'required|exists:patterns,id',
             'order_date' => 'required|date',
             'prepared_by' => 'nullable|exists:users,id',
             'output_quantity' => 'required|numeric|min:0.01',
@@ -24,6 +41,7 @@ class UpdatePreparationOrderRequest extends FormRequest
             'materials_used.*.material_name' => 'required|string',
             'materials_used.*.quantity' => 'required|numeric|min:0.01',
             'materials_used.*.unit' => 'required|string',
+            'material_usage' => 'sometimes|array',
             'notes' => 'nullable|string',
             'status' => 'nullable|in:draft,in_progress,completed,cancelled',
         ];
@@ -32,6 +50,7 @@ class UpdatePreparationOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'pattern_id.required' => 'Pattern/Resep harus dipilih',
             'materials_used.required' => 'Minimal harus ada 1 material yang digunakan',
             'materials_used.*.material_id.required' => 'Material harus dipilih',
             'materials_used.*.quantity.required' => 'Quantity material harus diisi',

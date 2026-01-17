@@ -24,9 +24,9 @@ class StorePatternRequest extends FormRequest
                 Rule::unique('patterns', 'code')->where('tenant_id', $tenant->id),
             ],
             'name' => 'required|string|max:255',
-            'category' => 'required|in:garment,food,craft,cosmetic,other',
             'description' => 'nullable|string',
             'image_url' => 'nullable|url',
+            'is_active' => 'boolean',
         ];
     }
 }

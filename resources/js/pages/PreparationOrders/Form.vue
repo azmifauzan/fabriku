@@ -104,13 +104,14 @@ const isEditing = !!props.order?.id;
                             <div class="md:col-span-2">
                                 <FormField
                                     v-model="form.pattern_id"
-                                    label="Pattern (Optional)"
+                                    label="Pattern/Resep"
                                     type="select"
+                                    :required="true"
                                     :error="form.errors.pattern_id"
-                                    hint="Pilih pattern sebagai acuan, atau kosongkan untuk custom prep"
+                                    hint="Pilih pattern/resep sebagai acuan untuk preparation"
                                     :options="[
-                                        { value: null, label: 'Tanpa Pattern' },
-                                        ...patterns.map((p) => ({ value: p.id, label: `${p.name} (${p.category})` })),
+                                        { value: null, label: 'Pilih Pattern/Resep' },
+                                        ...patterns.map((p) => ({ value: p.id, label: p.name })),
                                     ]"
                                 />
                             </div>
@@ -166,7 +167,7 @@ const isEditing = !!props.order?.id;
                                         >
                                             <option :value="null">Pilih Material</option>
                                             <option v-for="mat in materials" :key="mat.id" :value="mat.id">
-                                                {{ mat.name }} (Stock: {{ mat.current_stock }} {{ mat.unit }})
+                                                {{ mat.name }} (Stock: {{ mat.stock_quantity }} {{ mat.unit }})
                                             </option>
                                         </select>
                                     </div>

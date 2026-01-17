@@ -12,7 +12,7 @@ class MaterialAttribute extends Model
 
     protected $fillable = [
         'material_id',
-        'attribute_name',
+        'attribute_key',
         'attribute_value',
     ];
 

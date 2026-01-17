@@ -14,18 +14,17 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->string('code');
             $table->string('name');
-            $table->string('category')->nullable(); // mukena, gamis, cake, cookies, etc
             $table->integer('output_quantity')->default(1); // how many pieces produced
             $table->text('description')->nullable();
-            $table->json('material_requirements')->nullable(); // BOM: [{ material_id, quantity, unit }]
             $table->decimal('estimated_labor_cost', 15, 2)->default(0);
             $table->text('instructions')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
 
             $table->unique(['tenant_id', 'code']);
             $table->index(['tenant_id', 'name']);
-            $table->index(['tenant_id', 'category']);
+            $table->index(['tenant_id', 'is_active']);
         });
 
         // Preparation Orders (cutting for garment, mixing for food)
@@ -33,9 +32,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->string('order_number');
-            $table->foreignId('pattern_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('pattern_id')->constrained()->cascadeOnDelete();
             $table->foreignId('prepared_by')->nullable()->constrained('users')->nullOnDelete();
             $table->integer('output_quantity');
+            $table->string('output_unit', 20)->default('pieces');
             $table->json('material_usage')->nullable(); // actual material used: [{ material_id, quantity }]
             $table->decimal('waste_percentage', 5, 2)->default(0);
             $table->enum('status', ['draft', 'in_progress', 'completed', 'cancelled'])->default('draft');

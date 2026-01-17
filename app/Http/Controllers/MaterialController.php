@@ -22,10 +22,15 @@ class MaterialController extends Controller
             ->when(request('material_type_id'), fn ($query, $typeId) => $query->where('material_type_id', $typeId))
             ->latest()
             ->paginate(15)
-            ->withQueryString();
+            ->withQueryString()
+            ->through(fn ($material) => [
+                ...$material->toArray(),
+                'materialType' => $material->materialType?->only(['id', 'name', 'code']),
+            ]);
 
         $types = MaterialType::query()
             ->select('id', 'name')
+            ->where('is_active', true)
             ->orderBy('name')
             ->get();
 
@@ -42,7 +47,7 @@ class MaterialController extends Controller
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->get(['code', 'name']);
+            ->get(['id', 'code', 'name']);
 
         return Inertia::render('Materials/Form', [
             'materialTypes' => $materialTypes,
@@ -51,11 +56,11 @@ class MaterialController extends Controller
 
     public function store(StoreMaterialRequest $request)
     {
-        $data = $request->safe()->except(['attributes', 'quantity']);
+        $data = $request->safe()->except(['attributes', 'stock_quantity']);
 
-        // Map quantity to current_stock
-        if ($request->has('quantity')) {
-            $data['current_stock'] = $request->quantity;
+        // Map stock_quantity to actual field name if needed
+        if ($request->has('stock_quantity')) {
+            $data['stock_quantity'] = $request->stock_quantity;
         }
 
         $material = Material::create($data);
@@ -65,7 +70,7 @@ class MaterialController extends Controller
             foreach ($request->attributes as $attr) {
                 if (! empty($attr['name']) && ! empty($attr['value'])) {
                     $material->materialAttributes()->create([
-                        'attribute_name' => $attr['name'],
+                        'attribute_key' => $attr['name'],
                         'attribute_value' => $attr['value'],
                     ]);
                 }
@@ -78,36 +83,67 @@ class MaterialController extends Controller
 
     public function show(Material $material)
     {
-        $material->load(['receipts' => fn ($query) => $query->latest()->take(10)]);
+        $material->load(['materialAttributes', 'materialType', 'receipts' => fn ($query) => $query->latest()->take(10)]);
 
         return Inertia::render('Materials/Show', [
-            'material' => $material,
+            'material' => [
+                'id' => $material->id,
+                'code' => $material->code,
+                'name' => $material->name,
+                'material_type_id' => $material->material_type_id,
+                'unit' => $material->unit,
+                'price_per_unit' => (string) $material->price_per_unit,
+                'stock_quantity' => (string) $material->stock_quantity,
+                'min_stock' => (string) $material->min_stock,
+                'supplier_name' => $material->supplier_name,
+                'description' => $material->description,
+                'materialType' => $material->materialType?->only(['id', 'name', 'code']),
+                'attributes' => $material->materialAttributes->map(fn ($attr) => [
+                    'attribute_name' => $attr->attribute_key,
+                    'attribute_value' => $attr->attribute_value,
+                ])->toArray(),
+            ],
         ]);
     }
 
     public function edit(Material $material)
     {
-        $material->load('materialAttributes');
+        $material->load(['materialAttributes', 'materialType']);
 
         $materialTypes = MaterialType::query()
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->get(['code', 'name']);
+            ->get(['id', 'code', 'name']);
 
         return Inertia::render('Materials/Form', [
-            'material' => $material,
+            'material' => [
+                'id' => $material->id,
+                'code' => $material->code,
+                'name' => $material->name,
+                'material_type_id' => $material->material_type_id,
+                'unit' => $material->unit,
+                'price_per_unit' => (string) $material->price_per_unit,
+                'stock_quantity' => (string) $material->stock_quantity,
+                'min_stock' => (string) $material->min_stock,
+                'supplier_name' => $material->supplier_name,
+                'description' => $material->description,
+                'attributes' => $material->materialAttributes->map(fn ($attr) => [
+                    'attribute_name' => $attr->attribute_key,
+                    'attribute_value' => $attr->attribute_value,
+                ])->toArray(),
+            ],
             'materialTypes' => $materialTypes,
         ]);
     }
 
     public function update(UpdateMaterialRequest $request, Material $material)
     {
-        $data = $request->safe()->except(['attributes', 'quantity']);
+        $data = $request->safe()->except(['attributes', 'stock_quantity']);
 
-        // Map quantity to current_stock
-        if ($request->has('quantity')) {
-            $data['current_stock'] = $request->quantity;
+        // Map stock_quantity to actual field name if needed
+        if ($request->has('stock_quantity')) {
+            $data['stock_quantity'] = $request->stock_quantity;
         }
 
         $material->update($data);
@@ -122,7 +158,7 @@ class MaterialController extends Controller
                 foreach ($request->attributes as $attr) {
                     if (! empty($attr['name']) && ! empty($attr['value'])) {
                         $material->materialAttributes()->create([
-                            'attribute_name' => $attr['name'],
+                            'attribute_key' => $attr['name'],
                             'attribute_value' => $attr['value'],
                         ]);
                     }

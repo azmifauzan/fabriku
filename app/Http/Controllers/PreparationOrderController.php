@@ -44,14 +44,15 @@ class PreparationOrderController extends Controller
      */
     public function create(): Response
     {
-        $patterns = Pattern::where('is_active', true)
+        $patterns = Pattern::query()
+            ->where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'category', 'product_type']);
+            ->get(['id', 'code', 'name']);
 
-        $materials = Material::where('is_active', true)
-            ->where('current_stock', '>', 0)
+        $materials = Material::query()
+            ->where('stock_quantity', '>', 0)
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'unit', 'current_stock']);
+            ->get(['id', 'code', 'name', 'unit', 'stock_quantity']);
 
         $staff = Staff::where('is_active', true)
             ->orderBy('name')
@@ -93,10 +94,37 @@ class PreparationOrderController extends Controller
     {
         $preparationOrder->load(['pattern', 'preparedBy', 'productionOrders']);
 
+        // Extract materials from material_usage JSON
+        $materialsUsed = [];
+        if ($preparationOrder->material_usage && is_array($preparationOrder->material_usage)) {
+            foreach ($preparationOrder->material_usage as $material) {
+                $materialId = $material['material_id'] ?? null;
+
+                // If material_name or unit is missing, fetch from database
+                if ($materialId && (empty($material['material_name']) || empty($material['unit']))) {
+                    $dbMaterial = Material::find($materialId);
+                    $materialName = $dbMaterial ? $dbMaterial->name : 'Unknown Material';
+                    $unit = $dbMaterial ? $dbMaterial->unit : '-';
+                } else {
+                    $materialName = $material['material_name'] ?? 'Unknown Material';
+                    $unit = $material['unit'] ?? '-';
+                }
+
+                $materialsUsed[] = [
+                    'material_id' => $materialId,
+                    'material_name' => $materialName,
+                    'quantity' => $material['quantity'] ?? 0,
+                    'unit' => $unit,
+                ];
+            }
+        }
+
         return Inertia::render('PreparationOrders/Show', [
             'order' => [
                 ...$preparationOrder->toArray(),
                 'prepared_by_staff' => $preparationOrder->preparedBy,
+                'materials_used' => $materialsUsed,
+                'production_orders' => $preparationOrder->productionOrders->toArray(),
                 'can_be_edited' => $preparationOrder->canBeEdited(),
                 'can_be_deleted' => $preparationOrder->canBeDeleted(),
             ],
@@ -112,12 +140,40 @@ class PreparationOrderController extends Controller
             abort(403, 'Order cannot be edited');
         }
 
-        $patterns = Pattern::where('is_active', true)->get(['id', 'code', 'name', 'category']);
-        $materials = Material::where('is_active', true)->get(['id', 'code', 'name', 'unit', 'current_stock']);
+        $patterns = Pattern::where('is_active', true)->get(['id', 'code', 'name']);
+        $materials = Material::orderBy('name')->get(['id', 'code', 'name', 'unit', 'stock_quantity']);
         $staff = Staff::where('is_active', true)->orderBy('name')->get(['id', 'code', 'name', 'position']);
 
+        // Format material_usage for form
+        $materialsUsed = [];
+        if ($preparationOrder->material_usage && is_array($preparationOrder->material_usage)) {
+            foreach ($preparationOrder->material_usage as $material) {
+                $materialId = $material['material_id'] ?? null;
+
+                // If material_name or unit is missing, fetch from database
+                if ($materialId && (empty($material['material_name']) || empty($material['unit']))) {
+                    $dbMaterial = Material::find($materialId);
+                    $materialName = $dbMaterial ? $dbMaterial->name : 'Unknown Material';
+                    $unit = $dbMaterial ? $dbMaterial->unit : '-';
+                } else {
+                    $materialName = $material['material_name'] ?? 'Unknown Material';
+                    $unit = $material['unit'] ?? '-';
+                }
+
+                $materialsUsed[] = [
+                    'material_id' => $materialId,
+                    'material_name' => $materialName,
+                    'quantity' => $material['quantity'] ?? 0,
+                    'unit' => $unit,
+                ];
+            }
+        }
+
         return Inertia::render('PreparationOrders/Form', [
-            'order' => $preparationOrder,
+            'order' => [
+                ...$preparationOrder->toArray(),
+                'materials_used' => $materialsUsed,
+            ],
             'patterns' => $patterns,
             'materials' => $materials,
             'staff' => $staff,
