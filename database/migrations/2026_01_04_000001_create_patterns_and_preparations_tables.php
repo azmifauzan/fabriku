@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('code');
             $table->string('name');
             $table->string('category')->nullable(); // mukena, gamis, cake, cookies, etc
-            $table->string('size')->nullable(); // for garment: S,M,L,XL or all_size
             $table->integer('output_quantity')->default(1); // how many pieces produced
             $table->text('description')->nullable();
             $table->json('material_requirements')->nullable(); // BOM: [{ material_id, quantity, unit }]

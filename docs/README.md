@@ -138,7 +138,7 @@ Setiap implementasi wajib melalui validasi:
 Untuk perubahan schema selama development:
 - Jangan buat migration baru untuk mengubah tabel yang sudah ada.
 - Update migration existing yang paling relevan (biasanya migration `create_*` yang pertama kali membuat tabel).
-- Jalankan `php artisan migrate:fresh` (tambahkan `--seed` jika butuh data awal).
+- Jalankan `php artisan migrate:fresh --seed`.
 
 ## 🤝 Contributing
 

@@ -22,7 +22,6 @@ class PatternFactory extends Factory
             'code' => strtoupper(fake()->unique()->bothify('PTN-###')),
             'name' => fake()->words(3, true),
             'category' => fake()->optional()->randomElement(['mukena', 'gamis', 'cake', 'cookies']),
-            'size' => fake()->optional()->randomElement(['S', 'M', 'L', 'XL', 'all_size']),
             'output_quantity' => fake()->numberBetween(1, 10),
             'description' => fake()->optional()->sentence(),
             'material_requirements' => null,

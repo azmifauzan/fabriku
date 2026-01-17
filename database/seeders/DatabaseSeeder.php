@@ -85,8 +85,7 @@ class DatabaseSeeder extends Seeder
             'specialty' => 'Jahit mukena & gamis',
             'contact_person' => 'Bu Aisyah',
             'phone' => '08111222333',
-            'rate_per_piece' => 15000,
-            'status' => 'active',
+            'is_active' => true,
         ]);
 
         $contractor2 = Contractor::create([
@@ -97,8 +96,7 @@ class DatabaseSeeder extends Seeder
             'specialty' => 'Jahit mukena',
             'contact_person' => 'Pak Budi',
             'phone' => '08222333444',
-            'rate_per_piece' => 12000,
-            'status' => 'active',
+            'is_active' => true,
         ]);
 
         // 5. Create Material Types
@@ -190,7 +188,6 @@ class DatabaseSeeder extends Seeder
             'code' => 'PTN-MUKENA-001',
             'name' => 'Mukena Dewasa Premium',
             'category' => 'mukena',
-            'size' => 'all_size',
             'output_quantity' => 1,
             'description' => 'Mukena dewasa bahan katun premium',
             'material_requirements' => [
@@ -206,7 +203,6 @@ class DatabaseSeeder extends Seeder
             'code' => 'PTN-GAMIS-001',
             'name' => 'Gamis Casual',
             'category' => 'gamis',
-            'size' => 'L',
             'output_quantity' => 1,
             'description' => 'Gamis casual bahan polyester',
             'material_requirements' => [
@@ -214,7 +210,7 @@ class DatabaseSeeder extends Seeder
                 ['material_id' => $materialBenang->id, 'quantity' => 0.15, 'unit' => 'cone'],
             ],
             'estimated_labor_cost' => 20000,
-            'instructions' => 'Pola gamis casual size L',
+            'instructions' => 'Pola gamis casual',
         ]);
 
         // 9. Create Preparation Orders (Cutting Orders) - COMPLETED
@@ -335,19 +331,17 @@ class DatabaseSeeder extends Seeder
         $location1 = InventoryLocation::create([
             'tenant_id' => $tenantGarment->id,
             'code' => 'RACK-A1',
-            'name' => 'Rak A1',
-            'type' => 'rack',
+            'name' => 'Rak A1 - Mukena',
             'capacity' => 100,
-            'description' => 'Rak untuk produk mukena',
+            'is_active' => true,
         ]);
 
         $location2 = InventoryLocation::create([
             'tenant_id' => $tenantGarment->id,
             'code' => 'RACK-B1',
-            'name' => 'Rak B1',
-            'type' => 'rack',
+            'name' => 'Rak B1 - Gamis',
             'capacity' => 100,
-            'description' => 'Rak untuk produk gamis',
+            'is_active' => true,
         ]);
 
         // 12. Create Inventory Items (from completed production order)
@@ -372,7 +366,6 @@ class DatabaseSeeder extends Seeder
             'tenant_id' => $tenantGarment->id,
             'code' => 'CUST-001',
             'name' => 'Toko Busana Muslim Amanah',
-            'type' => 'reseller',
             'phone' => '08555666777',
             'email' => 'amanah@example.com',
             'address' => 'Jl. Merdeka No. 123, Jakarta',
@@ -382,7 +375,6 @@ class DatabaseSeeder extends Seeder
             'tenant_id' => $tenantGarment->id,
             'code' => 'CUST-002',
             'name' => 'Ibu Siti',
-            'type' => 'retail',
             'phone' => '08666777888',
             'address' => 'Jl. Sudirman No. 45, Bandung',
         ]);
@@ -513,8 +505,7 @@ class DatabaseSeeder extends Seeder
             'specialty' => 'Baking kue & cookies',
             'contact_person' => 'Bu Ani',
             'phone' => '08333445566',
-            'rate_per_piece' => 5000,
-            'status' => 'active',
+            'is_active' => true,
         ]);
 
         // Material Types for Food
@@ -622,9 +613,8 @@ class DatabaseSeeder extends Seeder
             'code' => 'RCP-BROWNIES-001',
             'name' => 'Brownies Coklat Premium',
             'category' => 'brownies',
-            'size' => '20x20cm',
             'output_quantity' => 16,
-            'description' => 'Brownies coklat premium potong 16',
+            'description' => 'Brownies coklat premium potong 16 (ukuran 20x20cm)',
             'material_requirements' => [
                 ['material_id' => $materialTepung->id, 'quantity' => 0.5, 'unit' => 'kg'],
                 ['material_id' => $materialGula->id, 'quantity' => 0.4, 'unit' => 'kg'],
@@ -639,9 +629,8 @@ class DatabaseSeeder extends Seeder
             'code' => 'RCP-COOKIES-001',
             'name' => 'Cookies Coklat Chip',
             'category' => 'cookies',
-            'size' => 'medium',
             'output_quantity' => 50,
-            'description' => 'Cookies coklat chip isi 50 pcs',
+            'description' => 'Cookies coklat chip isi 50 pcs ukuran medium',
             'material_requirements' => [
                 ['material_id' => $materialTepung->id, 'quantity' => 0.6, 'unit' => 'kg'],
                 ['material_id' => $materialGula->id, 'quantity' => 0.3, 'unit' => 'kg'],
@@ -733,19 +722,17 @@ class DatabaseSeeder extends Seeder
         $locationCooling = InventoryLocation::create([
             'tenant_id' => $tenantFood->id,
             'code' => 'COOL-1',
-            'name' => 'Cooling Rack 1',
-            'type' => 'rack',
+            'name' => 'Cooling Rack 1 - Brownies',
             'capacity' => 100,
-            'description' => 'Rak pendingin untuk brownies',
+            'is_active' => true,
         ]);
 
         $locationPacking = InventoryLocation::create([
             'tenant_id' => $tenantFood->id,
             'code' => 'PACK-1',
-            'name' => 'Packaging Area 1',
-            'type' => 'shelf',
+            'name' => 'Packaging Area 1 - Cookies',
             'capacity' => 150,
-            'description' => 'Area packing cookies',
+            'is_active' => true,
         ]);
 
         // Inventory Items for Food
@@ -771,7 +758,6 @@ class DatabaseSeeder extends Seeder
             'tenant_id' => $tenantFood->id,
             'code' => 'CUST-F001',
             'name' => 'Cafe Corner Kopi',
-            'type' => 'reseller',
             'phone' => '08777888999',
             'email' => 'cafe@example.com',
             'address' => 'Jl. Senopati No. 88, Jakarta',
@@ -781,7 +767,6 @@ class DatabaseSeeder extends Seeder
             'tenant_id' => $tenantFood->id,
             'code' => 'CUST-F002',
             'name' => 'Ibu Lina',
-            'type' => 'retail',
             'phone' => '08888999000',
             'address' => 'Jl. Cikini No. 12, Jakarta',
         ]);

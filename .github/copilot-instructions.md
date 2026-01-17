@@ -210,7 +210,7 @@ Code is only "complete" when:
 
 ## Database Migrations (Development Workflow)
 - When changing an existing table during development, do **not** create a new “patch” migration.
-- Instead, update the original/earliest relevant migration(s) and run `php artisan migrate:fresh` (and `--seed` if needed).
+- Instead, update the original/earliest relevant migration(s) and run `php artisan migrate:fresh --seed`.
 - Keep migrations consistent with the current schema expectations so fresh installs/tests match production intent.
 
 ## Frontend Bundling

@@ -5,7 +5,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useSweetAlert } from '@/composables/useSweetAlert'
 import { useBusinessContext } from '@/composables/useBusinessContext'
-import { Edit, Trash2 } from 'lucide-vue-next'
+import { Edit, Trash2, Eye } from 'lucide-vue-next'
 
 interface PatternMaterial {
   id: number
@@ -22,7 +22,6 @@ interface Pattern {
   code: string
   name: string
   product_type: string
-  size: string | null
   is_active: boolean
   preparation_orders_count: number
   materials: PatternMaterial[]
@@ -41,6 +40,7 @@ const { productTypes, term, termLower } = useBusinessContext()
 const { confirmDelete, showSuccess } = useSweetAlert()
 
 const patternLabel = computed(() => term('pattern', 'Pattern'))
+const patternLabelLower = computed(() => termLower('pattern', 'pattern'))
 const materialLabel = computed(() => term('material', 'Bahan Baku'))
 
 const props = defineProps<{
@@ -227,17 +227,12 @@ const getProductTypeBadge = (type: string) => {
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex flex-col gap-1">
-                    <span
-                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                      :class="getProductTypeBadge(pattern.product_type)"
-                    >
-                      {{ getProductTypeLabel(pattern.product_type) }}
-                    </span>
-                    <span v-if="pattern.size" class="text-xs text-gray-500 dark:text-gray-400">
-                      Size: {{ pattern.size }}
-                    </span>
-                  </div>
+                  <span
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                    :class="getProductTypeBadge(pattern.product_type)"
+                  >
+                    {{ getProductTypeLabel(pattern.product_type) }}
+                  </span>
                 </td>
                 <td class="px-6 py-4">
                   <div class="text-sm text-gray-900 dark:text-gray-100">
@@ -269,6 +264,13 @@ const getProductTypeBadge = (type: string) => {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                   <div class="flex justify-end gap-2">
+                    <Link
+                      :href="`/patterns/${pattern.id}`"
+                      class="inline-flex items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      :title="`Lihat ${patternLabelLower}`"
+                    >
+                      <Eye :size="18" />
+                    </Link>
                     <Link
                       :href="`/patterns/${pattern.id}/edit`"
                       class="inline-flex items-center justify-center p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"

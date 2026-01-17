@@ -14,13 +14,8 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->string('code')->unique();
             $table->string('name');
-            $table->string('zone')->nullable(); // A, B, C, D, E etc
-            $table->string('rack')->nullable();
-            $table->string('type')->default('rack'); // rack, shelf, bin, etc
             $table->integer('capacity')->nullable();
-            $table->enum('status', ['active', 'inactive', 'maintenance'])->default('active');
-            $table->text('description')->nullable();
-            $table->text('notes')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
 

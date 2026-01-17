@@ -27,7 +27,6 @@ class UpdatePatternRequest extends FormRequest
             ],
             'name' => 'required|string|max:255',
             'category' => 'required|in:garment,food,craft,cosmetic,other',
-            'size' => 'nullable|string|max:50',
             'description' => 'nullable|string',
             'image_url' => 'nullable|url',
         ];

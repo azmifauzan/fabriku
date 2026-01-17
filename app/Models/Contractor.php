@@ -24,17 +24,14 @@ class Contractor extends Model
         'address',
         'type',
         'specialty',
-        'rate_per_piece',
-        'rate_per_hour',
-        'status',
+        'is_active',
         'notes',
     ];
 
     protected function casts(): array
     {
         return [
-            'rate_per_piece' => 'decimal:2',
-            'rate_per_hour' => 'decimal:2',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -46,13 +43,13 @@ class Contractor extends Model
             if (! $contractor->tenant_id) {
                 $contractor->tenant_id = auth()->user()->tenant_id;
             }
-            
+
             if (empty($contractor->code)) {
                 $contractor->code = self::generateCode();
             }
         });
     }
-    
+
     public static function generateCode(): string
     {
         $lastContractor = self::withoutGlobalScope(TenantScope::class)
@@ -89,34 +86,18 @@ class Contractor extends Model
 
     public function isActive(): bool
     {
-        return $this->status === 'active';
-    }
-
-    public function specialtyLabel(): string
-    {
-        return match ($this->specialty) {
-            'sewing' => 'Penjahit',
-            'baking' => 'Tukang Kue',
-            'crafting' => 'Perajin',
-            'other' => 'Lainnya',
-            default => $this->specialty,
-        };
+        return $this->is_active;
     }
 
     // Scopes
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('is_active', true);
     }
 
     public function scopeInactive($query)
     {
-        return $query->where('status', 'inactive');
-    }
-
-    public function scopeBySpecialty($query, string $specialty)
-    {
-        return $query->where('specialty', $specialty);
+        return $query->where('is_active', false);
     }
 
     public function scopeIndividual($query)

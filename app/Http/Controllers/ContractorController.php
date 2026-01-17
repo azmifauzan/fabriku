@@ -20,15 +20,14 @@ class ContractorController extends Controller
                     ->orWhere('phone', 'like', "%{$search}%");
             })
             ->when(request('type'), fn ($query, $type) => $query->where('type', $type))
-            ->when(request('specialty'), fn ($query, $specialty) => $query->where('specialty', $specialty))
-            ->when(request('status'), fn ($query, $status) => $query->where('status', $status))
+            ->when(request('is_active') !== null, fn ($query) => $query->where('is_active', request('is_active')))
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('Contractors/Index', [
             'contractors' => $contractors,
-            'filters' => request()->only(['search', 'type', 'specialty', 'status']),
+            'filters' => request()->only(['search', 'type', 'is_active']),
         ]);
     }
 

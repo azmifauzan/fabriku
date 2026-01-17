@@ -19,33 +19,20 @@ class InventoryLocationController extends Controller
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('zone', 'LIKE', "%{$search}%")
-                    ->orWhere('rack', 'LIKE', "%{$search}%")
-                    ->orWhere('description', 'LIKE', "%{$search}%");
+                    ->orWhere('code', 'LIKE', "%{$search}%");
             });
         }
 
-        // Filter by zone
-        if ($zone = $request->get('zone')) {
-            $query->where('zone', $zone);
-        }
-
         // Filter by status
-        if ($status = $request->get('status')) {
-            $query->where('status', $status);
+        if ($request->has('is_active')) {
+            $query->where('is_active', $request->boolean('is_active'));
         }
 
         $locations = $query->latest()->paginate(15);
 
         return Inertia::render('Inventory/Locations/Index', [
             'locations' => $locations,
-            'filters' => $request->only(['search', 'zone', 'status']),
-            'zones' => ['A', 'B', 'C', 'D', 'E'],
-            'statuses' => [
-                'active' => 'Active',
-                'inactive' => 'Inactive',
-                'maintenance' => 'Maintenance',
-            ],
+            'filters' => $request->only(['search', 'is_active']),
         ]);
     }
 
@@ -73,14 +60,7 @@ class InventoryLocationController extends Controller
 
     public function create(Request $request)
     {
-        return Inertia::render('Inventory/Locations/Create', [
-            'zones' => ['A', 'B', 'C', 'D', 'E'],
-            'statuses' => [
-                'active' => 'Active',
-                'inactive' => 'Inactive',
-                'maintenance' => 'Maintenance',
-            ],
-        ]);
+        return Inertia::render('Inventory/Locations/Create');
     }
 
     public function store(StoreInventoryLocationRequest $request)
@@ -88,7 +68,7 @@ class InventoryLocationController extends Controller
         $location = InventoryLocation::create($request->validated());
 
         return redirect()
-            ->route('inventory.locations.show', $location)
+            ->route('inventory.locations.index')
             ->with('success', 'Location berhasil dibuat.');
     }
 
@@ -96,12 +76,6 @@ class InventoryLocationController extends Controller
     {
         return Inertia::render('Inventory/Locations/Edit', [
             'location' => $location,
-            'zones' => ['A', 'B', 'C', 'D', 'E'],
-            'statuses' => [
-                'active' => 'Active',
-                'inactive' => 'Inactive',
-                'maintenance' => 'Maintenance',
-            ],
         ]);
     }
 
@@ -110,7 +84,7 @@ class InventoryLocationController extends Controller
         $location->update($request->validated());
 
         return redirect()
-            ->route('inventory.locations.show', $location)
+            ->route('inventory.locations.index')
             ->with('success', 'Location berhasil diupdate.');
     }
 

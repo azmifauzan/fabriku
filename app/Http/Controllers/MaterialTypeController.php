@@ -32,6 +32,22 @@ class MaterialTypeController extends Controller
         return Inertia::render('MaterialTypes/Form');
     }
 
+    public function show(MaterialType $materialType)
+    {
+        $materialType->loadCount('materials');
+        $materialType->load(['materials' => function ($query) {
+            $query->latest()->limit(10);
+        }]);
+
+        return Inertia::render('MaterialTypes/Show', [
+            'materialType' => $materialType,
+            'recentMaterials' => $materialType->materials,
+            'stats' => [
+                'total_materials' => $materialType->materials()->count(),
+            ],
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

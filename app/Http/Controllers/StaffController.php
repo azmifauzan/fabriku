@@ -32,6 +32,22 @@ class StaffController extends Controller
         return Inertia::render('Staff/Form');
     }
 
+    public function show(Staff $staff)
+    {
+        $staff->loadCount('preparationOrders');
+        $staff->load(['preparationOrders' => function ($query) {
+            $query->latest()->limit(10);
+        }]);
+
+        return Inertia::render('Staff/Show', [
+            'staff' => $staff,
+            'recentOrders' => $staff->preparationOrders,
+            'stats' => [
+                'total_preparations' => $staff->preparationOrders()->count(),
+            ],
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

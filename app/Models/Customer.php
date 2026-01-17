@@ -17,14 +17,11 @@ class Customer extends Model
         'tenant_id',
         'code',
         'name',
-        'type',
         'phone',
         'email',
         'address',
         'city',
         'province',
-        'discount_percentage',
-        'payment_term',
         'notes',
         'is_active',
     ];
@@ -32,7 +29,6 @@ class Customer extends Model
     protected function casts(): array
     {
         return [
-            'discount_percentage' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }

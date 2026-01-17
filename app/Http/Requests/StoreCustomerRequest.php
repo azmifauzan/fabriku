@@ -21,14 +21,11 @@ class StoreCustomerRequest extends FormRequest
         return [
             'code' => ['required', 'string', 'max:50', "unique:customers,code,NULL,id,tenant_id,{$tenantId}"],
             'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'in:retail,reseller,online'],
             'phone' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
             'address' => ['nullable', 'string'],
             'city' => ['nullable', 'string', 'max:100'],
             'province' => ['nullable', 'string', 'max:100'],
-            'discount_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'payment_term' => ['required', 'in:cash,credit_7,credit_14,credit_30'],
             'notes' => ['nullable', 'string'],
             'is_active' => ['boolean'],
         ];

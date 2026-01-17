@@ -8,6 +8,7 @@ import { useBusinessContext } from '@/composables/useBusinessContext'
 
 interface Contractor {
   id?: number
+  code?: string
   name: string
   type: string
   specialty: string
@@ -15,10 +16,7 @@ interface Contractor {
   email: string
   phone: string
   address: string
-  rate_per_piece: string
-  rate_per_hour: string
-  payment_terms: string
-  status: string
+  is_active: boolean
   notes: string
 }
 
@@ -26,24 +24,21 @@ const props = defineProps<{
   contractor?: Contractor
 }>()
 
-const { tenant, term, termLower } = useBusinessContext()
+const { term, termLower } = useBusinessContext()
 
 const contractorLabel = computed(() => term('contractor', 'Kontraktor'))
 const contractorLabelLower = computed(() => termLower('contractor', 'kontraktor'))
-const defaultSpecialty = computed(() => (tenant.value?.business_category === 'food' ? 'baking' : 'sewing'))
 
 const form = useForm({
+  code: props.contractor?.code || '',
   name: props.contractor?.name || '',
   type: props.contractor?.type || 'individual',
-  specialty: props.contractor?.specialty || defaultSpecialty.value,
+  specialty: props.contractor?.specialty || '',
   contact_person: props.contractor?.contact_person || '',
   email: props.contractor?.email || '',
   phone: props.contractor?.phone || '',
   address: props.contractor?.address || '',
-  rate_per_piece: props.contractor?.rate_per_piece || '0',
-  rate_per_hour: props.contractor?.rate_per_hour || '0',
-  payment_terms: props.contractor?.payment_terms || '',
-  status: props.contractor?.status || 'active',
+  is_active: props.contractor?.is_active ?? true,
   notes: props.contractor?.notes || '',
 })
 
@@ -91,6 +86,15 @@ const isEditing = !!props.contractor?.id
           <FormSection title="Informasi Dasar" description="Data identitas kontraktor">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
+                v-model="form.code"
+                label="Kode"
+                type="text"
+                placeholder="Otomatis jika kosong"
+                :error="form.errors.code"
+                hint="Biarkan kosong untuk generate otomatis"
+              />
+
+              <FormField
                 v-model="form.name"
                 :label="`Nama ${contractorLabel}`"
                 type="text"
@@ -114,28 +118,27 @@ const isEditing = !!props.contractor?.id
               <FormField
                 v-model="form.specialty"
                 label="Spesialisasi"
-                type="select"
-                :required="true"
+                type="text"
+                placeholder="Contoh: Penjahit mukena dan gamis"
                 :error="form.errors.specialty"
-                :options="[
-                  { value: 'sewing', label: 'Penjahit' },
-                  { value: 'baking', label: 'Tukang Kue' },
-                  { value: 'crafting', label: 'Perajin' },
-                  { value: 'other', label: 'Lainnya' }
-                ]"
+                hint="Deskripsi spesialisasi kontraktor"
               />
 
-              <FormField
-                v-model="form.status"
-                label="Status"
-                type="select"
-                :required="true"
-                :error="form.errors.status"
-                :options="[
-                  { value: 'active', label: 'Aktif' },
-                  { value: 'inactive', label: 'Non-Aktif' }
-                ]"
-              />
+              <div class="md:col-span-2">
+                <label class="flex items-center space-x-3">
+                  <input
+                    v-model="form.is_active"
+                    type="checkbox"
+                    class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700"
+                  />
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Kontraktor Aktif
+                  </span>
+                </label>
+                <p class="mt-1 ml-7 text-xs text-gray-500 dark:text-gray-400">
+                  Hanya kontraktor aktif yang dapat dipilih untuk production order
+                </p>
+              </div>
             </div>
           </FormSection>
 
@@ -174,40 +177,6 @@ const isEditing = !!props.contractor?.id
                 :rows="3"
                 :error="form.errors.address"
               />
-            </div>
-          </FormSection>
-
-          <!-- Pricing Information -->
-          <FormSection title="Informasi Harga" description="Tarif dan syarat pembayaran">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                v-model="form.rate_per_piece"
-                label="Tarif per Piece (Rp)"
-                type="number"
-                placeholder="0"
-                hint="Tarif per piece/unit produk"
-                :error="form.errors.rate_per_piece"
-              />
-
-              <FormField
-                v-model="form.rate_per_hour"
-                label="Tarif per Jam (Rp)"
-                type="number"
-                placeholder="0"
-                hint="Tarif per jam kerja"
-                :error="form.errors.rate_per_hour"
-              />
-
-              <div class="md:col-span-2">
-                <FormField
-                  v-model="form.payment_terms"
-                  label="Syarat Pembayaran"
-                  type="textarea"
-                  placeholder="Contoh: 50% DP, 50% setelah selesai"
-                  :rows="2"
-                  :error="form.errors.payment_terms"
-                />
-              </div>
             </div>
           </FormSection>
 

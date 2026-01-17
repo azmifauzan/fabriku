@@ -18,23 +18,15 @@ class InventoryLocation extends Model
         'tenant_id',
         'code',
         'name',
-        'type',
-        'zone',
-        'rack',
-        'description',
         'capacity',
-        'temperature_min',
-        'temperature_max',
-        'status',
-        'notes',
+        'is_active',
     ];
 
     protected function casts(): array
     {
         return [
             'capacity' => 'integer',
-            'temperature_min' => 'integer',
-            'temperature_max' => 'integer',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -46,13 +38,13 @@ class InventoryLocation extends Model
             if (! $location->tenant_id) {
                 $location->tenant_id = auth()->user()->tenant_id;
             }
-            
+
             if (empty($location->code)) {
                 $location->code = self::generateCode();
             }
         });
     }
-    
+
     public static function generateCode(): string
     {
         $lastLocation = self::withoutGlobalScope(TenantScope::class)
@@ -79,7 +71,7 @@ class InventoryLocation extends Model
     // Helper methods
     public function getFullLocationAttribute(): string
     {
-        return $this->zone.'-'.$this->rack;
+        return $this->code.' - '.$this->name;
     }
 
     public function getAvailableCapacityAttribute(): ?int
@@ -100,23 +92,18 @@ class InventoryLocation extends Model
 
     public function isAvailable(): bool
     {
-        return $this->status === 'active' && ($this->available_capacity === null || $this->available_capacity > 0);
+        return $this->is_active && ($this->available_capacity === null || $this->available_capacity > 0);
     }
 
     public function isActive(): bool
     {
-        return $this->status === 'active';
+        return $this->is_active;
     }
 
     // Scopes
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
-    }
-
-    public function scopeByZone($query, string $zone)
-    {
-        return $query->where('zone', $zone);
+        return $query->where('is_active', true);
     }
 
     public function scopeAvailable($query)

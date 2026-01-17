@@ -38,19 +38,8 @@
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ customer.name }}</dd>
                                     </div>
                                     <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Tipe</dt>
-                                        <dd class="mt-1">
-                                            <span
-                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                                :class="{
-                                                    'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': customer.type === 'retail',
-                                                    'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200': customer.type === 'reseller',
-                                                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': customer.type === 'online'
-                                                }"
-                                            >
-                                                {{ customer.type === 'retail' ? 'Retail' : customer.type === 'reseller' ? 'Reseller' : 'Online' }}
-                                            </span>
-                                        </dd>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Nama</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ customer.name }}</dd>
                                     </div>
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
@@ -78,16 +67,6 @@
                                             <span v-if="customer.city || customer.province">
                                                 {{ customer.city }}{{ customer.city && customer.province ? ', ' : '' }}{{ customer.province }}
                                             </span>
-                                        </dd>
-                                    </div>
-                                    <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Diskon Default</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ customer.discount_percentage }}%</dd>
-                                    </div>
-                                    <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Term Pembayaran</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ customer.payment_term === 'cash' ? 'Cash' : customer.payment_term === 'credit_7' ? 'Kredit 7 Hari' : customer.payment_term === 'credit_14' ? 'Kredit 14 Hari' : 'Kredit 30 Hari' }}
                                         </dd>
                                     </div>
                                     <div v-if="customer.notes" class="sm:col-span-2">

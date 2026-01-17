@@ -16,13 +16,10 @@ class CustomerFactory extends Factory
      */
     public function definition(): array
     {
-        $types = ['retail', 'reseller', 'corporate'];
-
         return [
             'tenant_id' => 1,
             'code' => fake()->unique()->numerify('CUST-####'),
             'name' => fake()->company(),
-            'type' => fake()->randomElement($types),
             'phone' => fake()->phoneNumber(),
             'email' => fake()->optional()->safeEmail(),
             'address' => fake()->optional()->address(),

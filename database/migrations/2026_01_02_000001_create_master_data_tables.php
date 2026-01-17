@@ -31,19 +31,17 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->string('name');
             $table->enum('type', ['individual', 'company'])->default('individual');
-            $table->string('specialty')->nullable(); // jahit, bordir, sablon, etc
+            $table->text('specialty')->nullable(); // jahit, bordir, sablon, etc - freeform text
             $table->string('contact_person')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
-            $table->decimal('rate_per_piece', 15, 2)->nullable();
-            $table->decimal('rate_per_hour', 15, 2)->nullable();
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->boolean('is_active')->default(true);
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['tenant_id', 'status']);
+            $table->index(['tenant_id', 'is_active']);
         });
 
         // Customers
@@ -52,14 +50,11 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->string('code')->unique();
             $table->string('name');
-            $table->enum('type', ['retail', 'reseller', 'corporate'])->default('retail');
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
             $table->string('city')->nullable();
             $table->string('province')->nullable();
-            $table->decimal('discount_percentage', 5, 2)->default(0);
-            $table->string('payment_term')->nullable();
             $table->boolean('is_active')->default(true);
             $table->text('notes')->nullable();
             $table->timestamps();

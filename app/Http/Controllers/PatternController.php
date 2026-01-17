@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePatternRequest;
 use App\Http\Requests\UpdatePatternRequest;
+use App\Models\Material;
 use App\Models\Pattern;
 use Inertia\Inertia;
 
@@ -29,12 +30,29 @@ class PatternController extends Controller
         ]);
     }
 
+    public function show(Pattern $pattern)
+    {
+        $pattern->load(['preparationOrders' => function ($query) {
+            $query->latest()->limit(10);
+        }]);
+
+        return Inertia::render('Patterns/Show', [
+            'pattern' => $pattern,
+            'recentOrders' => $pattern->preparationOrders,
+            'stats' => [
+                'total_orders' => $pattern->preparationOrders()->count(),
+                'total_produced' => $pattern->preparationOrders()->sum('quantity'),
+            ],
+        ]);
+    }
+
     public function create()
     {
         $tenant = auth()->user()->tenant;
         $categoryConfig = $tenant->getCategoryConfig();
 
         return Inertia::render('Patterns/PatternForm', [
+            'materials' => Material::with('type')->get(),
             'productTypes' => $categoryConfig['product_types'] ?? [],
             'sizes' => $categoryConfig['sizes'] ?? [],
             'isEdit' => false,
@@ -59,6 +77,7 @@ class PatternController extends Controller
 
         return Inertia::render('Patterns/PatternForm', [
             'pattern' => $pattern,
+            'materials' => Material::with('type')->get(),
             'productTypes' => $categoryConfig['product_types'] ?? [],
             'sizes' => $categoryConfig['sizes'] ?? [],
             'isEdit' => true,
