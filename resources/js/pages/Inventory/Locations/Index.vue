@@ -4,7 +4,7 @@ import { ref } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
-import { Eye, Edit, Trash2, Search } from 'lucide-vue-next';
+import { Eye, Edit, Trash2, Search, X } from 'lucide-vue-next';
 
 interface Location {
     id: number;
@@ -110,62 +110,79 @@ const capacityBarClass = (percentage: number) => {
                 />
 
                 <!-- Filters -->
-                <div class="mb-6 flex flex-col sm:flex-row gap-4">
-                    <div class="flex-1">
-                        <div class="relative">
-                            <Search
-                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-                                :size="20"
-                            />
-                            <input
-                                v-model="search"
-                                type="text"
-                                placeholder="Cari nama atau rak..."
-                                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors"
-                                @keyup.enter="applyFilters"
-                            />
+                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cari</label>
+                            <div class="relative">
+                                <Search :size="18" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                <input
+                                    v-model="search"
+                                    type="text"
+                                    placeholder="Nama atau rak..."
+                                    class="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                                    @keyup.enter="applyFilters"
+                                />
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <select
-                            v-model="statusFilter"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors"
-                            @change="applyFilters"
-                        >
-                            <option value="">Semua Status</option>
-                            <option value="true">Aktif</option>
-                            <option value="false">Tidak Aktif</option>
-                        </select>
-
-                        <button
-                            v-if="search || statusFilter"
-                            type="button"
-                            @click="clearFilters"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-semibold rounded-lg transition-all shadow-sm"
-                            title="Clear filters"
-                        >
-                            ✕
-                        </button>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                            <select
+                                v-model="statusFilter"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                            >
+                                <option value="">Semua Status</option>
+                                <option value="true">Aktif</option>
+                                <option value="false">Tidak Aktif</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end gap-2">
+                            <button
+                                type="button"
+                                @click="applyFilters"
+                                class="flex-1 inline-flex justify-center items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
+                            >
+                                <Search :size="16" />
+                                Filter
+                            </button>
+                            <button
+                                v-if="search || statusFilter"
+                                type="button"
+                                @click="clearFilters"
+                                class="inline-flex justify-center items-center px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-semibold rounded-lg transition-all shadow-sm"
+                                title="Clear filters"
+                            >
+                                <X :size="18" />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Table -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <!-- Table Info -->
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Menampilkan <span class="font-semibold">{{ locations.from }}</span> - <span class="font-semibold">{{ locations.to }}</span> dari <span class="font-semibold">{{ locations.total }}</span> lokasi
+                            </p>
+                        </div>
+                    </div>
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-900/50">
+                            <thead class="bg-gray-50 dark:bg-gray-700/50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                         Nama
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                         Kapasitas
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                         Status
                                     </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                         Aksi
                                     </th>
                                 </tr>
@@ -233,11 +250,12 @@ const capacityBarClass = (percentage: number) => {
                                     </td>
                                 </tr>
                                 <tr v-if="locations.data.length === 0">
-                                    <td colspan="4" class="px-6 py-12 text-center">
-                                        <div class="text-gray-500 dark:text-gray-400">
-                                            <p class="text-lg font-medium mb-1">Tidak ada data</p>
-                                            <p class="text-sm">Belum ada lokasi yang ditambahkan</p>
-                                        </div>
+                                    <td colspan="4" class="px-6 py-16 text-center">
+                                        <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                        <p class="mt-4 text-sm font-medium text-gray-900 dark:text-gray-100">Tidak ada data lokasi</p>
+                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tambahkan lokasi inventory pertama Anda</p>
                                     </td>
                                 </tr>
                             </tbody>
@@ -245,25 +263,28 @@ const capacityBarClass = (percentage: number) => {
                     </div>
 
                     <!-- Pagination -->
-                    <div
-                        v-if="locations.last_page > 1"
-                        class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between"
-                    >
-                        <div class="text-sm text-gray-700 dark:text-gray-300">
-                            Menampilkan {{ locations.data.length }} dari {{ locations.total }} data
-                        </div>
-                        <div class="flex gap-2">
-                            <Link
-                                v-for="page in locations.last_page"
-                                :key="page"
-                                :href="`/inventory/locations?page=${page}&search=${search}&status=${statusFilter}`"
-                                class="px-3 py-1 rounded border transition-colors"
-                                :class="page === locations.current_page
-                                    ? 'bg-indigo-600 text-white border-indigo-600'
-                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                            >
-                                {{ page }}
-                            </Link>
+                    <div v-if="locations.data.length > 0" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="text-sm text-gray-700 dark:text-gray-300">
+                                <span class="font-medium">{{ locations.from }}</span> - <span class="font-medium">{{ locations.to }}</span> dari <span class="font-medium">{{ locations.total }}</span> data
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <Link
+                                    v-for="page in locations.last_page"
+                                    :key="page"
+                                    :href="`/inventory/locations?page=${page}`"
+                                    :class="[
+                                        'px-4 py-2 text-sm font-medium rounded-lg transition-all',
+                                        page === locations.current_page
+                                            ? 'bg-indigo-600 text-white shadow-sm'
+                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+                                    ]"
+                                    preserve-state
+                                    preserve-scroll
+                                >
+                                    {{ page }}
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>

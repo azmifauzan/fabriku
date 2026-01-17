@@ -206,27 +206,26 @@
                     </div>
                     
                     <!-- Pagination -->
-                    <div v-if="contractors.links.length > 3" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                    <div v-if="contractors.data.length > 0" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                             <div class="text-sm text-gray-700 dark:text-gray-300">
                                 <span class="font-medium">{{ contractors.from }}</span> - <span class="font-medium">{{ contractors.to }}</span> dari <span class="font-medium">{{ contractors.total }}</span> data
                             </div>
                             <div class="flex flex-wrap gap-2">
                                 <Link
-                                    v-for="link in contractors.links"
-                                    :key="link.label"
-                                    :href="link.url"
+                                    v-for="page in contractors.last_page"
+                                    :key="page"
+                                    :href="`/contractors?page=${page}`"
                                     :class="[
                                         'px-4 py-2 text-sm font-medium rounded-lg transition-all',
-                                        link.active
+                                        page === contractors.current_page
                                             ? 'bg-indigo-600 text-white shadow-sm'
-                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600',
-                                        !link.url ? 'opacity-50 cursor-not-allowed' : ''
+                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
                                     ]"
                                     preserve-state
                                     preserve-scroll
                                 >
-                                    {{ link.label.replace(/&laquo;|&raquo;/g, '') }}
+                                    {{ page }}
                                 </Link>
                             </div>
                         </div>
@@ -261,8 +260,10 @@ interface Contractor {
 
 interface ContractorData {
     data: Contractor[]
+    current_page: number
+    last_page: number
+    per_page: number
     total: number
-    links: any[]
     from: number
     to: number
 }

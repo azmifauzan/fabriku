@@ -90,9 +90,9 @@ const deleteCustomer = async (customer: Customer) => {
         />
 
         <!-- Filters -->
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-          <div class="flex flex-col sm:flex-row gap-4">
-            <div class="flex-1">
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cari</label>
               <div class="relative">
                 <Search :size="18" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -116,7 +116,7 @@ const deleteCustomer = async (customer: Customer) => {
                 <option value="0">Nonaktif</option>
               </select>
             </div>
-            <div class="flex gap-2 items-end">
+            <div class="flex items-end gap-2">
               <button
                 type="button"
                 @click="applyFilters"
