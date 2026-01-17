@@ -25,6 +25,7 @@ class UpdateProductionOrderRequest extends FormRequest
             'preparation_order_id' => ['required', 'exists:preparation_orders,id'],
             'type' => ['required', 'string', Rule::in(['internal', 'external'])],
             'contractor_id' => ['nullable', 'exists:contractors,id', 'required_if:type,external'],
+            'quantity_requested' => ['required', 'integer', 'min:1'],
             'quantity_produced' => ['nullable', 'integer', 'min:0'],
             'quantity_good' => ['nullable', 'integer', 'min:0'],
             'quantity_reject' => ['nullable', 'integer', 'min:0'],

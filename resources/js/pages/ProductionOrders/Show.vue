@@ -40,7 +40,7 @@ const props = defineProps<{
 }>();
 
 const { term, termLower } = useBusinessContext();
-const { confirmDelete, showSuccess } = useSweetAlert();
+const { confirm, confirmDelete, showSuccess } = useSweetAlert();
 
 const productionOrderLabel = computed(() => 'Production Order');
 const contractorLabel = computed(() => term('contractor', 'Kontraktor'));
@@ -60,9 +60,12 @@ const canReceive = computed(() => {
 });
 
 const sendOrder = async () => {
-    const result = await confirmDelete(
+    const result = await confirm(
         `Kirim ${productionOrderLabel.value}`,
-        `Apakah Anda yakin ingin mengirim ${termLower('production_order', 'production order')} ${props.order.order_number}?`,
+        `Apakah Anda yakin ingin mengirim ${productionOrderLabel.value.toLowerCase()} ${props.order.order_number}?`,
+        'Ya, Kirim',
+        'question',
+        '#4f46e5',
     );
 
     if (result.isConfirmed) {
