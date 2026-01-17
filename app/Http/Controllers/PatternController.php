@@ -18,15 +18,13 @@ class PatternController extends Controller
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%");
             })
-            ->when(request('product_type'), fn ($query, $type) => $query->where('product_type', $type))
-            ->when(request('is_active') !== null, fn ($query) => $query->where('is_active', request('is_active')))
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('Patterns/Index', [
             'patterns' => $patterns,
-            'filters' => request()->only(['search', 'product_type', 'is_active']),
+            'filters' => request()->only(['search']),
         ]);
     }
 
@@ -41,20 +39,15 @@ class PatternController extends Controller
             'recentOrders' => $pattern->preparationOrders,
             'stats' => [
                 'total_orders' => $pattern->preparationOrders()->count(),
-                'total_produced' => $pattern->preparationOrders()->sum('quantity'),
+                'total_produced' => $pattern->preparationOrders()->sum('output_quantity'),
             ],
         ]);
     }
 
     public function create()
     {
-        $tenant = auth()->user()->tenant;
-        $categoryConfig = $tenant->getCategoryConfig();
-
         return Inertia::render('Patterns/PatternForm', [
-            'materials' => Material::with('type')->get(),
-            'productTypes' => $categoryConfig['product_types'] ?? [],
-            'sizes' => $categoryConfig['sizes'] ?? [],
+            'materials' => Material::with('materialType')->get(),
             'isEdit' => false,
         ]);
     }
@@ -72,14 +65,9 @@ class PatternController extends Controller
 
     public function edit(Pattern $pattern)
     {
-        $tenant = auth()->user()->tenant;
-        $categoryConfig = $tenant->getCategoryConfig();
-
         return Inertia::render('Patterns/PatternForm', [
             'pattern' => $pattern,
-            'materials' => Material::with('type')->get(),
-            'productTypes' => $categoryConfig['product_types'] ?? [],
-            'sizes' => $categoryConfig['sizes'] ?? [],
+            'materials' => Material::with('materialType')->get(),
             'isEdit' => true,
         ]);
     }

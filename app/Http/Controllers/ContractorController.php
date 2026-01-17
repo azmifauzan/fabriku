@@ -20,14 +20,14 @@ class ContractorController extends Controller
                     ->orWhere('phone', 'like', "%{$search}%");
             })
             ->when(request('type'), fn ($query, $type) => $query->where('type', $type))
-            ->when(request('is_active') !== null, fn ($query) => $query->where('is_active', request('is_active')))
+            ->when(request('status') !== null && request('status') !== '', fn ($query) => $query->where('is_active', (bool) request('status')))
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('Contractors/Index', [
             'contractors' => $contractors,
-            'filters' => request()->only(['search', 'type', 'is_active']),
+            'filters' => request()->only(['search', 'type', 'specialty', 'status']),
         ]);
     }
 
@@ -51,8 +51,14 @@ class ContractorController extends Controller
     {
         $contractor->load(['productionOrders' => fn ($query) => $query->latest()->take(10)]);
 
+        $stats = [
+            'total_productions' => $contractor->productionOrders()->count(),
+            'total_items_produced' => $contractor->productionOrders()->sum('quantity_ordered'),
+        ];
+
         return Inertia::render('Contractors/Show', [
             'contractor' => $contractor,
+            'stats' => $stats,
         ]);
     }
 

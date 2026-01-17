@@ -21,8 +21,6 @@ interface Pattern {
   id: number
   code: string
   name: string
-  product_type: string
-  is_active: boolean
   preparation_orders_count: number
   materials: PatternMaterial[]
 }
@@ -36,7 +34,7 @@ interface PaginatedPatterns {
   to: number
 }
 
-const { productTypes, term, termLower } = useBusinessContext()
+const { term, termLower } = useBusinessContext()
 const { confirmDelete, showSuccess } = useSweetAlert()
 
 const patternLabel = computed(() => term('pattern', 'Pattern'))
@@ -47,31 +45,18 @@ const props = defineProps<{
   patterns: PaginatedPatterns
   filters: {
     search?: string
-    product_type?: string
-    is_active?: string
   }
 }>()
 
 const search = ref(props.filters.search || '')
-const productTypeFilter = ref(props.filters.product_type || '')
-const statusFilter = ref(props.filters.is_active || '')
 
 const applyFilters = () => {
   router.get('/patterns', {
     search: search.value || undefined,
-    product_type: productTypeFilter.value || undefined,
-    is_active: statusFilter.value || undefined,
   }, {
     preserveState: true,
     preserveScroll: true,
   })
-}
-
-const clearFilters = () => {
-  search.value = ''
-  productTypeFilter.value = ''
-  statusFilter.value = ''
-  applyFilters()
 }
 
 const deletePattern = async (pattern: Pattern) => {
@@ -89,32 +74,6 @@ const deletePattern = async (pattern: Pattern) => {
     })
   }
 }
-
-const getProductTypeLabel = (type: string) => {
-  return productTypes.value[type] || type
-}
-
-const getProductTypeBadge = (type: string) => {
-  if (!type) {
-    return 'bg-gray-100 text-gray-800 dark:bg-gray-800/40 dark:text-gray-300'
-  }
-
-  const palette = [
-    'bg-purple-100 text-purple-800 dark:bg-purple-800/20 dark:text-purple-300',
-    'bg-pink-100 text-pink-800 dark:bg-pink-800/20 dark:text-pink-300',
-    'bg-blue-100 text-blue-800 dark:bg-blue-800/20 dark:text-blue-300',
-    'bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300',
-    'bg-yellow-100 text-yellow-800 dark:bg-yellow-800/20 dark:text-yellow-300',
-    'bg-indigo-100 text-indigo-800 dark:bg-indigo-800/20 dark:text-indigo-300',
-  ]
-
-  let hash = 0
-  for (let i = 0; i < type.length; i += 1) {
-    hash = (hash * 31 + type.charCodeAt(i)) % 2147483647
-  }
-
-  return palette[hash % palette.length] || 'bg-gray-100 text-gray-800 dark:bg-gray-800/40 dark:text-gray-300'
-}
 </script>
 
 <template>
@@ -131,59 +90,27 @@ const getProductTypeBadge = (type: string) => {
         />
 
         <!-- Filters -->
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cari</label>
+        <div class="mb-6 flex flex-col sm:flex-row gap-4">
+          <div class="flex-1">
+            <div class="relative">
               <input
                 v-model="search"
                 type="text"
-                placeholder="Nama atau kode..."
-                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                placeholder="Cari kode atau nama..."
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors"
                 @keyup.enter="applyFilters"
               />
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Jenis Produk</label>
-              <select
-                v-model="productTypeFilter"
-                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-              >
-                <option value="">Semua Jenis</option>
-                <option v-for="(label, value) in productTypes" :key="value" :value="value">
-                  {{ label }}
-                </option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
-              <select
-                v-model="statusFilter"
-                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-              >
-                <option value="">Semua Status</option>
-                <option value="1">Aktif</option>
-                <option value="0">Nonaktif</option>
-              </select>
-            </div>
-            <div class="flex items-end gap-2">
-              <button
-                type="button"
-                @click="applyFilters"
-                class="flex-1 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
-              >
-                Filter
-              </button>
-              <button
-                v-if="search || productTypeFilter || statusFilter"
-                type="button"
-                @click="clearFilters"
-                class="px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-semibold rounded-lg transition-all shadow-sm"
-                title="Clear filters"
-              >
-                ✕
-              </button>
-            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <button
+              type="button"
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-lg transition-colors font-medium"
+              @click="applyFilters"
+            >
+              Filter
+            </button>
           </div>
         </div>
 
@@ -196,13 +123,7 @@ const getProductTypeBadge = (type: string) => {
                   {{ patternLabel }}
                 </th>
                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                  Jenis & Ukuran
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                   {{ materialLabel }} (BOM)
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                  Status
                 </th>
                 <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                   Aksi
@@ -211,7 +132,7 @@ const getProductTypeBadge = (type: string) => {
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               <tr v-if="patterns.data.length === 0">
-                <td colspan="5" class="px-6 py-16 text-center">
+                <td colspan="3" class="px-6 py-16 text-center">
                   <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
@@ -226,14 +147,6 @@ const getProductTypeBadge = (type: string) => {
                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ pattern.name }}</div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                    :class="getProductTypeBadge(pattern.product_type)"
-                  >
-                    {{ getProductTypeLabel(pattern.product_type) }}
-                  </span>
-                </td>
                 <td class="px-6 py-4">
                   <div class="text-sm text-gray-900 dark:text-gray-100">
                     <div v-if="pattern.materials && pattern.materials.length > 0" class="space-y-1">
@@ -247,20 +160,6 @@ const getProductTypeBadge = (type: string) => {
                     </div>
                     <span v-else class="text-gray-400">Belum ada BOM</span>
                   </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    v-if="pattern.is_active"
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300"
-                  >
-                    Aktif
-                  </span>
-                  <span
-                    v-else
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-800/20 dark:text-red-300"
-                  >
-                    Nonaktif
-                  </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                   <div class="flex justify-end gap-2">

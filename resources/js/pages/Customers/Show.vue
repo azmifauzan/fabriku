@@ -4,11 +4,22 @@
 
         <div class="py-6 px-6">
             <div class="mx-auto max-w-7xl">
-                <PageHeader
-                    :title="`Detail Customer: ${customer.name}`"
-                    :description="`Informasi lengkap customer ${customer.code}`"
-                    :back-link="{ href: '/customers', text: 'Kembali ke Daftar Customer' }"
-                />
+                <div class="mb-6 flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+              Detail Customer: {{ customer.name }}
+            </h1>
+            <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+              Informasi lengkap customer {{ customer.code }}
+            </p>
+          </div>
+          <Link
+            href="/customers"
+            class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 transition-colors"
+          >
+            ← Kembali
+          </Link>
+        </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Customer Information -->
@@ -169,11 +180,37 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import PageHeader from '@/components/PageHeader.vue';
 
-defineProps({
-    customer: Object,
-    recentOrders: Array,
-    stats: Object
-});
+interface Order {
+  id: number;
+  order_number: string;
+  order_date: string;
+  total: number;
+  status: string;
+}
+
+interface Stats {
+  total_orders: number;
+  total_revenue: number;
+  pending_orders: number;
+}
+
+interface Customer {
+  id: number;
+  code: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  province?: string;
+  is_active: boolean;
+  notes?: string;
+}
+
+defineProps<{
+  customer: Customer;
+  recentOrders: Order[];
+  stats: Stats;
+}>();
 </script>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { Search, Plus, SquarePen, Trash2, Eye } from 'lucide-vue-next'
+import { Search, SquarePen, Trash2, Eye } from 'lucide-vue-next'
 import { ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
