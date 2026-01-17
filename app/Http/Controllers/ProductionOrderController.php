@@ -46,7 +46,7 @@ class ProductionOrderController extends Controller
             ->latest()
             ->get();
 
-        $contractors = Contractor::active()->get(['id', 'name', 'type', 'specialty', 'rate_per_piece', 'rate_per_hour']);
+        $contractors = Contractor::active()->get(['id', 'name', 'type', 'specialty']);
 
         return Inertia::render('ProductionOrders/Form', [
             'preparationOrders' => $preparationOrders,

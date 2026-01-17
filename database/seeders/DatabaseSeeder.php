@@ -187,30 +187,22 @@ class DatabaseSeeder extends Seeder
             'tenant_id' => $tenantGarment->id,
             'code' => 'PTN-MUKENA-001',
             'name' => 'Mukena Dewasa Premium',
-            'category' => 'mukena',
             'output_quantity' => 1,
             'description' => 'Mukena dewasa bahan katun premium',
-            'material_requirements' => [
-                ['material_id' => $materialKatun->id, 'quantity' => 2.5, 'unit' => 'meter'],
-                ['material_id' => $materialBenang->id, 'quantity' => 0.1, 'unit' => 'cone'],
-            ],
             'estimated_labor_cost' => 15000,
             'instructions' => 'Pola mukena standar dewasa dengan tas',
+            'is_active' => true,
         ]);
 
         $patternGamis = Pattern::create([
             'tenant_id' => $tenantGarment->id,
             'code' => 'PTN-GAMIS-001',
             'name' => 'Gamis Casual',
-            'category' => 'gamis',
             'output_quantity' => 1,
             'description' => 'Gamis casual bahan polyester',
-            'material_requirements' => [
-                ['material_id' => $materialPolyester->id, 'quantity' => 3.0, 'unit' => 'meter'],
-                ['material_id' => $materialBenang->id, 'quantity' => 0.15, 'unit' => 'cone'],
-            ],
             'estimated_labor_cost' => 20000,
             'instructions' => 'Pola gamis casual',
+            'is_active' => true,
         ]);
 
         // 9. Create Preparation Orders (Cutting Orders) - COMPLETED
@@ -221,8 +213,8 @@ class DatabaseSeeder extends Seeder
             'prepared_by' => $staffPreparation->id,
             'output_quantity' => 20,
             'material_usage' => [
-                ['material_id' => $materialKatun->id, 'quantity' => 52], // 2.5 x 20 + waste
-                ['material_id' => $materialBenang->id, 'quantity' => 2.5],
+                ['material_id' => $materialKatun->id, 'material_name' => $materialKatun->name, 'quantity' => 52, 'unit' => $materialKatun->unit], // 2.5 x 20 + waste
+                ['material_id' => $materialBenang->id, 'material_name' => $materialBenang->name, 'quantity' => 2.5, 'unit' => $materialBenang->unit],
             ],
             'waste_percentage' => 4.0,
             'status' => 'completed',
@@ -238,8 +230,8 @@ class DatabaseSeeder extends Seeder
             'prepared_by' => $staffPreparation->id,
             'output_quantity' => 15,
             'material_usage' => [
-                ['material_id' => $materialPolyester->id, 'quantity' => 47], // 3.0 x 15 + waste
-                ['material_id' => $materialBenang->id, 'quantity' => 2.5],
+                ['material_id' => $materialPolyester->id, 'material_name' => $materialPolyester->name, 'quantity' => 47, 'unit' => $materialPolyester->unit], // 3.0 x 15 + waste
+                ['material_id' => $materialBenang->id, 'material_name' => $materialBenang->name, 'quantity' => 2.5, 'unit' => $materialBenang->unit],
             ],
             'waste_percentage' => 4.5,
             'status' => 'completed',
@@ -297,8 +289,8 @@ class DatabaseSeeder extends Seeder
             'prepared_by' => $staffPreparation->id,
             'output_quantity' => 10,
             'material_usage' => [
-                ['material_id' => $materialKatun->id, 'quantity' => 26],
-                ['material_id' => $materialBenang->id, 'quantity' => 1.2],
+                ['material_id' => $materialKatun->id, 'material_name' => $materialKatun->name, 'quantity' => 26, 'unit' => $materialKatun->unit],
+                ['material_id' => $materialBenang->id, 'material_name' => $materialBenang->name, 'quantity' => 1.2, 'unit' => $materialBenang->unit],
             ],
             'waste_percentage' => 4.0,
             'status' => 'completed',
@@ -612,32 +604,22 @@ class DatabaseSeeder extends Seeder
             'tenant_id' => $tenantFood->id,
             'code' => 'RCP-BROWNIES-001',
             'name' => 'Brownies Coklat Premium',
-            'category' => 'brownies',
             'output_quantity' => 16,
             'description' => 'Brownies coklat premium potong 16 (ukuran 20x20cm)',
-            'material_requirements' => [
-                ['material_id' => $materialTepung->id, 'quantity' => 0.5, 'unit' => 'kg'],
-                ['material_id' => $materialGula->id, 'quantity' => 0.4, 'unit' => 'kg'],
-                ['material_id' => $materialTelur->id, 'quantity' => 0.3, 'unit' => 'kg'],
-            ],
             'estimated_labor_cost' => 30000,
             'instructions' => 'Campur semua bahan, panggang 180C selama 35 menit',
+            'is_active' => true,
         ]);
 
         $recipeCookies = Pattern::create([
             'tenant_id' => $tenantFood->id,
             'code' => 'RCP-COOKIES-001',
             'name' => 'Cookies Coklat Chip',
-            'category' => 'cookies',
             'output_quantity' => 50,
             'description' => 'Cookies coklat chip isi 50 pcs ukuran medium',
-            'material_requirements' => [
-                ['material_id' => $materialTepung->id, 'quantity' => 0.6, 'unit' => 'kg'],
-                ['material_id' => $materialGula->id, 'quantity' => 0.3, 'unit' => 'kg'],
-                ['material_id' => $materialTelur->id, 'quantity' => 0.2, 'unit' => 'kg'],
-            ],
             'estimated_labor_cost' => 25000,
             'instructions' => 'Bentuk bulat, panggang 170C selama 15 menit',
+            'is_active' => true,
         ]);
 
         // Preparation Orders for Food (Mixing/Prep)
@@ -648,9 +630,9 @@ class DatabaseSeeder extends Seeder
             'prepared_by' => $staffMixing->id,
             'output_quantity' => 48,
             'material_usage' => [
-                ['material_id' => $materialTepung->id, 'quantity' => 1.6],
-                ['material_id' => $materialGula->id, 'quantity' => 1.3],
-                ['material_id' => $materialTelur->id, 'quantity' => 1.0],
+                ['material_id' => $materialTepung->id, 'material_name' => $materialTepung->name, 'quantity' => 1.6, 'unit' => $materialTepung->unit],
+                ['material_id' => $materialGula->id, 'material_name' => $materialGula->name, 'quantity' => 1.3, 'unit' => $materialGula->unit],
+                ['material_id' => $materialTelur->id, 'material_name' => $materialTelur->name, 'quantity' => 1.0, 'unit' => $materialTelur->unit],
             ],
             'waste_percentage' => 3.0,
             'status' => 'completed',
@@ -666,9 +648,9 @@ class DatabaseSeeder extends Seeder
             'prepared_by' => $staffMixing->id,
             'output_quantity' => 100,
             'material_usage' => [
-                ['material_id' => $materialTepung->id, 'quantity' => 1.3],
-                ['material_id' => $materialGula->id, 'quantity' => 0.7],
-                ['material_id' => $materialTelur->id, 'quantity' => 0.5],
+                ['material_id' => $materialTepung->id, 'material_name' => $materialTepung->name, 'quantity' => 1.3, 'unit' => $materialTepung->unit],
+                ['material_id' => $materialGula->id, 'material_name' => $materialGula->name, 'quantity' => 0.7, 'unit' => $materialGula->unit],
+                ['material_id' => $materialTelur->id, 'material_name' => $materialTelur->name, 'quantity' => 0.5, 'unit' => $materialTelur->unit],
             ],
             'waste_percentage' => 2.5,
             'status' => 'completed',

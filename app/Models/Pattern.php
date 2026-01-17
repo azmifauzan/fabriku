@@ -17,19 +17,18 @@ class Pattern extends Model
         'tenant_id',
         'code',
         'name',
-        'category',
         'output_quantity',
         'description',
-        'material_requirements',
         'estimated_labor_cost',
         'instructions',
+        'is_active',
     ];
 
     protected function casts(): array
     {
         return [
-            'material_requirements' => 'array',
             'estimated_labor_cost' => 'decimal:2',
+            'is_active' => 'boolean',
         ];
     }
 

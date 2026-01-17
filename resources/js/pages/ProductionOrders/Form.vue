@@ -2,7 +2,7 @@
 import { useBusinessContext } from '@/composables/useBusinessContext';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 
 interface Pattern {
     id: number;
@@ -22,8 +22,6 @@ interface Contractor {
     name: string;
     type: string;
     specialty: string;
-    rate_per_piece: number;
-    rate_per_hour: number;
 }
 
 interface ProductionOrder {
@@ -32,6 +30,7 @@ interface ProductionOrder {
     preparation_order_id: number;
     contractor_id: number | null;
     type: string;
+    quantity_requested: number;
     estimated_completion_date: string | null;
     status: string;
     notes: string;
@@ -49,9 +48,11 @@ const form = useForm({
     preparation_order_id: props.productionOrder?.preparation_order_id || 0,
     type: props.productionOrder?.type || 'internal',
     contractor_id: props.productionOrder?.contractor_id || null,
+    quantity_requested: props.productionOrder?.quantity_requested || 0,
     estimated_completion_date: props.productionOrder?.estimated_completion_date || '',
     labor_cost: props.productionOrder?.labor_cost ?? 0,
     priority: props.productionOrder?.priority || 'normal',
+    status: props.productionOrder?.status || 'draft',
     notes: props.productionOrder?.notes || '',
 });
 
@@ -59,16 +60,22 @@ const selectedPreparationOrder = computed(() => {
     return props.preparationOrders.find((po) => po.id === form.preparation_order_id);
 });
 
-const selectedContractor = computed(() => {
-    return props.contractors.find((c) => c.id === form.contractor_id);
-});
-
 const availableQuantity = computed(() => {
     if (!selectedPreparationOrder.value) return 0;
     return selectedPreparationOrder.value.output_quantity;
 });
 
-const { term, termLower } = useBusinessContext();
+// Auto-fill quantity_requested when preparation order is selected
+watch(() => form.preparation_order_id, (newValue) => {
+    if (newValue && newValue !== 0 && !isEditing) {
+        const prepOrder = props.preparationOrders.find((po) => po.id === newValue);
+        if (prepOrder) {
+            form.quantity_requested = prepOrder.output_quantity;
+        }
+    }
+});
+
+const { term } = useBusinessContext();
 
 const productionOrderLabel = computed(() => 'Production Order');
 const productionOrderLabelLower = computed(() => 'production order');
@@ -190,6 +197,27 @@ const isEditing = !!props.productionOrder?.id;
                                         <p v-if="form.errors.type" class="mt-1 text-sm text-red-600">{{ form.errors.type }}</p>
                                     </div>
 
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Jumlah Diminta <span class="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            v-model.number="form.quantity_requested"
+                                            type="number"
+                                            min="1"
+                                            :max="availableQuantity"
+                                            required
+                                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                            :class="{ 'border-red-500': form.errors.quantity_requested }"
+                                        />
+                                        <p v-if="form.errors.quantity_requested" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors.quantity_requested }}
+                                        </p>
+                                        <p v-if="selectedPreparationOrder" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            Tersedia: {{ availableQuantity }} pcs
+                                        </p>
+                                    </div>
+
                                     <div v-if="form.type === 'external'">
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                             {{ contractorLabel }} <span class="text-red-500">*</span>
@@ -202,7 +230,8 @@ const isEditing = !!props.productionOrder?.id;
                                         >
                                             <option :value="null" disabled>-- Pilih {{ contractorLabel }} --</option>
                                             <option v-for="contractor in contractors" :key="contractor.id" :value="contractor.id">
-                                                {{ contractor.name }} - Rp {{ contractor.rate_per_piece.toLocaleString('id-ID') }}/pcs
+                                                {{ contractor.name }}
+                                                <template v-if="contractor.specialty">- {{ contractor.specialty }}</template>
                                             </option>
                                         </select>
                                         <p v-if="form.errors.contractor_id" class="mt-1 text-sm text-red-600">{{ form.errors.contractor_id }}</p>
@@ -227,6 +256,26 @@ const isEditing = !!props.productionOrder?.id;
                             <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700">
                                 <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Prioritas & Biaya</h3>
                                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div v-if="isEditing">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Status <span class="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            v-model="form.status"
+                                            required
+                                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                            :class="{ 'border-red-500': form.errors.status }"
+                                        >
+                                            <option value="draft">Draft</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="sent">Dikirim</option>
+                                            <option value="in_progress">Dalam Proses</option>
+                                            <option value="completed">Selesai</option>
+                                            <option value="cancelled">Dibatalkan</option>
+                                        </select>
+                                        <p v-if="form.errors.status" class="mt-1 text-sm text-red-600">{{ form.errors.status }}</p>
+                                    </div>
+
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                             Prioritas <span class="text-red-500">*</span>

@@ -53,15 +53,38 @@ class ProductionOrder extends Model
             }
 
             // Auto-generate order number
-            if (! $order->order_number) {
+            if (! $order->order_number && $order->tenant_id) {
                 $year = now()->year;
+                $nextNumber = 1;
+
+                // Find the highest order number for this tenant and year
                 $lastOrder = ProductionOrder::withoutGlobalScope(TenantScope::class)
+                    ->where('tenant_id', $order->tenant_id)
                     ->whereYear('created_at', $year)
-                    ->latest('id')
+                    ->orderBy('id', 'desc')
                     ->first();
 
-                $nextNumber = $lastOrder ? ((int) substr($lastOrder->order_number, -3)) + 1 : 1;
-                $order->order_number = sprintf('PO-%d-%03d', $year, $nextNumber);
+                if ($lastOrder && $lastOrder->order_number) {
+                    // Extract number from order_number using regex
+                    if (preg_match('/(\d+)$/', $lastOrder->order_number, $matches)) {
+                        $nextNumber = (int) $matches[1] + 1;
+                    }
+                }
+
+                // Loop until we find a unique order number
+                do {
+                    $orderNumber = sprintf('PO-%d-%03d', $year, $nextNumber);
+                    $exists = ProductionOrder::withoutGlobalScope(TenantScope::class)
+                        ->where('tenant_id', $order->tenant_id)
+                        ->where('order_number', $orderNumber)
+                        ->exists();
+
+                    if ($exists) {
+                        $nextNumber++;
+                    }
+                } while ($exists);
+
+                $order->order_number = $orderNumber;
             }
         });
     }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePatternRequest;
 use App\Http\Requests\UpdatePatternRequest;
-use App\Models\Material;
 use App\Models\Pattern;
 use Inertia\Inertia;
 
@@ -20,7 +19,15 @@ class PatternController extends Controller
             })
             ->latest()
             ->paginate(15)
-            ->withQueryString();
+            ->withQueryString()
+            ->through(fn ($pattern) => [
+                'id' => $pattern->id,
+                'code' => $pattern->code,
+                'name' => $pattern->name,
+                'is_active' => $pattern->is_active,
+                'preparation_orders_count' => $pattern->preparation_orders_count,
+                'materials' => $pattern->materials,
+            ]);
 
         return Inertia::render('Patterns/Index', [
             'patterns' => $patterns,
@@ -47,7 +54,6 @@ class PatternController extends Controller
     public function create()
     {
         return Inertia::render('Patterns/PatternForm', [
-            'materials' => Material::with('materialType')->get(),
             'isEdit' => false,
         ]);
     }
@@ -67,7 +73,6 @@ class PatternController extends Controller
     {
         return Inertia::render('Patterns/PatternForm', [
             'pattern' => $pattern,
-            'materials' => Material::with('materialType')->get(),
             'isEdit' => true,
         ]);
     }

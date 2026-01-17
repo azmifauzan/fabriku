@@ -11,6 +11,7 @@ interface MaterialAttribute {
 }
 
 interface MaterialType {
+    id: number;
     code: string;
     name: string;
 }
@@ -19,12 +20,13 @@ interface Material {
     id?: number;
     code: string;
     name: string;
-    type: string;
+    material_type_id: number;
     unit: string;
-    standard_price: string;
-    reorder_point: string;
-    is_active: boolean;
-    current_stock?: string;
+    price_per_unit: string;
+    stock_quantity?: string;
+    min_stock?: string;
+    supplier_name?: string;
+    description?: string;
     attributes?: MaterialAttribute[];
 }
 
@@ -36,12 +38,13 @@ const props = defineProps<{
 const form = useForm({
     code: props.material?.code || '',
     name: props.material?.name || '',
-    type: props.material?.type || props.materialTypes[0]?.code || 'kain',
-    quantity: props.material?.current_stock || '0',
+    material_type_id: props.material?.material_type_id || (props.materialTypes[0]?.id || ''),
+    stock_quantity: props.material?.stock_quantity || '0',
     unit: props.material?.unit || 'meter',
-    standard_price: props.material?.standard_price || '0',
-    reorder_point: props.material?.reorder_point || '0',
-    is_active: props.material?.is_active ?? true,
+    price_per_unit: props.material?.price_per_unit || '0',
+    min_stock: props.material?.min_stock || '0',
+    supplier_name: props.material?.supplier_name || '',
+    description: props.material?.description || '',
     attributes:
         props.material?.attributes
             ?.filter((attr): attr is MaterialAttribute => attr != null)
@@ -122,14 +125,14 @@ const isEditing = !!props.material?.id;
                             />
 
                             <FormField
-                                v-model="form.type"
+                                v-model="form.material_type_id"
                                 label="Jenis Bahan"
                                 type="select"
                                 :required="true"
-                                :error="form.errors.type"
+                                :error="form.errors.material_type_id"
                                 :options="
-                                    materialTypes.map((type) => ({
-                                        value: type.code,
+                                    props.materialTypes.map((type) => ({
+                                        value: type.id,
                                         label: type.name,
                                     }))
                                 "
@@ -138,19 +141,10 @@ const isEditing = !!props.material?.id;
                             <FormField
                                 v-model="form.unit"
                                 label="Satuan"
-                                type="select"
+                                type="text"
+                                placeholder="meter, kg, pcs, etc"
                                 :required="true"
                                 :error="form.errors.unit"
-                                :options="[
-                                    { value: 'meter', label: 'Meter' },
-                                    { value: 'yard', label: 'Yard' },
-                                    { value: 'kg', label: 'Kilogram (kg)' },
-                                    { value: 'gram', label: 'Gram' },
-                                    { value: 'roll', label: 'Roll' },
-                                    { value: 'pcs', label: 'Pieces (pcs)' },
-                                    { value: 'lusin', label: 'Lusin' },
-                                    { value: 'pack', label: 'Pack' },
-                                ]"
                             />
                         </div>
                     </FormSection>
@@ -159,38 +153,55 @@ const isEditing = !!props.material?.id;
                     <FormSection title="Stok dan Harga" description="Informasi stok dan pricing">
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <FormField
-                                v-model="form.quantity"
+                                v-model="form.stock_quantity"
                                 label="Jumlah Stok"
                                 type="number"
                                 placeholder="0"
-                                :error="form.errors.quantity"
+                                :error="form.errors.stock_quantity"
                                 hint="Stok bahan baku saat ini"
                             />
 
                             <FormField
-                                v-model="form.standard_price"
+                                v-model="form.price_per_unit"
                                 label="Harga (Rp)"
                                 type="number"
                                 placeholder="0"
-                                :error="form.errors.standard_price"
+                                :error="form.errors.price_per_unit"
                                 hint="Harga per satuan (opsional)"
                             />
 
                             <FormField
-                                v-model="form.reorder_point"
+                                v-model="form.min_stock"
                                 label="Minimum Stok"
                                 type="number"
                                 placeholder="0"
-                                :error="form.errors.reorder_point"
+                                :error="form.errors.min_stock"
                                 hint="Peringatan stok rendah (opsional)"
                             />
 
-                            <div class="space-y-2">
-                                <div class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                    Bahan baku aktif (dapat digunakan untuk produksi)
-                                </div>
-                                <FormField v-model="form.is_active" label="Aktif" type="checkbox" />
-                            </div>
+                            <FormField
+                                v-model="form.supplier_name"
+                                label="Nama Supplier"
+                                type="text"
+                                placeholder="Nama supplier (opsional)"
+                                :error="form.errors.supplier_name"
+                            />
+                        </div>
+                    </FormSection>
+
+                    <!-- Description -->
+                    <FormSection title="Deskripsi" description="Informasi tambahan tentang bahan baku">
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">Deskripsi</label>
+                            <textarea
+                                v-model="form.description"
+                                placeholder="Deskripsi bahan baku (opsional)"
+                                rows="4"
+                                class="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            />
+                            <p v-if="form.errors.description" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.errors.description }}
+                            </p>
                         </div>
                     </FormSection>
 

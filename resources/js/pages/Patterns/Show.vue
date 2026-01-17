@@ -93,7 +93,7 @@
                                                 <Link :href="`/preparation-orders/${order.id}`">{{ order.order_number }}</Link>
                                             </td>
                                             <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                                                {{ new Date(order.order_date).toLocaleDateString('id-ID') }}
+                                                {{ order.preparation_date ? new Date(order.preparation_date).toLocaleDateString('id-ID') : '-' }}
                                             </td>
                                             <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
                                                 {{ order.quantity }}

@@ -8,7 +8,7 @@ import { ref } from 'vue';
 
 interface MaterialAttribute {
     id: number;
-    attribute_name: string;
+    attribute_key: string;
     attribute_value: string;
 }
 
@@ -16,14 +16,19 @@ interface Material {
     id: number;
     code: string;
     name: string;
-    type: string;
+    material_type_id: number;
     unit: string;
-    standard_price: string;
-    current_stock: string;
+    price_per_unit: string;
+    stock_quantity: string;
     reorder_point: string;
-    is_active: boolean;
+    supplier_name?: string;
     receipts_count: number;
     attributes?: MaterialAttribute[];
+    materialType?: {
+        id: number;
+        name: string;
+        code: string;
+    };
     created_at: string;
 }
 
@@ -37,28 +42,31 @@ interface PaginatedMaterials {
     to: number;
 }
 
+interface MaterialType {
+    id: number;
+    name: string;
+}
+
 const props = defineProps<{
     materials: PaginatedMaterials;
+    types: MaterialType[];
     filters: {
         search?: string;
-        type?: string;
-        is_active?: string;
+        material_type_id?: string;
     };
 }>();
 
 const { confirmDelete, showSuccess } = useSweetAlert();
 
 const search = ref(props.filters.search || '');
-const typeFilter = ref(props.filters.type || '');
-const statusFilter = ref(props.filters.is_active || '');
+const typeFilter = ref(props.filters.material_type_id || '');
 
 const applyFilters = () => {
     router.get(
         '/materials',
         {
             search: search.value || undefined,
-            type: typeFilter.value || undefined,
-            is_active: statusFilter.value || undefined,
+            material_type_id: typeFilter.value || undefined,
         },
         {
             preserveState: true,
@@ -70,7 +78,6 @@ const applyFilters = () => {
 const clearFilters = () => {
     search.value = '';
     typeFilter.value = '';
-    statusFilter.value = '';
     applyFilters();
 };
 
@@ -102,30 +109,8 @@ const formatNumber = (value: string) => {
     }).format(parseFloat(value));
 };
 
-const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-        kain: 'Kain',
-        benang: 'Benang',
-        aksesoris: 'Aksesoris',
-        kemasan: 'Kemasan',
-        lainnya: 'Lainnya',
-    };
-    return labels[type] || type;
-};
-
-const getTypeBadgeColor = (type: string) => {
-    const colors: Record<string, string> = {
-        kain: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
-        benang: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
-        aksesoris: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300',
-        kemasan: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
-        lainnya: 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300',
-    };
-    return colors[type] || 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300';
-};
-
 const isLowStock = (material: Material) => {
-    return parseFloat(material.current_stock) <= parseFloat(material.reorder_point);
+    return parseFloat(material.stock_quantity) <= parseFloat(material.min_stock);
 };
 </script>
 
@@ -144,8 +129,8 @@ const isLowStock = (material: Material) => {
 
                 <!-- Filters -->
                 <div class="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-                        <div>
+                    <div class="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
+                        <div class="flex-1">
                             <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Cari</label>
                             <div class="relative">
                                 <Search :size="18" class="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-400" />
@@ -158,42 +143,29 @@ const isLowStock = (material: Material) => {
                                 />
                             </div>
                         </div>
-                        <div>
+                        <div class="flex-1">
                             <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Jenis</label>
                             <select
                                 v-model="typeFilter"
                                 class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
                                 <option value="">Semua Jenis</option>
-                                <option value="kain">Kain</option>
-                                <option value="benang">Benang</option>
-                                <option value="aksesoris">Aksesoris</option>
-                                <option value="kemasan">Kemasan</option>
-                                <option value="lainnya">Lainnya</option>
+                                <option v-for="type in types" :key="type.id" :value="type.id">
+                                    {{ type.name }}
+                                </option>
                             </select>
                         </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                            <select
-                                v-model="statusFilter"
-                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            >
-                                <option value="">Semua Status</option>
-                                <option value="1">Aktif</option>
-                                <option value="0">Nonaktif</option>
-                            </select>
-                        </div>
-                        <div class="flex items-end gap-2">
+                        <div class="flex gap-2">
                             <button
                                 type="button"
                                 @click="applyFilters"
-                                class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md"
+                                class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md"
                             >
                                 <Search :size="16" />
                                 Filter
                             </button>
                             <button
-                                v-if="search || typeFilter || statusFilter"
+                                v-if="search || typeFilter"
                                 type="button"
                                 @click="clearFilters"
                                 class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -232,10 +204,7 @@ const isLowStock = (material: Material) => {
                                         Stok
                                     </th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
-                                        Harga Standar
-                                    </th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
-                                        Status
+                                        Harga
                                     </th>
                                     <th class="px-6 py-4 text-right text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
                                         Aksi
@@ -244,7 +213,7 @@ const isLowStock = (material: Material) => {
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                                 <tr v-if="materials.data.length === 0">
-                                    <td colspan="6" class="px-6 py-16 text-center">
+                                    <td colspan="4" class="px-6 py-16 text-center">
                                         <svg
                                             class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500"
                                             fill="none"
@@ -277,29 +246,26 @@ const isLowStock = (material: Material) => {
                                                     :key="attr.id"
                                                     class="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                                                 >
-                                                    <span class="font-medium">{{ attr.attribute_name }}:</span>
+                                                    <span class="font-medium">{{ attr.attribute_key }}:</span>
                                                     <span class="ml-1">{{ attr.attribute_value }}</span>
                                                 </span>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="inline-flex rounded-full px-2 text-xs leading-5 font-semibold"
-                                            :class="getTypeBadgeColor(material.type)"
-                                        >
-                                            {{ getTypeLabel(material.type) }}
+                                        <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                            {{ material.materialType?.name || '-' }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex flex-col">
                                             <div class="text-sm text-gray-900 dark:text-white">
                                                 <span :class="{ 'font-semibold text-red-600 dark:text-red-400': isLowStock(material) }">
-                                                    {{ formatNumber(material.current_stock) }} {{ material.unit }}
+                                                    {{ formatNumber(material.stock_quantity) }} {{ material.unit }}
                                                 </span>
                                             </div>
                                             <div class="text-xs text-gray-500 dark:text-gray-400">
-                                                Min: {{ formatNumber(material.reorder_point) }}
+                                                Min: {{ formatNumber(material.min_stock) }}
                                                 <span
                                                     v-if="isLowStock(material)"
                                                     class="ml-1 inline-flex items-center gap-1 font-medium text-red-600 dark:text-red-400"
@@ -311,24 +277,20 @@ const isLowStock = (material: Material) => {
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-white">
-                                        {{ formatCurrency(material.standard_price) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            v-if="material.is_active"
-                                            class="inline-flex rounded-full bg-green-100 px-2 text-xs leading-5 font-semibold text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                                        >
-                                            Aktif
-                                        </span>
-                                        <span
-                                            v-else
-                                            class="inline-flex rounded-full bg-red-100 px-2 text-xs leading-5 font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                                        >
-                                            Nonaktif
-                                        </span>
+                                        {{ formatCurrency(material.price_per_unit) }}
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm whitespace-nowrap">
                                         <div class="flex justify-end gap-2">
+                                            <Link
+                                                :href="`/materials/${material.id}`"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                                                title="Lihat detail"
+                                            >
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </Link>
                                             <Link
                                                 :href="`/materials/${material.id}/edit`"
                                                 class="inline-flex items-center justify-center rounded-lg p-2 text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
