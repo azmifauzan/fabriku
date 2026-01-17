@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, Link } from '@inertiajs/vue3';
 
 interface Item {
     id: number;
@@ -75,9 +75,7 @@ const formatDate = (dateString?: string) => {
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="mb-6 flex items-center justify-between">
-                    <Link href="/inventory/items" class="text-sm font-medium text-gray-600 hover:text-gray-900">
-                        ← Kembali ke Inventory
-                    </Link>
+                    <Link href="/inventory/items" class="text-sm font-medium text-gray-600 hover:text-gray-900"> ← Kembali ke Inventory </Link>
                     <Link
                         :href="`/inventory/items/${item.id}/edit`"
                         class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
@@ -101,7 +99,7 @@ const formatDate = (dateString?: string) => {
                             <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500">SKU</dt>
-                                    <dd class="mt-1 text-sm font-mono text-gray-900">{{ item.sku }}</dd>
+                                    <dd class="mt-1 font-mono text-sm text-gray-900">{{ item.sku }}</dd>
                                 </div>
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500">Kategori</dt>
@@ -109,9 +107,7 @@ const formatDate = (dateString?: string) => {
                                 </div>
                                 <div v-if="item.pattern" class="sm:col-span-2">
                                     <dt class="text-sm font-medium text-gray-500">Pattern/Resep</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">
-                                        {{ item.pattern.name }} ({{ item.pattern.code }})
-                                    </dd>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.pattern.name }} ({{ item.pattern.code }})</dd>
                                 </div>
                                 <div v-if="item.description" class="sm:col-span-2">
                                     <dt class="text-sm font-medium text-gray-500">Deskripsi</dt>
@@ -139,7 +135,8 @@ const formatDate = (dateString?: string) => {
                                 <div v-if="item.inventory_location" class="sm:col-span-2">
                                     <dt class="text-sm font-medium text-gray-500">Lokasi</dt>
                                     <dd class="mt-1 text-sm text-gray-900">
-                                        {{ item.inventory_location.name }} (Zona {{ item.inventory_location.zone }}, Rak {{ item.inventory_location.rack }})
+                                        {{ item.inventory_location.name }} (Zona {{ item.inventory_location.zone }}, Rak
+                                        {{ item.inventory_location.rack }})
                                     </dd>
                                 </div>
                                 <div>
