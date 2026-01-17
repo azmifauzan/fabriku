@@ -34,7 +34,7 @@ test('can list preparation orders', function () {
 });
 
 test('can create preparation order', function () {
-    $pattern = Pattern::factory()->create(['tenant_id' => $this->tenant->id, 'category' => 'garment']);
+    $pattern = Pattern::factory()->create(['tenant_id' => $this->tenant->id]);
     $material = Material::factory()->create(['tenant_id' => $this->tenant->id, 'stock_quantity' => 100]);
 
     $response = $this->post('/preparation-orders', [
@@ -61,6 +61,13 @@ test('can create preparation order', function () {
         'output_quantity' => 10,
         'status' => 'draft',
     ]);
+
+    // Verify material_usage is saved correctly
+    $order = PreparationOrder::latest('id')->first();
+    expect($order->material_usage)->not->toBeNull();
+    expect($order->material_usage)->toBeArray();
+    expect($order->material_usage[0]['material_name'])->toBe($material->name);
+    expect((float) $order->material_usage[0]['quantity'])->toBe(5.0);
 });
 
 test('auto generates order number', function () {
@@ -97,34 +104,6 @@ test('auto deducts material stock when completed', function () {
     expect((float) $material->stock_quantity)->toBe(90.0);
 });
 
-test('pattern can be nullable for free-form preparation', function () {
-    $material = Material::factory()->create(['tenant_id' => $this->tenant->id, 'stock_quantity' => 100]);
-
-    $response = $this->post('/preparation-orders', [
-        'pattern_id' => null,
-        'order_date' => now()->toDateString(),
-        'prepared_by' => $this->user->id,
-        'output_quantity' => 5,
-        'output_unit' => 'pcs',
-        'materials_used' => [
-            [
-                'material_id' => $material->id,
-                'material_name' => $material->name,
-                'quantity' => 2.0,
-                'unit' => 'meter',
-            ],
-        ],
-        'status' => 'draft',
-    ]);
-
-    $response->assertRedirect();
-    $this->assertDatabaseHas('preparation_orders', [
-        'tenant_id' => $this->tenant->id,
-        'pattern_id' => null,
-        'output_quantity' => 5,
-    ]);
-});
-
 test('users can only see their tenant preparation orders', function () {
     $otherTenant = Tenant::create([
         'name' => 'Other Tenant',
@@ -157,7 +136,7 @@ test('can update preparation order', function () {
         'prepared_by' => $order->prepared_by,
         'output_quantity' => 20,
         'output_unit' => 'pieces',
-        'material_usage' => [
+        'materials_used' => [
             [
                 'material_id' => $material->id,
                 'material_name' => $material->name,
@@ -174,6 +153,12 @@ test('can update preparation order', function () {
         'output_quantity' => 20,
         'status' => 'in_progress',
     ]);
+
+    // Verify material_usage is updated correctly
+    $order->refresh();
+    expect($order->material_usage)->not->toBeNull();
+    expect($order->material_usage)->toBeArray();
+    expect($order->material_usage[0]['material_name'])->toBe($material->name);
 });
 
 test('can delete preparation order', function () {

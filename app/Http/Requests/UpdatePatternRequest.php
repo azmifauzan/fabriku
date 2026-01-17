@@ -26,9 +26,9 @@ class UpdatePatternRequest extends FormRequest
                     ->ignore($this->route('pattern')),
             ],
             'name' => 'required|string|max:255',
-            'category' => 'required|in:garment,food,craft,cosmetic,other',
             'description' => 'nullable|string',
             'image_url' => 'nullable|url',
+            'is_active' => 'boolean',
         ];
     }
 }

@@ -10,15 +10,15 @@ use Illuminate\Support\Facades\Log;
 class MaterialStockService
 {
     /**
-     * Deduct material stock based on preparation order materials_used
+     * Deduct material stock based on preparation order material_usage
      */
     public function deductStock(PreparationOrder $order): void
     {
         DB::transaction(function () use ($order) {
-            $materialsUsed = $order->materials_used;
+            $materialsUsed = $order->material_usage;
 
             if (! is_array($materialsUsed)) {
-                Log::warning("PreparationOrder {$order->id} has invalid materials_used format");
+                Log::warning("PreparationOrder {$order->id} has invalid material_usage format");
 
                 return;
             }
@@ -40,17 +40,17 @@ class MaterialStockService
                 }
 
                 // Deduct stock
-                $material->current_stock -= $quantityUsed;
+                $material->stock_quantity -= $quantityUsed;
 
                 // Ensure stock doesn't go below 0
-                if ($material->current_stock < 0) {
-                    $material->current_stock = 0;
+                if ($material->stock_quantity < 0) {
+                    $material->stock_quantity = 0;
                     Log::warning("Material {$material->code} stock went negative, set to 0");
                 }
 
                 $material->save();
 
-                Log::info("Deducted {$quantityUsed} {$materialData['unit']} from Material {$material->code}. New stock: {$material->current_stock}");
+                Log::info("Deducted {$quantityUsed} {$materialData['unit']} from Material {$material->code}. New stock: {$material->stock_quantity}");
             }
         });
     }

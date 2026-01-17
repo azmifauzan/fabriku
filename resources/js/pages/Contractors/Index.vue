@@ -97,9 +97,6 @@
                                         Spesialisasi
                                     </th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
-                                        Tarif
-                                    </th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
                                         Status
                                     </th>
                                     <th class="px-6 py-4 text-right text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
@@ -157,11 +154,6 @@
                                         >
                                             {{ getSpecialtyLabel(contractor.specialty) }}
                                         </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                        <div v-if="contractor.rate_per_piece">Rp {{ Number(contractor.rate_per_piece).toLocaleString() }}/pcs</div>
-                                        <div v-if="contractor.rate_per_hour">Rp {{ Number(contractor.rate_per_hour).toLocaleString() }}/jam</div>
-                                        <div v-if="!contractor.rate_per_piece && !contractor.rate_per_hour">-</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
