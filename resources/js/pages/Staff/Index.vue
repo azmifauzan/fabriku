@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { Search, SquarePen, Trash2, Eye } from 'lucide-vue-next'
+import { Search, SquarePen, Trash2, Eye, X } from 'lucide-vue-next'
 import { ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -17,14 +17,18 @@ interface Staff {
   created_at: string
 }
 
+interface PaginatedStaff {
+  data: Staff[]
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
+  from: number
+  to: number
+}
+
 interface Props {
-  staff: {
-    data: Staff[]
-    current_page: number
-    last_page: number
-    per_page: number
-    total: number
-  }
+  staff: PaginatedStaff
   filters: {
     search?: string
     is_active?: boolean | string
@@ -82,66 +86,85 @@ const deleteStaff = async (staff: Staff) => {
         />
 
         <!-- Filters -->
-        <div class="mb-6 flex flex-col sm:flex-row gap-4">
-          <div class="flex-1">
-            <div class="relative">
-              <Search
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-                :size="20"
-              />
-              <input
-                v-model="search"
-                type="text"
-                placeholder="Cari nama, kode, atau posisi..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors"
-                @keyup.enter="searchStaff"
-              />
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cari</label>
+              <div class="relative">
+                <Search :size="18" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  v-model="search"
+                  type="text"
+                  placeholder="Nama, kode, atau posisi..."
+                  class="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                  @keyup.enter="searchStaff"
+                />
+              </div>
             </div>
-          </div>
-
-          <div class="flex gap-4">
-            <select
-              v-model="isActiveFilter"
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors"
-              @change="searchStaff"
-            >
-              <option value="">Semua Status</option>
-              <option value="1">Aktif</option>
-              <option value="0">Nonaktif</option>
-            </select>
-
-            <button
-              type="button"
-              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-lg transition-colors font-medium"
-              @click="searchStaff"
-            >
-              Filter
-            </button>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+              <select
+                v-model="isActiveFilter"
+                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+              >
+                <option value="">Semua Status</option>
+                <option value="1">Aktif</option>
+                <option value="0">Nonaktif</option>
+              </select>
+            </div>
+            <div class="flex items-end gap-2">
+              <button
+                type="button"
+                @click="searchStaff"
+                class="flex-1 inline-flex justify-center items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
+              >
+                <Search :size="16" />
+                Filter
+              </button>
+              <button
+                v-if="search || isActiveFilter"
+                type="button"
+                @click="search = ''; isActiveFilter = ''; searchStaff()"
+                class="inline-flex justify-center items-center px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-semibold rounded-lg transition-all shadow-sm"
+                title="Clear filters"
+              >
+                <X :size="18" />
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- Table -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+          <!-- Table Info -->
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Menampilkan <span class="font-semibold">{{ staff.from }}</span> - <span class="font-semibold">{{ staff.to }}</span> dari <span class="font-semibold">{{ staff.total }}</span> staff
+              </p>
+            </div>
+          </div>
+
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead class="bg-gray-50 dark:bg-gray-900/50">
+              <thead class="bg-gray-50 dark:bg-gray-700/50">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                     Kode
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                     Nama
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                     Posisi
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                     Kontak
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                     Status
                   </th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                     Aksi
                   </th>
                 </tr>
@@ -212,11 +235,12 @@ const deleteStaff = async (staff: Staff) => {
                   </td>
                 </tr>
                 <tr v-if="staff.data.length === 0">
-                  <td colspan="6" class="px-6 py-12 text-center">
-                    <div class="text-gray-500 dark:text-gray-400">
-                      <p class="text-lg font-medium mb-1">Tidak ada data</p>
-                      <p class="text-sm">Belum ada staff yang ditambahkan</p>
-                    </div>
+                  <td colspan="6" class="px-6 py-16 text-center">
+                    <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <p class="mt-4 text-sm font-medium text-gray-900 dark:text-gray-100">Tidak ada data staff</p>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tambahkan staff pertama Anda</p>
                   </td>
                 </tr>
               </tbody>
@@ -224,25 +248,28 @@ const deleteStaff = async (staff: Staff) => {
           </div>
 
           <!-- Pagination -->
-          <div
-            v-if="staff.last_page > 1"
-            class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between"
-          >
-            <div class="text-sm text-gray-700 dark:text-gray-300">
-              Menampilkan {{ staff.data.length }} dari {{ staff.total }} data
-            </div>
-            <div class="flex gap-2">
-              <Link
-                v-for="page in staff.last_page"
-                :key="page"
-                :href="`/staff?page=${page}&search=${search}&is_active=${isActiveFilter}`"
-                class="px-3 py-1 rounded border transition-colors"
-                :class="page === staff.current_page
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'"
-              >
-                {{ page }}
-              </Link>
+          <div v-if="staff.data.length > 0" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="text-sm text-gray-700 dark:text-gray-300">
+                <span class="font-medium">{{ staff.from }}</span> - <span class="font-medium">{{ staff.to }}</span> dari <span class="font-medium">{{ staff.total }}</span> data
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <Link
+                  v-for="page in staff.last_page"
+                  :key="page"
+                  :href="`/staff?page=${page}`"
+                  :class="[
+                    'px-4 py-2 text-sm font-medium rounded-lg transition-all',
+                    page === staff.current_page
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+                  ]"
+                  preserve-state
+                  preserve-scroll
+                >
+                  {{ page }}
+                </Link>
+              </div>
             </div>
           </div>
         </div>

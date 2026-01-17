@@ -5,7 +5,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useSweetAlert } from '@/composables/useSweetAlert'
 import { useBusinessContext } from '@/composables/useBusinessContext'
-import { Edit, Trash2, Eye } from 'lucide-vue-next'
+import { Edit, Trash2, Eye, Search, X } from 'lucide-vue-next'
 
 interface PatternMaterial {
   id: number
@@ -90,27 +90,40 @@ const deletePattern = async (pattern: Pattern) => {
         />
 
         <!-- Filters -->
-        <div class="mb-6 flex flex-col sm:flex-row gap-4">
-          <div class="flex-1">
-            <div class="relative">
-              <input
-                v-model="search"
-                type="text"
-                placeholder="Cari kode atau nama..."
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors"
-                @keyup.enter="applyFilters"
-              />
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cari</label>
+              <div class="relative">
+                <Search :size="18" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  v-model="search"
+                  type="text"
+                  placeholder="Kode atau nama..."
+                  class="w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
+                  @keyup.enter="applyFilters"
+                />
+              </div>
             </div>
-          </div>
-
-          <div class="flex gap-4">
-            <button
-              type="button"
-              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-lg transition-colors font-medium"
-              @click="applyFilters"
-            >
-              Filter
-            </button>
+            <div class="flex items-end gap-2">
+              <button
+                type="button"
+                @click="applyFilters"
+                class="flex-1 inline-flex justify-center items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
+              >
+                <Search :size="16" />
+                Filter
+              </button>
+              <button
+                v-if="search"
+                type="button"
+                @click="search = ''; applyFilters()"
+                class="inline-flex justify-center items-center px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-semibold rounded-lg transition-all shadow-sm"
+                title="Clear filters"
+              >
+                <X :size="18" />
+              </button>
+            </div>
           </div>
         </div>
 
