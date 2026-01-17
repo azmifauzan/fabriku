@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import PageHeader from '@/components/PageHeader.vue'
 
 interface PreparationOrder {
   id: number
@@ -39,11 +38,22 @@ defineProps<Props>()
 
     <div class="py-6 px-6">
       <div class="mx-auto max-w-7xl">
-        <PageHeader
-          :title="`Detail Staff: ${staff.name}`"
-          :description="`Informasi lengkap staff ${staff.code}`"
-          :back-link="{ href: '/staff', text: 'Kembali ke Daftar Staff' }"
-        />
+        <div class="mb-6 flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+              Detail Staff: {{ staff.name }}
+            </h1>
+            <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+              Informasi lengkap staff {{ staff.code }}
+            </p>
+          </div>
+          <Link
+            href="/staff"
+            class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 transition-colors"
+          >
+            ← Kembali
+          </Link>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- Staff Information -->
@@ -53,13 +63,6 @@ defineProps<Props>()
                 <div class="flex items-center justify-between">
                   <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Informasi Staff</h3>
                   <div class="flex gap-2">
-                    <Link
-                      href="/staff"
-                      class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 dark:border-gray-700 rounded-md text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      Kembali ke Daftar
-                    </Link>
-
                     <Link
                       :href="`/staff/${staff.id}/edit`"
                       class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"

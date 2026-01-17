@@ -4,11 +4,22 @@
 
         <div class="py-6 px-6">
             <div class="mx-auto max-w-7xl">
-                <PageHeader
-                    :title="`Detail Kontraktor: ${contractor.name}`"
-                    :description="`Informasi lengkap kontraktor ${contractor.code}`"
-                    :back-link="{ href: '/contractors', text: 'Kembali ke Daftar Kontraktor' }"
-                />
+                <div class="mb-6 flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+              Detail Kontraktor: {{ contractor.name }}
+            </h1>
+            <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+              Informasi lengkap kontraktor {{ contractor.code }}
+            </p>
+          </div>
+          <Link
+            href="/contractors"
+            class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 transition-colors"
+          >
+            ← Kembali
+          </Link>
+        </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Contractor Information -->
@@ -173,8 +184,8 @@
 
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3'
+import { computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import PageHeader from '@/components/PageHeader.vue'
 
 interface Pattern {
     id: number
@@ -207,9 +218,16 @@ interface Stats {
     total_items_produced: number
 }
 
-defineProps<{
+const props = defineProps<{
     contractor: Contractor
     recentOrders?: ProductionOrder[]
-    stats: Stats
+    stats?: Stats
 }>()
+
+const defaultStats: Stats = {
+    total_productions: 0,
+    total_items_produced: 0,
+}
+
+const stats = computed(() => props.stats ?? defaultStats)
 </script>

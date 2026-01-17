@@ -43,11 +43,8 @@ it('can show inventory location details', function () {
 it('can create new inventory location', function () {
     $locationData = [
         'name' => 'Test Warehouse A1',
-        'zone' => 'A',
-        'rack' => 'A-01',
-        'description' => 'Main storage area',
         'capacity' => 1000,
-        'status' => 'active',
+        'is_active' => true,
     ];
 
     $response = $this->post('/inventory/locations', $locationData);
@@ -62,7 +59,7 @@ it('can create new inventory location', function () {
 it('validates required fields when creating location', function () {
     $response = $this->post('/inventory/locations', []);
 
-    $response->assertSessionHasErrors(['name', 'zone', 'rack', 'status']);
+    $response->assertSessionHasErrors(['name']);
 });
 
 it('validates unique name within tenant', function () {
@@ -72,9 +69,8 @@ it('validates unique name within tenant', function () {
 
     $response = $this->post('/inventory/locations', [
         'name' => 'Existing Location',
-        'zone' => 'A',
-        'rack' => 'A-01',
-        'status' => 'active',
+        'capacity' => 1000,
+        'is_active' => true,
     ]);
 
     $response->assertSessionHasErrors(['name']);
@@ -87,12 +83,8 @@ it('can update inventory location', function () {
 
     $updateData = [
         'name' => 'Updated Location Name',
-        'zone' => 'B',
-        'rack' => 'B-02',
-        'description' => 'Updated description',
         'capacity' => 2000,
-        'status' => 'maintenance',
-        'notes' => 'Under maintenance',
+        'is_active' => false,
     ];
 
     $response = $this->put("/inventory/locations/{$location->id}", $updateData);
@@ -133,13 +125,13 @@ it('cannot access other tenant locations', function () {
 it('filters locations by status', function () {
     InventoryLocation::factory()
         ->for($this->tenant)
-        ->create(['status' => 'active']);
+        ->create(['is_active' => true]);
 
     InventoryLocation::factory()
         ->for($this->tenant)
-        ->create(['status' => 'inactive']);
+        ->create(['is_active' => false]);
 
-    $response = $this->get('/inventory/locations?status=active');
+    $response = $this->get('/inventory/locations?is_active=true');
 
     $response->assertSuccessful();
     $response->assertInertia(fn (AssertableInertia $page) => $page->component('Inventory/Locations/Index')

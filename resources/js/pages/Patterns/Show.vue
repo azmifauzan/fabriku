@@ -4,11 +4,22 @@
 
         <div class="py-6 px-6">
             <div class="mx-auto max-w-7xl">
-                <PageHeader
-                    :title="`Detail ${patternLabel}: ${pattern.name}`"
-                    :description="`Informasi lengkap ${patternLabel.toLowerCase()} ${pattern.code}`"
-                    :back-link="{ href: '/patterns', text: `Kembali ke Daftar ${patternLabel}` }"
-                />
+                <div class="mb-6 flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+              Detail {{ patternLabel }}: {{ pattern.name }}
+            </h1>
+            <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+              Informasi lengkap {{ patternLabel.toLowerCase() }} {{ pattern.code }}
+            </p>
+          </div>
+          <Link
+            href="/patterns"
+            class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 transition-colors"
+          >
+            ← Kembali
+          </Link>
+        </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Pattern Information -->
@@ -36,31 +47,6 @@
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Nama</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ pattern.name }}</dd>
-                                    </div>
-                                    <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Tipe Produk</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ pattern.product_type }}</dd>
-                                    </div>
-                                    <div v-if="pattern.size">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Ukuran</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ pattern.size }}</dd>
-                                    </div>
-                                    <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
-                                        <dd class="mt-1">
-                                            <span
-                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                                :class="pattern.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'"
-                                            >
-                                                {{ pattern.is_active ? 'Aktif' : 'Non-Aktif' }}
-                                            </span>
-                                        </dd>
-                                    </div>
-                                    <div v-if="pattern.estimated_cost">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Estimasi Biaya</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                            Rp {{ Number(pattern.estimated_cost).toLocaleString('id-ID') }}
-                                        </dd>
                                     </div>
                                     <div v-if="pattern.description" class="sm:col-span-2">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Deskripsi</dt>
@@ -157,17 +143,13 @@
 import { Head, Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import PageHeader from '@/components/PageHeader.vue'
 import { useBusinessContext } from '@/composables/useBusinessContext'
 
 interface Pattern {
     id: number
     code: string
     name: string
-    product_type: string
-    size?: string
     description?: string
-    is_active: boolean
     estimated_cost?: number
 }
 

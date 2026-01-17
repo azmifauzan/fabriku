@@ -52,7 +52,7 @@ const isEditing = !!props.materialType?.id
         <div class="mb-6 flex items-center justify-between">
           <div>
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-              {{ isEditing ? 'Edit Jenis Bahan' : 'Tambah Jenis Bahan Baru' }}
+              {{ isEditing ? 'Edit Jenis Bahan' : 'Tambah Jenis Bahan' }}
             </h1>
             <p class="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
               {{ isEditing ? 'Perbarui informasi jenis bahan' : 'Tambahkan jenis bahan baru untuk kategorisasi' }}
@@ -72,7 +72,7 @@ const isEditing = !!props.materialType?.id
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 v-model="form.code"
-                label="Kode"
+                label="Kode Jenis Bahan"
                 type="text"
                 placeholder="Contoh: kain"
                 :required="true"

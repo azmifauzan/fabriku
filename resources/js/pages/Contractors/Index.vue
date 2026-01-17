@@ -63,9 +63,17 @@
                                     class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
                                 >
                                     <option value="">Semua Status</option>
-                                    <option value="active">Aktif</option>
-                                    <option value="inactive">Non-Aktif</option>
+                                    <option value="1">Aktif</option>
+                                    <option value="0">Non-Aktif</option>
                                 </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button
+                                    type="submit"
+                                    class="w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-lg shadow-sm font-medium text-sm transition-colors"
+                                >
+                                    Cari
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -159,11 +167,11 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
                                             class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                                            :class="contractor.status === 'active' 
+                                            :class="contractor.is_active 
                                                 ? 'bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-400'
                                                 : 'bg-red-100 text-red-800 dark:bg-red-800/20 dark:text-red-400'"
                                         >
-                                            {{ contractor.status === 'active' ? 'Aktif' : 'Non-Aktif' }}
+                                            {{ contractor.is_active ? 'Aktif' : 'Non-Aktif' }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
@@ -231,12 +239,11 @@
 
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { computed, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useSweetAlert } from '@/composables/useSweetAlert'
 import { index, show, edit, destroy } from '@/actions/App/Http/Controllers/ContractorController'
-import { useBusinessContext } from '@/composables/useBusinessContext'
 import { Eye, Edit, Trash2 } from 'lucide-vue-next'
 
 interface Contractor {
@@ -247,7 +254,7 @@ interface Contractor {
     phone?: string
     email?: string
     specialty: string
-    status: string
+    is_active: boolean
     rate_per_piece?: number
     rate_per_hour?: number
 }
@@ -272,11 +279,10 @@ const props = defineProps<{
     filters: Filters
 }>()
 
-const { term, termLower } = useBusinessContext()
 const { confirmDelete, showSuccess } = useSweetAlert()
 
-const contractorLabel = computed(() => term('contractor', 'Kontraktor'))
-const contractorLabelLower = computed(() => termLower('contractor', 'kontraktor'))
+const contractorLabel = 'Kontraktor'
+const contractorLabelLower = 'kontraktor'
 
 const form = reactive({
     search: props.filters?.search || '',
@@ -314,14 +320,14 @@ const getSpecialtyBadgeClass = (specialty: string) => {
 
 const deleteContractor = async (contractor: Contractor) => {
     const result = await confirmDelete(
-        `Hapus ${contractorLabel.value}`,
-        `Apakah Anda yakin ingin menghapus ${contractorLabelLower.value} "${contractor.name}"?`
+        `Hapus ${contractorLabel}`,
+        `Apakah Anda yakin ingin menghapus ${contractorLabelLower} "${contractor.name}"?`
     )
 
     if (result.isConfirmed) {
         router.delete(destroy.url(contractor.id), {
             onSuccess: () => {
-                showSuccess('Berhasil!', `${contractorLabel.value} berhasil dihapus`)
+                showSuccess('Berhasil!', `${contractorLabel} berhasil dihapus`)
             }
         })
     }

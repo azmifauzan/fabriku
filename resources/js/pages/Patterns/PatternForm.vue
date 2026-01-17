@@ -24,9 +24,7 @@ interface Pattern {
     id?: number;
     code: string;
     name: string;
-    product_type: string;
     description?: string;
-    is_active: boolean;
     estimated_cost?: number;
     materials?: PatternMaterial[];
 }
@@ -34,8 +32,6 @@ interface Pattern {
 interface Props {
     pattern?: Pattern;
     materials: Material[];
-    productTypes: Record<string, string>;
-    sizes: string[];
     isEdit?: boolean;
 }
 
@@ -52,9 +48,7 @@ const materialLabelLower = computed(() => termLower('material', 'bahan'));
 const form = useForm({
     code: props.pattern?.code || '',
     name: props.pattern?.name || '',
-    product_type: props.pattern?.product_type || '',
     description: props.pattern?.description || '',
-    is_active: props.pattern?.is_active ?? true,
     materials: props.pattern?.materials?.map(pm => ({
         material_id: pm.material_id,
         quantity_needed: pm.quantity_needed,
@@ -193,27 +187,6 @@ const goBack = () => {
                                         {{ form.errors.name }}
                                     </p>
                                 </div>
-
-                                <!-- Product Type -->
-                                <div>
-                                    <label for="product_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Jenis Produk <span class="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        id="product_type"
-                                        v-model="form.product_type"
-                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                        required
-                                    >
-                                        <option value="">-- Pilih Jenis Produk --</option>
-                                        <option v-for="(label, value) in productTypes" :key="value" :value="value">
-                                            {{ label }}
-                                        </option>
-                                    </select>
-                                    <p v-if="form.errors.product_type" class="mt-1 text-sm text-red-600">
-                                        {{ form.errors.product_type }}
-                                    </p>
-                                </div>
                             </div>
 
                             <!-- Description -->
@@ -230,19 +203,6 @@ const goBack = () => {
                                 <p v-if="form.errors.description" class="mt-1 text-sm text-red-600">
                                     {{ form.errors.description }}
                                 </p>
-                            </div>
-
-                            <!-- Is Active -->
-                            <div class="flex items-center">
-                                <input
-                                    id="is_active"
-                                    v-model="form.is_active"
-                                    type="checkbox"
-                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-indigo-600 focus:ring-indigo-500"
-                                />
-                                <label for="is_active" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                                    {{ patternLabel }} Aktif
-                                </label>
                             </div>
                         </div>
 
