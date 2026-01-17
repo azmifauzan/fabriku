@@ -71,7 +71,7 @@ class CustomerController extends Controller
         ]));
 
         return redirect()
-            ->route('customers.show', $customer)
+            ->route('customers.index')
             ->with('success', 'Customer berhasil ditambahkan.');
     }
 
@@ -87,7 +87,7 @@ class CustomerController extends Controller
         $customer->update($request->validated());
 
         return redirect()
-            ->route('customers.show', $customer)
+            ->route('customers.index')
             ->with('success', 'Customer berhasil diupdate.');
     }
 

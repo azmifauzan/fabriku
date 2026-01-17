@@ -7,14 +7,11 @@ interface Customer {
   id?: number
   code: string
   name: string
-  type: string
   phone: string
   email: string
   address: string
   city: string
   province: string
-  discount_percentage: string
-  payment_term: string
   is_active: boolean
   notes: string
 }
@@ -26,14 +23,11 @@ const props = defineProps<{
 const form = useForm({
   code: props.customer?.code || '',
   name: props.customer?.name || '',
-  type: props.customer?.type || 'retail',
   phone: props.customer?.phone || '',
   email: props.customer?.email || '',
   address: props.customer?.address || '',
   city: props.customer?.city || '',
   province: props.customer?.province || '',
-  discount_percentage: props.customer?.discount_percentage || '0',
-  payment_term: props.customer?.payment_term || 'cash',
   notes: props.customer?.notes || '',
   is_active: props.customer?.is_active ?? true,
 })
@@ -98,19 +92,6 @@ const isEditing = !!props.customer?.id
                 :error="form.errors.name"
               />
 
-              <FormField
-                v-model="form.type"
-                label="Tipe Customer"
-                type="select"
-                :required="true"
-                :error="form.errors.type"
-                :options="[
-                  { value: 'retail', label: 'Retail' },
-                  { value: 'reseller', label: 'Reseller' },
-                  { value: 'online', label: 'Online' }
-                ]"
-              />
-
               <div class="flex items-center pt-8">
                 <FormField
                   v-model="form.is_active"
@@ -165,37 +146,6 @@ const isEditing = !!props.customer?.id
                 type="text"
                 placeholder="Contoh: DKI Jakarta"
                 :error="form.errors.province"
-              />
-            </div>
-          </FormSection>
-
-          <!-- Pricing & Terms -->
-          <FormSection title="Harga & Term" description="Informasi diskon dan pembayaran">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                v-model="form.discount_percentage"
-                label="Diskon Default (%)"
-                type="number"
-                placeholder="0"
-                :error="form.errors.discount_percentage"
-                hint="Diskon standar untuk customer ini"
-                min="0"
-                max="100"
-                step="0.01"
-              />
-
-              <FormField
-                v-model="form.payment_term"
-                label="Term Pembayaran"
-                type="select"
-                :required="true"
-                :error="form.errors.payment_term"
-                :options="[
-                  { value: 'cash', label: 'Cash' },
-                  { value: 'credit_7', label: 'Kredit 7 Hari' },
-                  { value: 'credit_14', label: 'Kredit 14 Hari' },
-                  { value: 'credit_30', label: 'Kredit 30 Hari' }
-                ]"
               />
             </div>
           </FormSection>

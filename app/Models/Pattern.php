@@ -18,7 +18,6 @@ class Pattern extends Model
         'code',
         'name',
         'category',
-        'size',
         'output_quantity',
         'description',
         'material_requirements',

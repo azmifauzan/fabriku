@@ -10,7 +10,13 @@ class ContractorFactory extends Factory
     public function definition(): array
     {
         $types = ['individual', 'company'];
-        $specialties = ['sewing', 'baking', 'crafting', 'other'];
+        $specialties = [
+            'Penjahit mukena dan gamis',
+            'Kue tradisional dan modern',
+            'Furniture dan kerajinan kayu',
+            'Bordir dan sablon',
+            'Produksi garment massal',
+        ];
         $type = fake()->randomElement($types);
         $specialty = fake()->randomElement($specialties);
 
@@ -24,9 +30,7 @@ class ContractorFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'email' => fake()->optional(0.7)->safeEmail(),
             'address' => fake()->optional(0.8)->address(),
-            'rate_per_piece' => fake()->optional(0.6)->randomFloat(2, 1000, 50000),
-            'rate_per_hour' => fake()->optional(0.4)->randomFloat(2, 15000, 100000),
-            'status' => 'active',
+            'is_active' => true,
             'notes' => fake()->optional(0.3)->sentence(),
         ];
     }
@@ -57,21 +61,21 @@ class ContractorFactory extends Factory
     public function sewing(): self
     {
         return $this->state(fn (array $attributes) => [
-            'specialty' => 'sewing',
+            'specialty' => 'Penjahit mukena dan gamis',
         ]);
     }
 
     public function baking(): self
     {
         return $this->state(fn (array $attributes) => [
-            'specialty' => 'baking',
+            'specialty' => 'Kue tradisional dan modern',
         ]);
     }
 
     public function inactive(): self
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'inactive',
+            'is_active' => false,
         ]);
     }
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { Search, SquarePen, Trash2 } from 'lucide-vue-next'
+import { Search, SquarePen, Trash2, Eye } from 'lucide-vue-next'
 import { ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -186,6 +186,13 @@ const deleteStaff = async (staff: Staff) => {
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                     <div class="flex justify-end gap-2">
+                      <Link
+                        :href="`/staff/${item.id}`"
+                        class="inline-flex items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        title="Lihat staff"
+                      >
+                        <Eye :size="18" />
+                      </Link>
                       <Link
                         :href="`/staff/${item.id}/edit`"
                         class="inline-flex items-center justify-center p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"

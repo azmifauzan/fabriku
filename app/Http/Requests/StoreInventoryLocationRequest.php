@@ -22,26 +22,21 @@ class StoreInventoryLocationRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'code' => 'sometimes|string|max:50|unique:inventory_locations,code,NULL,id,tenant_id,'.auth()->user()->tenant_id,
             'name' => 'required|string|max:255|unique:inventory_locations,name,NULL,id,tenant_id,'.auth()->user()->tenant_id,
-            'zone' => 'required|string|max:10',
-            'rack' => 'required|string|max:20',
-            'description' => 'nullable|string|max:1000',
             'capacity' => 'nullable|integer|min:1',
-            'temperature_min' => 'nullable|integer',
-            'temperature_max' => 'nullable|integer|gte:temperature_min',
-            'status' => 'required|in:active,inactive,maintenance',
-            'notes' => 'nullable|string|max:500',
+            'is_active' => 'sometimes|boolean',
         ];
     }
 
     public function messages(): array
     {
         return [
+            'name.required' => 'Nama lokasi harus diisi.',
             'name.unique' => 'Nama lokasi sudah digunakan.',
-            'zone.required' => 'Zone harus diisi.',
-            'rack.required' => 'Rack harus diisi.',
-            'status.in' => 'Status tidak valid.',
-            'temperature_max.gte' => 'Suhu maksimal harus lebih besar atau sama dengan suhu minimal.',
+            'code.unique' => 'Kode lokasi sudah digunakan.',
+            'capacity.integer' => 'Kapasitas harus berupa angka.',
+            'capacity.min' => 'Kapasitas minimal 1.',
         ];
     }
 }

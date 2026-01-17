@@ -15,16 +15,15 @@ class StoreContractorRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'code' => 'sometimes|string|max:50|unique:contractors,code,NULL,id,tenant_id,'.auth()->user()->tenant_id,
             'name' => ['required', 'string', 'max:255'],
             'contact_person' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
             'address' => ['nullable', 'string'],
             'type' => ['required', 'string', Rule::in(['individual', 'company'])],
-            'specialty' => ['required', 'string', Rule::in(['sewing', 'baking', 'crafting', 'other'])],
-            'rate_per_piece' => ['nullable', 'numeric', 'min:0'],
-            'rate_per_hour' => ['nullable', 'numeric', 'min:0'],
-            'status' => ['sometimes', 'string', Rule::in(['active', 'inactive'])],
+            'specialty' => ['nullable', 'string', 'max:500'],
+            'is_active' => ['sometimes', 'boolean'],
             'notes' => ['nullable', 'string'],
         ];
     }
@@ -32,15 +31,11 @@ class StoreContractorRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'code.unique' => 'Kode kontraktor sudah digunakan.',
             'name.required' => 'Nama kontraktor wajib diisi.',
             'type.required' => 'Tipe kontraktor wajib dipilih.',
             'type.in' => 'Tipe kontraktor tidak valid.',
-            'specialty.required' => 'Spesialisasi kontraktor wajib dipilih.',
-            'specialty.in' => 'Spesialisasi kontraktor tidak valid.',
-            'rate_per_piece.numeric' => 'Tarif per piece harus berupa angka.',
-            'rate_per_piece.min' => 'Tarif per piece tidak boleh negatif.',
-            'rate_per_hour.numeric' => 'Tarif per jam harus berupa angka.',
-            'rate_per_hour.min' => 'Tarif per jam tidak boleh negatif.',
+            'specialty.max' => 'Spesialisasi maksimal 500 karakter.',
         ];
     }
 }

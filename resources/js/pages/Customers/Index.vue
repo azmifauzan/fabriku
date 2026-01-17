@@ -10,14 +10,11 @@ interface Customer {
   id: number
   code: string
   name: string
-  type: string
   phone: string
   email: string
   address: string
   city: string
   province: string
-  discount_percentage: string
-  payment_term: string
   is_active: boolean
   notes: string
   created_at: string
@@ -37,7 +34,6 @@ const props = defineProps<{
   customers: PaginatedCustomers
   filters: {
     search?: string
-    type?: string
     is_active?: string
   }
 }>()
@@ -45,13 +41,11 @@ const props = defineProps<{
 const { confirmDelete, showSuccess } = useSweetAlert()
 
 const search = ref(props.filters.search || '')
-const typeFilter = ref(props.filters.type || '')
 const statusFilter = ref(props.filters.is_active || '')
 
 const applyFilters = () => {
   router.get('/customers', {
     search: search.value || undefined,
-    type: typeFilter.value || undefined,
     is_active: statusFilter.value || undefined,
   }, {
     preserveState: true,
@@ -61,7 +55,6 @@ const applyFilters = () => {
 
 const clearFilters = () => {
   search.value = ''
-  typeFilter.value = ''
   statusFilter.value = ''
   applyFilters()
 }
@@ -80,34 +73,6 @@ const deleteCustomer = async (customer: Customer) => {
       }
     })
   }
-}
-
-const getTypeLabel = (type: string) => {
-  const labels: Record<string, string> = {
-    retail: 'Retail',
-    reseller: 'Reseller',
-    online: 'Online',
-  }
-  return labels[type] || type
-}
-
-const getTypeBadgeColor = (type: string) => {
-  const colors: Record<string, string> = {
-    retail: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
-    reseller: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300',
-    online: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
-  }
-  return colors[type] || 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300'
-}
-
-const getPaymentTermLabel = (term: string) => {
-  const labels: Record<string, string> = {
-    cash: 'Cash',
-    credit_7: '7 Hari',
-    credit_14: '14 Hari',
-    credit_30: '30 Hari',
-  }
-  return labels[term] || term
 }
 </script>
 
@@ -141,18 +106,6 @@ const getPaymentTermLabel = (term: string) => {
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipe</label>
-              <select
-                v-model="typeFilter"
-                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-              >
-                <option value="">Semua Tipe</option>
-                <option value="retail">Retail</option>
-                <option value="reseller">Reseller</option>
-                <option value="online">Online</option>
-              </select>
-            </div>
-            <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
               <select
                 v-model="statusFilter"
@@ -173,7 +126,7 @@ const getPaymentTermLabel = (term: string) => {
                 Filter
               </button>
               <button
-                v-if="search || typeFilter || statusFilter"
+                v-if="search || statusFilter"
                 type="button"
                 @click="clearFilters"
                 class="inline-flex justify-center items-center px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-semibold rounded-lg transition-all shadow-sm"
@@ -204,13 +157,7 @@ const getPaymentTermLabel = (term: string) => {
                     Kode / Nama
                   </th>
                   <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                    Tipe
-                  </th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                     Kontak
-                  </th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                    Diskon / Term
                   </th>
                   <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                     Status
@@ -222,7 +169,7 @@ const getPaymentTermLabel = (term: string) => {
               </thead>
               <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 <tr v-if="customers.data.length === 0">
-                  <td colspan="6" class="px-6 py-16 text-center">
+                  <td colspan="4" class="px-6 py-16 text-center">
                     <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
@@ -238,24 +185,10 @@ const getPaymentTermLabel = (term: string) => {
                       <div v-if="customer.city" class="text-xs text-gray-400 dark:text-gray-500">{{ customer.city }}</div>
                     </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span
-                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                      :class="getTypeBadgeColor(customer.type)"
-                    >
-                      {{ getTypeLabel(customer.type) }}
-                    </span>
-                  </td>
                   <td class="px-6 py-4">
                     <div class="flex flex-col gap-1">
                       <div v-if="customer.phone" class="text-sm text-gray-900 dark:text-white">{{ customer.phone }}</div>
                       <div v-if="customer.email" class="text-xs text-gray-500 dark:text-gray-400">{{ customer.email }}</div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="flex flex-col gap-1">
-                      <div class="text-sm text-gray-900 dark:text-white">Diskon: {{ customer.discount_percentage }}%</div>
-                      <div class="text-xs text-gray-500 dark:text-gray-400">{{ getPaymentTermLabel(customer.payment_term) }}</div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">

@@ -29,39 +29,27 @@ class InventorySeeder extends Seeder
         $locations = [
             [
                 'tenant_id' => $tenant->id,
-                'name' => 'Rak A1',
-                'zone' => 'Zona A',
-                'rack' => 'A1',
-                'description' => 'Rak untuk mukena grade A',
+                'name' => 'Rak A1 - Mukena Grade A',
                 'capacity' => 100,
-                'status' => 'active',
+                'is_active' => true,
             ],
             [
                 'tenant_id' => $tenant->id,
-                'name' => 'Rak A2',
-                'zone' => 'Zona A',
-                'rack' => 'A2',
-                'description' => 'Rak untuk mukena grade B',
+                'name' => 'Rak A2 - Mukena Grade B',
                 'capacity' => 100,
-                'status' => 'active',
+                'is_active' => true,
             ],
             [
                 'tenant_id' => $tenant->id,
-                'name' => 'Rak B1',
-                'zone' => 'Zona B',
-                'rack' => 'B1',
-                'description' => 'Rak untuk daster/gamis',
+                'name' => 'Rak B1 - Daster/Gamis',
                 'capacity' => 150,
-                'status' => 'active',
+                'is_active' => true,
             ],
             [
                 'tenant_id' => $tenant->id,
-                'name' => 'Rak C1',
-                'zone' => 'Zona C',
-                'rack' => 'C1',
-                'description' => 'Rak untuk produk reject/cacat',
+                'name' => 'Rak C1 - Produk Reject',
                 'capacity' => 50,
-                'status' => 'active',
+                'is_active' => true,
             ],
         ];
 
@@ -81,11 +69,11 @@ class InventorySeeder extends Seeder
             ->where('product_type', 'daster')
             ->first();
 
-        // Get locations
-        $rakA1 = InventoryLocation::where('tenant_id', $tenant->id)->where('rack', 'A1')->first();
-        $rakA2 = InventoryLocation::where('tenant_id', $tenant->id)->where('rack', 'A2')->first();
-        $rakB1 = InventoryLocation::where('tenant_id', $tenant->id)->where('rack', 'B1')->first();
-        $rakC1 = InventoryLocation::where('tenant_id', $tenant->id)->where('rack', 'C1')->first();
+        // Get locations by name instead of rack
+        $rakA1 = InventoryLocation::where('tenant_id', $tenant->id)->where('name', 'like', '%A1%')->first();
+        $rakA2 = InventoryLocation::where('tenant_id', $tenant->id)->where('name', 'like', '%A2%')->first();
+        $rakB1 = InventoryLocation::where('tenant_id', $tenant->id)->where('name', 'like', '%B1%')->first();
+        $rakC1 = InventoryLocation::where('tenant_id', $tenant->id)->where('name', 'like', '%C1%')->first();
 
         // Create inventory items
         $items = [];

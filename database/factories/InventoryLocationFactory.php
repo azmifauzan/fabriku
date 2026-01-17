@@ -23,9 +23,8 @@ class InventoryLocationFactory extends Factory
             'tenant_id' => Tenant::factory(),
             'code' => $code,
             'name' => fake()->unique()->bothify('Rack ?#-?#'),
-            'type' => fake()->randomElement(['rack', 'shelf', 'bin']),
             'capacity' => fake()->optional(0.8)->numberBetween(100, 2000),
-            'description' => fake()->optional(0.7)->sentence(),
+            'is_active' => true,
         ];
     }
 

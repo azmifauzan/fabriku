@@ -25,7 +25,6 @@ interface Pattern {
     code: string;
     name: string;
     product_type: string;
-    size?: string;
     description?: string;
     is_active: boolean;
     estimated_cost?: number;
@@ -54,7 +53,6 @@ const form = useForm({
     code: props.pattern?.code || '',
     name: props.pattern?.name || '',
     product_type: props.pattern?.product_type || '',
-    size: props.pattern?.size || '',
     description: props.pattern?.description || '',
     is_active: props.pattern?.is_active ?? true,
     materials: props.pattern?.materials?.map(pm => ({
@@ -214,26 +212,6 @@ const goBack = () => {
                                     </select>
                                     <p v-if="form.errors.product_type" class="mt-1 text-sm text-red-600">
                                         {{ form.errors.product_type }}
-                                    </p>
-                                </div>
-
-                                <!-- Size -->
-                                <div>
-                                    <label for="size" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Ukuran
-                                    </label>
-                                    <select
-                                        id="size"
-                                        v-model="form.size"
-                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all"
-                                    >
-                                        <option value="">-- Pilih Ukuran --</option>
-                                        <option v-for="size in sizes" :key="size" :value="size">
-                                            {{ size }}
-                                        </option>
-                                    </select>
-                                    <p v-if="form.errors.size" class="mt-1 text-sm text-red-600">
-                                        {{ form.errors.size }}
                                     </p>
                                 </div>
                             </div>
