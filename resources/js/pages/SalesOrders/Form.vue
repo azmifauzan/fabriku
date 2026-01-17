@@ -150,9 +150,7 @@
                                     >
                                         <option value="">Pilih Produk</option>
                                         <option v-for="invItem in inventoryItems" :key="invItem.id" :value="invItem.id">
-                                            {{ invItem.sku }} - {{ invItem.pattern?.name }} ({{
-                                                invItem.current_stock - invItem.reserved_stock
-                                            }}
+                                            {{ invItem.sku }} - {{ invItem.pattern?.name }} ({{ invItem.current_stock - invItem.reserved_stock }}
                                             available)
                                         </option>
                                     </select>
