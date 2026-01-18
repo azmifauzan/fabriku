@@ -3,8 +3,7 @@ import { useBusinessContext } from '@/composables/useBusinessContext';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
-import ProductionBatchForm from './ProductionBatchForm.vue';
+import { computed } from 'vue';
 
 interface Pattern {
     id: number;
@@ -15,7 +14,13 @@ interface Pattern {
 interface PreparationOrder {
     id: number;
     order_number: string;
+    output_quantity: number;
     pattern: Pattern;
+}
+
+interface Contractor {
+    id: number;
+    name: string;
 }
 
 interface ProductionOrder {
@@ -25,14 +30,12 @@ interface ProductionOrder {
     contractor: Contractor | null;
     type: string;
     status: string;
-    quantity_produced: number;
-    quantity_good: number;
-    quantity_reject: number;
     estimated_completion_date: string | null;
     sent_date: string | null;
     completed_date: string | null;
+    priority: string;
+    labor_cost: number;
     notes: string | null;
-    batches: ProductionBatch[];
 }
 
 const props = defineProps<{
@@ -43,19 +46,14 @@ const { term, termLower } = useBusinessContext();
 const { confirm, confirmDelete, showSuccess } = useSweetAlert();
 
 const productionOrderLabel = computed(() => 'Production Order');
+const patternLabel = computed(() => term('pattern', 'Pattern'));
 const contractorLabel = computed(() => term('contractor', 'Kontraktor'));
 
-const showReceive = ref(false);
-
 const canSend = computed(() => {
-    if (props.order.type === 'external') {
-        return ['draft', 'pending'].includes(props.order.status);
-    }
-
-    return ['draft', 'pending'].includes(props.order.status);
+    return props.order.status === 'draft';
 });
 
-const canReceive = computed(() => {
+const canMarkComplete = computed(() => {
     return ['sent', 'in_progress'].includes(props.order.status);
 });
 
@@ -105,138 +103,145 @@ const statusLabel = (status: string) => {
     };
     return labels[status] || status;
 };
+
+const markComplete = async () => {
+    const result = await confirm(
+        `Tandai Selesai`,
+        `Apakah Anda yakin ingin menandai ${productionOrderLabel.value.toLowerCase()} ${props.order.order_number} sebagai selesai?`,
+        'Ya, Tandai Selesai',
+        'question',
+        '#10b981',
+    );
+
+    if (result.isConfirmed) {
+        router.post(
+            `/production-orders/${props.order.id}/mark-complete`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    showSuccess('Berhasil!', `${productionOrderLabel.value} berhasil ditandai selesai`);
+                },
+            },
+        );
+    }
+};
 </script>
 
 <template>
     <AppLayout>
-        <Head :title="`${productionOrderLabel} ${order.order_number}`" />
+        <Head :title="`${productionOrderLabel} #${order.order_number}`" />
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="mb-6 flex items-start justify-between gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">{{ productionOrderLabel }} {{ order.order_number }}</h2>
-                        <p class="mt-2 text-sm text-gray-600">
-                            {{ order.preparation_order.order_number }} — {{ order.preparation_order.pattern?.name || 'No Pattern' }}
-                        </p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <Link href="/production-orders" class="text-sm text-gray-600 hover:text-gray-900"> ← Kembali </Link>
-                        <button
-                            v-if="canSend"
-                            @click="sendOrder"
-                            class="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase hover:bg-indigo-700"
-                        >
-                            Kirim / Mulai
-                        </button>
-                        <button
-                            v-if="canReceive"
-                            @click="showReceive = !showReceive"
-                            class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold tracking-widest text-gray-700 uppercase hover:bg-gray-50"
-                        >
-                            {{ showReceive ? 'Tutup Form' : 'Terima Batch' }}
-                        </button>
+                <!-- Header -->
+                <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-semibold text-gray-800">{{ productionOrderLabel }} #{{ order.order_number }}</h2>
+                                <p class="text-sm text-gray-600">{{ order.preparation_order.order_number }}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button
+                                    v-if="canSend"
+                                    @click="sendOrder"
+                                    class="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase hover:bg-indigo-700"
+                                >
+                                    {{ order.type === 'external' ? 'Kirim ke Kontraktor' : 'Mulai Produksi' }}
+                                </button>
+                                <button
+                                    v-if="canMarkComplete"
+                                    @click="markComplete"
+                                    class="inline-flex items-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase hover:bg-green-700"
+                                >
+                                    Tandai Selesai
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg lg:col-span-2">
-                        <div class="p-6">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-lg font-medium text-gray-900">Detail</h3>
+                <!-- Order Details -->
+                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <h3 class="text-lg font-medium text-gray-900">Detail Order</h3>
                                 <span :class="statusBadge(order.status)" class="inline-flex rounded-full px-2 text-xs leading-5 font-semibold">
                                     {{ statusLabel(order.status) }}
                                 </span>
                             </div>
-
-                            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                <div class="rounded-lg bg-gray-50 p-4">
-                                    <p class="text-xs text-gray-500">Tipe</p>
-                                    <p class="text-sm font-medium text-gray-900">{{ order.type === 'internal' ? 'Internal' : 'Eksternal' }}</p>
-                                </div>
-                                <div class="rounded-lg bg-gray-50 p-4">
-                                    <p class="text-xs text-gray-500">{{ contractorLabel }}</p>
-                                    <p class="text-sm font-medium text-gray-900">{{ order.contractor?.name || '-' }}</p>
-                                </div>
-                                <div class="rounded-lg bg-gray-50 p-4">
-                                    <p class="text-xs text-gray-500">Tanggal Estimasi Selesai</p>
-                                    <p class="text-sm font-medium text-gray-900">
-                                        {{
-                                            order.estimated_completion_date
-                                                ? new Date(order.estimated_completion_date).toLocaleDateString('id-ID')
-                                                : '-'
-                                        }}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                <div class="rounded-lg bg-green-50 p-4">
-                                    <p class="text-xs text-gray-600">Diterima (total)</p>
-                                    <p class="text-lg font-bold text-green-700">{{ order.quantity_produced }} pcs</p>
-                                </div>
-                                <div class="rounded-lg bg-gray-50 p-4">
-                                    <p class="text-xs text-gray-600">Good / Reject</p>
-                                    <p class="text-lg font-bold text-gray-900">{{ order.quantity_good }} / {{ order.quantity_reject }}</p>
-                                </div>
-                            </div>
-
-                            <div v-if="order.notes" class="mt-4">
-                                <p class="text-xs text-gray-500">Catatan</p>
-                                <p class="text-sm text-gray-900">{{ order.notes }}</p>
+                            <div class="flex gap-2">
+                                <Link
+                                    :href="`/production-orders/${order.id}/edit`"
+                                    v-if="order.status === 'draft' || order.status === 'sent'"
+                                    class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold tracking-widest text-gray-700 uppercase hover:bg-gray-50"
+                                >
+                                    Edit
+                                </Link>
+                                <Link href="/production-orders" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold tracking-widest text-gray-700 uppercase hover:bg-gray-50"> ← Kembali </Link>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div class="p-6">
-                            <h3 class="text-lg font-medium text-gray-900">Terima Batch</h3>
-                            <p class="mt-1 text-sm text-gray-600">Input hasil produksi dan QC.</p>
-
-                            <div v-if="!canReceive" class="mt-4 text-sm text-gray-500">Form tersedia setelah order dikirim / dimulai.</div>
-
-                            <div v-else class="mt-4" v-show="showReceive">
-                                <ProductionBatchForm :order="order" />
+                        <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            <div class="rounded-lg bg-gray-50 p-4">
+                                <p class="text-xs text-gray-500">{{ patternLabel }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ order.preparation_order.pattern?.name || '-' }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ order.preparation_order.pattern?.code || '' }}</p>
+                            </div>
+                            <div class="rounded-lg bg-gray-50 p-4">
+                                <p class="text-xs text-gray-500">Quantity</p>
+                                <p class="text-sm font-medium text-gray-900">{{ order.preparation_order.output_quantity }} pcs</p>
+                            </div>
+                            <div class="rounded-lg bg-gray-50 p-4">
+                                <p class="text-xs text-gray-500">Tipe</p>
+                                <p class="text-sm font-medium text-gray-900">{{ order.type === 'internal' ? 'Internal' : 'Eksternal' }}</p>
+                            </div>
+                            <div class="rounded-lg bg-gray-50 p-4">
+                                <p class="text-xs text-gray-500">{{ contractorLabel }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ order.contractor?.name || '-' }}</p>
+                            </div>
+                            <div class="rounded-lg bg-gray-50 p-4">
+                                <p class="text-xs text-gray-500">Prioritas</p>
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{ order.priority === 'urgent' ? 'Urgent' : order.priority === 'high' ? 'Tinggi' : order.priority === 'low' ? 'Rendah' : 'Normal' }}
+                                </p>
+                            </div>
+                            <div class="rounded-lg bg-gray-50 p-4">
+                                <p class="text-xs text-gray-500">Biaya Tenaga Kerja</p>
+                                <p class="text-sm font-medium text-gray-900">Rp {{ order.labor_cost?.toLocaleString('id-ID') || 0 }}</p>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="mt-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-medium text-gray-900">Batch</h3>
+                        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            <div class="rounded-lg bg-blue-50 p-4">
+                                <p class="text-xs text-gray-600">Tanggal Estimasi Selesai</p>
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{
+                                        order.estimated_completion_date
+                                            ? new Date(order.estimated_completion_date).toLocaleDateString('id-ID')
+                                            : '-'
+                                    }}
+                                </p>
+                            </div>
+                            <div class="rounded-lg bg-indigo-50 p-4">
+                                <p class="text-xs text-gray-600">Tanggal Kirim/Mulai</p>
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{ order.sent_date ? new Date(order.sent_date).toLocaleDateString('id-ID') : '-' }}
+                                </p>
+                            </div>
+                            <div class="rounded-lg bg-green-50 p-4">
+                                <p class="text-xs text-gray-600">Tanggal Selesai</p>
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{ order.completed_date ? new Date(order.completed_date).toLocaleDateString('id-ID') : '-' }}
+                                </p>
+                            </div>
+                        </div>
 
-                        <div class="mt-4 overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Batch</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Grade</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Expiry</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    <tr v-if="order.batches.length === 0">
-                                        <td colspan="5" class="px-4 py-3 text-center text-sm text-gray-500">Belum ada batch.</td>
-                                    </tr>
-                                    <tr v-for="b in order.batches" :key="b.id" class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ b.batch_number }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-700">
-                                            {{ new Date(b.received_date).toLocaleDateString('id-ID') }}
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-gray-700">
-                                            {{ b.quantity_received }} (good {{ b.quantity_good }}, defect {{ b.quantity_defect }}, reject
-                                            {{ b.quantity_reject }})
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-gray-700">{{ b.grade }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-700">
-                                            {{ b.expiry_date ? new Date(b.expiry_date).toLocaleDateString('id-ID') : '-' }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div v-if="order.notes" class="mt-4 rounded-lg bg-yellow-50 p-4">
+                            <p class="text-xs text-gray-600 font-medium">Catatan</p>
+                            <p class="text-sm text-gray-900 mt-1">{{ order.notes }}</p>
                         </div>
                     </div>
                 </div>

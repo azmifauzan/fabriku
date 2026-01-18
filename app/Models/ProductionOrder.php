@@ -6,7 +6,6 @@ use App\Models\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductionOrder extends Model
@@ -19,10 +18,6 @@ class ProductionOrder extends Model
         'preparation_order_id',
         'type',
         'contractor_id',
-        'quantity_requested',
-        'quantity_produced',
-        'quantity_good',
-        'quantity_reject',
         'labor_cost',
         'estimated_completion_date',
         'sent_date',
@@ -104,20 +99,15 @@ class ProductionOrder extends Model
         return $this->belongsTo(Contractor::class);
     }
 
-    public function batches(): HasMany
+    public function inventoryItems()
     {
-        return $this->hasMany(ProductionBatch::class);
+        return $this->hasMany(InventoryItem::class);
     }
 
     // Status helpers
     public function isDraft(): bool
     {
         return $this->status === 'draft';
-    }
-
-    public function isPending(): bool
-    {
-        return $this->status === 'pending';
     }
 
     public function isSent(): bool
@@ -152,31 +142,17 @@ class ProductionOrder extends Model
 
     public function canBeEdited(): bool
     {
-        return in_array($this->status, ['draft', 'pending', 'sent'], true);
+        return in_array($this->status, ['draft', 'sent'], true);
     }
 
     public function canBeDeleted(): bool
     {
-        return $this->status === 'draft' && $this->batches()->doesntExist();
+        return $this->status === 'draft';
     }
 
     public function canBeSent(): bool
     {
-        return $this->isExternal() && in_array($this->status, ['draft', 'pending'], true);
-    }
-
-    public function canBeReceived(): bool
-    {
-        return in_array($this->status, ['sent', 'in_progress']);
-    }
-
-    public function efficiency(): float
-    {
-        if ($this->quantity_produced === 0) {
-            return 0;
-        }
-
-        return round(($this->quantity_good / $this->quantity_produced) * 100, 2);
+        return $this->isExternal() && $this->status === 'draft';
     }
 
     // Scopes
@@ -197,7 +173,7 @@ class ProductionOrder extends Model
 
     public function scopePending($query)
     {
-        return $query->whereIn('status', ['draft', 'pending']);
+        return $query->where('status', 'draft');
     }
 
     public function scopeInProgress($query)

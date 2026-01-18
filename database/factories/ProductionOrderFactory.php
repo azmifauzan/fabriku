@@ -13,7 +13,6 @@ class ProductionOrderFactory extends Factory
     {
         $estimatedCompletion = fake()->optional(0.7)->dateTimeBetween('now', '+2 weeks');
         $type = fake()->randomElement(['internal', 'external']);
-        $quantityRequested = fake()->numberBetween(50, 500);
 
         return [
             'tenant_id' => Tenant::factory(),
@@ -21,10 +20,6 @@ class ProductionOrderFactory extends Factory
             'preparation_order_id' => PreparationOrder::factory(),
             'type' => $type,
             'contractor_id' => $type === 'external' ? Contractor::factory() : null,
-            'quantity_requested' => $quantityRequested,
-            'quantity_produced' => 0,
-            'quantity_good' => 0,
-            'quantity_reject' => 0,
             'labor_cost' => fake()->randomFloat(2, 100000, 2000000),
             'estimated_completion_date' => $estimatedCompletion,
             'sent_date' => null,
@@ -75,27 +70,20 @@ class ProductionOrderFactory extends Factory
             return [
                 'status' => 'in_progress',
                 'sent_date' => $sentDate,
-                'quantity_produced' => fake()->numberBetween(50, 300),
             ];
         });
     }
 
     public function completed(): self
     {
-        $efficiency = fake()->randomFloat(2, 85, 98); // 85-98% efficiency
-
-        return $this->state(function (array $attributes) use ($efficiency) {
+        return $this->state(function (array $attributes) {
             $sentDate = fake()->dateTimeBetween('-3 weeks', '-1 week');
             $completedDate = fake()->dateTimeBetween($sentDate, 'now');
-            $quantityProduced = fake()->numberBetween(50, 500);
 
             return [
                 'status' => 'completed',
                 'sent_date' => $sentDate,
                 'completed_date' => $completedDate,
-                'quantity_produced' => $quantityProduced,
-                'quantity_good' => (int) ($quantityProduced * $efficiency / 100),
-                'quantity_reject' => fake()->numberBetween(0, (int) ($quantityProduced * 0.05)),
                 'completion_notes' => fake()->optional(0.6)->sentence(),
             ];
         });

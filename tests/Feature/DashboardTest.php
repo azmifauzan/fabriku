@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use App\Models\Tenant;
+use App\Models\User;
 
 test('guests cannot access dashboard', function () {
     $response = $this->get('/dashboard');

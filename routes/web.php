@@ -39,8 +39,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::resource('production-orders', \App\Http\Controllers\ProductionOrderController::class);
     Route::post('production-orders/{production_order}/send', [\App\Http\Controllers\ProductionOrderController::class, 'send'])
         ->name('production-orders.send');
-    Route::post('production-orders/{production_order}/receive', [\App\Http\Controllers\ProductionOrderController::class, 'receive'])
-        ->name('production-orders.receive');
+    Route::post('production-orders/{production_order}/start', [\App\Http\Controllers\ProductionOrderController::class, 'start'])
+        ->name('production-orders.start');
     Route::post('production-orders/{production_order}/mark-complete', [\App\Http\Controllers\ProductionOrderController::class, 'markComplete'])
         ->name('production-orders.mark-complete');
 

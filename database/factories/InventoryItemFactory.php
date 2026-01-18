@@ -36,7 +36,6 @@ class InventoryItemFactory extends Factory
             'quality_grade' => fake()->randomElement(['A', 'B', 'Reject']),
             'unit_cost' => fake()->randomFloat(2, 1, 100),
             'selling_price' => fake()->randomFloat(2, 10, 200),
-            'production_date' => fake()->dateTimeBetween('-6 months', 'now'),
             'expired_date' => fake()->optional(0.3)->dateTimeBetween('now', '+1 year'),
             'notes' => fake()->optional(0.4)->sentence(),
         ];

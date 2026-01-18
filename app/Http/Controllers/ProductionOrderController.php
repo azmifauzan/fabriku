@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreProductionBatchRequest;
 use App\Http\Requests\StoreProductionOrderRequest;
 use App\Http\Requests\UpdateProductionOrderRequest;
 use App\Models\Contractor;
@@ -72,7 +71,6 @@ class ProductionOrderController extends Controller
         $productionOrder->load([
             'preparationOrder.pattern',
             'contractor',
-            'batches' => fn ($query) => $query->latest(),
         ]);
 
         return Inertia::render('ProductionOrders/Show', [
@@ -154,18 +152,16 @@ class ProductionOrderController extends Controller
         return back()->with('success', "{$productionOrderLabel} berhasil dikirim.");
     }
 
-    public function receive(StoreProductionBatchRequest $request, ProductionOrder $productionOrder, ProductionService $productionService)
+    public function start(ProductionOrder $productionOrder)
     {
-        $batch = $productionService->receive($productionOrder, array_merge(
-            $request->validated(),
-            ['received_by' => auth()->id()]
-        ));
+        $productionOrder->update([
+            'status' => 'in_progress',
+        ]);
 
         $tenant = auth()->user()?->tenant;
         $productionOrderLabel = $tenant?->getTerminology('production_order') ?? 'Production order';
 
-        return redirect()->route('production-orders.show', $productionOrder)
-            ->with('success', "{$productionOrderLabel} berhasil diterima (Batch {$batch->batch_number}).");
+        return back()->with('success', "{$productionOrderLabel} berhasil dimulai produksinya.");
     }
 
     public function markComplete(ProductionOrder $productionOrder)

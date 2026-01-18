@@ -11,27 +11,20 @@ interface ProductionOrder {
     category: string;
     type: string;
     contractor_name: string;
-    quantity_target: number;
-    quantity_good: number;
-    quantity_defect: number;
-    quantity_reject: number;
-    efficiency_percentage: number;
+    output_quantity: number;
     production_cost: number;
     status: string;
-    start_date: string | null;
-    target_date: string | null;
+    sent_date: string | null;
+    estimated_date: string | null;
     completion_date: string | null;
 }
 
 interface Summary {
     total_orders: number;
-    total_target: number;
-    total_produced: number;
-    total_defect: number;
-    total_reject: number;
-    average_efficiency: number;
+    total_output: number;
     total_cost: number;
     completed_orders: number;
+    in_progress_orders: number;
 }
 
 interface Filters {
@@ -93,12 +86,6 @@ const getStatusClass = (orderStatus: string) => {
     };
     return classes[orderStatus] || classes.draft;
 };
-
-const getEfficiencyClass = (efficiency: number) => {
-    if (efficiency >= 90) return 'text-green-600 dark:text-green-400';
-    if (efficiency >= 75) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
-};
 </script>
 
 <template>
@@ -130,20 +117,18 @@ const getEfficiencyClass = (efficiency: number) => {
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ summary.completed_orders }} completed</p>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Produced</dt>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Output</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ summary.total_produced }}
+                            {{ summary.total_output }}
                         </dd>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Target: {{ summary.total_target }}</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ summary.in_progress_orders }} in progress</p>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Average Efficiency</dt>
-                        <dd class="mt-1 text-2xl font-semibold" :class="getEfficiencyClass(summary.average_efficiency ?? 0)">
-                            {{ (summary.average_efficiency ?? 0).toFixed(1) }}%
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status Summary</dt>
+                        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                            {{ summary.completed_orders }}/{{ summary.total_orders }}
                         </dd>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            Defect: {{ summary.total_defect }}, Reject: {{ summary.total_reject }}
-                        </p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Completion rate</p>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Cost</dt>
@@ -237,22 +222,13 @@ const getEfficiencyClass = (efficiency: number) => {
                                         Contractor
                                     </th>
                                     <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                        Target
-                                    </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                        Good
-                                    </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                        Defect
-                                    </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                        Reject
-                                    </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                        Efficiency
+                                        Output Qty
                                     </th>
                                     <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Cost
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                                        Dates
                                     </th>
                                     <th class="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Status
@@ -261,7 +237,7 @@ const getEfficiencyClass = (efficiency: number) => {
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                                 <tr v-if="orders.length === 0">
-                                    <td colspan="10" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data produksi</td>
+                                    <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data produksi</td>
                                 </tr>
                                 <tr v-for="order in orders" :key="order.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
@@ -284,25 +260,21 @@ const getEfficiencyClass = (efficiency: number) => {
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white">
-                                        {{ order.quantity_target }}
-                                    </td>
-                                    <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap text-green-600 dark:text-green-400">
-                                        {{ order.quantity_good }}
-                                    </td>
-                                    <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-yellow-600 dark:text-yellow-400">
-                                        {{ order.quantity_defect }}
-                                    </td>
-                                    <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-red-600 dark:text-red-400">
-                                        {{ order.quantity_reject }}
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap"
-                                        :class="getEfficiencyClass(order.efficiency_percentage)"
-                                    >
-                                        {{ order.efficiency_percentage }}%
+                                        {{ order.output_quantity }}
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white">
                                         {{ formatCurrency(order.production_cost) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div v-if="order.sent_date" class="text-xs text-gray-500 dark:text-gray-400">
+                                            Sent: {{ order.sent_date }}
+                                        </div>
+                                        <div v-if="order.estimated_date" class="text-xs text-gray-500 dark:text-gray-400">
+                                            Est: {{ order.estimated_date }}
+                                        </div>
+                                        <div v-if="order.completion_date" class="text-xs text-gray-500 dark:text-gray-400">
+                                            Done: {{ order.completion_date }}
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 text-center whitespace-nowrap">
                                         <span

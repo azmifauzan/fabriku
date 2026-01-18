@@ -17,11 +17,11 @@ beforeEach(function () {
     $this->preparationOrder = PreparationOrder::factory()
         ->for($this->tenant)
         ->for($this->pattern)
-        ->create(['status' => 'completed']);
+        ->create(['status' => 'completed', 'output_quantity' => 100]);
     $this->productionOrder = ProductionOrder::factory()
         ->for($this->tenant)
         ->for($this->preparationOrder)
-        ->create(['status' => 'completed', 'quantity_good' => 100]);
+        ->create(['status' => 'completed']);
 
     $this->actingAs($this->user);
 });
@@ -97,8 +97,8 @@ it('validates required fields when creating item', function () {
     $response = $this->post('/inventory/items', []);
 
     $response->assertSessionHasErrors([
-        'production_order_id', 'sku', 'product_name',
-        'location_id', 'target_quantity', 'current_quantity', 'unit_cost', 'status',
+        'production_order_id',
+        'location_id', 'target_quantity', 'current_quantity', 'unit_cost',
     ]);
 });
 
@@ -184,11 +184,12 @@ it('cannot access other tenant items', function () {
         ->create([
             'status' => 'completed',
             'order_number' => 'PRP-OTHER-001',
+            'output_quantity' => 100,
         ]);
     $otherProductionOrder = ProductionOrder::factory()
         ->for($otherTenant)
         ->for($otherPreparationOrder)
-        ->create(['status' => 'completed', 'quantity_good' => 100]);
+        ->create(['status' => 'completed']);
 
     $item = InventoryItem::factory()
         ->for($otherTenant)

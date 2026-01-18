@@ -264,9 +264,7 @@ class ReportController extends Controller
 
         $orders = $query->latest()->get()->map(function ($order) {
             $pattern = $order->preparationOrder?->pattern;
-            $efficiency = $order->quantity_requested > 0
-                ? ($order->quantity_good / $order->quantity_requested) * 100
-                : 0;
+            $outputQuantity = $order->preparationOrder?->output_quantity ?? 0;
 
             return [
                 'id' => $order->id,
@@ -275,15 +273,11 @@ class ReportController extends Controller
                 'category' => $pattern?->category ?? '-',
                 'type' => $order->type,
                 'contractor_name' => $order->contractor?->name ?? 'Internal',
-                'quantity_target' => $order->quantity_requested,
-                'quantity_good' => $order->quantity_good,
-                'quantity_defect' => 0, // Production order doesn't track defects separately
-                'quantity_reject' => $order->quantity_reject,
-                'efficiency_percentage' => round($efficiency, 2),
+                'output_quantity' => $outputQuantity,
                 'production_cost' => $order->labor_cost ?? 0,
                 'status' => $order->status,
-                'start_date' => $order->requested_date?->format('Y-m-d'),
-                'target_date' => $order->promised_date?->format('Y-m-d'),
+                'sent_date' => $order->sent_date?->format('Y-m-d'),
+                'estimated_date' => $order->estimated_completion_date?->format('Y-m-d'),
                 'completion_date' => $order->completed_date?->format('Y-m-d'),
             ];
         });
@@ -291,13 +285,10 @@ class ReportController extends Controller
         // Summary stats
         $summary = [
             'total_orders' => $orders->count(),
-            'total_target' => $orders->sum('quantity_target'),
-            'total_produced' => $orders->sum('quantity_good'),
-            'total_defect' => $orders->sum('quantity_defect'),
-            'total_reject' => $orders->sum('quantity_reject'),
-            'average_efficiency' => $orders->avg('efficiency_percentage') ?? 0,
+            'total_output' => $orders->sum('output_quantity'),
             'total_cost' => $orders->sum('production_cost') ?? 0,
             'completed_orders' => $orders->where('status', 'completed')->count(),
+            'in_progress_orders' => $orders->where('status', 'in_progress')->count(),
         ];
 
         return Inertia::render('Reports/ProductionReport', [

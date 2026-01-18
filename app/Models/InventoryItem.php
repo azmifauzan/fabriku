@@ -28,7 +28,6 @@ class InventoryItem extends Model
         'status',
         'unit_cost',
         'selling_price',
-        'production_date',
         'expired_date',
         'notes',
     ];
@@ -48,7 +47,6 @@ class InventoryItem extends Model
         return [
             'unit_cost' => 'decimal:2',
             'selling_price' => 'decimal:2',
-            'production_date' => 'date',
             'expired_date' => 'date',
         ];
     }
@@ -230,11 +228,44 @@ class InventoryItem extends Model
     // Static methods
     public static function generateSku(InventoryItem $item): string
     {
-        $count = static::withoutGlobalScope(TenantScope::class)
-            ->where('tenant_id', $item->tenant_id)
-            ->count() + 1;
+        // Get tenant's business category
+        $tenant = Tenant::find($item->tenant_id);
+        $category = $tenant?->business_category ?? 'OTHER';
 
-        return 'INV-'.str_pad($count, 6, '0', STR_PAD_LEFT);
+        // Generate prefix based on category
+        $prefix = match (strtoupper($category)) {
+            'GARMENT' => 'INV-GRM',
+            'FOOD' => 'INV-FOOD',
+            'CRAFT' => 'INV-CRFT',
+            default => 'INV-ITM',
+        };
+
+        // Find next sequential number for this tenant and prefix
+        $lastItem = static::withoutGlobalScope(TenantScope::class)
+            ->where('tenant_id', $item->tenant_id)
+            ->where('sku', 'LIKE', $prefix.'%')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $nextNumber = 1;
+        if ($lastItem && preg_match('/(\d+)$/', $lastItem->sku, $matches)) {
+            $nextNumber = (int) $matches[1] + 1;
+        }
+
+        // Generate SKU with uniqueness check
+        do {
+            $sku = sprintf('%s-%04d', $prefix, $nextNumber);
+            $exists = static::withoutGlobalScope(TenantScope::class)
+                ->where('tenant_id', $item->tenant_id)
+                ->where('sku', $sku)
+                ->exists();
+
+            if ($exists) {
+                $nextNumber++;
+            }
+        } while ($exists);
+
+        return $sku;
     }
 
     // Scopes
