@@ -5,7 +5,7 @@ import { useBusinessContext } from '@/composables/useBusinessContext';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Check, Edit, Eye, Trash2 } from 'lucide-vue-next';
+import { Check, Edit, Eye, Play, Send, Trash2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface Pattern {
@@ -17,6 +17,7 @@ interface Pattern {
 interface PreparationOrder {
     id: number;
     order_number: string;
+    output_quantity: number;
     pattern: Pattern;
 }
 
@@ -143,10 +144,56 @@ const getTypeLabel = (type: string) => {
     return type === 'internal' ? 'Internal' : 'Eksternal';
 };
 
+const startProduction = async (order: ProductionOrder) => {
+    const result = await useSweetAlert().confirm(
+        'Mulai Produksi?',
+        `Mulai produksi untuk ${productionOrderLabel.value} ${order.order_number}?`,
+        'Ya, Mulai Produksi',
+        'question',
+    );
+
+    if (result.isConfirmed) {
+        router.post(
+            `/production-orders/${order.id}/start`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    showSuccess('Berhasil!', `${productionOrderLabel.value} dimulai produksinya`);
+                },
+            },
+        );
+    }
+};
+
+const sendToContractor = async (order: ProductionOrder) => {
+    const result = await useSweetAlert().confirm(
+        'Kirim ke Kontraktor?',
+        `Kirim ${productionOrderLabel.value} ${order.order_number} ke kontraktor?`,
+        'Ya, Kirim',
+        'question',
+    );
+
+    if (result.isConfirmed) {
+        router.post(
+            `/production-orders/${order.id}/send`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    showSuccess('Berhasil!', `${productionOrderLabel.value} berhasil dikirim ke kontraktor`);
+                },
+            },
+        );
+    }
+};
+
 const markComplete = async (order: ProductionOrder) => {
-    const result = await useSweetAlert().confirmAction(
+    const result = await useSweetAlert().confirm(
         'Tandai Selesai?',
         `Tandai ${productionOrderLabel.value} ${order.order_number} sebagai selesai?`,
+        'Ya, Tandai Selesai',
+        'question',
     );
 
     if (result.isConfirmed) {
@@ -179,8 +226,8 @@ const markComplete = async (order: ProductionOrder) => {
 
                 <!-- Filters -->
                 <div class="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                        <div>
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:gap-4">
+                        <div class="flex-1">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"> Pencarian </label>
                             <input
                                 v-model="search"
@@ -191,7 +238,7 @@ const markComplete = async (order: ProductionOrder) => {
                             />
                         </div>
 
-                        <div>
+                        <div class="flex-1">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"> Status </label>
                             <select
                                 v-model="statusFilter"
@@ -200,7 +247,6 @@ const markComplete = async (order: ProductionOrder) => {
                             >
                                 <option value="">Semua Status</option>
                                 <option value="draft">Draft</option>
-                                <option value="pending">Pending</option>
                                 <option value="sent">Dikirim</option>
                                 <option value="in_progress">Dalam Proses</option>
                                 <option value="completed">Selesai</option>
@@ -208,7 +254,7 @@ const markComplete = async (order: ProductionOrder) => {
                             </select>
                         </div>
 
-                        <div>
+                        <div class="flex-1">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"> Tipe </label>
                             <select
                                 v-model="typeFilter"
@@ -221,7 +267,7 @@ const markComplete = async (order: ProductionOrder) => {
                             </select>
                         </div>
 
-                        <div>
+                        <div class="flex-1">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ contractorLabel }}
                             </label>
@@ -237,7 +283,7 @@ const markComplete = async (order: ProductionOrder) => {
                             </select>
                         </div>
 
-                        <div class="flex items-end gap-2">
+                        <div class="flex flex-shrink-0 items-end gap-2">
                             <button
                                 @click="applyFilters"
                                 class="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
@@ -366,8 +412,29 @@ const markComplete = async (order: ProductionOrder) => {
                                             >
                                                 <Eye :size="18" />
                                             </Link>
+                                            <!-- Mulai Produksi (Internal) -->
                                             <button
-                                                v-if="['sent', 'in_progress'].includes(order.status)"
+                                                v-if="order.type === 'internal' && order.status === 'draft'"
+                                                type="button"
+                                                @click="startProduction(order)"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-orange-600 transition-colors hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-900/30"
+                                                title="Mulai produksi"
+                                            >
+                                                <Play :size="18" />
+                                            </button>
+                                            <!-- Kirim ke Kontraktor (External) -->
+                                            <button
+                                                v-if="order.type === 'external' && order.status === 'draft'"
+                                                type="button"
+                                                @click="sendToContractor(order)"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-purple-600 transition-colors hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/30"
+                                                title="Kirim ke kontraktor"
+                                            >
+                                                <Send :size="18" />
+                                            </button>
+                                            <!-- Tandai Selesai -->
+                                            <button
+                                                v-if="['in_progress', 'sent'].includes(order.status)"
                                                 type="button"
                                                 @click="markComplete(order)"
                                                 class="inline-flex items-center justify-center rounded-lg p-2 text-green-600 transition-colors hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/30"

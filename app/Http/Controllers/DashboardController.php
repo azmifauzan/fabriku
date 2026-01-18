@@ -93,7 +93,7 @@ class DashboardController extends Controller
         // Recent production
         $recentProduction = ProductionOrder::query()
             ->with('preparationOrder.pattern:id,name')
-            ->select('id', 'order_number', 'preparation_order_id', 'quantity_produced', 'status', 'created_at')
+            ->select('id', 'order_number', 'preparation_order_id', 'status', 'created_at')
             ->latest()
             ->limit(5)
             ->get()
@@ -101,7 +101,6 @@ class DashboardController extends Controller
                 'type' => 'production',
                 'description' => "Production {$order->order_number}".
                     ($order->preparationOrder?->pattern ? " - {$order->preparationOrder->pattern->name}" : ''),
-                'quantity' => $order->quantity_produced,
                 'status' => $order->status,
                 'date' => $order->created_at,
             ]);

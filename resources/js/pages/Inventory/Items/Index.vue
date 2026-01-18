@@ -12,11 +12,9 @@ interface Item {
     category: string;
     current_stock: number;
     reserved_stock: number;
-    minimum_stock: number;
     target_quantity?: number;
     unit_cost: number;
     selling_price: number;
-    quality_grade: string;
     status: string;
     inventory_location?: {
         id: number;
@@ -87,7 +85,7 @@ const statusBadgeClass = (status: string) => {
 };
 
 const isLowStock = (item: Item) => {
-    return item.current_stock <= item.minimum_stock;
+    return item.current_stock <= 0;
 };
 </script>
 
@@ -175,13 +173,8 @@ const isLowStock = (item: Item) => {
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">SKU</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">Nama Item</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
-                                        Production Order
-                                    </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">Lokasi</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">Target</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">Hasil Aktual</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">Grade</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">Stock</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">Status</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase dark:text-gray-400">Aksi</th>
                                 </tr>
@@ -203,22 +196,15 @@ const isLowStock = (item: Item) => {
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                        {{ item.production_order?.order_number || '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
                                         {{ item.inventory_location?.name || '-' }}
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                        {{ item.target_quantity || '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                        {{ item.current_stock }}
-                                        <span v-if="item.reserved_stock > 0" class="text-gray-500 dark:text-gray-400"
-                                            >({{ item.reserved_stock }} reserved)</span
-                                        >
-                                    </td>
-                                    <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                        {{ item.quality_grade || '-' }}
+                                        <div class="flex flex-col">
+                                            <span class="font-medium">{{ item.current_stock }}</span>
+                                            <span v-if="item.reserved_stock > 0" class="text-xs text-gray-500 dark:text-gray-400">
+                                                {{ item.reserved_stock }} reserved
+                                            </span>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span :class="statusBadgeClass(item.status)" class="inline-flex rounded-full px-2 py-1 text-xs font-semibold">

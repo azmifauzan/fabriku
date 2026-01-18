@@ -39,9 +39,7 @@ class InventoryItemController extends Controller
         }
 
         // Filter by quality grade (mainly for garment)
-        if ($qualityGrade = $request->get('quality_grade')) {
-            $query->where('quality_grade', $qualityGrade);
-        }
+        // Removed: quality_grade filtering
 
         // Special filters
         if ($request->get('low_stock')) {
@@ -67,9 +65,9 @@ class InventoryItemController extends Controller
             'items' => $items,
             'filters' => $request->only([
                 'search', 'status', 'location_id', 'inventory_location_id',
-                'quality_grade', 'low_stock', 'expiring_soon', 'expired',
+                'low_stock', 'expiring_soon', 'expired',
             ]),
-            'locations' => InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'zone', 'rack']),
+            'locations' => InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'capacity']),
             'stats' => [
                 'total_items' => InventoryItem::count(),
                 'total_stock' => InventoryItem::sum('current_quantity'),
@@ -95,13 +93,16 @@ class InventoryItemController extends Controller
 
     public function create(Request $request)
     {
-        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'zone', 'rack']);
-        $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'product_type']);
-        // Only show completed or sent production orders for inventory
+        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'capacity']);
+        $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'output_quantity']);
+        // Only show completed or sent production orders that don't have inventory items yet
         $productionOrders = ProductionOrder::whereIn('status', ['completed', 'sent'])
-            ->with(['preparationOrder.pattern'])
-            ->orderBy('completed_date', 'desc')
-            ->get(['id', 'order_number', 'preparation_order_id', 'quantity_good', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status']);
+            ->whereDoesntHave('inventoryItems')
+            ->with(['preparationOrder' => function ($query) {
+                $query->select('id', 'pattern_id', 'output_quantity', 'output_unit');
+            }, 'preparationOrder.pattern'])
+            ->orderByRaw('COALESCE(completed_date, estimated_completion_date) DESC')
+            ->get(['id', 'order_number', 'preparation_order_id', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status']);
 
         return Inertia::render('Inventory/Items/Create', [
             'locations' => $locations,
@@ -112,12 +113,6 @@ class InventoryItemController extends Controller
                 'food' => 'Makanan',
                 'craft' => 'Kerajinan',
                 'other' => 'Lainnya',
-            ],
-            'qualityGrades' => [
-                'A' => 'Grade A (Perfect)',
-                'B' => 'Grade B (Minor defects)',
-                'C' => 'Grade C (Major defects)',
-                'reject' => 'Reject (Not saleable)',
             ],
         ]);
     }
@@ -133,13 +128,20 @@ class InventoryItemController extends Controller
 
     public function edit(InventoryItem $inventoryItem)
     {
-        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'zone', 'rack']);
-        $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'product_type']);
-        // Only show completed or sent production orders for inventory
+        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'capacity']);
+        $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'output_quantity']);
+        // Only show completed or sent production orders that don't have inventory items yet
+        // Include current item's production order
         $productionOrders = ProductionOrder::whereIn('status', ['completed', 'sent'])
-            ->with(['preparationOrder.pattern'])
-            ->orderBy('completed_date', 'desc')
-            ->get(['id', 'order_number', 'preparation_order_id', 'quantity_good', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status']);
+            ->where(function ($query) use ($inventoryItem) {
+                $query->whereDoesntHave('inventoryItems')
+                    ->orWhere('id', $inventoryItem->production_order_id);
+            })
+            ->with(['preparationOrder' => function ($query) {
+                $query->select('id', 'pattern_id', 'output_quantity', 'output_unit');
+            }, 'preparationOrder.pattern'])
+            ->orderByRaw('COALESCE(completed_date, estimated_completion_date) DESC')
+            ->get(['id', 'order_number', 'preparation_order_id', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status']);
 
         return Inertia::render('Inventory/Items/Edit', [
             'item' => $inventoryItem->load('productionOrder.preparationOrder.pattern'),
@@ -151,12 +153,6 @@ class InventoryItemController extends Controller
                 'food' => 'Makanan',
                 'craft' => 'Kerajinan',
                 'other' => 'Lainnya',
-            ],
-            'qualityGrades' => [
-                'A' => 'Grade A (Perfect)',
-                'B' => 'Grade B (Minor defects)',
-                'C' => 'Grade C (Major defects)',
-                'reject' => 'Reject (Not saleable)',
             ],
         ]);
     }

@@ -252,9 +252,6 @@ class DatabaseSeeder extends Seeder
             'preparation_order_id' => $preparationMukena->id,
             'type' => 'external',
             'contractor_id' => $contractor1->id,
-            'quantity_produced' => 20,
-            'quantity_good' => 18,
-            'quantity_reject' => 2,
             'labor_cost' => 300000, // 20 x 15000
             'estimated_completion_date' => now()->addDays(7),
             'sent_date' => now()->subDays(2),
@@ -270,9 +267,6 @@ class DatabaseSeeder extends Seeder
             'preparation_order_id' => $preparationGamis->id,
             'type' => 'external',
             'contractor_id' => $contractor2->id,
-            'quantity_produced' => 0,
-            'quantity_good' => 0,
-            'quantity_reject' => 0,
             'labor_cost' => 180000, // 15 x 12000
             'estimated_completion_date' => now()->addDays(10),
             'sent_date' => now()->subHours(6),
@@ -302,19 +296,16 @@ class DatabaseSeeder extends Seeder
         $materialKatun->decrement('stock_quantity', 26);
         $materialBenang->decrement('stock_quantity', 1.2);
 
-        // Production order PENDING (ready to send to contractor)
+        // Production order DRAFT (ready to send to contractor)
         ProductionOrder::create([
             'tenant_id' => $tenantGarment->id,
             'order_number' => 'PO-2026-003',
             'preparation_order_id' => $preparationMukenaBatch2->id,
             'type' => 'external',
             'contractor_id' => $contractor1->id,
-            'quantity_produced' => 0,
-            'quantity_good' => 0,
-            'quantity_reject' => 0,
             'labor_cost' => 150000,
             'estimated_completion_date' => now()->addDays(8),
-            'status' => 'pending', // PENDING - not yet sent
+            'status' => 'draft', // DRAFT - not yet sent
             'priority' => 'normal',
             'notes' => 'Order 10 pcs mukena batch 2',
         ]);
@@ -350,7 +341,6 @@ class DatabaseSeeder extends Seeder
             'quality_grade' => 'A',
             'unit_cost' => 65000, // material + labor
             'selling_price' => 150000,
-            'production_date' => now()->subHours(12),
         ]);
 
         // 13. Create Customers
@@ -671,9 +661,6 @@ class DatabaseSeeder extends Seeder
             'preparation_order_id' => $prepBrownies->id,
             'type' => 'internal',
             'contractor_id' => null,
-            'quantity_produced' => 48,
-            'quantity_good' => 46,
-            'quantity_reject' => 2,
             'labor_cost' => 90000,
             'estimated_completion_date' => now()->addDays(5),
             'sent_date' => null,
@@ -689,9 +676,6 @@ class DatabaseSeeder extends Seeder
             'preparation_order_id' => $prepCookies->id,
             'type' => 'external',
             'contractor_id' => $contractorBakery->id,
-            'quantity_produced' => 0,
-            'quantity_good' => 0,
-            'quantity_reject' => 0,
             'labor_cost' => 50000,
             'estimated_completion_date' => now()->addDays(7),
             'sent_date' => now()->subHours(8),
@@ -731,7 +715,6 @@ class DatabaseSeeder extends Seeder
             'quality_grade' => 'A',
             'unit_cost' => 8000,
             'selling_price' => 15000,
-            'production_date' => now()->subHours(12),
             'expired_date' => now()->addDays(7),
         ]);
 

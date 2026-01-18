@@ -14,7 +14,7 @@ beforeEach(function () {
         'role' => 'admin',
     ]);
     $this->actingAs($this->user);
-    
+
     // Create a material type for tests
     $this->materialType = \App\Models\MaterialType::factory()->create([
         'tenant_id' => $this->tenant->id,

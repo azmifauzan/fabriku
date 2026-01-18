@@ -102,7 +102,6 @@ class InventorySeeder extends Seeder
                         'selling_price' => 125000,
                         'inventory_location_id' => $rakA1->id,
                         'batch_number' => 'PB-2026-'.str_pad(fake()->numberBetween(1, 50), 4, '0', STR_PAD_LEFT),
-                        'production_date' => now()->subDays(fake()->numberBetween(1, 30)),
                         'quality_grade' => 'A',
                         'status' => 'available',
                     ];
@@ -128,7 +127,6 @@ class InventorySeeder extends Seeder
                 'selling_price' => 100000,
                 'inventory_location_id' => $rakA2->id,
                 'batch_number' => 'PB-2026-0012',
-                'production_date' => now()->subDays(15),
                 'quality_grade' => 'B',
                 'status' => 'available',
             ];
@@ -155,7 +153,6 @@ class InventorySeeder extends Seeder
                     'selling_price' => 75000,
                     'inventory_location_id' => $rakB1->id,
                     'batch_number' => 'PB-2026-'.str_pad(fake()->numberBetween(51, 80), 4, '0', STR_PAD_LEFT),
-                    'production_date' => now()->subDays(fake()->numberBetween(1, 20)),
                     'quality_grade' => 'A',
                     'status' => 'available',
                 ];
@@ -180,7 +177,6 @@ class InventorySeeder extends Seeder
             'selling_price' => 125000,
             'inventory_location_id' => $rakA1->id,
             'batch_number' => 'PB-2026-0099',
-            'production_date' => now()->subDays(45),
             'quality_grade' => 'A',
             'status' => 'available',
         ];
@@ -204,7 +200,6 @@ class InventorySeeder extends Seeder
             'selling_price' => 50000,
             'inventory_location_id' => $rakC1->id,
             'batch_number' => 'PB-2026-0013',
-            'production_date' => now()->subDays(20),
             'quality_grade' => 'reject',
             'status' => 'available',
         ];

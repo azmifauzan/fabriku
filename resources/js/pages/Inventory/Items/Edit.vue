@@ -6,34 +6,42 @@ import ItemForm from './Form.vue';
 interface Location {
     id: number;
     name: string;
-    zone: string;
-    rack: string;
+    code: string;
+    capacity: number;
 }
 
 interface Pattern {
     id: number;
     name: string;
     code: string;
-    product_type: string;
+    output_quantity: number;
+}
+
+interface PreparationOrder {
+    pattern: Pattern;
+}
+
+interface ProductionOrder {
+    id: number;
+    order_number: string;
+    preparation_order_id: number;
+    labor_cost: string;
+    completed_date: string;
+    estimated_completion_date: string;
+    status: string;
+    preparation_order?: PreparationOrder;
 }
 
 interface Item {
     id: number;
     sku: string;
     name: string;
-    category: string;
+    production_order_id?: number;
     inventory_location_id: number;
-    pattern_id?: number;
+    target_quantity: number;
     current_stock: number;
-    reserved_stock: number;
-    minimum_stock: number;
     unit_cost: string;
     selling_price: string;
-    quality_grade: string;
-    batch_number?: string;
-    production_date?: string;
-    expiry_date?: string;
-    storage_requirements?: string;
     status: string;
     notes?: string;
 }
@@ -41,7 +49,7 @@ interface Item {
 interface Props {
     item: Item;
     locations: Location[];
-    patterns: Pattern[];
+    productionOrders: ProductionOrder[];
 }
 
 defineProps<Props>();
@@ -53,7 +61,7 @@ defineProps<Props>();
 
         <div class="px-6 py-6">
             <div class="mx-auto max-w-4xl">
-                <ItemForm :item="item" :locations="locations" :patterns="patterns" />
+                <ItemForm :item="item" :locations="locations" :production-orders="productionOrders" />
             </div>
         </div>
     </AppLayout>

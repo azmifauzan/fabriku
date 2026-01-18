@@ -2,7 +2,7 @@
 import { useBusinessContext } from '@/composables/useBusinessContext';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 
 interface Pattern {
     id: number;
@@ -30,7 +30,6 @@ interface ProductionOrder {
     preparation_order_id: number;
     contractor_id: number | null;
     type: string;
-    quantity_requested: number;
     estimated_completion_date: string | null;
     status: string;
     notes: string;
@@ -48,7 +47,6 @@ const form = useForm({
     preparation_order_id: props.productionOrder?.preparation_order_id || 0,
     type: props.productionOrder?.type || 'internal',
     contractor_id: props.productionOrder?.contractor_id || null,
-    quantity_requested: props.productionOrder?.quantity_requested || 0,
     estimated_completion_date: props.productionOrder?.estimated_completion_date || '',
     labor_cost: props.productionOrder?.labor_cost ?? 0,
     priority: props.productionOrder?.priority || 'normal',
@@ -58,21 +56,6 @@ const form = useForm({
 
 const selectedPreparationOrder = computed(() => {
     return props.preparationOrders.find((po) => po.id === form.preparation_order_id);
-});
-
-const availableQuantity = computed(() => {
-    if (!selectedPreparationOrder.value) return 0;
-    return selectedPreparationOrder.value.output_quantity;
-});
-
-// Auto-fill quantity_requested when preparation order is selected
-watch(() => form.preparation_order_id, (newValue) => {
-    if (newValue && newValue !== 0 && !isEditing) {
-        const prepOrder = props.preparationOrders.find((po) => po.id === newValue);
-        if (prepOrder) {
-            form.quantity_requested = prepOrder.output_quantity;
-        }
-    }
 });
 
 const { term } = useBusinessContext();
@@ -195,27 +178,6 @@ const isEditing = !!props.productionOrder?.id;
                                             <option value="external">Eksternal ({{ contractorLabel }})</option>
                                         </select>
                                         <p v-if="form.errors.type" class="mt-1 text-sm text-red-600">{{ form.errors.type }}</p>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Jumlah Diminta <span class="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            v-model.number="form.quantity_requested"
-                                            type="number"
-                                            min="1"
-                                            :max="availableQuantity"
-                                            required
-                                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                            :class="{ 'border-red-500': form.errors.quantity_requested }"
-                                        />
-                                        <p v-if="form.errors.quantity_requested" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.quantity_requested }}
-                                        </p>
-                                        <p v-if="selectedPreparationOrder" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                            Tersedia: {{ availableQuantity }} pcs
-                                        </p>
                                     </div>
 
                                     <div v-if="form.type === 'external'">

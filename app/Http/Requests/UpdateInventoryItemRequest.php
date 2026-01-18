@@ -29,12 +29,12 @@ class UpdateInventoryItemRequest extends FormRequest
 
         $data = [];
         foreach ($mappings as $old => $new) {
-            if ($this->has($old) && !$this->has($new)) {
+            if ($this->has($old) && ! $this->has($new)) {
                 $data[$new] = $this->input($old);
             }
         }
 
-        if (!empty($data)) {
+        if (! empty($data)) {
             $this->merge($data);
         }
     }
@@ -51,8 +51,8 @@ class UpdateInventoryItemRequest extends FormRequest
 
         return [
             'production_order_id' => 'required|exists:production_orders,id',
-            'sku' => 'required|string|max:100|unique:inventory_items,sku,'.$itemId.',id,tenant_id,'.auth()->user()->tenant_id,
-            'product_name' => 'required|string|max:255',
+            'sku' => 'nullable|string|max:100|unique:inventory_items,sku,'.$itemId.',id,tenant_id,'.auth()->user()->tenant_id,
+            'product_name' => 'nullable|string|max:255',
             'name' => 'sometimes|string|max:255', // backwards compatibility
             'location_id' => 'required|exists:inventory_locations,id',
             'inventory_location_id' => 'sometimes|exists:inventory_locations,id', // backwards compatibility
@@ -63,9 +63,8 @@ class UpdateInventoryItemRequest extends FormRequest
             'minimum_stock' => 'integer|min:0',
             'unit_cost' => 'required|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',
-            'production_date' => 'nullable|date',
             'quality_grade' => 'nullable|in:grade_a,grade_b,reject,A,B,Reject',
-            'status' => 'required|in:available,reserved,damaged,expired',
+            'status' => 'nullable|in:available,reserved,damaged,expired',
             'notes' => 'nullable|string|max:1000',
         ];
     }
