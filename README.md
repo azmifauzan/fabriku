@@ -44,7 +44,7 @@ Platform ini mengelola workflow universal: **Bahan Baku → Pattern/Resep → Pe
 - **Auto deduct stock** saat status completed
 - Status workflow dengan guards (draft, in_progress, completed, cancelled)
 
-### 🧵 Manajemen Produksi (Coming in Phase 4)
+### 🧵 Manajemen Produksi
 - Support produksi internal dan outsourcing:
   - **Garment**: Penjahit/kontraktor jahit
   - **Makanan**: Dapur sharing/outsource produksi
@@ -53,28 +53,29 @@ Platform ini mengelola workflow universal: **Bahan Baku → Pattern/Resep → Pe
   - **Garment**: Grade A/B/Reject
   - **Makanan**: Premium/Standar, expired date tracking
 - Rating dan evaluasi kontraktor/partner
+- Status workflow: draft → pending → in_progress → completed
 
-### 📊 Inventory Produk Jadi (Coming in Phase 5)
+### 📊 Inventory Produk Jadi
 - Manajemen lokasi penyimpanan (rak)
-- Tracking dengan FIFO/FEFO
+- Tracking dengan SKU generation
+- Stock quantity: initial, current, reserved
 - **Makanan**: Expired date monitoring dan shelf life alerts
 - **Garment**: Batch tracking dan quality grades
-- Low stock alerts dan stock adjustment
+- Status management: available, reserved, depleted
 
-### 💰 Manajemen Penjualan (Coming in Phase 6)
+### 💰 Manajemen Penjualan
 - Multi-channel sales (offline, online, marketplace, reseller)
-- Customer relationship management
+- Customer relationship management (retail, wholesale, reseller)
 - Payment tracking (unpaid, partial, paid)
-- Invoice generation otomatis
-- Stock deduction otomatis saat penjualan
+- Order status workflow (pending → confirmed → packed → shipped → delivered)
+- Stock integration dengan inventory
 
-### 📈 Pelaporan & Analytics (Coming in Phase 7)
-- Dashboard dengan real-time KPI per kategori bisnis
-- Laporan bahan baku (pembelian, pemakaian, stok)
-- Laporan produksi (efisiensi, produktivitas, waste)
-- Laporan penjualan (revenue, profit, top products)
-- Profit & Loss statement
-- Export ke PDF dan Excel
+### 📈 Pelaporan & Analytics
+- Dashboard dengan real-time KPI
+- Laporan bahan baku (Material Report)
+- Laporan inventory (Inventory Report)
+- Laporan penjualan (Sales Report)
+- Laporan produksi (Production Report)
 
 ## 🏗️ Technology Stack
 
@@ -252,6 +253,7 @@ Dokumentasi lengkap tersedia di folder `docs/`:
 - [User Flows](docs/05-user-flows.md) - Alur kerja pengguna per kategori
 - [MVP Development Plan](docs/06-mvp-development-plan.md) - Rencana implementasi MVP
 - [Frontend UI Architecture](docs/07-frontend-ui-architecture.md) - UI/UX design system
+- [Workflow Summary](docs/09-workflow-summary.md) - Ringkasan workflow dan data flow
 - [Multi-Category Architecture](docs/multi-category-architecture.md) - Panduan arsitektur multi-kategori
 - [Refactoring Summary](docs/refactoring-preparation-simplification.md) - Preparation simplification
 
@@ -392,14 +394,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### ✅ Phase 1: Foundation (Completed)
 - ✅ Multi-tenancy setup dengan category selection
-- ✅ User authentication & authorization
+- ✅ User authentication & authorization (Login & Register)
 - ✅ Landing page dengan multi-category showcase
 
 ### ✅ Phase 2: Material Management (Completed)
 - ✅ Material master data dengan dynamic attributes
+- ✅ Material Types management
 - ✅ Material receipt recording
-- ✅ Stock tracking dengan FIFO/FEFO
+- ✅ Stock tracking dengan auto-update
 - ✅ Category-specific material attributes (warna, expired date, dll)
+- ✅ Staff management
 
 ### ✅ Phase 3: Pattern/Recipe & Preparation (Completed)
 - ✅ Pattern/Recipe library dengan spesifikasi lengkap
@@ -408,48 +412,52 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ Pattern sebagai referensi (optional, tidak auto-fill)
 - ✅ Status workflow (draft → in_progress → completed)
 - ✅ Stock availability validation
-- ✅ 33 tests passing ✅
 - ✅ UI/UX modernization complete:
   - Mobile-first responsive layout
-  - Collapsible sidebar navigation
+  - Collapsible sidebar navigation with submenus
   - Dark/light theme support
   - Lucide icon integration
-  - Consistent styling dengan Material
+  - Consistent styling
 
-### 🔄 Phase 4: Production Management (In Progress)
-- 🔄 Contractors/Partners management
-- 🔄 Production orders (internal & external)
-- 🔄 Quality control (Grade A/B/Reject, expired tracking)
-- 🔄 Production costing
+### ✅ Phase 4: Production Management (Completed)
+- ✅ Contractors/Partners management (CRUD)
+- ✅ Production orders (internal & external)
+- ✅ Status workflow (draft → pending → in_progress → completed)
+- ✅ Action endpoints: send, start, mark-complete
+- ✅ Quality control tracking
+- ✅ Cost per unit & total cost calculation
 
-### 📅 Phase 5: Inventory Management (Q1 2026)
-- Inventory items with SKU
-- Location management (racks)
-- Stock view and search
-- Expired date tracking & alerts (food category)
-- Production date & best before date
+### ✅ Phase 5: Inventory Management (Completed)
+- ✅ Inventory locations (racks) CRUD
+- ✅ Inventory items with SKU generation
+- ✅ Link to production batches & patterns
+- ✅ Stock quantity tracking (initial, current, reserved)
+- ✅ Status management (available, reserved, depleted)
+- ✅ Selling price & cost tracking
 
-### 📅 Phase 6: Sales Management (Q1 2026)
-- Customer management
-- Sales order creation
-- Multi-channel support
-- Payment tracking
-- Stock deduction otomatis
+### ✅ Phase 6: Sales Management (Completed)
+- ✅ Customer management (CRUD)
+- ✅ Customer types (retail, wholesale, reseller, online)
+- ✅ Sales order creation with line items
+- ✅ Multi-channel support (offline, online, marketplace)
+- ✅ Payment tracking (unpaid, partial, paid)
+- ✅ Order status workflow (pending → confirmed → packed → shipped → delivered)
 
-### 📅 Phase 7: Dashboard & Reporting (Q2 2026)
-- Dashboard KPI per kategori
-- Material, production, inventory reports
-- Sales summary & profit analysis
-- Category-specific analytics
+### ✅ Phase 7: Dashboard & Reporting (Completed)
+- ✅ Dashboard with real-time KPI
+- ✅ Material Report
+- ✅ Inventory Report
+- ✅ Sales Report
+- ✅ Production Report
 
-### 📅 Phase 8: Polish & Testing (Q2 2026)
-- Comprehensive testing
-- Browser testing (Pest 4)
-- UI/UX polish
-- Performance optimization
-- Documentation finalization
+### 🔄 Phase 8: Polish & Testing (In Progress)
+- 🔄 Comprehensive testing (14 test files)
+- 📋 Browser testing (Pest 4)
+- 📋 UI/UX polish & consistency
+- 📋 Performance optimization
+- 📋 Documentation finalization
 
-### 🚀 Future Enhancements (Q3-Q4 2026)
+### 🚀 Future Enhancements
 - 📱 Mobile app (React Native)
 - 🎨 Kategori baru: Kerajinan & Craft
 - 💄 Kategori baru: Kosmetik & Skincare

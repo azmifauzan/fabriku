@@ -84,22 +84,30 @@ resources/js/
 │   └── AppLayout.vue   # Main app layout
 ├── components/         # Reusable UI components
 │   ├── Navbar.vue      # Top navigation
-│   ├── Sidebar.vue     # Side navigation
+│   ├── Sidebar.vue     # Side navigation with submenus
 │   ├── Footer.vue      # App footer
-│   └── PageHeader.vue  # Page header component
+│   ├── PageHeader.vue  # Page header component
+│   ├── FormField.vue   # Reusable form field
+│   ├── FormSection.vue # Form section wrapper
+│   ├── FilterBar.vue   # Filter bar component
+│   └── ConfirmationModal.vue # Confirmation dialog
 ├── composables/        # Vue composables
 │   └── useDarkMode.ts  # Dark mode utility
 ├── pages/              # Inertia pages
-│   ├── Auth/
-│   ├── Dashboard.vue
-│   ├── Materials/      # Bahan baku
-│   ├── Patterns/       # Pattern/Recipe
-│   ├── CuttingOrders/  # Pemotongan/Prep
-│   ├── Contractors/    # Kontraktor
-│   ├── ProductionOrders/ # Produksi jahit/baking
-│   ├── Inventory/      # Gudang produk jadi
-│   ├── Sales/          # Penjualan
-│   └── Reports/        # Laporan
+│   ├── Auth/           # Login, Register
+│   ├── Dashboard.vue   # Main dashboard with KPIs
+│   ├── Welcome.vue     # Landing page
+│   ├── Materials/      # Bahan baku CRUD
+│   ├── MaterialTypes/  # Jenis bahan CRUD
+│   ├── Patterns/       # Pattern/Recipe CRUD
+│   ├── PreparationOrders/  # Preparation orders CRUD
+│   ├── Contractors/    # Kontraktor CRUD
+│   ├── ProductionOrders/ # Production orders CRUD
+│   ├── Inventory/      # Locations & Items CRUD
+│   ├── Customers/      # Customer CRUD
+│   ├── SalesOrders/    # Sales orders CRUD
+│   ├── Staff/          # Staff management
+│   └── Reports/        # Material, Inventory, Sales, Production reports
 ├── actions/            # Wayfinder generated routes
 ├── types/              # TypeScript types
 └── lib/                # Utilities & helpers
