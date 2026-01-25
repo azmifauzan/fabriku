@@ -72,14 +72,14 @@ class SalesOrderController extends Controller
         $salesOrder->load(['customer', 'items.inventoryItem.inventoryLocation', 'items.inventoryItem.productionOrder.preparationOrder.pattern']);
 
         return Inertia::render('SalesOrders/Show', [
-            'order' => $salesOrder,
+            'salesOrder' => $salesOrder,
         ]);
     }
 
     public function create()
     {
         return Inertia::render('SalesOrders/Create', [
-            'customers' => Customer::where('is_active', true)->orderBy('name')->get(['id', 'code', 'name', 'type', 'discount_percentage']),
+            'customers' => Customer::where('is_active', true)->orderBy('name')->get(['id', 'code', 'name']),
             'inventoryItems' => InventoryItem::with(['inventoryLocation', 'productionOrder.preparationOrder.pattern'])
                 ->where('status', 'available')
                 ->whereColumn('current_quantity', '>', 'reserved_quantity')
@@ -132,8 +132,8 @@ class SalesOrderController extends Controller
                 'tax_amount' => $taxAmount,
                 'total_amount' => $totalAmount,
                 'payment_method' => $validated['payment_method'],
-                'payment_status' => 'unpaid',
-                'paid_amount' => 0,
+                'payment_status' => $validated['payment_status'] ?? 'unpaid',
+                'paid_amount' => $validated['paid_amount'] ?? 0,
                 'notes' => $validated['notes'] ?? null,
                 'shipping_address' => $validated['shipping_address'] ?? null,
             ]);
@@ -164,7 +164,7 @@ class SalesOrderController extends Controller
 
         return Inertia::render('SalesOrders/Edit', [
             'salesOrder' => $salesOrder,
-            'customers' => Customer::where('is_active', true)->orderBy('name')->get(['id', 'code', 'name', 'type', 'discount_percentage']),
+            'customers' => Customer::where('is_active', true)->orderBy('name')->get(['id', 'code', 'name']),
             'inventoryItems' => InventoryItem::with(['inventoryLocation', 'productionOrder.preparationOrder.pattern'])
                 ->where('status', 'available')
                 ->whereColumn('current_quantity', '>', 'reserved_quantity')
@@ -216,6 +216,8 @@ class SalesOrderController extends Controller
                 'tax_amount' => $taxAmount,
                 'total_amount' => $totalAmount,
                 'payment_method' => $validated['payment_method'],
+                'payment_status' => $validated['payment_status'] ?? $salesOrder->payment_status,
+                'paid_amount' => $validated['paid_amount'] ?? $salesOrder->paid_amount,
                 'notes' => $validated['notes'] ?? null,
                 'shipping_address' => $validated['shipping_address'] ?? null,
             ]);

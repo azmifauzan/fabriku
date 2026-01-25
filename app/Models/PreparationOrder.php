@@ -84,9 +84,16 @@ class PreparationOrder extends Model
             }
         });
 
-        // Auto deduct stock when status changed to completed
+        // Auto deduct stock when status changed to completed (updating)
         static::updating(function (PreparationOrder $order) {
             if ($order->isDirty('status') && $order->status === 'completed' && $order->getOriginal('status') !== 'completed') {
+                app(MaterialStockService::class)->deductStock($order);
+            }
+        });
+
+        // Also handle case when order is created directly with completed status
+        static::created(function (PreparationOrder $order) {
+            if ($order->status === 'completed') {
                 app(MaterialStockService::class)->deductStock($order);
             }
         });

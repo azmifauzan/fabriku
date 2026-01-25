@@ -27,12 +27,7 @@ interface Summary {
     pending_orders: number;
 }
 
-interface RevenueByType {
-    [key: string]: {
-        count: number;
-        total: number;
-    };
-}
+
 
 interface Filters {
     status?: string;
@@ -50,7 +45,7 @@ interface DefaultDates {
 const props = defineProps<{
     orders: Order[];
     summary: Summary;
-    revenueByType: RevenueByType;
+    // revenueByType: RevenueByType;
     filters: Filters;
     defaultDates: DefaultDates;
 }>();
@@ -161,7 +156,7 @@ const getPaymentStatusClass = (paymentStatus: string) => {
                 </div>
 
                 <!-- Revenue by Customer Type -->
-                <div v-if="Object.keys(revenueByType).length > 0" class="rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                <!-- <div v-if="Object.keys(revenueByType).length > 0" class="rounded-lg bg-white shadow-sm dark:bg-gray-800">
                     <div class="p-6">
                         <div class="mb-4 flex items-center gap-2">
                             <TrendingUp :size="20" class="text-indigo-500" />
@@ -179,7 +174,7 @@ const getPaymentStatusClass = (paymentStatus: string) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Filters -->
                 <div class="rounded-lg bg-white shadow-sm dark:bg-gray-800">
@@ -314,9 +309,9 @@ const getPaymentStatusClass = (paymentStatus: string) => {
                                         <div class="text-sm text-gray-900 dark:text-white">
                                             {{ order.customer_name }}
                                         </div>
-                                        <div class="text-xs text-gray-500 capitalize dark:text-gray-400">
+                                        <!-- <div class="text-xs text-gray-500 capitalize dark:text-gray-400">
                                             {{ order.customer_type }}
-                                        </div>
+                                        </div> -->
                                     </td>
                                     <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900 dark:text-white">
                                         {{ order.total_items }}

@@ -22,6 +22,8 @@ class StoreSalesOrderRequest extends FormRequest
             'channel' => ['required', 'in:offline,online,reseller,marketplace'],
             'status' => ['nullable', 'in:draft,confirmed,processing,shipped,completed,cancelled'],
             'payment_method' => ['required', 'in:cash,transfer,credit_card,qris,cod'],
+            'payment_status' => ['nullable', 'in:unpaid,partial,paid'],
+            'paid_amount' => ['nullable', 'numeric', 'min:0'],
             'discount_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'discount_amount' => ['nullable', 'numeric', 'min:0'],
             'tax_amount' => ['nullable', 'numeric', 'min:0'],

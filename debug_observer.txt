@@ -1,0 +1,5 @@
+Observer Triggered: draft -> confirmed
+Observer Triggered: draft -> confirmed
+Observer Triggered: draft -> confirmed
+Observer Triggered: draft -> confirmed
+Observer Triggered: draft -> confirmed

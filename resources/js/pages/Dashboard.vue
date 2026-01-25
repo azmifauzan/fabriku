@@ -2,7 +2,7 @@
 import { useBusinessContext } from '@/composables/useBusinessContext';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { AlertTriangle, Box, ClipboardList, Factory, Package, ShoppingCart, TrendingUp } from 'lucide-vue-next';
+import { AlertTriangle, Box, ClipboardList, Factory, Layers, Package, ShoppingCart, TrendingUp } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const { term } = useBusinessContext();
@@ -54,6 +54,36 @@ interface InventoryItem {
     minimum_stock: number;
 }
 
+interface MaterialStockItem {
+    id: number;
+    code: string;
+    name: string;
+    type: string;
+    stock_quantity: number;
+    unit: string;
+    price_per_unit: number;
+    stock_value: number;
+    is_low_stock: boolean;
+}
+
+interface MaterialStockSummary {
+    total_items: number;
+    total_stock_value: number;
+    low_stock_count: number;
+}
+
+interface InventoryLocationSummary {
+    id: number;
+    name: string;
+    code: string;
+    type: string;
+    item_count: number;
+    used_capacity: number;
+    capacity: number | null;
+    percentage: number;
+    is_unlimited: boolean;
+}
+
 defineProps<{
     stats: Stats;
     salesTrend?: Array<{ date: string; total: number; count: number }>;
@@ -61,6 +91,9 @@ defineProps<{
     recentActivities?: Activity[];
     lowStockMaterials?: Material[];
     lowStockInventory?: InventoryItem[];
+    materialStockSummary?: MaterialStockSummary;
+    topMaterialsByValue?: MaterialStockItem[];
+    inventoryByLocation?: InventoryLocationSummary[];
 }>();
 
 const formatCurrency = (amount: number) => {
@@ -68,7 +101,15 @@ const formatCurrency = (amount: number) => {
         style: 'currency',
         currency: 'IDR',
         minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
     }).format(amount);
+};
+
+const formatNumber = (value: number, decimals: number = 2) => {
+    return new Intl.NumberFormat('id-ID', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: decimals,
+    }).format(value);
 };
 
 const formatDate = (date: string) => {
@@ -249,6 +290,183 @@ const getStatusBadgeClass = (status: string) => {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Material Stock Summary -->
+                <div v-if="materialStockSummary" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    <!-- Stock Value Card -->
+                    <div class="overflow-hidden rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 shadow-lg">
+                        <div class="p-6 text-white">
+                            <div class="flex items-center gap-3">
+                                <div class="rounded-lg bg-white/20 p-3">
+                                    <Layers :size="24" />
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-purple-100">Total Nilai Stock {{ materialLabel }}</dt>
+                                    <dd class="mt-1 text-2xl font-bold">
+                                        {{ formatCurrency(materialStockSummary.total_stock_value) }}
+                                    </dd>
+                                    <p class="mt-1 text-sm text-purple-200">
+                                        {{ materialStockSummary.total_items }} jenis material
+                                        <span v-if="materialStockSummary.low_stock_count > 0" class="text-yellow-200">
+                                            ({{ materialStockSummary.low_stock_count }} low stock)
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Materials by Stock Value -->
+                    <div
+                        v-if="topMaterialsByValue && topMaterialsByValue.length > 0"
+                        class="rounded-lg bg-white shadow-sm lg:col-span-2 dark:bg-gray-800"
+                    >
+                        <div class="p-6">
+                            <div class="mb-4 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <Package :size="20" class="text-purple-500" />
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                        {{ materialLabel }} - Nilai Tertinggi
+                                    </h3>
+                                </div>
+                                <Link
+                                    href="/reports/material"
+                                    class="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                                >
+                                    Lihat Report →
+                                </Link>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead>
+                                        <tr>
+                                            <th
+                                                class="px-3 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Material
+                                            </th>
+                                            <th
+                                                class="px-3 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Stock
+                                            </th>
+                                            <th
+                                                class="px-3 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Nilai
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                        <tr
+                                            v-for="material in topMaterialsByValue"
+                                            :key="material.id"
+                                            class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                                        >
+                                            <td class="px-3 py-2">
+                                                <div class="flex items-center gap-2">
+                                                    <div>
+                                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ material.name }}
+                                                        </p>
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                            {{ material.code }}
+                                                            <span v-if="material.type"> · {{ material.type }}</span>
+                                                        </p>
+                                                    </div>
+                                                    <span
+                                                        v-if="material.is_low_stock"
+                                                        class="inline-flex items-center rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900 dark:text-red-200"
+                                                    >
+                                                        Low
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="px-3 py-2 text-right text-sm text-gray-900 dark:text-white">
+                                                {{ formatNumber(material.stock_quantity) }} {{ material.unit }}
+                                            </td>
+                                            <td class="px-3 py-2 text-right text-sm font-medium text-gray-900 dark:text-white">
+                                                {{ formatCurrency(material.stock_value) }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory by Location Summary -->
+                <div v-if="inventoryByLocation && inventoryByLocation.length > 0" class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <Box :size="20" class="text-indigo-500" />
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Inventory by Location</h3>
+                        </div>
+                        <Link
+                            href="/inventory/visualization"
+                            class="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                        >
+                            Visualisasi Lengkap →
+                        </Link>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div
+                            v-for="location in inventoryByLocation"
+                            :key="location.id"
+                            class="group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+                        >
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h4 class="font-medium text-gray-900 dark:text-white">{{ location.name }}</h4>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ location.code }}</p>
+                                </div>
+                                <span
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                                    :class="
+                                        location.percentage >= 90
+                                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                            : location.percentage >= 70
+                                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                              : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                    "
+                                >
+                                    {{ location.is_unlimited ? 'Unlimited' : `${location.percentage}%` }}
+                                </span>
+                            </div>
+
+                            <div class="mt-4">
+                                <div class="flex items-end justify-between text-sm">
+                                    <span class="text-gray-500 dark:text-gray-400">{{ location.item_count }} items</span>
+                                    <span v-if="!location.is_unlimited" class="text-gray-900 dark:text-white">
+                                        {{ location.used_capacity }} / {{ location.capacity }}
+                                    </span>
+                                </div>
+                                <div v-if="!location.is_unlimited" class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
+                                    <div
+                                        class="h-full rounded-full transition-all duration-500"
+                                        :class="
+                                            location.percentage >= 90
+                                                ? 'bg-red-500'
+                                                : location.percentage >= 70
+                                                  ? 'bg-yellow-500'
+                                                  : 'bg-green-500'
+                                        "
+                                        :style="{ width: `${Math.min(location.percentage, 100)}%` }"
+                                    ></div>
+                                </div>
+                            </div>
+
+                            <Link
+                                :href="`/inventory/visualization?location=${location.id}`"
+                                class="absolute inset-0 z-10 focus:outline-none"
+                            >
+                                <span class="sr-only">View detail</span>
+                            </Link>
                         </div>
                     </div>
                 </div>

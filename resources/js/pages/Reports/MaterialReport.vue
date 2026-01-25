@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { FileBarChart, Filter, Search } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { AlertTriangle, FileBarChart, Filter, Search } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 interface Material {
     id: number;
@@ -10,11 +10,15 @@ interface Material {
     name: string;
     type: string;
     current_stock: number;
+    min_stock: number;
     unit: string;
+    price_per_unit: number;
     total_received: number;
+    total_used: number;
     total_cost: number;
     average_price: number;
     receipts_count: number;
+    is_low_stock: boolean;
 }
 
 interface Filters {
@@ -24,8 +28,17 @@ interface Filters {
     end_date?: string;
 }
 
+interface Summary {
+    total_items: number;
+    total_stock_value: number;
+    total_received: number;
+    total_used: number;
+    low_stock_count: number;
+}
+
 const props = defineProps<{
     materials: Material[];
+    summary: Summary;
     filters: Filters;
 }>();
 
@@ -34,20 +47,22 @@ const materialType = ref(props.filters.material_type || '');
 const startDate = ref(props.filters.start_date || '');
 const endDate = ref(props.filters.end_date || '');
 
-const totalValue = computed(() => {
-    return props.materials.reduce((sum, m) => sum + m.total_cost, 0);
-});
 
-const totalReceived = computed(() => {
-    return props.materials.reduce((sum, m) => sum + m.total_received, 0);
-});
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
         minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
     }).format(amount);
+};
+
+const formatNumber = (value: number, decimals: number = 2) => {
+    return new Intl.NumberFormat('id-ID', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: decimals,
+    }).format(value);
 };
 
 const applyFilter = () => {
@@ -95,23 +110,41 @@ const resetFilter = () => {
                 </div>
 
                 <!-- Summary Cards -->
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Material</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ materials.length }}
+                            {{ summary.total_items }}
                         </dd>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Penerimaan</dt>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Nilai Stock Saat Ini</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ totalReceived.toFixed(2) }}
+                            {{ formatCurrency(summary.total_stock_value) }}
                         </dd>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Nilai</dt>
-                        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ formatCurrency(totalValue) }}
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Diterima</dt>
+                        <dd class="mt-1 text-2xl font-semibold text-green-600 dark:text-green-400">
+                            {{ formatNumber(summary.total_received) }}
+                        </dd>
+                    </div>
+                    <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Digunakan</dt>
+                        <dd class="mt-1 text-2xl font-semibold text-orange-600 dark:text-orange-400">
+                            {{ formatNumber(summary.total_used) }}
+                        </dd>
+                    </div>
+                    <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+                        <dt class="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <AlertTriangle v-if="summary.low_stock_count > 0" :size="16" class="text-red-500" />
+                            Low Stock
+                        </dt>
+                        <dd
+                            class="mt-1 text-2xl font-semibold"
+                            :class="summary.low_stock_count > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'"
+                        >
+                            {{ summary.low_stock_count }}
                         </dd>
                     </div>
                 </div>
@@ -210,13 +243,13 @@ const resetFilter = () => {
                                         Total Diterima
                                     </th>
                                     <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                                        Total Digunakan
+                                    </th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Total Biaya
                                     </th>
                                     <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Harga Rata-rata
-                                    </th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                        Jumlah Penerimaan
                                     </th>
                                 </tr>
                             </thead>
@@ -224,34 +257,50 @@ const resetFilter = () => {
                                 <tr v-if="materials.length === 0">
                                     <td colspan="8" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data material</td>
                                 </tr>
-                                <tr v-for="material in materials" :key="material.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <tr
+                                    v-for="material in materials"
+                                    :key="material.id"
+                                    class="hover:bg-gray-50 dark:hover:bg-gray-700"
+                                    :class="{ 'bg-red-50 dark:bg-red-900/20': material.is_low_stock }"
+                                >
                                     <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
                                         {{ material.code }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-white">
-                                        {{ material.name }}
+                                    <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-gray-900 dark:text-white">{{ material.name }}</span>
+                                            <span
+                                                v-if="material.is_low_stock"
+                                                class="inline-flex items-center rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900 dark:text-red-200"
+                                            >
+                                                Low
+                                            </span>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
                                         <span
                                             class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-300"
                                         >
-                                            {{ material.type }}
+                                            {{ material.type || '-' }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white">
-                                        {{ material.current_stock }} {{ material.unit }}
+                                    <td
+                                        class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap"
+                                        :class="material.is_low_stock ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'"
+                                    >
+                                        {{ formatNumber(material.current_stock) }} {{ material.unit }}
                                     </td>
-                                    <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white">
-                                        {{ material.total_received }} {{ material.unit }}
+                                    <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-green-600 dark:text-green-400">
+                                        +{{ formatNumber(material.total_received) }} {{ material.unit }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-orange-600 dark:text-orange-400">
+                                        -{{ formatNumber(material.total_used) }} {{ material.unit }}
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white">
                                         {{ formatCurrency(material.total_cost) }}
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
                                         {{ formatCurrency(material.average_price) }}/{{ material.unit }}
-                                    </td>
-                                    <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                                        {{ material.receipts_count }}x
                                     </td>
                                 </tr>
                             </tbody>

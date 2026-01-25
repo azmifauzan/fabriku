@@ -36,6 +36,12 @@ class PreparationOrderController extends Controller
         return Inertia::render('PreparationOrders/Index', [
             'orders' => $orders,
             'filters' => $request->only(['search', 'status', 'pattern_id']),
+            'stats' => [
+                'total_orders' => PreparationOrder::count(),
+                'draft_orders' => PreparationOrder::where('status', 'draft')->count(),
+                'in_progress_orders' => PreparationOrder::where('status', 'in_progress')->count(),
+                'completed_orders' => PreparationOrder::where('status', 'completed')->count(),
+            ],
         ]);
     }
 

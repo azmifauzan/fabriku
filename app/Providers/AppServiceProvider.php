@@ -23,5 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register observers
         InventoryItem::observe(InventoryObserver::class);
+        \App\Models\SalesOrder::observe(\App\Observers\SalesOrderObserver::class);
+        \App\Models\SalesOrderItem::observe(\App\Observers\SalesOrderItemObserver::class);
     }
 }
