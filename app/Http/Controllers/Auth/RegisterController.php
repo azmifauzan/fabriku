@@ -28,8 +28,14 @@ class RegisterController extends Controller
                 ]];
             });
 
+        $settings = \App\Models\SystemSetting::getAllForTenant(null);
+        
         return Inertia::render('Auth/Register', [
             'categories' => $categories,
+            'prices' => [
+                'monthly' => $settings['membership_price_monthly'] ?? 25000,
+                'yearly' => $settings['membership_price_yearly'] ?? 250000,
+            ],
         ]);
     }
 
@@ -41,18 +47,23 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'subscription_plan' => ['required', 'string', 'in:trial,full'],
         ]);
 
         $tenant = null;
         $user = null;
 
         DB::transaction(function () use ($validated, &$tenant, &$user) {
-            // Create tenant with trial subscription
+            $expiresAt = $validated['subscription_plan'] === 'trial' 
+                ? now()->addDays(30) 
+                : now(); // Full member starts expired/inactive until payment
+
+            // Create tenant
             $tenant = Tenant::create([
                 'name' => $validated['business_name'],
                 'business_category' => $validated['business_category'],
-                'subscription_plan' => 'trial',
-                'subscription_expires_at' => now()->addDays(30),
+                'subscription_plan' => $validated['subscription_plan'],
+                'subscription_expires_at' => $expiresAt,
                 'is_active' => true,
             ]);
 

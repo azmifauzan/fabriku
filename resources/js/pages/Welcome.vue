@@ -1,5 +1,14 @@
+
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
+import FAQ from '@/components/Landing/FAQ.vue';
+
+defineProps({
+    canLogin: {
+        type: Boolean,
+        required: true,
+    },
+});
 </script>
 
 <template>
@@ -204,6 +213,8 @@ import { Head, Link } from '@inertiajs/vue3';
                 </div>
             </div>
         </section>
+
+        <FAQ />
 
         <!-- CTA Section -->
         <section class="py-24">

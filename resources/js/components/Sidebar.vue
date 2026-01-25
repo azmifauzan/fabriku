@@ -13,6 +13,7 @@ import {
     ShoppingCart,
     Warehouse,
     X,
+    CreditCard,
 } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 
@@ -187,7 +188,7 @@ const handleLinkClick = () => {
 <template>
     <aside
         :class="[
-            'fixed top-16 z-40 h-[calc(100vh-4rem)] border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-700 dark:bg-gray-800',
+            'fixed top-16 z-40 h-[calc(100vh-4rem)] flex flex-col border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-700 dark:bg-gray-800',
             // Mobile: slide from left, Desktop: always visible
             isMobile ? ['left-0 w-64', isOpen ? 'translate-x-0' : '-translate-x-full'] : ['left-0', isOpen ? 'w-64' : 'w-16'],
         ]"
@@ -213,7 +214,7 @@ const handleLinkClick = () => {
         </button>
 
         <!-- Menu Items -->
-        <nav class="h-full space-y-1 overflow-y-auto px-2 py-4">
+        <nav class="flex-1 space-y-1 overflow-y-auto px-2 py-4">
             <template v-for="item in menuItems" :key="item.href">
                 <!-- Parent Menu Item -->
                 <Link
@@ -298,5 +299,32 @@ const handleLinkClick = () => {
                 </div>
             </template>
         </nav>
+
+        <!-- Sidebar Footer (Membership) -->
+        <div class="border-t border-gray-200 dark:border-gray-700 p-2">
+            <Link
+                href="/subscription"
+                :class="[
+                    'group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
+                    isActive('/subscription')
+                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400'
+                        : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700',
+                ]"
+                @click="handleLinkClick"
+            >
+                <CreditCard
+                    :size="20"
+                    :class="[
+                        'flex-shrink-0',
+                        isActive('/subscription')
+                            ? 'text-indigo-600 dark:text-indigo-400'
+                            : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300',
+                    ]"
+                />
+                <span v-if="isMobile || isOpen" class="text-sm font-medium whitespace-nowrap">
+                    Membership
+                </span>
+            </Link>
+        </div>
     </aside>
 </template>

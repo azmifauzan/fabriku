@@ -43,6 +43,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Role Management
         Route::resource('roles', \App\Http\Controllers\Admin\AdminRoleController::class);
 
+        // Payments
+        Route::get('payments', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'index'])->name('payments.index');
+        Route::post('payments/{payment}/approve', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'approve'])->name('payments.approve');
+        Route::post('payments/{payment}/reject', [\App\Http\Controllers\Admin\AdminPaymentController::class, 'reject'])->name('payments.reject');
+
+        // Settings
+        Route::get('settings', [\App\Http\Controllers\Admin\AdminSettingController::class, 'index'])->name('settings.index');
+        Route::post('settings', [\App\Http\Controllers\Admin\AdminSettingController::class, 'update'])->name('settings.update');
+
         // Audit Logs
         Route::get('audit-logs', [\App\Http\Controllers\Admin\AdminAuditLogController::class, 'index'])->name('audit-logs.index');
         Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AdminAuditLogController::class, 'show'])->name('audit-logs.show');
@@ -67,7 +76,7 @@ Route::post('logout', [LoginController::class, 'destroy'])
     ->name('logout');
 
 // Protected Routes
-Route::middleware(['auth', 'tenant'])->group(function () {
+Route::middleware(['auth', 'tenant', 'subscription.check'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Material Management
@@ -108,4 +117,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('sales', [\App\Http\Controllers\ReportController::class, 'sales'])->name('sales');
         Route::get('production', [\App\Http\Controllers\ReportController::class, 'production'])->name('production');
     });
+
+    // Subscription
+    Route::get('subscription', [\App\Http\Controllers\SubscriptionController::class, 'index'])->name('subscription.index');
+    Route::post('subscription', [\App\Http\Controllers\SubscriptionController::class, 'store'])->name('subscription.store');
 });
