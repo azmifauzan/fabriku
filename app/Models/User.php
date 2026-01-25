@@ -68,4 +68,64 @@ class User extends Authenticatable
     {
         return in_array($this->role, ['admin', 'manager']);
     }
+
+    /**
+     * Get the roles for the user
+     */
+    public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\Role::class, 'user_roles');
+    }
+
+    /**
+     * Check if user has a specific role
+     */
+    public function hasRole(string $roleSlug): bool
+    {
+        return $this->roles()->where('slug', $roleSlug)->exists();
+    }
+
+    /**
+     * Check if user has any of the given roles
+     */
+    public function hasAnyRole(array $roleSlugs): bool
+    {
+        return $this->roles()->whereIn('slug', $roleSlugs)->exists();
+    }
+
+    /**
+     * Check if user has a specific permission
+     */
+    public function hasPermission(string $permissionSlug): bool
+    {
+        return $this->roles()
+            ->whereHas('permissions', function ($query) use ($permissionSlug) {
+                $query->where('slug', $permissionSlug);
+            })
+            ->exists();
+    }
+
+    /**
+     * Assign role to user
+     */
+    public function assignRole(\App\Models\Role $role): void
+    {
+        $this->roles()->syncWithoutDetaching($role);
+    }
+
+    /**
+     * Remove role from user
+     */
+    public function removeRole(\App\Models\Role $role): void
+    {
+        $this->roles()->detach($role);
+    }
+
+    /**
+     * Sync roles for user
+     */
+    public function syncRoles(array $roleIds): void
+    {
+        $this->roles()->sync($roleIds);
+    }
 }
