@@ -10,6 +10,10 @@ interface Category {
 
 const props = defineProps<{
     categories: Record<string, Category>;
+    prices: {
+        monthly: number;
+        yearly: number;
+    };
 }>();
 
 const form = useForm({
@@ -19,6 +23,7 @@ const form = useForm({
     email: '',
     password: '',
     password_confirmation: '',
+    subscription_plan: 'trial',
 });
 
 const selectedCategory = ref<string | null>(null);
@@ -113,7 +118,74 @@ const submit = () => {
                         </p>
                     </div>
 
+
+
                     <hr class="border-gray-200" />
+
+                     <!-- Subscription Plan -->
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">
+                            Pilih Paket
+                        </label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Trial -->
+                            <button
+                                type="button"
+                                @click="form.subscription_plan = 'trial'"
+                                class="relative p-4 rounded-xl border-2 text-left transition-all"
+                                :class="[
+                                    form.subscription_plan === 'trial'
+                                        ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                                        : 'border-gray-200 hover:border-indigo-200'
+                                ]"
+                            >
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-gray-900">Free Trial</span>
+                                    <span class="text-sm text-gray-500">30 Hari</span>
+                                    <span class="mt-2 text-indigo-600 font-bold">Rp 0</span>
+                                </div>
+                                <div 
+                                    v-if="form.subscription_plan === 'trial'"
+                                    class="absolute top-2 right-2 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center"
+                                >
+                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </button>
+
+                            <!-- Full Member -->
+                            <button
+                                type="button"
+                                @click="form.subscription_plan = 'full'"
+                                class="relative p-4 rounded-xl border-2 text-left transition-all"
+                                :class="[
+                                    form.subscription_plan === 'full'
+                                        ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                                        : 'border-gray-200 hover:border-indigo-200'
+                                ]"
+                            >
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-gray-900">Full Member</span>
+                                    <span class="text-sm text-gray-500">Akses Selamanya</span>
+                                    <span class="mt-2 text-indigo-600 font-bold">
+                                        Rp {{ new Intl.NumberFormat('id-ID').format(prices.monthly) }}/bln
+                                    </span>
+                                    <span class="text-xs text-gray-500">
+                                        atau Rp {{ new Intl.NumberFormat('id-ID').format(prices.yearly) }}/thn
+                                    </span>
+                                </div>
+                                <div 
+                                    v-if="form.subscription_plan === 'full'"
+                                    class="absolute top-2 right-2 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center"
+                                >
+                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- User Name -->
                     <div>
@@ -194,7 +266,9 @@ const submit = () => {
                         class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <span v-if="form.processing">Memproses...</span>
-                        <span v-else>Mulai Trial 30 Hari</span>
+
+                        <span v-else-if="form.subscription_plan === 'trial'">Mulai Trial 30 Hari</span>
+                        <span v-else>Daftar Membership</span>
                     </button>
 
                     <!-- Trial Info -->
