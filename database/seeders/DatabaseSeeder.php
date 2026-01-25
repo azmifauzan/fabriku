@@ -28,6 +28,15 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // ==========================================
+        // ADMIN SETUP (Platform Level)
+        // ==========================================
+        $this->call([
+            PermissionSeeder::class,
+            RoleSeeder::class,
+            AdminUserSeeder::class,
+        ]);
+
+        // ==========================================
         // TENANT 1: KONVEKSI FABRIKU (GARMENT)
         // ==========================================
         $tenantGarment = Tenant::create([
