@@ -38,9 +38,38 @@ class ReportController extends Controller
             });
         }
 
-        $materials = $query->get()->map(function ($material) {
+        // Get completed preparation orders within date range to calculate usage
+        $prepOrderQuery = \App\Models\PreparationOrder::query()
+            ->where('status', 'completed');
+
+        if ($request->filled('start_date')) {
+            $prepOrderQuery->where('completed_date', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $prepOrderQuery->where('completed_date', '<=', $request->end_date);
+        }
+
+        // Calculate total usage per material from completed preparation orders
+        $materialUsageMap = [];
+        $prepOrders = $prepOrderQuery->get();
+
+        foreach ($prepOrders as $order) {
+            $materialsUsed = $order->material_usage ?? [];
+            if (is_array($materialsUsed)) {
+                foreach ($materialsUsed as $usage) {
+                    $materialId = $usage['material_id'] ?? null;
+                    $quantity = $usage['quantity'] ?? 0;
+                    if ($materialId) {
+                        $materialUsageMap[$materialId] = ($materialUsageMap[$materialId] ?? 0) + $quantity;
+                    }
+                }
+            }
+        }
+
+        $materials = $query->get()->map(function ($material) use ($materialUsageMap) {
             $totalReceived = $material->receipts->sum('quantity');
             $totalCost = $material->receipts->sum(fn ($r) => $r->quantity * $r->unit_price);
+            $totalUsed = $materialUsageMap[$material->id] ?? 0;
 
             return [
                 'id' => $material->id,
@@ -48,16 +77,30 @@ class ReportController extends Controller
                 'name' => $material->name,
                 'type' => $material->materialType?->name,
                 'current_stock' => $material->stock_quantity,
+                'min_stock' => $material->min_stock,
                 'unit' => $material->unit,
+                'price_per_unit' => $material->price_per_unit,
                 'total_received' => $totalReceived,
+                'total_used' => $totalUsed,
                 'total_cost' => $totalCost,
                 'average_price' => $totalReceived > 0 ? $totalCost / $totalReceived : 0,
                 'receipts_count' => $material->receipts->count(),
+                'is_low_stock' => $material->stock_quantity <= $material->min_stock,
             ];
         });
 
+        // Summary stats
+        $summary = [
+            'total_items' => $materials->count(),
+            'total_stock_value' => $materials->sum(fn ($m) => $m['current_stock'] * $m['price_per_unit']),
+            'total_received' => $materials->sum('total_received'),
+            'total_used' => $materials->sum('total_used'),
+            'low_stock_count' => $materials->where('is_low_stock', true)->count(),
+        ];
+
         return Inertia::render('Reports/MaterialReport', [
             'materials' => $materials,
+            'summary' => $summary,
             'filters' => $request->only(['material_type', 'search', 'start_date', 'end_date']),
         ]);
     }
@@ -153,7 +196,7 @@ class ReportController extends Controller
     public function sales(Request $request): Response
     {
         $query = SalesOrder::query()
-            ->with(['customer:id,name,type', 'items.inventoryItem:id,sku,product_name']);
+            ->with(['customer:id,name', 'items.inventoryItem:id,sku,product_name']);
 
         // Date filter
         $startDate = $request->filled('start_date')
@@ -170,11 +213,7 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('customer_type')) {
-            $query->whereHas('customer', function ($q) use ($request) {
-                $q->where('type', $request->customer_type);
-            });
-        }
+
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -191,7 +230,7 @@ class ReportController extends Controller
                 'order_number' => $order->order_number,
                 'order_date' => $order->order_date->format('Y-m-d'),
                 'customer_name' => $order->customer->name,
-                'customer_type' => $order->customer->type,
+                // 'customer_type' => $order->customer->type,
                 'total_items' => $order->items->sum('quantity'),
                 'subtotal' => $order->subtotal,
                 'discount' => $order->discount,
@@ -219,17 +258,18 @@ class ReportController extends Controller
         ];
 
         // Revenue by customer type
-        $revenueByType = $orders->groupBy('customer_type')
-            ->map(fn ($group) => [
-                'count' => $group->count(),
-                'total' => $group->sum('total_amount'),
-            ]);
+        // $revenueByType = $orders->groupBy('customer_type')
+        //     ->map(fn ($group) => [
+        //         'count' => $group->count(),
+        //         'total' => $group->sum('total_amount'),
+        //     ]);
 
         return Inertia::render('Reports/SalesReport', [
             'orders' => $orders,
             'summary' => $summary,
-            'revenueByType' => $revenueByType,
-            'filters' => $request->only(['status', 'customer_type', 'search', 'start_date', 'end_date']),
+            'summary' => $summary,
+            // 'revenueByType' => $revenueByType,
+            'filters' => $request->only(['status', 'search', 'start_date', 'end_date']),
             'defaultDates' => [
                 'start_date' => $startDate,
                 'end_date' => $endDate,
@@ -243,7 +283,7 @@ class ReportController extends Controller
     public function production(Request $request): Response
     {
         $query = ProductionOrder::query()
-            ->with(['preparationOrder.pattern:id,name,category', 'contractor:id,name,type']);
+            ->with(['preparationOrder.pattern:id,name', 'contractor:id,name,type']);
 
         // Date filter
         if ($request->filled('start_date')) {

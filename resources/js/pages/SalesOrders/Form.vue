@@ -9,17 +9,27 @@
                         <label for="customer_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Customer <span class="text-red-600">*</span>
                         </label>
-                        <select
-                            id="customer_id"
-                            v-model="form.customer_id"
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            :class="{ 'border-red-500': form.errors.customer_id }"
-                        >
-                            <option value="">Pilih Customer</option>
-                            <option v-for="customer in customers" :key="customer.id" :value="customer.id">
-                                {{ customer.code }} - {{ customer.name }}
-                            </option>
-                        </select>
+                        <div class="flex gap-2">
+                            <select
+                                id="customer_id"
+                                v-model="form.customer_id"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                :class="{ 'border-red-500': form.errors.customer_id }"
+                            >
+                                <option value="">Pilih Customer</option>
+                                <option v-for="customer in customerList" :key="customer.id" :value="customer.id">
+                                    {{ customer.code }} - {{ customer.name }}
+                                </option>
+                            </select>
+                            <button
+                                type="button"
+                                @click="showQuickCustomerModal = true"
+                                class="inline-flex items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
+                                title="Tambah Customer Baru"
+                            >
+                                +
+                            </button>
+                        </div>
                         <p v-if="form.errors.customer_id" class="mt-2 text-sm text-red-600 dark:text-red-400">
                             {{ form.errors.customer_id }}
                         </p>
@@ -274,7 +284,7 @@
                         <select
                             id="payment_method"
                             v-model="form.payment_method"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             :class="{ 'border-red-500': form.errors.payment_method }"
                         >
                             <option value="">Pilih Metode</option>
@@ -294,7 +304,7 @@
                         <select
                             id="payment_status"
                             v-model="form.payment_status"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         >
                             <option value="unpaid">Belum Dibayar</option>
                             <option value="partial">Dibayar Sebagian</option>
@@ -310,7 +320,7 @@
                             type="number"
                             min="0"
                             step="0.01"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
                     </div>
 
@@ -320,7 +330,7 @@
                             id="shipping_address"
                             v-model="form.shipping_address"
                             rows="3"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         ></textarea>
                     </div>
                 </div>
@@ -333,7 +343,7 @@
                     id="notes"
                     v-model="form.notes"
                     rows="3"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 ></textarea>
             </div>
 
@@ -356,12 +366,14 @@
                 </button>
             </div>
         </form>
+        <QuickCustomerModal :show="showQuickCustomerModal" @close="showQuickCustomerModal = false" @created="onCustomerCreated" />
     </div>
 </template>
 
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
+import QuickCustomerModal from './QuickCustomerModal.vue';
 
 const props = defineProps({
     salesOrder: {
@@ -376,6 +388,22 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+});
+
+const customerList = ref([...props.customers]);
+const showQuickCustomerModal = ref(false);
+
+// Watch for prop updates to sync customer list if parent updates it (mostly initial load)
+watch(() => props.customers, (newVal) => {
+    // Only update if we haven't added local items, or just merge?
+    // Simplest is to just re-initalize, but preserving selection is handled by v-model
+    // For now, let's just ensure we have the prop data.
+    // However, if we added a new customer locally, we don't want to lose it if props update.
+    // Given the context, props likely won't update during the form session unless full reload.
+    if (newVal.length > customerList.value.length) {
+         // This logic might be flawed if we have local additions.
+         // But for this task, just initializing is enough.
+    }
 });
 
 // Get today's date in YYYY-MM-DD format
@@ -463,6 +491,17 @@ function removeItem(index) {
     if (form.items.length > 1) {
         form.items.splice(index, 1);
     }
+}
+
+function openQuickCustomerModal() {
+    showQuickCustomerModal.value = true;
+}
+
+function onCustomerCreated(newCustomer) {
+    customerList.value.push(newCustomer);
+    form.customer_id = newCustomer.id;
+    // Optionally sort list?
+    customerList.value.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function submit() {

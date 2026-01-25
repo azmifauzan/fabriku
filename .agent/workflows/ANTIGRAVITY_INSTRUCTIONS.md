@@ -147,12 +147,13 @@ Raw Materials → Pattern/Recipe → Preparation → Production → Inventory �
 7. Assume pattern is required (it's optional).
 
 ### ✅ DO
-1. Check stock availability server-side before completing preparation orders.
-2. Use `materials_used` JSONB column for material tracking.
-3. Test with and without pattern references.
-4. Follow mobile-first responsive design.
-5. Write Pest feature tests for backend logic.
-6. Use TypeScript interfaces for type safety.
+1. Test and Retest: ALWAYS verify your changes. If you implement a new feature, write a test script or perform a verification step to ensure it works. 'Check and Ricek' is mandatory.
+2. Check stock availability server-side before completing preparation orders.
+3. Use `materials_used` JSONB column for material tracking.
+4. Test with and without pattern references.
+5. Follow mobile-first responsive design.
+6. Write Pest feature tests for backend logic.
+7. Use TypeScript interfaces for type safety.
 
 ---
 

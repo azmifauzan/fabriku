@@ -49,6 +49,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
 
     // Inventory Management
     Route::prefix('inventory')->name('inventory.')->group(function () {
+        Route::get('visualization', [\App\Http\Controllers\InventoryVisualizationController::class, 'index'])->name('visualization');
         Route::resource('locations', \App\Http\Controllers\InventoryLocationController::class);
         Route::resource('items', \App\Http\Controllers\InventoryItemController::class);
     });

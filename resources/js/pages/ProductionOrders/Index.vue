@@ -56,6 +56,12 @@ const props = defineProps<{
         type?: string;
         contractor_id?: string;
     };
+    stats: {
+        total_orders: number;
+        draft_orders: number;
+        in_progress_orders: number;
+        completed_orders: number;
+    };
 }>();
 
 const { term, termLower } = useBusinessContext();
@@ -223,6 +229,93 @@ const markComplete = async (order: ProductionOrder) => {
                     :create-link="create.url()"
                     create-text="Buat Order"
                 />
+
+                <!-- Statistics -->
+                <div class="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 rounded-md bg-blue-500 p-3">
+                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="ml-5">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Order</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.total_orders }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 rounded-md bg-gray-500 p-3">
+                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="ml-5">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Draft</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.draft_orders }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 rounded-md bg-yellow-500 p-3">
+                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="ml-5">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">In Progress</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.in_progress_orders }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 rounded-md bg-green-500 p-3">
+                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="ml-5">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.completed_orders }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Filters -->
                 <div class="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">

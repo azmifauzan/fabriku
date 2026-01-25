@@ -6,6 +6,7 @@ use App\Http\Requests\StoreMaterialRequest;
 use App\Http\Requests\UpdateMaterialRequest;
 use App\Models\Material;
 use App\Models\MaterialType;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class MaterialController extends Controller
@@ -38,6 +39,12 @@ class MaterialController extends Controller
             'materials' => $materials,
             'types' => $types,
             'filters' => request()->only(['search', 'material_type_id']),
+            'stats' => [
+                'total_materials' => Material::count(),
+                'low_stock_materials' => Material::whereColumn('stock_quantity', '<=', 'min_stock')->where('stock_quantity', '>', 0)->count(),
+                'out_of_stock_materials' => Material::where('stock_quantity', '<=', 0)->count(),
+                'total_asset_value' => Material::sum(DB::raw('stock_quantity * price_per_unit')),
+            ],
         ]);
     }
 

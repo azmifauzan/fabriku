@@ -91,9 +91,19 @@ const menuItems = computed(() => {
             icon: Factory,
         },
         {
-            name: 'Inventory Items',
-            href: '/inventory/items',
+            name: 'Inventory',
+            href: '/inventory',
             icon: Warehouse,
+            children: [
+                {
+                    name: 'Items',
+                    href: '/inventory/items',
+                },
+                {
+                    name: 'Visualisasi',
+                    href: '/inventory/visualization',
+                },
+            ],
         },
         {
             name: 'Sales Order',

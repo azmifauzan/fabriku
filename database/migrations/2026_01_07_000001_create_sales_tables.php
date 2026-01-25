@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('order_date');
             $table->date('delivery_date')->nullable();
             $table->enum('channel', ['offline', 'online', 'marketplace', 'reseller'])->default('offline');
-            $table->enum('status', ['draft', 'confirmed', 'completed', 'cancelled'])->default('draft');
+            $table->enum('status', ['draft', 'confirmed', 'processing', 'completed', 'cancelled'])->default('draft');
             $table->decimal('subtotal', 15, 2);
             $table->decimal('discount_amount', 15, 2)->default(0);
             $table->decimal('discount_percentage', 15, 2)->default(0);

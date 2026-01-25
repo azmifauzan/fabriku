@@ -70,6 +70,13 @@ class CustomerController extends Controller
             'tenant_id' => auth()->user()->tenant_id,
         ]));
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'customer' => $customer,
+                'message' => 'Customer berhasil ditambahkan.',
+            ]);
+        }
+
         return redirect()
             ->route('customers.index')
             ->with('success', 'Customer berhasil ditambahkan.');

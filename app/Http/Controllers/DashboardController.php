@@ -123,6 +123,62 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Material Stock Summary
+        $allMaterials = Material::query()
+            ->with('materialType:id,name')
+            ->select('id', 'code', 'name', 'stock_quantity', 'unit', 'price_per_unit', 'material_type_id', 'min_stock')
+            ->get();
+
+        $materialStockSummary = [
+            'total_items' => $allMaterials->count(),
+            'total_stock_value' => $allMaterials->sum(fn ($m) => $m->stock_quantity * $m->price_per_unit),
+            'low_stock_count' => $allMaterials->filter(fn ($m) => $m->stock_quantity <= $m->min_stock)->count(),
+        ];
+
+        // Top 5 materials by stock value
+        $topMaterialsByValue = $allMaterials
+            ->map(fn ($m) => [
+                'id' => $m->id,
+                'code' => $m->code,
+                'name' => $m->name,
+                'type' => $m->materialType?->name,
+                'stock_quantity' => $m->stock_quantity,
+                'unit' => $m->unit,
+                'price_per_unit' => $m->price_per_unit,
+                'stock_value' => $m->stock_quantity * $m->price_per_unit,
+                'is_low_stock' => $m->stock_quantity <= $m->min_stock,
+            ])
+            ->sortByDesc('stock_value')
+            ->take(5)
+            ->values();
+
+        // Inventory by Location Summary
+        $inventoryByLocation = \App\Models\InventoryLocation::query()
+            ->active()
+            ->withCount('inventoryItems')
+            ->withSum('inventoryItems', 'current_quantity')
+            ->orderBy('code')
+            ->limit(6)
+            ->get()
+            ->map(function ($location) {
+                // If capacity is null (unlimited), use 0 for calculation safety or handle in frontend
+                // Actually if capacity is null, it's unlimited.
+                $usedCapacity = $location->inventory_items_sum_current_quantity ?? 0;
+                
+                return [
+                    'id' => $location->id,
+                    'name' => $location->name,
+                    'code' => $location->code,
+                    'type' => $location->type,
+                    'item_count' => $location->inventory_items_count,
+                    'used_capacity' => $usedCapacity,
+                    'capacity' => $location->capacity,
+                    // If capacity is null, percentage is 0 (or irrelevant)
+                    'percentage' => $location->capacity ? round(($usedCapacity / $location->capacity) * 100) : 0,
+                    'is_unlimited' => is_null($location->capacity),
+                ];
+            });
+
         return Inertia::render('Dashboard', [
             'stats' => $stats,
             'salesTrend' => $salesTrend,
@@ -130,6 +186,9 @@ class DashboardController extends Controller
             'recentActivities' => $recentActivities,
             'lowStockMaterials' => $lowStockMaterials,
             'lowStockInventory' => $lowStockInventory,
+            'materialStockSummary' => $materialStockSummary,
+            'topMaterialsByValue' => $topMaterialsByValue,
+            'inventoryByLocation' => $inventoryByLocation,
         ]);
     }
 }

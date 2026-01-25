@@ -20,6 +20,7 @@ interface Material {
     unit: string;
     price_per_unit: string;
     stock_quantity: string;
+    min_stock: string;
     reorder_point: string;
     supplier_name?: string;
     receipts_count: number;
@@ -53,6 +54,12 @@ const props = defineProps<{
     filters: {
         search?: string;
         material_type_id?: string;
+    };
+    stats: {
+        total_materials: number;
+        low_stock_materials: number;
+        out_of_stock_materials: number;
+        total_asset_value: number;
     };
 }>();
 
@@ -94,12 +101,12 @@ const deleteMaterial = async (material: Material) => {
     }
 };
 
-const formatCurrency = (value: string) => {
+const formatCurrency = (value: string | number) => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
         minimumFractionDigits: 0,
-    }).format(parseFloat(value));
+    }).format(typeof value === 'string' ? parseFloat(value) : value);
 };
 
 const formatNumber = (value: string) => {
@@ -126,6 +133,95 @@ const isLowStock = (material: Material) => {
                     create-link="/materials/create"
                     create-text="Tambah Bahan Baku"
                 />
+
+                <!-- Statistics -->
+                <div class="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 rounded-md bg-blue-500 p-3">
+                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="ml-5">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Material</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.total_materials }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 rounded-md bg-yellow-500 p-3">
+                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="ml-5">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Stok Menipis</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.low_stock_materials }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 rounded-md bg-red-500 p-3">
+                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="ml-5">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Stok Habis</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.out_of_stock_materials }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 rounded-md bg-green-500 p-3">
+                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="ml-5">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Valuasi Aset</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                                        {{ formatCurrency(stats.total_asset_value) }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Filters -->
                 <div class="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">

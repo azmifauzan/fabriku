@@ -33,6 +33,12 @@ class ProductionOrderController extends Controller
             'orders' => $orders,
             'contractors' => $contractors,
             'filters' => request()->only(['search', 'status', 'type', 'contractor_id']),
+            'stats' => [
+                'total_orders' => ProductionOrder::count(),
+                'draft_orders' => ProductionOrder::where('status', 'draft')->count(),
+                'in_progress_orders' => ProductionOrder::whereIn('status', ['in_progress', 'sent'])->count(),
+                'completed_orders' => ProductionOrder::where('status', 'completed')->count(),
+            ],
         ]);
     }
 
