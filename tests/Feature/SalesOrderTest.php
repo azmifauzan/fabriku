@@ -202,8 +202,8 @@ it('can view sales order with items', function () {
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
         ->component('SalesOrders/Show')
-        ->has('order')
-        ->has('order.items', 1)
+        ->has('salesOrder')
+        ->has('salesOrder.items', 1)
     );
 });
 

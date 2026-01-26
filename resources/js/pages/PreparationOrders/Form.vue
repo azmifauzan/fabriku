@@ -40,6 +40,7 @@ const form = useForm({
 const addMaterial = () => {
     form.materials_used.push({
         material_id: null,
+        batch_id: null,
         material_name: '',
         quantity: 0,
         unit: '',
@@ -55,7 +56,31 @@ const onMaterialSelect = (index: number) => {
     if (selected) {
         form.materials_used[index].material_name = selected.name;
         form.materials_used[index].unit = selected.unit;
+        form.materials_used[index].batch_id = null; // Reset batch when material changes
     }
+};
+
+const getBatchesForMaterial = (materialId: number) => {
+    const material = props.materials.find(m => m.id === materialId);
+    return material?.receipts || [];
+};
+
+const getSelectedBatch = (materialId: number, batchId: number | null) => {
+    if (!materialId || !batchId) return null;
+    const batches = getBatchesForMaterial(materialId);
+    return batches.find(b => b.id === batchId);
+};
+
+const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+    }).format(value);
+};
+
+const formatBatchLabel = (batch: any) => {
+    return `${batch.batch_number || batch.receipt_number} - ${batch.supplier_name} - Sisa: ${batch.remaining_quantity} ${batch.unit}`;
 };
 
 const submit = () => {
@@ -155,55 +180,112 @@ const isEditing = !!props.order?.id;
                                 <div
                                     v-for="(material, idx) in form.materials_used"
                                     :key="idx"
-                                    class="flex items-start gap-3 rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50"
+                                    class="items-start gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
                                 >
-                                    <div class="flex-1">
-                                        <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Material</label>
-                                        <select
-                                            v-model="material.material_id"
-                                            @change="onMaterialSelect(Number(idx))"
-                                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                            required
-                                        >
-                                            <option :value="null">Pilih Material</option>
-                                            <option v-for="mat in materials" :key="mat.id" :value="mat.id">
-                                                {{ mat.name }} (Stock: {{ mat.stock_quantity }} {{ mat.unit }})
-                                            </option>
-                                        </select>
-                                    </div>
-                                    <div class="w-32">
-                                        <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Jumlah</label>
-                                        <input
-                                            v-model.number="material.quantity"
-                                            type="number"
-                                            step="0.01"
-                                            placeholder="0"
-                                            required
-                                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                        />
-                                    </div>
-                                    <div class="w-24">
-                                        <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Satuan</label>
-                                        <input
-                                            v-model="material.unit"
-                                            type="text"
-                                            placeholder="Unit"
-                                            required
-                                            readonly
-                                            class="w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                                        />
-                                    </div>
-                                    <div class="pt-7">
-                                        <button
-                                            type="button"
-                                            @click="removeMaterial(Number(idx))"
-                                            class="rounded-lg p-2.5 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
-                                            title="Hapus material"
-                                        >
-                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
+                                    <div class="grid grid-cols-1 gap-4 md:grid-cols-12 items-start">
+                                        <!-- Material Selection (Full Width) -->
+                                        <div class="md:col-span-12">
+                                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                                Material
+                                            </label>
+                                            <select
+                                                v-model="material.material_id"
+                                                @change="onMaterialSelect(Number(idx))"
+                                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                                required
+                                            >
+                                                <option :value="null">Pilih Material</option>
+                                                <option v-for="mat in materials" :key="mat.id" :value="mat.id">
+                                                    {{ mat.name }} (Total Stok: {{ mat.stock_quantity }} {{ mat.unit }})
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Batch Selection (Full Width) -->
+                                        <div class="md:col-span-12">
+                                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                                Batch / Supplier
+                                            </label>
+                                            <select
+                                                v-model="material.batch_id"
+                                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                                :disabled="!material.material_id"
+                                                required
+                                            >
+                                                <option :value="null" disabled>Pilih Batch</option>
+                                                <option v-for="batch in getBatchesForMaterial(material.material_id)" :key="batch.id" :value="batch.id">
+                                                    {{ formatBatchLabel(batch) }}
+                                                </option>
+                                            </select>
+                                            
+                                            <!-- Detailed Batch Information Panel -->
+                                            <div v-if="getSelectedBatch(material.material_id, material.batch_id)" class="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-700/50">
+                                                <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                                                    <div>
+                                                        <span class="block text-xs text-gray-500 dark:text-gray-400">Supplier</span>
+                                                        <span class="font-medium text-gray-900 dark:text-gray-200">{{ getSelectedBatch(material.material_id, material.batch_id).supplier_name }}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="block text-xs text-gray-500 dark:text-gray-400">Harga Satuan</span>
+                                                        <span class="font-medium text-gray-900 dark:text-gray-200">{{ formatCurrency(getSelectedBatch(material.material_id, material.batch_id).price_per_unit) }}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="block text-xs text-gray-500 dark:text-gray-400">Batch Info</span>
+                                                        <span class="font-medium text-gray-900 dark:text-gray-200">{{ getSelectedBatch(material.material_id, material.batch_id).batch_number || '-' }}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="block text-xs text-gray-500 dark:text-gray-400">Sisa Stok Batch</span>
+                                                        <span class="font-bold text-indigo-600 dark:text-indigo-400">
+                                                            {{ getSelectedBatch(material.material_id, material.batch_id).remaining_quantity }} {{ material.unit }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Quantity Input -->
+                                        <div class="md:col-span-5">
+                                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                                Jumlah Digunakan
+                                            </label>
+                                            <div class="relative">
+                                                <input
+                                                    v-model.number="material.quantity"
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="0"
+                                                    required
+                                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <!-- Unit Input -->
+                                        <div class="md:col-span-4">
+                                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                                Satuan
+                                            </label>
+                                            <input
+                                                v-model="material.unit"
+                                                type="text"
+                                                readonly
+                                                class="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                                            />
+                                        </div>
+
+                                        <!-- Remove Button -->
+                                        <div class="md:col-span-3 flex justify-end items-end h-full pt-6">
+                                            <button
+                                                type="button"
+                                                @click="removeMaterial(Number(idx))"
+                                                class="flex items-center gap-2 rounded-lg border border-transparent px-4 py-2.5 text-sm font-medium text-red-600 transition-all hover:bg-red-50 hover:text-red-700 active:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
+                                            >
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                Hapus
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

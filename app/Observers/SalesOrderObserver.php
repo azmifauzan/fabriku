@@ -25,11 +25,8 @@ class SalesOrderObserver
                 $this->reserveStock($salesOrder);
             }
 
-
-
-            // Confirmed/Processing -> Shipped/Completed: Deduct Stock
-            // Check if status changed TO shipped/completed logic
-            elseif (!in_array($originalStatus, ['shipped', 'completed']) && in_array($newStatus, ['shipped', 'completed'])) {
+            // Confirmed/Processing -> Completed: Deduct Stock
+            elseif (in_array($originalStatus, ['confirmed', 'processing']) && $newStatus === 'completed') {
                 $this->deductStock($salesOrder);
             }
 
@@ -37,10 +34,9 @@ class SalesOrderObserver
             elseif (in_array($originalStatus, ['confirmed', 'processing']) && $newStatus === 'cancelled') {
                 $this->releaseReservedStock($salesOrder);
             }
-            
+
             // Draft -> Cancelled: Do nothing (no stock reserved yet)
-            
-            // Shipped -> Completed: Do nothing (already deducted)
+            // Draft -> Completed: Should not happen in normal flow, but would need to deduct without reservation
         }
     }
 
@@ -51,7 +47,7 @@ class SalesOrderObserver
     {
         // If order was confirmed/processing, release reserved stock
         if (in_array($salesOrder->status, ['confirmed', 'processing'])) {
-             $this->releaseReservedStock($salesOrder);
+            $this->releaseReservedStock($salesOrder);
         }
     }
 
@@ -62,7 +58,7 @@ class SalesOrderObserver
     {
         // If order is confirmed/processing, reserve stock again
         if (in_array($salesOrder->status, ['confirmed', 'processing'])) {
-             $this->reserveStock($salesOrder);
+            $this->reserveStock($salesOrder);
         }
     }
 
@@ -75,7 +71,7 @@ class SalesOrderObserver
         // If the order is already trashed (soft deleted), stock was released in 'deleted' event.
         // We only care if we are force deleting a NON-trashed order (direct hard delete).
         if (! $salesOrder->trashed() && in_array($salesOrder->status, ['confirmed', 'processing'])) {
-             $this->releaseReservedStock($salesOrder);
+            $this->releaseReservedStock($salesOrder);
         }
     }
 
@@ -94,10 +90,10 @@ class SalesOrderObserver
             foreach ($salesOrder->items()->get() as $item) {
                 // Deduct from current_quantity AND reserved_quantity
                 $inventoryItem = $item->inventoryItem;
-                
+
                 // Reduce reserved quantity (releasing the reservation)
                 $inventoryItem->decrement('reserved_quantity', $item->quantity);
-                
+
                 // Reduce actual quantity (shipping the item)
                 $inventoryItem->decrement('current_quantity', $item->quantity);
             }

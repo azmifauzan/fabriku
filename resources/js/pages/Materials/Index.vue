@@ -3,8 +3,9 @@ import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { AlertTriangle, Edit, Search, Trash2, X } from 'lucide-vue-next';
+import { AlertTriangle, Edit, Search, Trash2, X, Plus } from 'lucide-vue-next';
 import { ref } from 'vue';
+import RestockModal from './Partials/RestockModal.vue';
 
 interface MaterialAttribute {
     id: number;
@@ -119,6 +120,20 @@ const formatNumber = (value: string) => {
 const isLowStock = (material: Material) => {
     return parseFloat(material.stock_quantity) <= parseFloat(material.min_stock);
 };
+
+const showRestockModal = ref(false);
+const selectedMaterial = ref<Material | null>(null);
+
+const openRestockModal = (material: Material) => {
+    selectedMaterial.value = material;
+    showRestockModal.value = true;
+};
+
+const closeRestockModal = () => {
+    showRestockModal.value = false;
+    selectedMaterial.value = null;
+};
+
 </script>
 
 <template>
@@ -377,6 +392,14 @@ const isLowStock = (material: Material) => {
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm whitespace-nowrap">
                                         <div class="flex justify-end gap-2">
+                                            <button
+                                                type="button"
+                                                @click="openRestockModal(material)"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-green-600 transition-colors hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/30"
+                                                title="Restock bahan"
+                                            >
+                                                <Plus :size="18" />
+                                            </button>
                                             <Link
                                                 :href="`/materials/${material.id}`"
                                                 class="inline-flex items-center justify-center rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
@@ -443,5 +466,14 @@ const isLowStock = (material: Material) => {
                 </div>
             </div>
         </div>
+
+        <RestockModal
+            v-if="selectedMaterial"
+            :show="showRestockModal"
+            :material-id="selectedMaterial.id"
+            :supplier-name="selectedMaterial.supplier_name"
+            :current-price="selectedMaterial.price_per_unit"
+            @close="closeRestockModal"
+        />
     </AppLayout>
 </template>
