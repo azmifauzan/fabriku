@@ -133,7 +133,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Kain Katun Premium',
             'supplier_name' => 'PT Tekstil Indo',
             'price_per_unit' => 45000,
-            'stock_quantity' => 100,
+            'stock_quantity' => 0,
             'min_stock' => 20,
             'unit' => 'meter',
             'description' => 'Kain katun premium untuk mukena',
@@ -146,7 +146,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Kain Polyester',
             'supplier_name' => 'CV Kain Jaya',
             'price_per_unit' => 35000,
-            'stock_quantity' => 80,
+            'stock_quantity' => 0,
             'min_stock' => 15,
             'unit' => 'meter',
             'description' => 'Kain polyester untuk gamis',
@@ -159,18 +159,21 @@ class DatabaseSeeder extends Seeder
             'name' => 'Benang Jahit Polyester',
             'supplier_name' => 'Toko Benang Sentosa',
             'price_per_unit' => 25000,
-            'stock_quantity' => 50,
+            'stock_quantity' => 0,
             'min_stock' => 10,
             'unit' => 'cone',
         ]);
 
         // 7. Create Material Receipts (Stock In)
-        MaterialReceipt::create([
+        // 7. Create Material Receipts (Stock In)
+        $receiptKatun = MaterialReceipt::create([
             'tenant_id' => $tenantGarment->id,
             'material_id' => $materialKatun->id,
             'receipt_number' => 'RCV-2026-001',
             'supplier_name' => 'PT Tekstil Indo',
             'quantity' => 100,
+            'remaining_quantity' => 100, // Initial remaining
+            'status' => 'active',
             'unit' => 'meter',
             'price_per_unit' => 45000,
             'total_cost' => 4500000,
@@ -178,17 +181,66 @@ class DatabaseSeeder extends Seeder
             'batch_number' => 'BATCH-KTN-001',
         ]);
 
+        // Additional batch for Kain Katun (Different supplier, different price)
         MaterialReceipt::create([
+            'tenant_id' => $tenantGarment->id,
+            'material_id' => $materialKatun->id,
+            'receipt_number' => 'RCV-2026-001-B',
+            'supplier_name' => 'CV Tekstil Murah',
+            'quantity' => 150,
+            'remaining_quantity' => 150,
+            'status' => 'active',
+            'unit' => 'meter',
+            'price_per_unit' => 42000, // Cheaper batch
+            'total_cost' => 6300000,
+            'receipt_date' => now()->subDays(2),
+            'batch_number' => 'BATCH-KTN-002',
+        ]);
+
+        // Another batch for Kain Katun (Same supplier, recent date)
+        MaterialReceipt::create([
+            'tenant_id' => $tenantGarment->id,
+            'material_id' => $materialKatun->id,
+            'receipt_number' => 'RCV-2026-001-C',
+            'supplier_name' => 'PT Tekstil Indo',
+            'quantity' => 50,
+            'remaining_quantity' => 50,
+            'status' => 'active',
+            'unit' => 'meter',
+            'price_per_unit' => 46000, // Price increase
+            'total_cost' => 2300000,
+            'receipt_date' => now()->subHours(12),
+            'batch_number' => 'BATCH-KTN-003',
+        ]);
+
+        $receiptPolyester = MaterialReceipt::create([
             'tenant_id' => $tenantGarment->id,
             'material_id' => $materialPolyester->id,
             'receipt_number' => 'RCV-2026-002',
             'supplier_name' => 'CV Kain Jaya',
             'quantity' => 80,
+            'remaining_quantity' => 80, // Initial remaining
+            'status' => 'active',
             'unit' => 'meter',
             'price_per_unit' => 35000,
             'total_cost' => 2800000,
             'receipt_date' => now()->subDays(4),
             'batch_number' => 'BATCH-PLY-001',
+        ]);
+
+        $receiptBenang = MaterialReceipt::create([
+            'tenant_id' => $tenantGarment->id,
+            'material_id' => $materialBenang->id,
+            'receipt_number' => 'RCV-2026-003',
+            'supplier_name' => 'Toko Benang Sentosa',
+            'quantity' => 50,
+            'remaining_quantity' => 50, // Initial remaining
+            'status' => 'active',
+            'unit' => 'cone',
+            'price_per_unit' => 25000,
+            'total_cost' => 1250000,
+            'receipt_date' => now()->subDays(5),
+            'batch_number' => 'BATCH-BNG-001',
         ]);
 
         // 8. Create Patterns (Product Templates with BOM)
@@ -221,6 +273,7 @@ class DatabaseSeeder extends Seeder
             'pattern_id' => $patternMukena->id,
             'prepared_by' => $staffPreparation->id,
             'output_quantity' => 20,
+            // JSON material_usage for legacy/display purposes
             'material_usage' => [
                 ['material_id' => $materialKatun->id, 'material_name' => $materialKatun->name, 'quantity' => 52, 'unit' => $materialKatun->unit], // 2.5 x 20 + waste
                 ['material_id' => $materialBenang->id, 'material_name' => $materialBenang->name, 'quantity' => 2.5, 'unit' => $materialBenang->unit],
@@ -248,11 +301,6 @@ class DatabaseSeeder extends Seeder
             'completed_date' => now()->subDays(1),
             'notes' => 'Cutting 15 pcs gamis size L',
         ]);
-
-        // Update material stock after preparation
-        $materialKatun->decrement('stock_quantity', 52);
-        $materialPolyester->decrement('stock_quantity', 47);
-        $materialBenang->decrement('stock_quantity', 5);
 
         // 10. Create Production Orders - Mix of statuses
         $productionMukena = ProductionOrder::create([
@@ -301,9 +349,6 @@ class DatabaseSeeder extends Seeder
             'completed_date' => now()->subHours(6),
             'notes' => 'Cutting 10 pcs mukena batch 2',
         ]);
-
-        $materialKatun->decrement('stock_quantity', 26);
-        $materialBenang->decrement('stock_quantity', 1.2);
 
         // Production order DRAFT (ready to send to contractor)
         ProductionOrder::create([
@@ -524,7 +569,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Tepung Terigu Premium',
             'supplier_name' => 'Toko Bahan Kue Makmur',
             'price_per_unit' => 15000,
-            'stock_quantity' => 50,
+            'stock_quantity' => 0,
             'min_stock' => 10,
             'unit' => 'kg',
             'description' => 'Tepung terigu protein tinggi untuk cake',
@@ -537,7 +582,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Gula Pasir Halus',
             'supplier_name' => 'Toko Bahan Kue Makmur',
             'price_per_unit' => 18000,
-            'stock_quantity' => 30,
+            'stock_quantity' => 0,
             'min_stock' => 8,
             'unit' => 'kg',
             'description' => 'Gula pasir halus',
@@ -550,7 +595,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Telur Ayam',
             'supplier_name' => 'Peternak Telur Jaya',
             'price_per_unit' => 28000,
-            'stock_quantity' => 25,
+            'stock_quantity' => 0,
             'min_stock' => 10,
             'unit' => 'kg',
             'description' => 'Telur ayam segar',
