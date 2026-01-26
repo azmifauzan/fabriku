@@ -164,7 +164,7 @@ class DashboardController extends Controller
                 // If capacity is null (unlimited), use 0 for calculation safety or handle in frontend
                 // Actually if capacity is null, it's unlimited.
                 $usedCapacity = $location->inventory_items_sum_current_quantity ?? 0;
-                
+
                 return [
                     'id' => $location->id,
                     'name' => $location->name,
@@ -179,6 +179,24 @@ class DashboardController extends Controller
                 ];
             });
 
+        // Comprehensive Inventory Summary
+        $allInventoryItems = InventoryItem::query()
+            ->select('id', 'sku', 'product_name', 'current_quantity', 'reserved_quantity', 'minimum_stock', 'unit_cost')
+            ->get();
+
+        $inventorySummary = [
+            'total_items' => $allInventoryItems->count(),
+            'total_quantity' => $allInventoryItems->sum('current_quantity'),
+            'total_reserved' => $allInventoryItems->sum('reserved_quantity'),
+            'total_available' => $allInventoryItems->sum(fn ($item) => max(0, $item->current_quantity - $item->reserved_quantity)),
+            'total_value' => $allInventoryItems->sum(fn ($item) => $item->current_quantity * $item->unit_cost),
+            'low_stock_count' => $allInventoryItems->filter(fn ($item) => ($item->current_quantity - $item->reserved_quantity) > 0 &&
+                ($item->current_quantity - $item->reserved_quantity) <= $item->minimum_stock
+            )->count(),
+            'out_of_stock_count' => $allInventoryItems->filter(fn ($item) => $item->current_quantity == 0
+            )->count(),
+        ];
+
         return Inertia::render('Dashboard', [
             'stats' => $stats,
             'salesTrend' => $salesTrend,
@@ -189,6 +207,7 @@ class DashboardController extends Controller
             'materialStockSummary' => $materialStockSummary,
             'topMaterialsByValue' => $topMaterialsByValue,
             'inventoryByLocation' => $inventoryByLocation,
+            'inventorySummary' => $inventorySummary,
         ]);
     }
 }

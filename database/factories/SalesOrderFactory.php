@@ -55,6 +55,24 @@ class SalesOrderFactory extends Factory
         ]);
     }
 
+    public function confirmed(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'confirmed',
+            'payment_status' => 'pending',
+            'paid_amount' => 0,
+        ]);
+    }
+
+    public function processing(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'processing',
+            'payment_status' => 'pending',
+            'paid_amount' => 0,
+        ]);
+    }
+
     public function completed(): static
     {
         return $this->state(fn (array $attributes) => [
