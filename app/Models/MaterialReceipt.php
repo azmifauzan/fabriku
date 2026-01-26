@@ -18,14 +18,17 @@ class MaterialReceipt extends Model
         'supplier_name',
         'receipt_date',
         'quantity',
-        'unit_price',
-        'total_price',
+        'price_per_unit',
+        'total_cost',
         'rolls_count',
         'length_per_roll',
         'batch_number',
         'notes',
         'received_by',
         'attachments',
+        'remaining_quantity',
+        'status',
+        'barcode',
     ];
 
     protected function casts(): array
@@ -33,10 +36,11 @@ class MaterialReceipt extends Model
         return [
             'receipt_date' => 'date',
             'quantity' => 'decimal:2',
-            'unit_price' => 'decimal:2',
-            'total_price' => 'decimal:2',
+            'price_per_unit' => 'decimal:2',
+            'total_cost' => 'decimal:2',
             'length_per_roll' => 'decimal:2',
             'attachments' => 'array',
+            'remaining_quantity' => 'decimal:3',
         ];
     }
 
@@ -58,6 +62,27 @@ class MaterialReceipt extends Model
             // Update material stock
             $receipt->material->increment('stock_quantity', $receipt->quantity);
         });
+
+        static::creating(function (MaterialReceipt $receipt) {
+            if (empty($receipt->barcode)) {
+                $receipt->barcode = $receipt->generateBarcode();
+            }
+            if (! isset($receipt->remaining_quantity)) {
+                $receipt->remaining_quantity = $receipt->quantity;
+            }
+        });
+    }
+
+    public function generateBarcode(): string
+    {
+        // Simple barcode based on timestamp and random string or UUID
+        // For now using uniqid to ensure uniqueness
+        return 'BAT-' . strtoupper(uniqid());
+    }
+
+    public function usages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(PreparationMaterialUsage::class);
     }
 
     public function tenant(): BelongsTo

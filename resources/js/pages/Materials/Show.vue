@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { AlertTriangle } from 'lucide-vue-next';
+import { AlertTriangle, Plus, QrCode } from 'lucide-vue-next';
+import RestockModal from './Partials/RestockModal.vue';
+import { ref } from 'vue';
 
 interface MaterialAttribute {
     id: number;
@@ -21,6 +23,15 @@ interface MaterialReceipt {
     batch_number: string | null;
     expired_date: string | null;
     notes: string | null;
+    remaining_quantity?: string;
+    status?: string;
+    barcode?: string | null;
+    usages?: Array<{
+        id: number;
+        preparation_order_number: string;
+        quantity: string;
+        date: string;
+    }>;
 }
 
 interface Material {
@@ -37,6 +48,7 @@ interface Material {
     created_at: string;
     updated_at: string;
     receipts?: MaterialReceipt[];
+    receipts_count?: number;
     materialAttributes?: MaterialAttribute[];
     materialType?: {
         id: number;
@@ -75,6 +87,9 @@ const formatDate = (date: string) => {
         day: 'numeric',
     });
 };
+
+const showRestockModal = ref(false);
+const activeTab = ref<'batches' | 'usages'>('batches');
 </script>
 
 <template>
@@ -137,30 +152,7 @@ const formatDate = (date: string) => {
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Satuan</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ material.unit }}</dd>
                                     </div>
-                                    <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Harga Per Unit</dt>
-                                        <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                            {{ formatCurrency(material.price_per_unit) }}
-                                        </dd>
-                                    </div>
-                                    <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Supplier</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ material.supplier_name || '-' }}
-                                        </dd>
-                                    </div>
-                                    <div v-if="material.description" class="sm:col-span-2">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Deskripsi</dt>
-                                        <dd class="mt-1 text-sm whitespace-pre-wrap text-gray-900 dark:text-gray-100">
-                                            {{ material.description }}
-                                        </dd>
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Dibuat pada</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ formatDate(material.created_at) }}
-                                        </dd>
-                                    </div>
+                                    <!-- Removed Price, Supplier, Created At as per user request -->
                                 </dl>
                             </div>
                         </div>
@@ -183,48 +175,117 @@ const formatDate = (date: string) => {
                             </div>
                         </div>
 
-                        <!-- Recent Receipts -->
-                        <div v-if="material.receipts && material.receipts.length > 0" class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        <!-- Stock History Tabs -->
+                        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                             <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Penerimaan Terbaru</h3>
+                                <div class="flex items-center gap-4">
+                                    <button
+                                        @click="activeTab = 'batches'"
+                                        class="text-sm font-semibold transition-colors"
+                                        :class="activeTab === 'batches' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'"
+                                    >
+                                        Daftar Batch
+                                    </button>
+                                    <div class="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
+                                    <button
+                                        @click="activeTab = 'usages'"
+                                        class="text-sm font-semibold transition-colors"
+                                        :class="activeTab === 'usages' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'"
+                                    >
+                                        Riwayat Penggunaan
+                                    </button>
+                                </div>
                             </div>
-                            <div class="overflow-x-auto">
+
+                            <!-- Batches Table -->
+                            <div v-if="activeTab === 'batches'" class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                                         <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                                Nomor
-                                            </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                                Supplier
-                                            </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                                Qty
-                                            </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                                Total
-                                            </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                                Tanggal
-                                            </th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Batch Info</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Supplier & Harga</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Qty Awal</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Sisa</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Barcode</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                                        <tr v-for="receipt in material.receipts" :key="receipt.id" class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                            <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                                                {{ receipt.receipt_number }}
+                                        <tr v-for="receipt in material.receipts" :key="receipt.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ receipt.receipt_number }}</div>
+                                                <div v-if="receipt.batch_number" class="text-xs text-gray-500">{{ receipt.batch_number }}</div>
+                                                <div class="text-xs text-gray-500">{{ formatDate(receipt.receipt_date) }}</div>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                                                {{ receipt.supplier_name }}
+                                            <td class="px-6 py-4">
+                                                 <div class="text-sm font-medium text-gray-900 dark:text-white">{{ receipt.supplier_name }}</div>
+                                                 <div class="text-xs text-gray-500">{{ formatCurrency(receipt.price_per_unit) }}</div>
                                             </td>
-                                            <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">
-                                                {{ formatNumber(receipt.quantity) }} {{ receipt.unit }}
+                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                                {{ formatNumber(receipt.quantity) }} {{ material.unit }}
                                             </td>
-                                            <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-white">
-                                                {{ formatCurrency(receipt.total_cost) }}
+                                            <td class="px-6 py-4 text-sm font-semibold" :class="parseFloat(receipt.remaining_quantity || '0') > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'">
+                                                {{ formatNumber(receipt.remaining_quantity ?? receipt.quantity) }} {{ material.unit }}
                                             </td>
-                                            <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">
-                                                {{ formatDate(receipt.receipt_date) }}
+                                            <td class="px-6 py-4">
+                                                <span 
+                                                    class="inline-flex rounded-full px-2 text-xs font-semibold leading-5"
+                                                    :class="receipt.status === 'active' && parseFloat(receipt.remaining_quantity || '0') > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
+                                                >
+                                                    {{ parseFloat(receipt.remaining_quantity || '0') > 0 ? 'Aktif' : 'Habis' }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                                <div v-if="receipt.barcode" class="flex items-center gap-2">
+                                                    <QrCode class="h-4 w-4" />
+                                                    <span class="font-mono text-xs">{{ receipt.barcode }}</span>
+                                                </div>
+                                                <span v-else>-</span>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="!material.receipts?.length">
+                                            <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                Belum ada data batch.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Usages Table -->
+                            <div v-else class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead class="bg-gray-50 dark:bg-gray-700/50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Tanggal</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Kegiatan/Order</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Batch Asal</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Qty Digunakan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                                        <!-- Flatten usages from receipts -->
+                                        <template v-for="receipt in material.receipts" :key="receipt.id">
+                                            <tr v-for="usage in receipt.usages" :key="usage.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                                    {{ usage.date }}
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                     <Link :href="`/preparation-orders`" class="text-indigo-600 hover:underline dark:text-indigo-400">
+                                                        {{ usage.preparation_order_number }}
+                                                     </Link>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                                    {{ receipt.batch_number || receipt.receipt_number }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                                    {{ formatNumber(usage.quantity) }} {{ material.unit }}
+                                                </td>
+                                            </tr>
+                                        </template>
+                                        <tr v-if="!material.receipts?.some(r => r.usages?.length)">
+                                            <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                Belum ada riwayat penggunaan.
                                             </td>
                                         </tr>
                                     </tbody>
@@ -256,7 +317,7 @@ const formatDate = (date: string) => {
                                         <div>
                                             <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-200">Stok Rendah</p>
                                             <p class="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
-                                                Stok berada di bawah batas minimum ({{ formatNumber(material.reorder_point) }})
+                                                Stok berada di bawah batas minimum ({{ formatNumber(material.min_stock) }})
                                             </p>
                                         </div>
                                     </div>
@@ -268,11 +329,29 @@ const formatDate = (date: string) => {
                                         <span class="text-sm text-gray-900 dark:text-gray-100">{{ formatNumber(material.min_stock) }} {{ material.unit }}</span>
                                     </div>
                                 </div>
+                                
+                                <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
+                                    <button 
+                                        @click="showRestockModal = true"
+                                        class="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-indigo-700 active:bg-indigo-800"
+                                    >
+                                        <Plus class="h-4 w-4" />
+                                        Restock Barang
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <RestockModal
+            :show="showRestockModal"
+            :material-id="material.id"
+            :supplier-name="material.supplier_name"
+            :current-price="material.price_per_unit"
+            @close="showRestockModal = false"
+        />
     </AppLayout>
 </template>

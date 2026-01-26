@@ -119,6 +119,11 @@ class PreparationOrder extends Model
         return $this->hasMany(ProductionOrder::class);
     }
 
+    public function materialUsages(): HasMany
+    {
+        return $this->hasMany(PreparationMaterialUsage::class);
+    }
+
     public function isDraft(): bool
     {
         return $this->status === 'draft';

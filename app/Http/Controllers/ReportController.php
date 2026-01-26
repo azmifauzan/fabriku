@@ -68,7 +68,7 @@ class ReportController extends Controller
 
         $materials = $query->get()->map(function ($material) use ($materialUsageMap) {
             $totalReceived = $material->receipts->sum('quantity');
-            $totalCost = $material->receipts->sum(fn ($r) => $r->quantity * $r->unit_price);
+            $totalCost = $material->receipts->sum(fn ($r) => $r->quantity * $r->price_per_unit);
             $totalUsed = $materialUsageMap[$material->id] ?? 0;
 
             return [
@@ -283,7 +283,7 @@ class ReportController extends Controller
     public function production(Request $request): Response
     {
         $query = ProductionOrder::query()
-            ->with(['preparationOrder.pattern:id,name', 'contractor:id,name,type']);
+            ->with(['preparationOrder.pattern:id,name', 'contractor:id,name,type', 'preparationOrder.materialUsages.materialReceipt']);
 
         // Date filter
         if ($request->filled('start_date')) {
@@ -314,7 +314,10 @@ class ReportController extends Controller
                 'type' => $order->type,
                 'contractor_name' => $order->contractor?->name ?? 'Internal',
                 'output_quantity' => $outputQuantity,
-                'production_cost' => $order->labor_cost ?? 0,
+                'output_quantity' => $outputQuantity,
+                'labor_cost' => $order->labor_cost ?? 0,
+                'material_cost' => $order->preparationOrder?->materialUsages->sum(fn($u) => $u->quantity * ($u->materialReceipt->price_per_unit ?? 0)) ?? 0,
+                'total_cost' => ($order->labor_cost ?? 0) + ($order->preparationOrder?->materialUsages->sum(fn($u) => $u->quantity * ($u->materialReceipt->price_per_unit ?? 0)) ?? 0),
                 'status' => $order->status,
                 'sent_date' => $order->sent_date?->format('Y-m-d'),
                 'estimated_date' => $order->estimated_completion_date?->format('Y-m-d'),
@@ -326,7 +329,9 @@ class ReportController extends Controller
         $summary = [
             'total_orders' => $orders->count(),
             'total_output' => $orders->sum('output_quantity'),
-            'total_cost' => $orders->sum('production_cost') ?? 0,
+            'total_labor_cost' => $orders->sum('labor_cost'),
+            'total_material_cost' => $orders->sum('material_cost'),
+            'total_cost' => $orders->sum('total_cost'),
             'completed_orders' => $orders->where('status', 'completed')->count(),
             'in_progress_orders' => $orders->where('status', 'in_progress')->count(),
         ];
