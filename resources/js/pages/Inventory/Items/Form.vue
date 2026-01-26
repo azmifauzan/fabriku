@@ -30,6 +30,7 @@ interface ProductionOrder {
     completed_date: string;
     estimated_completion_date: string;
     status: string;
+    material_cost?: number;
     preparation_order?: PreparationOrder;
 }
 
@@ -116,8 +117,8 @@ watch([() => form.production_order_id], () => {
         // Material cost would need to be calculated from preparation order
         const laborCost = parseFloat(selectedProductionOrder.value.labor_cost || '0');
 
-        // TODO: Add material cost calculation from preparation order's BOM
-        const materialCost = 0; // Placeholder
+        // Material cost calculated from backend
+        const materialCost = selectedProductionOrder.value.material_cost || 0;
 
         form.unit_cost = (materialCost + laborCost).toFixed(2);
     }

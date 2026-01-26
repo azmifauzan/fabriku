@@ -12,7 +12,9 @@ interface ProductionOrder {
     type: string;
     contractor_name: string;
     output_quantity: number;
-    production_cost: number;
+    labor_cost: number;
+    material_cost: number;
+    total_cost: number;
     status: string;
     sent_date: string | null;
     estimated_date: string | null;
@@ -22,6 +24,8 @@ interface ProductionOrder {
 interface Summary {
     total_orders: number;
     total_output: number;
+    total_labor_cost: number;
+    total_material_cost: number;
     total_cost: number;
     completed_orders: number;
     in_progress_orders: number;
@@ -131,9 +135,15 @@ const getStatusClass = (orderStatus: string) => {
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Completion rate</p>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Cost</dt>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Material Cost</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ formatCurrency(summary.total_cost) }}
+                            {{ formatCurrency(summary.total_material_cost) }}
+                        </dd>
+                    </div>
+                    <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Labor Cost</dt>
+                        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                            {{ formatCurrency(summary.total_labor_cost) }}
                         </dd>
                     </div>
                 </div>
@@ -225,7 +235,13 @@ const getStatusClass = (orderStatus: string) => {
                                         Output Qty
                                     </th>
                                     <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                        Cost
+                                        Material
+                                    </th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                                        Labor
+                                    </th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                                        Total
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Dates
@@ -263,7 +279,13 @@ const getStatusClass = (orderStatus: string) => {
                                         {{ order.output_quantity }}
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white">
-                                        {{ formatCurrency(order.production_cost) }}
+                                        {{ formatCurrency(order.material_cost) }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white">
+                                        {{ formatCurrency(order.labor_cost) }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-sm font-bold whitespace-nowrap text-gray-900 dark:text-white">
+                                        {{ formatCurrency(order.total_cost) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div v-if="order.sent_date" class="text-xs text-gray-500 dark:text-gray-400">

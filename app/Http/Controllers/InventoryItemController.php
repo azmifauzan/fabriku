@@ -99,10 +99,18 @@ class InventoryItemController extends Controller
         $productionOrders = ProductionOrder::whereIn('status', ['completed', 'sent'])
             ->whereDoesntHave('inventoryItems')
             ->with(['preparationOrder' => function ($query) {
-                $query->select('id', 'pattern_id', 'output_quantity', 'output_unit');
+                $query->select('id', 'pattern_id', 'output_quantity', 'output_unit')
+                    ->with(['materialUsages.materialReceipt']);
             }, 'preparationOrder.pattern'])
             ->orderByRaw('COALESCE(completed_date, estimated_completion_date) DESC')
-            ->get(['id', 'order_number', 'preparation_order_id', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status']);
+            ->get(['id', 'order_number', 'preparation_order_id', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status'])
+            ->map(function ($order) {
+                $materialCost = $order->preparationOrder->materialUsages->sum(function ($usage) {
+                    return $usage->quantity * ($usage->materialReceipt->price_per_unit ?? 0);
+                });
+                $order->material_cost = $materialCost;
+                return $order;
+            });
 
         return Inertia::render('Inventory/Items/Create', [
             'locations' => $locations,
@@ -138,10 +146,18 @@ class InventoryItemController extends Controller
                     ->orWhere('id', $inventoryItem->production_order_id);
             })
             ->with(['preparationOrder' => function ($query) {
-                $query->select('id', 'pattern_id', 'output_quantity', 'output_unit');
+                $query->select('id', 'pattern_id', 'output_quantity', 'output_unit')
+                    ->with(['materialUsages.materialReceipt']);
             }, 'preparationOrder.pattern'])
             ->orderByRaw('COALESCE(completed_date, estimated_completion_date) DESC')
-            ->get(['id', 'order_number', 'preparation_order_id', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status']);
+            ->get(['id', 'order_number', 'preparation_order_id', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status'])
+            ->map(function ($order) {
+                $materialCost = $order->preparationOrder->materialUsages->sum(function ($usage) {
+                    return $usage->quantity * ($usage->materialReceipt->price_per_unit ?? 0);
+                });
+                $order->material_cost = $materialCost;
+                return $order;
+            });
 
         return Inertia::render('Inventory/Items/Edit', [
             'item' => $inventoryItem->load('productionOrder.preparationOrder.pattern'),
