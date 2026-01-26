@@ -5,72 +5,6 @@
 
 The Laravel Boost guidelines are specifically curated by Laravel maintainers for this application. These guidelines should be followed closely to enhance the user's satisfaction building Laravel applications.
 
-## Project Overview
-**Fabriku** is a SaaS application for UMKM (small-medium businesses) supporting **multi-category production and sales management**. The application helps manage the complete lifecycle from raw materials/ingredients, preparation/processing, production, finished goods inventory, to sales and comprehensive reporting.
-
-### Business Domain
-- **Target Users**: UMKM dengan berbagai kategori bisnis:
-  1. **Garment** - Produksi pakaian (mukena, daster, gamis, dll)
-  2. **Kue Rumahan** - Produksi makanan/kue untuk dijual
-  3. *Future categories*: Craft, cosmetics, dll
-  
-- **Core Workflow** (Generic untuk semua kategori):
-  - **Raw Materials/Ingredients** → **Recipe/Pattern** → **Preparation** → **Production** → **Inventory** → **Sales** → **Reports**
-
-- **Category-Specific Terminology**:
-  - **Garment**: Material → Pattern → Cutting → Sewing → Inventory → Sales
-  - **Kue**: Bahan Mentah → Resep → Mixing/Prep → Baking → Inventory → Sales
-
-- **Multi-Tenancy**: Each tenant (UMKM) has isolated data, subscriptions, dan dapat memilih kategori bisnis mereka
-
-### Key Business Entities (Universal)
-1. **Materials**: Raw materials/ingredients dari suppliers dengan atribut dinamis:
-   - *Garment*: warna, lebar kain, gramasi, batch number
-   - *Kue*: expired date, storage temp, batch number
-2. **Patterns/Recipes**: Product templates dengan Bill of Materials (BOM)
-   - *Garment*: Pattern untuk mukena/daster dengan ukuran dan kebutuhan kain
-   - *Kue*: Resep untuk cake/cookies dengan komposisi bahan
-3. **Preparation Orders**: Process persiapan bahan
-   - *Garment*: Cutting Orders - pemotongan kain sesuai pattern
-   - *Kue*: Mixing/Prep Orders - persiapan adonan sesuai resep
-4. **Production Orders**: Main production process (internal/external)
-   - *Garment*: Sewing process (staff internal atau outsourcing penjahit)
-   - *Kue*: Baking/cooking process (dapur internal atau outsourcing)
-5. **Inventory Items**: Finished products di warehouse locations (racks)
-6. **Sales Orders**: Multi-channel sales dengan payment tracking
-7. **Reports**: Material usage, production efficiency, inventory, sales, P&L (per kategori)
-
-### Architecture Notes
-- Multi-tenant SaaS with PostgreSQL database
-- Category-agnostic design dengan flexible business rules per category
-- Service layer pattern for business logic
-- Observer pattern for automated actions (stock alerts, expired date alerts, notifications)
-- Queue jobs for reports and notifications
-- Role-based access control (admin, manager, production staff, warehouse staff, sales staff, viewer)
-
-### Important Business Rules (Category-Aware)
-- **Universal Rules**:
-  - Material tracking: batch numbers, FIFO/FEFO for inventory
-  - Production tracking: efficiency calculations, waste tracking
-  - Stock management: reserved quantities, automatic deduction on sales
-  - Cost tracking: COGS calculation from materials + labor + overhead
-  - Audit trail: critical operations logged for compliance
-
-- **Garment-Specific**:
-  - Material tracking: warna, lebar kain, gramasi
-  - Pattern dengan ukuran (XS, S, M, L, XL, XXL, all_size)
-  - Quality grades: Grade A, Grade B, Reject
-  - Waste percentage standar: 3-10%
-
-- **Makanan-Specific**:
-  - Material tracking: expired date (CRITICAL!), storage temperature
-  - Recipe dengan serving size atau jumlah output
-  - Shelf life tracking dan expired date alerts
-  - Storage requirements (frozen, chilled, room temp)
-  - Food safety compliance notes
-
-Refer to `/docs` folder for detailed documentation on business requirements, architecture, database schema, API endpoints, and user flows.
-
 ## Foundational Context
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
@@ -96,122 +30,12 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
 - Check for existing components to reuse before writing a new one.
 
-## ✅ **MANDATORY**: Testing & Validation in Every Implementation
-
-**CRITICAL**: Every code implementation MUST go through validation before being marked as complete.
-
-### Required Validation Steps (in order):
-
-1. **Error Checking** - IMMEDIATE after file edits
-   ```
-   Use get_errors tool to check for compile/lint errors
-   - Check specific files that were edited
-   - Fix any syntax errors immediately
-   - Verify all imports are valid
-   ```
-
-2. **Code Formatting** - BEFORE considering work complete
-   ```bash
-   vendor/bin/pint --dirty
-   ```
-   - Run Pint to format all changed files
-   - Ensures consistent code style across project
-   - Must pass without errors
-
-3. **Feature Testing** - TEST the actual functionality
-   ```bash
-   php artisan test --filter=FeatureName --compact
-   ```
-   - Run relevant tests for the feature
-   - Create tests if they don't exist yet
-   - All tests must pass (green)
-   - If test fails, fix the code, not the test
-
-4. **Browser Testing** - For UI/frontend changes
-   - Open browser and verify UI displays correctly
-   - Test user interactions (clicks, forms, navigation)
-   - Check responsive design on different screen sizes
-   - Verify no JavaScript console errors
-
-### Validation Workflow Template
-```bash
-# After making changes to files:
-
-# 1. Check for errors immediately
-get_errors("path/to/ChangedFile.php")
-
-# 2. Format code
-vendor/bin/pint --dirty
-
-# 3. Run relevant tests
-php artisan test --filter=MyFeature --compact
-
-# 4. If UI changed, test in browser
-# - Open http://localhost
-# - Click through the feature
-# - Check console for errors
-```
-
-### ⚠️ Common Mistakes to Avoid
-
-1. **Assuming code is correct without checking**
-   - ALWAYS run get_errors after file edits
-   - Leftover template code causes syntax errors
-   - Missing imports break compilation
-
-2. **Skipping formatting**
-   - Run Pint before marking task complete
-   - Inconsistent formatting causes review overhead
-
-3. **Not testing functionality**
-   - Creating code without running it is risky
-   - Tests catch bugs before production
-   - Manual testing catches UX issues
-
-4. **Batch validations at the end**
-   - Validate INCREMENTALLY as you build
-   - Fix errors immediately when found
-   - Don't accumulate technical debt
-
-### When to Create Tests
-
-- **Feature Tests**: For every controller endpoint
-- **Unit Tests**: For complex business logic, calculations
-- **Browser Tests** (Pest 4): For critical user flows
-- **Factory Tests**: Verify relationships and data generation
-
-### Failure Recovery
-
-If validation fails:
-1. **Read the error message carefully**
-2. **Fix the root cause, not the symptom**
-3. **Re-run validation to confirm fix**
-4. **Document lesson learned in comments/docs**
-
-### Success Criteria
-
-Code is only "complete" when:
-- ✅ Zero errors in get_errors check
-- ✅ Code passes Pint formatting
-- ✅ All relevant tests pass
-- ✅ Manual browser test successful (if UI)
-- ✅ No JavaScript console errors
-
-**Remember**: Prevention is cheaper than debugging. Validate early, validate often.
-
----
-
 ## Verification Scripts
 - Do not create verification scripts or tinker when tests cover that functionality and prove it works. Unit and feature tests are more important.
 
 ## Application Structure & Architecture
 - Stick to existing directory structure; don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
-
-## Database Migrations (Development Workflow)
-- When changing an existing table during development, do **not** create a new “patch” migration.
-- Instead, update the original/earliest relevant migration(s) and run `php artisan migrate:fresh --seed`.
-- Keep migrations consistent with the current schema expectations so fresh installs/tests match production intent.
 
 ## Frontend Bundling
 - If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
@@ -288,6 +112,13 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 ## Enums
 - Typically, keys in an Enum should be TitleCase. For example: `FavoritePerson`, `BestLake`, `Monthly`.
+
+=== tests rules ===
+
+## Test Enforcement
+
+- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
 
 === inertia-laravel/core rules ===
 

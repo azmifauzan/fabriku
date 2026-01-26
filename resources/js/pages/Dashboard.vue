@@ -84,6 +84,16 @@ interface InventoryLocationSummary {
     is_unlimited: boolean;
 }
 
+interface InventorySummary {
+    total_items: number;
+    total_quantity: number;
+    total_reserved: number;
+    total_available: number;
+    total_value: number;
+    low_stock_count: number;
+    out_of_stock_count: number;
+}
+
 defineProps<{
     stats: Stats;
     salesTrend?: Array<{ date: string; total: number; count: number }>;
@@ -94,6 +104,7 @@ defineProps<{
     materialStockSummary?: MaterialStockSummary;
     topMaterialsByValue?: MaterialStockItem[];
     inventoryByLocation?: InventoryLocationSummary[];
+    inventorySummary?: InventorySummary;
 }>();
 
 const formatCurrency = (amount: number) => {
@@ -287,6 +298,154 @@ const getStatusBadgeClass = (status: string) => {
                                                 </span>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Summary Statistics -->
+                <div v-if="inventorySummary" class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <Package :size="20" class="text-indigo-500" />
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ringkasan Inventory</h3>
+                        </div>
+                        <Link href="/reports/inventory" class="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+                            Laporan Lengkap →
+                        </Link>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <!-- Total Items -->
+                        <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                            <div class="p-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 rounded-lg bg-blue-100 p-2 dark:bg-blue-900">
+                                        <Box :size="20" class="text-blue-600 dark:text-blue-300" />
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Items</dt>
+                                        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                                            {{ inventorySummary.total_items }}
+                                        </dd>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Quantity -->
+                        <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                            <div class="p-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 rounded-lg bg-green-100 p-2 dark:bg-green-900">
+                                        <Layers :size="20" class="text-green-600 dark:text-green-300" />
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Kuantitas</dt>
+                                        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                                            {{ formatNumber(inventorySummary.total_quantity, 0) }}
+                                        </dd>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            Reserved: {{ formatNumber(inventorySummary.total_reserved, 0) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Available Stock -->
+                        <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                            <div class="p-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 rounded-lg bg-purple-100 p-2 dark:bg-purple-900">
+                                        <Package :size="20" class="text-purple-600 dark:text-purple-300" />
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Stock Tersedia</dt>
+                                        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                                            {{ formatNumber(inventorySummary.total_available, 0) }}
+                                        </dd>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Siap dijual</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Value -->
+                        <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                            <div class="p-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0 rounded-lg bg-indigo-100 p-2 dark:bg-indigo-900">
+                                        <ShoppingCart :size="20" class="text-indigo-600 dark:text-indigo-300" />
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Nilai</dt>
+                                        <dd class="mt-1 text-xl font-semibold text-gray-900 dark:text-white">
+                                            {{ formatCurrency(inventorySummary.total_value) }}
+                                        </dd>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Status Summary -->
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <!-- Available Stock Count -->
+                        <div class="overflow-hidden rounded-lg border-2 border-green-200 bg-green-50 shadow-sm dark:border-green-800 dark:bg-green-900/20">
+                            <div class="p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <dt class="text-sm font-medium text-green-800 dark:text-green-300">Stock Aman</dt>
+                                        <dd class="mt-1 text-3xl font-bold text-green-600 dark:text-green-400">
+                                            {{
+                                                inventorySummary.total_items -
+                                                inventorySummary.low_stock_count -
+                                                inventorySummary.out_of_stock_count
+                                            }}
+                                        </dd>
+                                        <p class="mt-1 text-xs text-green-700 dark:text-green-400">Items dengan stock mencukupi</p>
+                                    </div>
+                                    <div class="flex-shrink-0 rounded-full bg-green-200 p-3 dark:bg-green-800">
+                                        <Package :size="24" class="text-green-700 dark:text-green-300" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Low Stock Count -->
+                        <div class="overflow-hidden rounded-lg border-2 border-yellow-200 bg-yellow-50 shadow-sm dark:border-yellow-800 dark:bg-yellow-900/20">
+                            <div class="p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <dt class="text-sm font-medium text-yellow-800 dark:text-yellow-300">Low Stock</dt>
+                                        <dd class="mt-1 text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                                            {{ inventorySummary.low_stock_count }}
+                                        </dd>
+                                        <p class="mt-1 text-xs text-yellow-700 dark:text-yellow-400">Perlu restock segera</p>
+                                    </div>
+                                    <div class="flex-shrink-0 rounded-full bg-yellow-200 p-3 dark:bg-yellow-800">
+                                        <AlertTriangle :size="24" class="text-yellow-700 dark:text-yellow-300" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Out of Stock Count -->
+                        <div class="overflow-hidden rounded-lg border-2 border-red-200 bg-red-50 shadow-sm dark:border-red-800 dark:bg-red-900/20">
+                            <div class="p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <dt class="text-sm font-medium text-red-800 dark:text-red-300">Out of Stock</dt>
+                                        <dd class="mt-1 text-3xl font-bold text-red-600 dark:text-red-400">
+                                            {{ inventorySummary.out_of_stock_count }}
+                                        </dd>
+                                        <p class="mt-1 text-xs text-red-700 dark:text-red-400">Stock habis</p>
+                                    </div>
+                                    <div class="flex-shrink-0 rounded-full bg-red-200 p-3 dark:bg-red-800">
+                                        <AlertTriangle :size="24" class="text-red-700 dark:text-red-300" />
                                     </div>
                                 </div>
                             </div>
