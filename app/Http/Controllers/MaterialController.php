@@ -90,7 +90,9 @@ class MaterialController extends Controller
 
     public function show(Material $material)
     {
-        $material->load(['materialAttributes', 'materialType', 'receipts' => fn ($query) => $query->latest()->take(10)]);
+        $material->load(['materialAttributes', 'materialType', 
+            'receipts' => fn ($query) => $query->latest()->with('usages.preparationOrder')
+        ]);
 
         return Inertia::render('Materials/Show', [
             'material' => [
@@ -109,6 +111,24 @@ class MaterialController extends Controller
                     'attribute_name' => $attr->attribute_key,
                     'attribute_value' => $attr->attribute_value,
                 ])->toArray(),
+                'receipts' => $material->receipts->map(fn ($receipt) => [
+                    'id' => $receipt->id,
+                    'receipt_number' => $receipt->receipt_number,
+                    'batch_number' => $receipt->batch_number, // or barcode
+                    'barcode' => $receipt->barcode,
+                    'quantity' => (string) $receipt->quantity,
+                    'remaining_quantity' => (string) $receipt->remaining_quantity,
+                    'status' => $receipt->status,
+                    'receipt_date' => $receipt->receipt_date->format('Y-m-d'),
+                    'supplier_name' => $receipt->supplier_name,
+                    'price_per_unit' => (string) $receipt->price_per_unit,
+                    'usages' => $receipt->usages->map(fn ($usage) => [
+                        'id' => $usage->id,
+                        'preparation_order_number' => $usage->preparationOrder->order_number,
+                        'quantity' => (string) $usage->quantity,
+                        'date' => $usage->created_at->format('Y-m-d H:i'),
+                    ]),
+                ]),
             ],
         ]);
     }
