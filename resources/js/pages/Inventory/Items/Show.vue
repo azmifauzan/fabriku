@@ -45,6 +45,7 @@ interface Item {
     status: string;
     expiry_date?: string;
     notes?: string;
+    image_url?: string;
     inventory_location?: InventoryLocation;
     production_order?: ProductionOrder;
 }
@@ -168,6 +169,14 @@ const productionUnit = () => {
                             </div>
                             <div class="p-6">
                                 <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <!-- Product Image -->
+                                    <div v-if="item.image_url" class="sm:col-span-2">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Foto Produk</dt>
+                                        <dd class="mt-2">
+                                            <img :src="item.image_url" :alt="item.name" class="h-48 w-full rounded-lg border border-gray-200 object-cover shadow-sm dark:border-gray-700" />
+                                        </dd>
+                                    </div>
+                                    
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">SKU</dt>
                                         <dd class="mt-1 font-mono text-sm font-semibold text-gray-900 dark:text-white">{{ item.sku }}</dd>

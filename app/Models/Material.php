@@ -13,6 +13,8 @@ class Material extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $appends = ['image_url'];
+
     protected $fillable = [
         'tenant_id',
         'material_type_id',
@@ -24,6 +26,7 @@ class Material extends Model
         'min_stock',
         'reorder_point',
         'unit',
+        'image_path',
         'description',
     ];
 
@@ -71,5 +74,17 @@ class Material extends Model
     public function isLowStock(): bool
     {
         return $this->stock_quantity <= $this->min_stock;
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (! $this->image_path) {
+            return null;
+        }
+
+        return \Illuminate\Support\Facades\Storage::disk('fabriku_s3')->temporaryUrl(
+            $this->image_path,
+            now()->addMinutes(30)
+        );
     }
 }

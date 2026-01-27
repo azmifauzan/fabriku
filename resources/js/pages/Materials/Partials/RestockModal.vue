@@ -2,7 +2,9 @@
 import { useForm } from '@inertiajs/vue3';
 import Modal from '@/components/Modal.vue';
 import FormField from '@/components/FormField.vue';
-import { watch } from 'vue';
+import { watch, ref } from 'vue';
+import { Camera, Upload, X } from 'lucide-vue-next';
+import CameraCaptureModal from '@/Components/CameraCaptureModal.vue';
 
 const props = defineProps<{
     show: boolean;
@@ -21,7 +23,12 @@ const form = useForm({
     receipt_date: new Date().toISOString().split('T')[0],
     batch_number: '',
     notes: '',
+    image: null as File | null,
 });
+
+const showCameraModal = ref(false);
+const previewImage = ref<string | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
 
 watch(() => props.show, (val) => {
     if (val) {
@@ -30,11 +37,46 @@ watch(() => props.show, (val) => {
         form.unit_price = props.currentPrice || '';
         form.batch_number = ''; // Reset batch number on open
         form.quantity = '';
+        form.image = null;
+        previewImage.value = null;
+        if (fileInput.value) fileInput.value.value = '';
     }
 });
 
+const handleFileChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        processFile(target.files[0]);
+    }
+};
+
+const handleCameraCapture = (file: File) => {
+    processFile(file);
+};
+
+const processFile = (file: File) => {
+    form.image = file;
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        previewImage.value = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+};
+
+const clearImage = () => {
+    form.image = null;
+    previewImage.value = null;
+    if (fileInput.value) {
+        fileInput.value.value = '';
+    }
+};
+
 const submit = () => {
     form.post(route('material-receipts.store'), {
+        preserveScroll: true,
+        forceFormData: true,
         onSuccess: () => {
             form.reset();
             emit('close');
@@ -45,6 +87,7 @@ const submit = () => {
 const close = () => {
     emit('close');
     form.reset();
+    clearImage();
 };
 </script>
 
@@ -101,6 +144,52 @@ const close = () => {
                     placeholder="Catatan tambahan..."
                     :error="form.errors.notes"
                 />
+
+                <div class="mt-4">
+                    <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">Foto Penerimaan (Opsional)</label>
+                    <div class="flex items-center gap-4">
+                        <div v-if="previewImage" class="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700">
+                            <img :src="previewImage" alt="Preview" class="h-full w-full object-cover" />
+                            <button 
+                                type="button" 
+                                @click="clearImage"
+                                class="absolute top-1 right-1 rounded-full bg-red-600 p-1 text-white shadow-sm hover:bg-red-700"
+                            >
+                                <X class="h-3 w-3" />
+                            </button>
+                        </div>
+                        <div class="flex-1 space-y-2">
+                             <div class="flex flex-wrap gap-2">
+                                <label class="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                                    <Upload class="h-4 w-4" />
+                                    <span>Upload File</span>
+                                    <input
+                                        ref="fileInput"
+                                        type="file"
+                                        accept="image/*"
+                                        @change="handleFileChange"
+                                        class="hidden"
+                                    />
+                                </label>
+
+                                <button 
+                                    type="button"
+                                    @click="showCameraModal = true"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-600 transition-all hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                                >
+                                    <Camera class="h-4 w-4" />
+                                    <span>Ambil Foto</span>
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                Bukti fisik penerimaan barang/surat jalan.
+                            </p>
+                            <p v-if="form.errors.image" class="text-sm text-red-600 dark:text-red-400">
+                                {{ form.errors.image }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="mt-6 flex justify-end gap-3">
@@ -124,4 +213,10 @@ const close = () => {
             </div>
         </div>
     </Modal>
+
+    <CameraCaptureModal
+        :show="showCameraModal"
+        @close="showCameraModal = false"
+        @capture="handleCameraCapture"
+    />
 </template>

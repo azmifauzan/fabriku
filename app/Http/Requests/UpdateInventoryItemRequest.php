@@ -66,6 +66,7 @@ class UpdateInventoryItemRequest extends FormRequest
             'quality_grade' => 'nullable|in:grade_a,grade_b,reject,A,B,Reject',
             'status' => 'nullable|in:available,reserved,damaged,expired',
             'notes' => 'nullable|string|max:1000',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ];
     }
 

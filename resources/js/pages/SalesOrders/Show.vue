@@ -314,7 +314,10 @@ import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
-defineProps({
-    salesOrder: Object,
+const props = defineProps({
+    salesOrder: {
+        type: Object,
+        required: true,
+    },
 });
 </script>
