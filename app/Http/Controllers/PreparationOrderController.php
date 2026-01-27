@@ -59,8 +59,8 @@ class PreparationOrderController extends Controller
             ->where('stock_quantity', '>', 0)
             ->with(['receipts' => function ($query) {
                 $query->where('remaining_quantity', '>', 0)
-                    ->where('status', 'active')
-                    ->select('id', 'material_id', 'receipt_number', 'batch_number', 'remaining_quantity', 'supplier_name', 'price_per_unit', 'unit')
+                    ->whereIn('status', ['active', 'available'])
+                    ->select('id', 'material_id', 'receipt_number', 'batch_number', 'remaining_quantity', 'supplier_name', 'price_per_unit', 'unit', 'status', 'image_path')
                     ->orderBy('receipt_date');
             }])
             ->orderBy('name')

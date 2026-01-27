@@ -109,6 +109,7 @@ class InventoryItemController extends Controller
                     return $usage->quantity * ($usage->materialReceipt->price_per_unit ?? 0);
                 });
                 $order->material_cost = $materialCost;
+
                 return $order;
             });
 
@@ -127,7 +128,16 @@ class InventoryItemController extends Controller
 
     public function store(StoreInventoryItemRequest $request)
     {
-        $item = InventoryItem::create($request->validated());
+        $data = $request->safe()->except(['image']);
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store(
+                'tenants/'.auth()->user()->tenant_id.'/inventory',
+                'fabriku_s3'
+            );
+        }
+
+        $item = InventoryItem::create($data);
 
         return redirect()
             ->route('inventory.items.show', $item)
@@ -156,6 +166,7 @@ class InventoryItemController extends Controller
                     return $usage->quantity * ($usage->materialReceipt->price_per_unit ?? 0);
                 });
                 $order->material_cost = $materialCost;
+
                 return $order;
             });
 
@@ -175,7 +186,21 @@ class InventoryItemController extends Controller
 
     public function update(UpdateInventoryItemRequest $request, InventoryItem $item)
     {
-        $item->update($request->validated());
+        $data = $request->safe()->except(['image']);
+
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($item->image_path) {
+                \Storage::disk('fabriku_s3')->delete($item->image_path);
+            }
+
+            $data['image_path'] = $request->file('image')->store(
+                'tenants/'.auth()->user()->tenant_id.'/inventory',
+                'fabriku_s3'
+            );
+        }
+
+        $item->update($data);
 
         return redirect()
             ->route('inventory.items.index')

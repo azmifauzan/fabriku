@@ -30,6 +30,7 @@ class InventoryItem extends Model
         'selling_price',
         'expired_date',
         'notes',
+        'image_path',
     ];
 
     protected $appends = [
@@ -40,6 +41,7 @@ class InventoryItem extends Model
         'pattern',
         'batch_number',
         'expiry_date',
+        'image_url',
     ];
 
     protected function casts(): array
@@ -159,6 +161,18 @@ class InventoryItem extends Model
             'reject' => 'Reject (Not saleable)',
             default => $this->quality_grade,
         };
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (! $this->image_path) {
+            return null;
+        }
+
+        return \Storage::disk('fabriku_s3')->temporaryUrl(
+            $this->image_path,
+            now()->addMinutes(30)
+        );
     }
 
     public function getStatusBadgeClassAttribute(): string
