@@ -12,12 +12,12 @@
                 />
 
                 <!-- Statistics Dashboard -->
-                <div class="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
                     <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
-                        <div class="p-6">
+                        <div class="p-4">
                             <div class="flex items-center">
-                                <div class="flex-shrink-0 rounded-md bg-blue-500 p-3">
-                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="flex-shrink-0 rounded-md bg-blue-500 p-2">
+                                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
@@ -26,19 +26,19 @@
                                         />
                                     </svg>
                                 </div>
-                                <div class="ml-5">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pesanan</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.total_orders }}</p>
+                                <div class="ml-3">
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Pesanan</p>
+                                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ stats.total_orders }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
-                        <div class="p-6">
+                        <div class="p-4">
                             <div class="flex items-center">
-                                <div class="flex-shrink-0 rounded-md bg-green-500 p-3">
-                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="flex-shrink-0 rounded-md bg-green-500 p-2">
+                                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
@@ -47,10 +47,10 @@
                                         />
                                     </svg>
                                 </div>
-                                <div class="ml-5">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                        Rp {{ Number(stats.total_revenue).toLocaleString('id-ID') }}
+                                <div class="ml-3">
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Revenue (Lunas)</p>
+                                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                        {{ Number(stats.realized_revenue).toLocaleString('id-ID', { maximumFractionDigits: 0 }) }}
                                     </p>
                                 </div>
                             </div>
@@ -58,10 +58,33 @@
                     </div>
 
                     <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
-                        <div class="p-6">
+                        <div class="p-4">
                             <div class="flex items-center">
-                                <div class="flex-shrink-0 rounded-md bg-yellow-500 p-3">
-                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="flex-shrink-0 rounded-md bg-red-500 p-2">
+                                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Piutang (Outstanding)</p>
+                                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                        {{ Number(stats.outstanding_revenue).toLocaleString('id-ID', { maximumFractionDigits: 0 }) }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div class="p-4">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 rounded-md bg-yellow-500 p-2">
+                                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
@@ -70,19 +93,19 @@
                                         />
                                     </svg>
                                 </div>
-                                <div class="ml-5">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.pending_orders }}</p>
+                                <div class="ml-3">
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Pending</p>
+                                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ stats.pending_orders }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
-                        <div class="p-6">
+                        <div class="p-4">
                             <div class="flex items-center">
-                                <div class="flex-shrink-0 rounded-md bg-purple-500 p-3">
-                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="flex-shrink-0 rounded-md bg-purple-500 p-2">
+                                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
@@ -91,9 +114,9 @@
                                         />
                                     </svg>
                                 </div>
-                                <div class="ml-5">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Selesai</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.completed_orders }}</p>
+                                <div class="ml-3">
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Selesai</p>
+                                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ stats.completed_orders }}</p>
                                 </div>
                             </div>
                         </div>
@@ -102,21 +125,21 @@
 
                 <!-- Filters and Search -->
                 <div class="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <form @submit.prevent="search" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"> Pencarian </label>
+                    <form @submit.prevent="search" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6 items-end">
+                        <div class="lg:col-span-2">
+                            <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"> Pencarian </label>
                             <input
                                 v-model="form.search"
                                 type="text"
                                 placeholder="No. order, customer..."
-                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             />
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"> Status </label>
+                            <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"> Status </label>
                             <select
                                 v-model="form.status"
-                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
                                 <option value="">Semua Status</option>
                                 <option value="draft">Draft</option>
@@ -128,10 +151,10 @@
                             </select>
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"> Pembayaran </label>
+                            <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"> Pembayaran </label>
                             <select
                                 v-model="form.payment_status"
-                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
                                 <option value="">Semua</option>
                                 <option value="unpaid">Belum Dibayar</option>
@@ -140,10 +163,10 @@
                             </select>
                         </div>
                         <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"> Channel </label>
+                            <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"> Channel </label>
                             <select
                                 v-model="form.channel"
-                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
                                 <option value="">Semua Channel</option>
                                 <option value="offline">Offline</option>
@@ -152,10 +175,10 @@
                                 <option value="marketplace">Marketplace</option>
                             </select>
                         </div>
-                        <div class="flex items-end gap-2">
+                        <div class="flex gap-2">
                             <button
                                 type="submit"
-                                class="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+                                class="flex-1 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
                             >
                                 Filter
                             </button>
@@ -163,10 +186,9 @@
                                 v-if="form.search || form.status || form.payment_status || form.channel"
                                 type="button"
                                 @click="clearFilters"
-                                class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                class="flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                             >
-                                <span class="text-base">✕</span>
-                                Clear
+                                ✕
                             </button>
                         </div>
                     </form>
@@ -178,51 +200,57 @@
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700/50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
+                                    <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
                                         No. Order
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
+                                    <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
                                         Customer
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
+                                    <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
                                         Tanggal
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
+                                    <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
+                                        No. Invoice
+                                    </th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
                                         Channel
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
+                                    <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
                                         Total
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
+                                    <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
                                         Status
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
+                                    <th class="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
                                         Pembayaran
                                     </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
+                                    <th class="px-4 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">
                                         Aksi
                                     </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                                 <tr v-for="order in orders.data" :key="order.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-100">
+                                    <td class="px-4 py-2 text-xs font-medium whitespace-nowrap text-gray-900 dark:text-gray-100">
                                         {{ order.order_number }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    <td class="px-4 py-2 whitespace-nowrap">
+                                        <div class="text-xs font-medium text-gray-900 dark:text-gray-100">
                                             {{ order.customer.name }}
                                         </div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">
                                             {{ order.customer.code }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                    <td class="px-4 py-2 text-xs whitespace-nowrap text-gray-500 dark:text-gray-400">
                                         {{ new Date(order.order_date).toLocaleDateString('id-ID') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 text-xs whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                        {{ order.invoice_number || '-' }}
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <span
-                                            class="inline-flex rounded-full px-2 text-xs leading-5 font-semibold"
+                                            class="inline-flex rounded-full px-2 text-[10px] leading-5 font-semibold"
                                             :class="{
                                                 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': order.channel === 'offline',
                                                 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': order.channel === 'online',
@@ -241,12 +269,12 @@
                                             }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-gray-100">
+                                    <td class="px-4 py-2 text-xs font-medium whitespace-nowrap text-gray-900 dark:text-gray-100">
                                         Rp {{ Number(order.total_amount).toLocaleString('id-ID') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <span
-                                            class="inline-flex rounded-full px-2 text-xs leading-5 font-semibold"
+                                            class="inline-flex rounded-full px-2 text-[10px] leading-5 font-semibold"
                                             :class="{
                                                 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': order.status === 'draft',
                                                 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': order.status === 'confirmed',
@@ -272,9 +300,9 @@
                                             }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <span
-                                            class="inline-flex rounded-full px-2 text-xs leading-5 font-semibold"
+                                            class="inline-flex rounded-full px-2 text-[10px] leading-5 font-semibold"
                                             :class="{
                                                 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': order.payment_status === 'unpaid',
                                                 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200':
@@ -291,30 +319,38 @@
                                             }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
+                                    <td class="px-4 py-2 text-right text-xs font-medium whitespace-nowrap">
                                         <div class="flex justify-end gap-2">
                                             <Link
                                                 :href="`/sales-orders/${order.id}`"
-                                                class="inline-flex items-center justify-center rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                                                class="inline-flex items-center justify-center rounded-lg p-1.5 text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
                                                 title="Lihat detail sales order"
                                             >
-                                                <Eye :size="18" />
+                                                <Eye :size="16" />
                                             </Link>
+                                            <a
+                                                :href="`/sales-orders/${order.id}/print`"
+                                                target="_blank"
+                                                class="inline-flex items-center justify-center rounded-lg p-1.5 text-gray-600 transition-colors hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-900/30"
+                                                title="Print Invoice"
+                                            >
+                                                <Printer :size="16" />
+                                            </a>
                                             <Link
                                                 v-if="order.status === 'draft' || order.status === 'confirmed'"
                                                 :href="`/sales-orders/${order.id}/edit`"
-                                                class="inline-flex items-center justify-center rounded-lg p-2 text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+                                                class="inline-flex items-center justify-center rounded-lg p-1.5 text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
                                                 title="Edit sales order"
                                             >
-                                                <Edit :size="18" />
+                                                <Edit :size="16" />
                                             </Link>
                                             <button
                                                 v-if="order.status === 'draft'"
                                                 @click="deleteOrder(order)"
-                                                class="inline-flex items-center justify-center rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
+                                                class="inline-flex items-center justify-center rounded-lg p-1.5 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
                                                 title="Hapus sales order"
                                             >
-                                                <Trash2 :size="18" />
+                                                <Trash2 :size="16" />
                                             </button>
                                         </div>
                                     </td>
@@ -375,7 +411,7 @@ import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Edit, Eye, Trash2 } from 'lucide-vue-next';
+import { Edit, Eye, Trash2, Printer } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
 const props = defineProps({

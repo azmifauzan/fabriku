@@ -73,6 +73,38 @@
                     </div>
 
                     <div>
+                        <label for="invoice_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            No. Invoice
+                        </label>
+                        <input
+                            id="invoice_number"
+                            v-model="form.invoice_number"
+                            type="text"
+                            placeholder="e.g. INV/2026/001"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
+                         <p v-if="form.errors.invoice_number" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                            {{ form.errors.invoice_number }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="resi_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            No. Resi
+                        </label>
+                        <input
+                            id="resi_number"
+                            v-model="form.resi_number"
+                            type="text"
+                            placeholder="e.g. JNE12345678"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
+                         <p v-if="form.errors.resi_number" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                            {{ form.errors.resi_number }}
+                        </p>
+                    </div>
+
+                    <div>
                         <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300"> Status </label>
                         <select
                             id="status"
@@ -413,6 +445,8 @@ const form = useForm({
     customer_id: props.salesOrder?.customer_id || '',
     order_date: props.salesOrder?.order_date || today,
     channel: props.salesOrder?.channel || 'offline',
+    invoice_number: props.salesOrder?.invoice_number || '',
+    resi_number: props.salesOrder?.resi_number || '',
     status: props.salesOrder?.status || 'draft',
     payment_method: props.salesOrder?.payment_method || 'cash',
     payment_status: props.salesOrder?.payment_status || 'unpaid',

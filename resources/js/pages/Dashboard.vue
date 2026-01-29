@@ -27,6 +27,8 @@ interface Stats {
     total_sales_count: number;
     pending_production: number;
     pending_preparation: number;
+    realized_revenue: number;
+    outstanding_receivables: number;
 }
 
 interface TopProduct {
@@ -158,7 +160,7 @@ const getStatusBadgeClass = (status: string) => {
                 </div>
 
                 <!-- Stats Grid -->
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <!-- Total Materials -->
                     <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
                         <div class="p-6">
@@ -230,6 +232,42 @@ const getStatusBadgeClass = (status: string) => {
                                         {{ stats.pending_production }}
                                     </dd>
                                     <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">{{ stats.pending_preparation }} preparation</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Realized Revenue -->
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div class="p-6">
+                            <div class="flex items-center gap-4">
+                                <div class="flex-shrink-0 rounded-lg bg-green-600 p-3">
+                                    <TrendingUp :size="24" class="text-white" />
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Revenue Lunas</dt>
+                                    <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                                        {{ formatCurrency(stats.realized_revenue) }}
+                                    </dd>
+                                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Total pembayaran diterima</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Outstanding Receivables -->
+                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div class="p-6">
+                            <div class="flex items-center gap-4">
+                                <div class="flex-shrink-0 rounded-lg bg-red-500 p-3">
+                                    <AlertTriangle :size="24" class="text-white" />
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Piutang Outstanding</dt>
+                                    <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                                        {{ formatCurrency(stats.outstanding_receivables) }}
+                                    </dd>
+                                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Belum dibayar</p>
                                 </div>
                             </div>
                         </div>

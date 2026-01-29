@@ -110,6 +110,16 @@ const menuItems = computed(() => {
             name: 'Sales Order',
             href: '/sales-orders',
             icon: ShoppingCart,
+            children: [
+                {
+                    name: 'List',
+                    href: '/sales-orders',
+                },
+                {
+                    name: 'Settings',
+                    href: '/settings',
+                },
+            ],
         },
         {
             name: 'Reports',

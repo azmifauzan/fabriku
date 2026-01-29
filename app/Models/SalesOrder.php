@@ -16,6 +16,8 @@ class SalesOrder extends Model
     protected $fillable = [
         'tenant_id',
         'order_number',
+        'invoice_number',
+        'resi_number',
         'customer_id',
         'order_date',
         'channel',
