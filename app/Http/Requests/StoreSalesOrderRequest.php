@@ -29,6 +29,8 @@ class StoreSalesOrderRequest extends FormRequest
             'tax_amount' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
             'shipping_address' => ['nullable', 'string'],
+            'invoice_number' => ['nullable', 'string', 'max:255'],
+            'resi_number' => ['nullable', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.inventory_item_id' => ['required', 'exists:inventory_items,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],

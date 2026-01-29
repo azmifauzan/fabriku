@@ -26,6 +26,19 @@
                                         >
                                             Edit
                                         </Link>
+                                        <a
+                                            :href="`/sales-orders/${salesOrder.id}/print`"
+                                            target="_blank"
+                                            class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold tracking-widest text-gray-700 uppercase shadow-sm transition duration-150 ease-in-out hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:opacity-25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                        >
+                                            Print
+                                        </a>
+                                        <a
+                                            :href="`/sales-orders/${salesOrder.id}/export`"
+                                            class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold tracking-widest text-gray-700 uppercase shadow-sm transition duration-150 ease-in-out hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:opacity-25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                        >
+                                            Export
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -47,6 +60,14 @@
                                                 })
                                             }}
                                         </dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">No. Invoice</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ salesOrder.invoice_number || '-' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">No. Resi</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ salesOrder.resi_number || '-' }}</dd>
                                     </div>
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Customer</dt>

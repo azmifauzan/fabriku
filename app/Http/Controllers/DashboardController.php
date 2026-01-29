@@ -41,6 +41,11 @@ class DashboardController extends Controller
             'pending_preparation' => PreparationOrder::query()
                 ->whereIn('status', ['draft', 'in_progress'])
                 ->count(),
+            'realized_revenue' => SalesOrder::query()
+                ->sum('paid_amount'),
+            'outstanding_receivables' => SalesOrder::query()
+                ->where('payment_status', '!=', 'paid')
+                ->sum(DB::raw('total_amount - paid_amount')),
         ];
 
         // Sales Trend (last 7 days)
