@@ -13,6 +13,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->string('order_number')->unique();
+            $table->string('invoice_number')->nullable();
+            $table->string('resi_number')->nullable();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->date('order_date');
             $table->date('delivery_date')->nullable();

@@ -108,6 +108,8 @@ Route::middleware(['auth', 'tenant', 'subscription.check'])->group(function () {
 
     // Sales Management
     Route::resource('customers', \App\Http\Controllers\CustomerController::class);
+    Route::get('sales-orders/{sales_order}/print', [\App\Http\Controllers\SalesOrderController::class, 'print'])->name('sales-orders.print');
+    Route::get('sales-orders/{sales_order}/export', [\App\Http\Controllers\SalesOrderController::class, 'export'])->name('sales-orders.export');
     Route::resource('sales-orders', \App\Http\Controllers\SalesOrderController::class);
 
     // Reports
@@ -115,8 +117,13 @@ Route::middleware(['auth', 'tenant', 'subscription.check'])->group(function () {
         Route::get('material', [\App\Http\Controllers\ReportController::class, 'material'])->name('material');
         Route::get('inventory', [\App\Http\Controllers\ReportController::class, 'inventory'])->name('inventory');
         Route::get('sales', [\App\Http\Controllers\ReportController::class, 'sales'])->name('sales');
+        Route::get('sales-recap', [\App\Http\Controllers\ReportController::class, 'salesRecap'])->name('sales-recap');
         Route::get('production', [\App\Http\Controllers\ReportController::class, 'production'])->name('production');
     });
+
+    // Settings
+    Route::get('settings', [\App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');
+    Route::post('settings', [\App\Http\Controllers\SettingController::class, 'update'])->name('settings.update');
 
     // Subscription
     Route::get('subscription', [\App\Http\Controllers\SubscriptionController::class, 'index'])->name('subscription.index');

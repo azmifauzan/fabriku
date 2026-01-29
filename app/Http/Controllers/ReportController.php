@@ -342,4 +342,59 @@ class ReportController extends Controller
             'filters' => $request->only(['status', 'production_type', 'start_date', 'end_date']),
         ]);
     }
+
+    /**
+     * Sales Recapitulation per Customer
+     */
+    public function salesRecap(Request $request): Response
+    {
+        $query = SalesOrder::query()
+            ->select('customer_id', \Illuminate\Support\Facades\DB::raw('count(*) as total_orders'), \Illuminate\Support\Facades\DB::raw('sum(total_amount) as total_revenue'), \Illuminate\Support\Facades\DB::raw('sum(paid_amount) as total_paid'))
+            ->with('customer:id,name')
+            ->groupBy('customer_id');
+
+        // Date filter
+        $startDate = $request->filled('start_date')
+            ? $request->start_date
+            : now()->startOfMonth()->format('Y-m-d');
+
+        $endDate = $request->filled('end_date')
+            ? $request->end_date
+            : now()->endOfMonth()->format('Y-m-d');
+
+        // We filter by order_date
+        $query->whereBetween('order_date', [$startDate, $endDate]);
+
+        if ($request->filled('search')) {
+            $query->whereHas('customer', function ($q) use ($request) {
+                $q->where('name', 'ilike', "%{$request->search}%");
+            });
+        }
+
+        $recap = $query->get()->map(function ($item) {
+            return [
+                'customer_id' => $item->customer_id,
+                'customer_name' => $item->customer->name,
+                'total_orders' => $item->total_orders,
+                'total_revenue' => $item->total_revenue,
+                'total_paid' => $item->total_paid,
+                'outstanding' => $item->total_revenue - $item->total_paid,
+            ];
+        });
+
+        return Inertia::render('Reports/SalesRecap', [
+            'recap' => $recap,
+            'summary' => [
+                'total_customers' => $recap->count(),
+                'total_revenue' => $recap->sum('total_revenue'),
+                'total_paid' => $recap->sum('total_paid'),
+                'total_outstanding' => $recap->sum('outstanding'),
+            ],
+            'filters' => $request->only(['search', 'start_date', 'end_date']),
+            'defaultDates' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ],
+        ]);
+    }
 }
