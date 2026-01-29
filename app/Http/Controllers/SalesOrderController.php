@@ -62,7 +62,9 @@ class SalesOrderController extends Controller
                 'pending_orders' => SalesOrder::whereIn('status', ['confirmed', 'processing'])->count(),
                 'completed_orders' => SalesOrder::where('status', 'completed')->count(),
                 'pending_payment' => SalesOrder::where('payment_status', 'unpaid')->count(),
-                'total_revenue' => SalesOrder::where('status', 'completed')->sum('total_amount'),
+                'pending_payment' => SalesOrder::where('payment_status', 'unpaid')->count(),
+                'realized_revenue' => SalesOrder::sum('paid_amount'),
+                'outstanding_revenue' => SalesOrder::where('payment_status', '!=', 'paid')->sum(DB::raw('total_amount - paid_amount')),
             ],
         ]);
     }
@@ -136,6 +138,8 @@ class SalesOrderController extends Controller
                 'paid_amount' => $validated['paid_amount'] ?? 0,
                 'notes' => $validated['notes'] ?? null,
                 'shipping_address' => $validated['shipping_address'] ?? null,
+                'invoice_number' => $validated['invoice_number'] ?? null,
+                'resi_number' => $validated['resi_number'] ?? null,
             ]);
 
             // Create items
@@ -220,6 +224,8 @@ class SalesOrderController extends Controller
                 'paid_amount' => $validated['paid_amount'] ?? $salesOrder->paid_amount,
                 'notes' => $validated['notes'] ?? null,
                 'shipping_address' => $validated['shipping_address'] ?? null,
+                'invoice_number' => $validated['invoice_number'] ?? null,
+                'resi_number' => $validated['resi_number'] ?? null,
             ]);
 
             // Delete old items and create new ones
@@ -250,5 +256,70 @@ class SalesOrderController extends Controller
         return redirect()
             ->route('sales-orders.index')
             ->with('success', 'Sales order berhasil dihapus.');
+    }
+
+    public function print(SalesOrder $salesOrder)
+    {
+        // For now, return a simple view or just a placeholder message for testing
+        // Ideally this would generate a PDF
+        $salesOrder->load(['customer', 'items.inventoryItem']);
+        $settings = \App\Models\SystemSetting::getAllForTenant(auth()->user()->tenant_id);
+
+        return Inertia::render('SalesOrders/Print', [
+            'salesOrder' => $salesOrder,
+            'settings' => $settings,
+        ]);
+    }
+
+    public function export(SalesOrder $salesOrder)
+    {
+        $salesOrder->load(['customer', 'items.inventoryItem']);
+        
+        $csvFileName = 'Invoice-' . str_replace('/', '-', $salesOrder->invoice_number ?? $salesOrder->order_number) . '.csv';
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$csvFileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+        
+        $callback = function() use($salesOrder) {
+            $file = fopen('php://output', 'w');
+            
+            // Header Info
+            fputcsv($file, ['INVOICE', $salesOrder->invoice_number ?? '-']);
+            fputcsv($file, ['Order Number', $salesOrder->order_number]);
+            fputcsv($file, ['Date', $salesOrder->order_date->format('Y-m-d')]);
+            fputcsv($file, ['Customer', $salesOrder->customer->name]);
+            fputcsv($file, ['Resi', $salesOrder->resi_number ?? '-']);
+            fputcsv($file, []); // Empty line
+            
+            // Items Header
+            fputcsv($file, ['Item', 'Quantity', 'Unit Price', 'Discount', 'Total']);
+            
+            // Items
+            foreach ($salesOrder->items as $item) {
+                fputcsv($file, [
+                    $item->inventoryItem->product_name ?? $item->inventoryItem->sku,
+                    $item->quantity,
+                    $item->unit_price,
+                    $item->discount_amount,
+                    $item->subtotal
+                ]);
+            }
+            
+            fputcsv($file, []); // Empty line
+            
+            // Totals
+            fputcsv($file, ['', '', '', 'Subtotal', $salesOrder->subtotal]);
+            fputcsv($file, ['', '', '', 'Discount', $salesOrder->discount_amount]);
+            fputcsv($file, ['', '', '', 'Tax', $salesOrder->tax_amount]);
+            fputcsv($file, ['', '', '', 'Total', $salesOrder->total_amount]);
+            
+            fclose($file);
+        };
+        
+        return response()->stream($callback, 200, $headers);
     }
 }
