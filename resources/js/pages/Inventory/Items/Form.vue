@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3';
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { Camera, Upload, X } from 'lucide-vue-next';
+import CameraCaptureModal from '@/Components/CameraCaptureModal.vue';
 
 interface Location {
     id: number;
@@ -47,6 +49,7 @@ interface Item {
     production_date?: string;
     status: string;
     notes?: string;
+    image_url?: string;
 }
 
 const props = defineProps<{
@@ -65,6 +68,7 @@ const form = useForm({
     unit_cost: props.item?.unit_cost || '0',
     selling_price: props.item?.selling_price || '0',
     notes: props.item?.notes || '',
+    image: null as File | null,
 });
 
 // Auto-populate fields when production order is selected
@@ -128,15 +132,51 @@ const submit = () => {
     if (props.item?.id) {
         form.put(`/inventory/items/${props.item.id}`, {
             preserveScroll: true,
+            forceFormData: true,
         });
     } else {
         form.post('/inventory/items', {
             preserveScroll: true,
+            forceFormData: true,
         });
     }
 };
 
 const isEditing = !!props.item?.id;
+
+const showCameraModal = ref(false);
+const fileInput = ref<HTMLInputElement | null>(null);
+const previewImage = ref<string | null>(null);
+
+const handleFileChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        processFile(target.files[0]);
+    }
+};
+
+const handleCameraCapture = (file: File) => {
+    processFile(file);
+};
+
+const processFile = (file: File) => {
+    form.image = file;
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        previewImage.value = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+};
+
+const clearImage = () => {
+    form.image = null;
+    previewImage.value = null;
+    if (fileInput.value) {
+        fileInput.value.value = '';
+    }
+};
 </script>
 
 <template>
@@ -365,6 +405,60 @@ const isEditing = !!props.item?.id;
                                 {{ form.errors.notes }}
                             </p>
                         </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Foto Produk</label>
+                            <div class="mt-2 flex items-center gap-6">
+                                <div v-if="previewImage || item?.image_url" class="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-lg border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700">
+                                    <img :src="previewImage || item?.image_url" alt="Preview" class="h-full w-full object-cover" />
+                                    <!-- Clear Image Button -->
+                                    <button 
+                                        v-if="form.image || previewImage"
+                                        type="button" 
+                                        @click="clearImage"
+                                        class="absolute top-1 right-1 rounded-full bg-red-600 p-1 text-white shadow-sm hover:bg-red-700"
+                                    >
+                                        <X class="h-3 w-3" />
+                                    </button>
+                                </div>
+                                <div class="flex-1 space-y-3">
+                                    <div class="flex flex-wrap gap-3">
+                                        <!-- File Upload Button -->
+                                        <label class="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                                            <Upload class="h-4 w-4" />
+                                            <span>Upload File</span>
+                                            <input
+                                                ref="fileInput"
+                                                type="file"
+                                                accept="image/*"
+                                                @change="handleFileChange"
+                                                class="hidden"
+                                            />
+                                        </label>
+
+                                        <!-- Camera Button -->
+                                        <button 
+                                            type="button"
+                                            @click="showCameraModal = true"
+                                            class="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-all hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                                        >
+                                            <Camera class="h-4 w-4" />
+                                            <span>Ambil Foto</span>
+                                        </button>
+                                    </div>
+
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        Format: JPG, JPEG, PNG, WEBP. Maksimal 2MB
+                                    </p>
+                                    <p v-if="form.image" class="text-sm text-gray-900 dark:text-gray-100">
+                                        File terpilih: <span class="font-medium">{{ form.image.name }}</span>
+                                    </p>
+                                    <p v-if="form.errors.image" class="text-sm text-red-600 dark:text-red-400">
+                                        {{ form.errors.image }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -388,5 +482,12 @@ const isEditing = !!props.item?.id;
                 </div>
             </form>
         </div>
+        
+        <!-- Camera Capture Modal -->
+        <CameraCaptureModal 
+            :show="showCameraModal"
+            @close="showCameraModal = false"
+            @capture="handleCameraCapture"
+        />
     </div>
 </template>

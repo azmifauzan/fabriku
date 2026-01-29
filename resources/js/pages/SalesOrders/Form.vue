@@ -385,7 +385,7 @@ const props = defineProps({
         required: true,
     },
     inventoryItems: {
-        type: Array,
+        type: Array as () => any[],
         required: true,
     },
 });

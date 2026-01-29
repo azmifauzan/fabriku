@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Material;
 use App\Models\MaterialReceipt;
+use Illuminate\Http\Request;
 
 class MaterialReceiptController extends Controller
 {
@@ -37,6 +37,7 @@ class MaterialReceiptController extends Controller
             'receipt_date' => 'required|date',
             'notes' => 'nullable|string',
             'batch_number' => 'nullable|string|max:255',
+            'image' => 'nullable|image|max:5120', // 5MB max
         ]);
 
         $material = Material::findOrFail($validated['material_id']);
@@ -46,6 +47,8 @@ class MaterialReceiptController extends Controller
         $count = MaterialReceipt::whereYear('created_at', $year)->count() + 1;
         $receiptNumber = sprintf('REC-%d-%04d', $year, $count);
 
+        \Illuminate\Support\Facades\Log::info('Creating receipt', ['validated' => $validated]);
+
         $receipt = MaterialReceipt::create([
             'tenant_id' => $request->user()->tenant_id,
             'material_id' => $material->id,
@@ -54,12 +57,20 @@ class MaterialReceiptController extends Controller
             'quantity' => $validated['quantity'],
             'unit' => $material->unit, // Assume same unit as material
             'price_per_unit' => $validated['unit_price'],
-            'total_price' => $validated['quantity'] * $validated['unit_price'],
+            'total_cost' => $validated['quantity'] * $validated['unit_price'],
             'receipt_date' => $validated['receipt_date'],
-            'notes' => $validated['notes'],
-            'batch_number' => $validated['batch_number'],
+            'notes' => $validated['notes'] ?? null,
+            'batch_number' => $validated['batch_number'] ?? null,
             'received_by' => $request->user()->id,
         ]);
+
+        \Illuminate\Support\Facades\Log::info('Receipt created', ['id' => $receipt->id]);
+
+        if ($request->hasFile('image')) {
+            $tenantId = $request->user()->tenant_id;
+            $path = $request->file('image')->store("tenants/{$tenantId}/receipts", 'fabriku_s3');
+            $receipt->update(['image_path' => $path]);
+        }
 
         return redirect()->back()->with('success', 'Stok berhasil ditambahkan.');
     }

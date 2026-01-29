@@ -60,6 +60,23 @@ return [
             'report' => false,
         ],
 
+        'fabriku_s3' => [
+            'driver' => 's3',
+            'key' => env('FABRIKU_S3_ACCESS_KEY'),
+            'secret' => env('FABRIKU_S3_SECRET_KEY'),
+            'region' => 'us-east-1', // Default for many S3 compatible services
+            'bucket' => env('FABRIKU_S3_BUCKET'),
+            'url' => env('FABRIKU_S3_URL'),
+            'endpoint' => env('FABRIKU_S3_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'visibility' => 'private', // Explicitly private
+            'throw' => false,
+            'report' => false,
+            'http' => [
+                'verify' => false, // Disable SSL verification for self-signed certificates
+            ],
+        ],
+
     ],
 
     /*

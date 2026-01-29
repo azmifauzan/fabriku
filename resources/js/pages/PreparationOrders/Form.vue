@@ -65,6 +65,11 @@ const getBatchesForMaterial = (materialId: number) => {
     return material?.receipts || [];
 };
 
+const getSelectedMaterial = (materialId: number | null) => {
+    if (!materialId) return null;
+    return props.materials.find(m => m.id === materialId);
+};
+
 const getSelectedBatch = (materialId: number, batchId: number | null) => {
     if (!materialId || !batchId) return null;
     const batches = getBatchesForMaterial(materialId);
@@ -220,26 +225,31 @@ const isEditing = !!props.order?.id;
                                             
                                             <!-- Detailed Batch Information Panel -->
                                             <div v-if="getSelectedBatch(material.material_id, material.batch_id)" class="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-700/50">
-                                                <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                                                    <div>
-                                                        <span class="block text-xs text-gray-500 dark:text-gray-400">Supplier</span>
-                                                        <span class="font-medium text-gray-900 dark:text-gray-200">{{ getSelectedBatch(material.material_id, material.batch_id).supplier_name }}</span>
+                                                    <div class="col-span-2 sm:col-span-4 flex gap-4">
+                                                        <div v-if="getSelectedBatch(material.material_id, material.batch_id)?.image_url" class="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 dark:border-gray-600">
+                                                            <img :src="getSelectedBatch(material.material_id, material.batch_id)?.image_url" alt="Material" class="h-full w-full object-cover" />
+                                                        </div>
+                                                        <div class="grid flex-1 grid-cols-2 gap-2 sm:grid-cols-4">
+                                                            <div>
+                                                                <span class="block text-xs text-gray-500 dark:text-gray-400">Supplier</span>
+                                                                <span class="font-medium text-gray-900 dark:text-gray-200">{{ getSelectedBatch(material.material_id, material.batch_id).supplier_name }}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span class="block text-xs text-gray-500 dark:text-gray-400">Harga Satuan</span>
+                                                                <span class="font-medium text-gray-900 dark:text-gray-200">{{ formatCurrency(getSelectedBatch(material.material_id, material.batch_id).price_per_unit) }}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span class="block text-xs text-gray-500 dark:text-gray-400">Batch Info</span>
+                                                                <span class="font-medium text-gray-900 dark:text-gray-200">{{ getSelectedBatch(material.material_id, material.batch_id).batch_number || '-' }}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span class="block text-xs text-gray-500 dark:text-gray-400">Sisa Stok Batch</span>
+                                                                <span class="font-bold text-indigo-600 dark:text-indigo-400">
+                                                                    {{ getSelectedBatch(material.material_id, material.batch_id).remaining_quantity }} {{ material.unit }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <span class="block text-xs text-gray-500 dark:text-gray-400">Harga Satuan</span>
-                                                        <span class="font-medium text-gray-900 dark:text-gray-200">{{ formatCurrency(getSelectedBatch(material.material_id, material.batch_id).price_per_unit) }}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span class="block text-xs text-gray-500 dark:text-gray-400">Batch Info</span>
-                                                        <span class="font-medium text-gray-900 dark:text-gray-200">{{ getSelectedBatch(material.material_id, material.batch_id).batch_number || '-' }}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span class="block text-xs text-gray-500 dark:text-gray-400">Sisa Stok Batch</span>
-                                                        <span class="font-bold text-indigo-600 dark:text-indigo-400">
-                                                            {{ getSelectedBatch(material.material_id, material.batch_id).remaining_quantity }} {{ material.unit }}
-                                                        </span>
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
 

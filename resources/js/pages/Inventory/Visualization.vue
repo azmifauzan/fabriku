@@ -12,6 +12,7 @@ interface InventoryItem {
     quantity: number;
     reserved: number;
     is_low_stock: boolean;
+    image_url?: string;
 }
 
 interface Location {
@@ -82,7 +83,7 @@ const getProgressBarColor = (percentage: number) => {
                 </PageHeader>
 
                 <!-- Stats Overview -->
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                     <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                         <div class="flex items-center gap-3">
                             <div class="rounded-lg bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
@@ -172,9 +173,25 @@ const getProgressBarColor = (percentage: number) => {
                                     v-for="item in location.items"
                                     :key="item.id"
                                     :href="`/inventory/items/${item.id}`"
-                                    class="group flex items-center justify-between p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30"
+                                    class="group flex items-center gap-3 p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30"
                                 >
-                                    <div class="min-w-0 flex-1 pr-4">
+                                    <!-- Product Image -->
+                                    <div class="shrink-0">
+                                        <img
+                                            v-if="item.image_url"
+                                            :src="item.image_url"
+                                            :alt="item.name"
+                                            class="h-12 w-12 rounded-lg border border-gray-200 object-cover shadow-sm dark:border-gray-700"
+                                        />
+                                        <div
+                                            v-else
+                                            class="flex h-12 w-12 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
+                                        >
+                                            <Package :size="20" class="text-gray-400" />
+                                        </div>
+                                    </div>
+
+                                    <div class="min-w-0 flex-1">
                                         <div class="flex items-center gap-2">
                                             <p class="truncate text-sm font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                                                 {{ item.name }}
@@ -183,7 +200,7 @@ const getProgressBarColor = (percentage: number) => {
                                         </div>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.sku }}</p>
                                     </div>
-                                    <div class="text-right text-sm">
+                                    <div class="shrink-0 text-right text-sm">
                                         <p class="font-medium text-gray-900 dark:text-white">{{ item.quantity }}</p>
                                         <p v-if="item.reserved > 0" class="text-xs text-yellow-600 dark:text-yellow-400">
                                             {{ item.reserved }} resv
