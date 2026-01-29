@@ -26,6 +26,7 @@ interface MaterialReceipt {
     remaining_quantity?: string;
     status?: string;
     barcode?: string | null;
+    image_url?: string;
     usages?: Array<{
         id: number;
         preparation_order_number: string;
@@ -53,8 +54,10 @@ interface Material {
     materialType?: {
         id: number;
         name: string;
+        name: string;
         code: string;
     };
+    image_url?: string;
 }
 
 const props = defineProps<{
@@ -138,6 +141,12 @@ const activeTab = ref<'batches' | 'usages'>('batches');
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Kode Bahan</dt>
                                         <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ material.code }}</dd>
                                     </div>
+                                    <div v-if="material.image_url" class="row-span-3">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Gambar</dt>
+                                        <div class="h-32 w-32 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-700">
+                                            <img :src="material.image_url" :alt="material.name" class="h-full w-full object-cover" />
+                                        </div>
+                                    </div>
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Nama</dt>
                                         <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ material.name }}</dd>
@@ -203,6 +212,7 @@ const activeTab = ref<'batches' | 'usages'>('batches');
                                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                                         <tr>
                                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Batch Info</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Image</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Supplier & Harga</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Qty Awal</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Sisa</th>
@@ -216,6 +226,12 @@ const activeTab = ref<'batches' | 'usages'>('batches');
                                                 <div class="text-sm font-medium text-gray-900 dark:text-white">{{ receipt.receipt_number }}</div>
                                                 <div v-if="receipt.batch_number" class="text-xs text-gray-500">{{ receipt.batch_number }}</div>
                                                 <div class="text-xs text-gray-500">{{ formatDate(receipt.receipt_date) }}</div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div v-if="receipt.image_url" class="h-10 w-10 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-700">
+                                                    <img :src="receipt.image_url" alt="Batch Image" class="h-full w-full object-cover" />
+                                                </div>
+                                                <span v-else class="text-xs text-gray-400 italic">No image</span>
                                             </td>
                                             <td class="px-6 py-4">
                                                  <div class="text-sm font-medium text-gray-900 dark:text-white">{{ receipt.supplier_name }}</div>

@@ -18,6 +18,7 @@ class MaterialReceipt extends Model
         'supplier_name',
         'receipt_date',
         'quantity',
+        'unit',
         'price_per_unit',
         'total_cost',
         'rolls_count',
@@ -29,7 +30,10 @@ class MaterialReceipt extends Model
         'remaining_quantity',
         'status',
         'barcode',
+        'image_path',
     ];
+
+    protected $appends = ['image_url'];
 
     protected function casts(): array
     {
@@ -77,7 +81,7 @@ class MaterialReceipt extends Model
     {
         // Simple barcode based on timestamp and random string or UUID
         // For now using uniqid to ensure uniqueness
-        return 'BAT-' . strtoupper(uniqid());
+        return 'BAT-'.strtoupper(uniqid());
     }
 
     public function usages(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -98,5 +102,17 @@ class MaterialReceipt extends Model
     public function receivedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'received_by');
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (! $this->image_path) {
+            return null;
+        }
+
+        return \Illuminate\Support\Facades\Storage::disk('fabriku_s3')->temporaryUrl(
+            $this->image_path,
+            now()->addMinutes(30)
+        );
     }
 }

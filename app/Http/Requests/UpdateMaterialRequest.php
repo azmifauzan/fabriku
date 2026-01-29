@@ -26,6 +26,7 @@ class UpdateMaterialRequest extends FormRequest
             'stock_quantity' => ['nullable', 'numeric', 'min:0'],
             'min_stock' => ['nullable', 'numeric', 'min:0'],
             'unit' => ['required', 'string', 'max:20'],
+            'image' => ['nullable', 'image', 'max:5120'], // 5MB max
             'description' => ['nullable', 'string'],
         ];
     }

@@ -36,6 +36,7 @@ return new class extends Migration
             $table->decimal('min_stock', 15, 3)->default(0);
             $table->decimal('reorder_point', 15, 3)->nullable();
             $table->string('unit');
+            $table->string('image_path')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -69,6 +70,7 @@ return new class extends Migration
             $table->decimal('total_cost', 15, 2);
             $table->date('receipt_date');
             $table->string('batch_number')->nullable();
+            $table->string('image_path')->nullable(); // Batch/Receipt Image
             $table->date('expired_date')->nullable(); // for food materials
             $table->foreignId('received_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('notes')->nullable();

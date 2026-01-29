@@ -63,11 +63,18 @@ class MaterialController extends Controller
 
     public function store(StoreMaterialRequest $request)
     {
-        $data = $request->safe()->except(['attributes', 'stock_quantity']);
+        $data = $request->safe()->except(['attributes', 'stock_quantity', 'image']);
 
-        // Map stock_quantity to actual field name if needed
-        if ($request->has('stock_quantity')) {
-            $data['stock_quantity'] = $request->stock_quantity;
+        // Don't set stock_quantity here - it will be set by MaterialReceipt
+        // We'll create initial stock to 0, then create a receipt if stock_quantity is provided
+        $data['stock_quantity'] = 0;
+
+        $initialStock = $request->stock_quantity ?? 0;
+
+        if ($request->hasFile('image')) {
+            $tenantId = auth()->user()->tenant_id;
+            $path = $request->file('image')->store("tenants/{$tenantId}/materials", 'fabriku_s3');
+            $data['image_path'] = $path;
         }
 
         $material = Material::create($data);
@@ -84,14 +91,42 @@ class MaterialController extends Controller
             }
         }
 
+        // Create initial receipt/batch if stock quantity is provided
+        if ($initialStock > 0) {
+            $year = now()->year;
+            $count = \App\Models\MaterialReceipt::whereYear('created_at', $year)->count() + 1;
+            $receiptNumber = sprintf('REC-%d-%04d', $year, $count);
+
+            $receiptData = [
+                'receipt_number' => $receiptNumber,
+                'supplier_name' => $material->supplier_name ?? 'Initial Stock',
+                'quantity' => $initialStock,
+                'remaining_quantity' => $initialStock,
+                'unit' => $material->unit,
+                'price_per_unit' => $material->price_per_unit ?? 0,
+                'total_cost' => $initialStock * ($material->price_per_unit ?? 0),
+                'receipt_date' => now(),
+                'batch_number' => 'BATCH-'.strtoupper($material->code).'-001',
+                'status' => 'available',
+                'notes' => 'Stok awal saat pembuatan material',
+            ];
+
+            // Include image path if material has image
+            if (! empty($data['image_path'])) {
+                $receiptData['image_path'] = $data['image_path'];
+            }
+
+            $material->receipts()->create($receiptData);
+        }
+
         return redirect()->route('materials.index')
             ->with('success', 'Material berhasil ditambahkan.');
     }
 
     public function show(Material $material)
     {
-        $material->load(['materialAttributes', 'materialType', 
-            'receipts' => fn ($query) => $query->latest()->with('usages.preparationOrder')
+        $material->load(['materialAttributes', 'materialType',
+            'receipts' => fn ($query) => $query->latest()->with('usages.preparationOrder'),
         ]);
 
         return Inertia::render('Materials/Show', [
@@ -122,6 +157,7 @@ class MaterialController extends Controller
                     'receipt_date' => $receipt->receipt_date->format('Y-m-d'),
                     'supplier_name' => $receipt->supplier_name,
                     'price_per_unit' => (string) $receipt->price_per_unit,
+                    'image_url' => $receipt->image_url,
                     'usages' => $receipt->usages->map(fn ($usage) => [
                         'id' => $usage->id,
                         'preparation_order_number' => $usage->preparationOrder->order_number,
@@ -166,11 +202,22 @@ class MaterialController extends Controller
 
     public function update(UpdateMaterialRequest $request, Material $material)
     {
-        $data = $request->safe()->except(['attributes', 'stock_quantity']);
+        $data = $request->safe()->except(['attributes', 'stock_quantity', 'image']);
 
         // Map stock_quantity to actual field name if needed
         if ($request->has('stock_quantity')) {
             $data['stock_quantity'] = $request->stock_quantity;
+        }
+
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($material->image_path) {
+                \Illuminate\Support\Facades\Storage::disk('fabriku_s3')->delete($material->image_path);
+            }
+
+            $tenantId = auth()->user()->tenant_id;
+            $path = $request->file('image')->store("tenants/{$tenantId}/materials", 'fabriku_s3');
+            $data['image_path'] = $path;
         }
 
         $material->update($data);
@@ -201,6 +248,10 @@ class MaterialController extends Controller
     {
         if ($material->receipts()->exists()) {
             return back()->with('error', 'Material tidak bisa dihapus karena sudah memiliki penerimaan.');
+        }
+
+        if ($material->image_path) {
+            \Illuminate\Support\Facades\Storage::disk('fabriku_s3')->delete($material->image_path);
         }
 
         $material->delete();

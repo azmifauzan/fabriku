@@ -3,6 +3,9 @@ import FormField from '@/components/FormField.vue';
 import FormSection from '@/components/FormSection.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { Camera, Upload, X } from 'lucide-vue-next';
+import CameraCaptureModal from '@/Components/CameraCaptureModal.vue';
 
 interface MaterialAttribute {
     id?: number;
@@ -28,12 +31,15 @@ interface Material {
     supplier_name?: string;
     description?: string;
     attributes?: MaterialAttribute[];
+    image_url?: string;
 }
 
 const props = defineProps<{
     material?: Material;
     materialTypes: MaterialType[];
 }>();
+
+const previewImage = ref<string | null>(null);
 
 const form = useForm({
     code: props.material?.code || '',
@@ -45,6 +51,7 @@ const form = useForm({
     min_stock: props.material?.min_stock || '0',
     supplier_name: props.material?.supplier_name || '',
     description: props.material?.description || '',
+    image: null as File | null,
     attributes:
         props.material?.attributes
             ?.filter((attr): attr is MaterialAttribute => attr != null)
@@ -64,17 +71,56 @@ const removeAttribute = (index: number) => {
 
 const submit = () => {
     if (props.material?.id) {
-        form.put(`/materials/${props.material.id}`, {
+        form.post(`/materials/${props.material.id}?_method=PUT`, {
             preserveScroll: true,
+            forceFormData: true,
         });
     } else {
         form.post('/materials', {
             preserveScroll: true,
+            forceFormData: true,
         });
     }
 };
 
+
+
+
+
 const isEditing = !!props.material?.id;
+
+const showCameraModal = ref(false);
+const fileInput = ref<HTMLInputElement | null>(null);
+
+const handleFileChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        processFile(target.files[0]);
+    }
+};
+
+const handleCameraCapture = (file: File) => {
+    processFile(file);
+};
+
+const processFile = (file: File) => {
+    form.image = file;
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        previewImage.value = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+};
+
+const clearImage = () => {
+    form.image = null;
+    previewImage.value = null;
+    if (fileInput.value) {
+        fileInput.value.value = '';
+    }
+};
 </script>
 
 <template>
@@ -146,6 +192,60 @@ const isEditing = !!props.material?.id;
                                 :required="true"
                                 :error="form.errors.unit"
                             />
+                        </div>
+
+                        <div class="mt-6">
+                            <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">Gambar Material</label>
+                            <div class="flex items-center gap-6">
+                                <div v-if="previewImage || material?.image_url" class="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-lg border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700">
+                                    <img :src="previewImage || material?.image_url" alt="Preview" class="h-full w-full object-cover" />
+                                    <!-- Clear Image Button -->
+                                    <button 
+                                        v-if="form.image || previewImage"
+                                        type="button" 
+                                        @click="clearImage"
+                                        class="absolute top-1 right-1 rounded-full bg-red-600 p-1 text-white shadow-sm hover:bg-red-700"
+                                    >
+                                        <X class="h-3 w-3" />
+                                    </button>
+                                </div>
+                                <div class="flex-1 space-y-3">
+                                    <div class="flex flex-wrap gap-3">
+                                        <!-- File Upload Button -->
+                                        <label class="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                                            <Upload class="h-4 w-4" />
+                                            <span>Upload File</span>
+                                            <input
+                                                ref="fileInput"
+                                                type="file"
+                                                accept="image/*"
+                                                @change="handleFileChange"
+                                                class="hidden"
+                                            />
+                                        </label>
+
+                                        <!-- Camera Button -->
+                                        <button 
+                                            type="button"
+                                            @click="showCameraModal = true"
+                                            class="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-all hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                                        >
+                                            <Camera class="h-4 w-4" />
+                                            <span>Ambil Foto</span>
+                                        </button>
+                                    </div>
+
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        Format: JPG, PNG, GIF. Max: 2MB.
+                                    </p>
+                                    <p v-if="form.image" class="text-sm text-gray-900 dark:text-gray-100">
+                                        File terpilih: <span class="font-medium">{{ form.image.name }}</span>
+                                    </p>
+                                    <p v-if="form.errors.image" class="text-sm text-red-600 dark:text-red-400">
+                                        {{ form.errors.image }}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </FormSection>
 
@@ -289,5 +389,11 @@ const isEditing = !!props.material?.id;
                 </form>
             </div>
         </div>
+
+        <CameraCaptureModal
+            :show="showCameraModal"
+            @close="showCameraModal = false"
+            @capture="handleCameraCapture"
+        />
     </AppLayout>
 </template>
