@@ -65,6 +65,9 @@ return new class extends Migration
             $table->string('receipt_number')->unique();
             $table->string('supplier_name');
             $table->decimal('quantity', 15, 3);
+            $table->decimal('remaining_quantity', 15, 3)->default(0); // For FIFO tracking
+            $table->string('status')->default('active'); // active, exhausted
+            $table->string('barcode')->nullable()->unique();
             $table->string('unit');
             $table->decimal('price_per_unit', 15, 2);
             $table->decimal('total_cost', 15, 2);
@@ -78,6 +81,7 @@ return new class extends Migration
 
             $table->index(['tenant_id', 'material_id']);
             $table->index(['tenant_id', 'receipt_date']);
+            $table->index(['tenant_id', 'status']); // For FIFO queries
         });
     }
 

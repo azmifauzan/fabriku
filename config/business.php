@@ -131,7 +131,7 @@ return [
             'label' => 'Kerajinan & Craft',
             'description' => 'Produksi kerajinan tangan, souvenir, aksesoris',
             'icon' => '🎨',
-            'enabled' => false, // Disable untuk MVP, aktifkan nanti
+            'enabled' => true,
 
             'terminology' => [
                 'material' => 'Bahan Baku',
@@ -181,7 +181,7 @@ return [
             'label' => 'Kosmetik & Skincare',
             'description' => 'Produksi kosmetik, skincare, produk kecantikan',
             'icon' => '💄',
-            'enabled' => false, // Disable untuk MVP
+            'enabled' => true,
 
             'terminology' => [
                 'material' => 'Bahan Baku',
@@ -251,5 +251,5 @@ return [
     | dengan mengubah 'enabled' => true di konfigurasi kategori di atas.
     |
     */
-    'enabled_categories' => ['garment', 'food'],
+    'enabled_categories' => ['garment', 'food', 'craft', 'cosmetic'],
 ];

@@ -99,7 +99,7 @@ const form = {
                 <!-- Demo Credentials -->
                 <div class="mt-8 pt-6 border-t border-gray-200">
                     <p class="text-center text-sm font-semibold text-gray-700 mb-4">🎯 Demo Credentials</p>
-                    <div class="grid grid-cols-1 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <!-- Garment Demo -->
                         <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
                             <div class="flex items-center gap-2 mb-2">
@@ -121,6 +121,30 @@ const form = {
                             <div class="space-y-1 text-xs text-gray-600">
                                 <p>Email: <span class="font-mono text-pink-600">admin@kuemama.com</span></p>
                                 <p>Password: <span class="font-mono text-pink-600">password</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Craft Demo -->
+                        <div class="rounded-xl border border-purple-200 bg-purple-50 p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-lg">🎨</span>
+                                <span class="text-sm font-semibold text-gray-900">Crafty Handmade</span>
+                            </div>
+                            <div class="space-y-1 text-xs text-gray-600">
+                                <p>Email: <span class="font-mono text-purple-600">admin@crafty.com</span></p>
+                                <p>Password: <span class="font-mono text-purple-600">password</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Cosmetic Demo -->
+                        <div class="rounded-xl border border-green-200 bg-green-50 p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-lg">💄</span>
+                                <span class="text-sm font-semibold text-gray-900">Glow Beauty Lab</span>
+                            </div>
+                            <div class="space-y-1 text-xs text-gray-600">
+                                <p>Email: <span class="font-mono text-green-600">admin@glowbeauty.com</span></p>
+                                <p>Password: <span class="font-mono text-green-600">password</span></p>
                             </div>
                         </div>
                     </div>
