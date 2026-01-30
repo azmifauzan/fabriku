@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\InventoryItem;
 use App\Models\InventoryLocation;
+use App\Models\StockAdjustment;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -90,40 +91,107 @@ class InventoryService
     /**
      * Adjust stock for item
      */
-    public function adjustStock(InventoryItem $item, string $type, int $quantity, string $reason): bool
+    public function adjustStock(InventoryItem $item, string $type, int $quantity, string $adjustmentType, string $reason, ?string $notes = null): StockAdjustment
     {
-        DB::transaction(function () use ($item, $type, $quantity) {
+        return DB::transaction(function () use ($item, $type, $quantity, $adjustmentType, $reason, $notes) {
             $oldStock = $item->current_quantity;
+            $adjustmentQuantity = 0;
 
             switch ($type) {
                 case 'add':
                     $item->increment('current_quantity', $quantity);
+                    $adjustmentQuantity = $quantity;
                     break;
                 case 'subtract':
                     if ($item->current_quantity < $quantity) {
                         throw new \Exception('Insufficient stock for subtraction.');
                     }
                     $item->decrement('current_quantity', $quantity);
+                    $adjustmentQuantity = -$quantity;
                     break;
                 case 'set':
+                    $adjustmentQuantity = $quantity - $item->current_quantity;
                     $item->update(['current_quantity' => $quantity]);
                     break;
                 default:
                     throw new \Exception('Invalid adjustment type.');
             }
 
-            // Log the adjustment
-            // StockMovement::create([
-            //     'inventory_item_id' => $item->id,
-            //     'type' => 'adjustment',
-            //     'quantity_before' => $oldStock,
-            //     'quantity_after' => $item->fresh()->current_stock,
-            //     'adjustment_type' => $type,
-            //     'reason' => $reason,
-            // ]);
+            // Create stock adjustment record for audit trail
+            return StockAdjustment::create([
+                'inventory_item_id' => $item->id,
+                'adjustment_type' => $adjustmentType,
+                'quantity_before' => $oldStock,
+                'quantity_after' => $item->fresh()->current_quantity,
+                'adjustment_quantity' => $adjustmentQuantity,
+                'reason' => $reason,
+                'notes' => $notes,
+            ]);
         });
+    }
 
-        return true;
+    /**
+     * Record opening balance adjustment (for manual entry items)
+     */
+    public function recordOpeningBalance(InventoryItem $item, int $quantity, string $reason, ?string $notes = null): StockAdjustment
+    {
+        if ($item->isFromProduction()) {
+            throw new \Exception('Opening balance hanya bisa untuk item manual entry.');
+        }
+
+        return $this->adjustStock(
+            $item,
+            'set',
+            $quantity,
+            StockAdjustment::TYPE_OPENING_BALANCE,
+            $reason,
+            $notes
+        );
+    }
+
+    /**
+     * Record correction adjustment
+     */
+    public function recordCorrection(InventoryItem $item, int $newQuantity, string $reason, ?string $notes = null): StockAdjustment
+    {
+        return $this->adjustStock(
+            $item,
+            'set',
+            $newQuantity,
+            StockAdjustment::TYPE_CORRECTION,
+            $reason,
+            $notes
+        );
+    }
+
+    /**
+     * Get adjustment history for an item
+     */
+    public function getAdjustmentHistory(InventoryItem $item): Collection
+    {
+        return $item->stockAdjustments()
+            ->with(['adjustedBy', 'approvedBy'])
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    /**
+     * Get adjustment statistics
+     */
+    public function getAdjustmentStats(): array
+    {
+        return [
+            'total_adjustments' => StockAdjustment::count(),
+            'adjustments_this_month' => StockAdjustment::whereMonth('created_at', now()->month)->count(),
+            'by_type' => StockAdjustment::selectRaw('adjustment_type, COUNT(*) as count')
+                ->groupBy('adjustment_type')
+                ->pluck('count', 'adjustment_type')
+                ->toArray(),
+            'recent_adjustments' => StockAdjustment::with(['inventoryItem', 'adjustedBy'])
+                ->orderByDesc('created_at')
+                ->limit(10)
+                ->get(),
+        ];
     }
 
     /**

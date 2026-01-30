@@ -46,20 +46,35 @@ class StoreInventoryItemRequest extends FormRequest
      */
     public function rules(): array
     {
+        $isManualEntry = empty($this->input('production_order_id'));
+
         return [
-            'production_order_id' => 'required|exists:production_orders,id',
+            // Source type for tracking
+            'source_type' => 'nullable|in:production,opening_balance,purchase,return',
+
+            // Production order is now optional (nullable for manual entry / opening balance)
+            'production_order_id' => 'nullable|exists:production_orders,id',
+
             'sku' => 'nullable|string|max:100|unique:inventory_items,sku,NULL,id,tenant_id,'.auth()->user()->tenant_id,
-            'product_name' => 'nullable|string|max:255',
+
+            // Product name required for manual entry
+            'product_name' => $isManualEntry ? 'required|string|max:255' : 'nullable|string|max:255',
             'name' => 'sometimes|string|max:255', // backwards compatibility
+
             'location_id' => 'required|exists:inventory_locations,id',
             'inventory_location_id' => 'sometimes|exists:inventory_locations,id', // backwards compatibility
+
+            // Quantities - required for manual entry
             'target_quantity' => 'required|integer|min:0',
             'current_quantity' => 'required|integer|min:0',
             'current_stock' => 'sometimes|integer|min:0', // backwards compatibility
             'stock_quantity' => 'sometimes|integer|min:0', // backwards compatibility
             'minimum_stock' => 'integer|min:0',
+
+            // Pricing - required for manual entry
             'unit_cost' => 'required|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',
+
             'quality_grade' => 'nullable|in:grade_a,grade_b,reject,A,B,Reject',
             'status' => 'nullable|in:available,reserved,damaged,expired',
             'notes' => 'nullable|string|max:1000',
@@ -70,10 +85,14 @@ class StoreInventoryItemRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'production_order_id.required' => 'Production order harus dipilih.',
             'production_order_id.exists' => 'Production order tidak ditemukan.',
+            'product_name.required' => 'Nama produk harus diisi untuk manual entry.',
             'sku.unique' => 'SKU sudah digunakan.',
             'inventory_location_id.exists' => 'Lokasi inventory tidak ditemukan.',
+            'location_id.required' => 'Lokasi harus dipilih.',
+            'target_quantity.required' => 'Jumlah target harus diisi.',
+            'current_quantity.required' => 'Jumlah stock saat ini harus diisi.',
+            'unit_cost.required' => 'Harga modal harus diisi.',
         ];
     }
 }

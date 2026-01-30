@@ -3,12 +3,20 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
+use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Landing Page
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    $settings = SystemSetting::getAllForTenant(null); // null = global/system-wide settings
+
+    return Inertia::render('Welcome', [
+        'settings' => [
+            'membership_price_monthly' => $settings['membership_price_monthly'] ?? 25000,
+            'membership_price_yearly' => $settings['membership_price_yearly'] ?? 250000,
+        ],
+    ]);
 })->name('home');
 
 // ==========================================
@@ -62,7 +70,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // TENANT ROUTES
 // ==========================================
 
-
 // Authentication Routes
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
@@ -103,6 +110,11 @@ Route::middleware(['auth', 'tenant', 'subscription.check'])->group(function () {
     Route::prefix('inventory')->name('inventory.')->group(function () {
         Route::get('visualization', [\App\Http\Controllers\InventoryVisualizationController::class, 'index'])->name('visualization');
         Route::resource('locations', \App\Http\Controllers\InventoryLocationController::class);
+
+        // Stock adjustment routes (must be before resource to avoid conflicts)
+        Route::post('items/{item}/adjust', [\App\Http\Controllers\InventoryItemController::class, 'adjustStock'])->name('items.adjust');
+        Route::get('items/{item}/adjustments', [\App\Http\Controllers\InventoryItemController::class, 'adjustmentHistory'])->name('items.adjustments');
+
         Route::resource('items', \App\Http\Controllers\InventoryItemController::class);
     });
 
