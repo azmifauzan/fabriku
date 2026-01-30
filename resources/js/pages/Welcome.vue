@@ -103,11 +103,11 @@ const features = [
                         <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pink-100 text-pink-700 text-sm font-medium">
                             <span class="text-lg">🍰</span> Makanan & Kue
                         </span>
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium opacity-60">
-                            <span class="text-lg">🎨</span> Kerajinan <span class="text-xs">(Segera)</span>
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
+                            <span class="text-lg">🎨</span> Kerajinan & Craft
                         </span>
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium opacity-60">
-                            <span class="text-lg">💄</span> Kosmetik <span class="text-xs">(Segera)</span>
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+                            <span class="text-lg">💄</span> Kosmetik & Skincare
                         </span>
                     </div>
 

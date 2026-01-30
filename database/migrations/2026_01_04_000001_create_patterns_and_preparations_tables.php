@@ -49,10 +49,22 @@ return new class extends Migration
             $table->index(['tenant_id', 'status']);
             $table->index(['tenant_id', 'preparation_date']);
         });
+
+        // Preparation Material Usages (FIFO tracking for material consumption)
+        Schema::create('preparation_material_usages', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('preparation_order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('material_receipt_id')->constrained()->cascadeOnDelete();
+            $table->decimal('quantity', 15, 3);
+            $table->timestamps();
+
+            $table->index(['preparation_order_id', 'material_receipt_id'], 'prep_mat_usage_index');
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('preparation_material_usages');
         Schema::dropIfExists('preparation_orders');
         Schema::dropIfExists('patterns');
     }
