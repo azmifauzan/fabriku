@@ -453,8 +453,30 @@ CREATE TABLE inventory_items (
     stored_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT inventory_items_tenant_sku_unique UNIQUE (tenant_id, sku)
+    constraint inventory_items_tenant_sku_unique unique (tenant_id, sku)
 );
+
+#### stock_adjustments
+History of manual stock changes (opname, damage, etc).
+
+```sql
+CREATE TABLE stock_adjustments (
+    id BIGSERIAL PRIMARY KEY,
+    tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    inventory_item_id BIGINT NOT NULL REFERENCES inventory_items(id) ON DELETE CASCADE,
+    adjustment_type VARCHAR(50) NOT NULL, -- opening_balance, correction, damage, loss, found, return
+    quantity_before INTEGER NOT NULL,
+    quantity_after INTEGER NOT NULL,
+    adjustment_quantity INTEGER NOT NULL, -- positive or negative
+    reason VARCHAR(255) NOT NULL,
+    notes TEXT,
+    adjusted_by BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    approved_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    approved_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 ```
 
 #### customers
