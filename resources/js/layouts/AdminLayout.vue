@@ -10,7 +10,9 @@ import {
     LogOut,
     Menu,
     X,
-    ChevronDown
+    ChevronDown,
+    CreditCard,
+    Settings
 } from 'lucide-vue-next'
 
 const page = usePage()
@@ -22,8 +24,10 @@ const userMenuOpen = ref(false)
 const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Tenants', href: '/admin/tenants', icon: Building2 },
+    { name: 'Payments', href: '/admin/payments', icon: CreditCard },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Roles', href: '/admin/roles', icon: Shield },
+    { name: 'Settings', href: '/admin/settings', icon: Settings },
     { name: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
 ]
 

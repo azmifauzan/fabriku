@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,6 +21,7 @@ class PreparationOrderFactory extends Factory
         $units = ['pieces', 'kg', 'batch', 'liter'];
 
         return [
+            'tenant_id' => Tenant::factory(),
             'pattern_id' => \App\Models\Pattern::factory(),
             'preparation_date' => fake()->dateTimeBetween('-30 days', 'now'),
             'status' => fake()->randomElement($statuses),

@@ -3,34 +3,45 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class AdminSettingController extends Controller
 {
     public function index()
     {
-        $settings = \App\Models\SystemSetting::getAllForTenant(null);
+        $settings = SystemSetting::getAllForTenant(null);
 
-        return \Inertia\Inertia::render('Admin/Settings/Index', [
+        // Ensure bank_accounts is an array
+        if (! isset($settings['bank_accounts']) || ! is_array($settings['bank_accounts'])) {
+            $settings['bank_accounts'] = [];
+        }
+
+        return Inertia::render('Admin/Settings/Index', [
             'settings' => $settings,
         ]);
     }
 
-    public function update(\Illuminate\Http\Request $request)
+    public function update(Request $request)
     {
         $request->validate([
-            'bank_name' => 'required|string',
-            'account_number' => 'required|string',
-            'account_holder' => 'required|string',
-            'membership_price_monthly' => 'required|numeric',
-            'membership_price_yearly' => 'required|numeric',
+            'bank_accounts' => 'required|array|min:1',
+            'bank_accounts.*.bank_name' => 'required|string|max:100',
+            'bank_accounts.*.account_number' => 'required|string|max:50',
+            'bank_accounts.*.account_holder' => 'required|string|max:100',
+            'membership_price_monthly' => 'required|numeric|min:0',
+            'membership_price_yearly' => 'required|numeric|min:0',
+            'membership_features' => 'nullable|array',
         ]);
 
-        \App\Models\SystemSetting::set('bank_name', $request->bank_name);
-        \App\Models\SystemSetting::set('account_number', $request->account_number);
-        \App\Models\SystemSetting::set('account_holder', $request->account_holder);
-        \App\Models\SystemSetting::set('membership_price_monthly', $request->membership_price_monthly, 'number');
-        \App\Models\SystemSetting::set('membership_price_yearly', $request->membership_price_yearly, 'number');
+        SystemSetting::set('bank_accounts', $request->bank_accounts, 'json');
+        SystemSetting::set('membership_price_monthly', $request->membership_price_monthly, 'number');
+        SystemSetting::set('membership_price_yearly', $request->membership_price_yearly, 'number');
+
+        if ($request->has('membership_features')) {
+            SystemSetting::set('membership_features', $request->membership_features, 'json');
+        }
 
         return redirect()->back()->with('success', 'Pengaturan berhasil disimpan.');
     }
