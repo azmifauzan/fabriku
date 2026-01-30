@@ -609,6 +609,8 @@ class DatabaseSeeder extends Seeder
             'receipt_number' => 'RCV-F-2026-001',
             'supplier_name' => 'Toko Bahan Kue Makmur',
             'quantity' => 50,
+            'remaining_quantity' => 50,
+            'status' => 'active',
             'unit' => 'kg',
             'price_per_unit' => 15000,
             'total_cost' => 750000,
@@ -623,6 +625,8 @@ class DatabaseSeeder extends Seeder
             'receipt_number' => 'RCV-F-2026-002',
             'supplier_name' => 'Toko Bahan Kue Makmur',
             'quantity' => 30,
+            'remaining_quantity' => 30,
+            'status' => 'active',
             'unit' => 'kg',
             'price_per_unit' => 18000,
             'total_cost' => 540000,
@@ -636,6 +640,8 @@ class DatabaseSeeder extends Seeder
             'receipt_number' => 'RCV-F-2026-003',
             'supplier_name' => 'Peternak Telur Jaya',
             'quantity' => 25,
+            'remaining_quantity' => 25,
+            'status' => 'active',
             'unit' => 'kg',
             'price_per_unit' => 28000,
             'total_cost' => 700000,
@@ -890,6 +896,329 @@ class DatabaseSeeder extends Seeder
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
         echo "🔑 FOOD Login:\n";
         echo "   🍰 Email: admin@kuemama.com\n";
+        echo "   🔐 Password: password\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+
+        // ==========================================
+        // TENANT 3: CRAFTY HANDMADE (CRAFT)
+        // ==========================================
+        $tenantCraft = Tenant::create([
+            'name' => 'Crafty Handmade',
+            'business_category' => 'craft',
+            'subscription_plan' => 'trial',
+            'subscription_expires_at' => now()->addDays(30),
+            'is_active' => true,
+        ]);
+
+        // Users for Craft
+        User::create([
+            'tenant_id' => $tenantCraft->id,
+            'name' => 'Admin Crafty',
+            'email' => 'admin@crafty.com',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+            'email_verified_at' => now(),
+        ]);
+
+        User::create([
+            'tenant_id' => $tenantCraft->id,
+            'name' => 'Manager Produksi',
+            'email' => 'manager@crafty.com',
+            'password' => Hash::make('password'),
+            'role' => 'manager',
+            'email_verified_at' => now(),
+        ]);
+
+        // Staff for Craft
+        Staff::create([
+            'tenant_id' => $tenantCraft->id,
+            'code' => 'STF-C001',
+            'name' => 'Ibu Rina',
+            'position' => 'Crafter',
+            'phone' => '08123456001',
+            'is_active' => true,
+        ]);
+
+        // Material Types for Craft
+        $materialTypeCraftBase = MaterialType::create([
+            'tenant_id' => $tenantCraft->id,
+            'name' => 'Bahan Dasar',
+            'code' => 'MAT-C-BASE',
+            'unit' => 'pcs',
+            'description' => 'Bahan dasar kerajinan',
+        ]);
+
+        // Materials for Craft
+        $materialKertas = Material::create([
+            'tenant_id' => $tenantCraft->id,
+            'material_type_id' => $materialTypeCraftBase->id,
+            'code' => 'KRT-001',
+            'name' => 'Kertas Karton Premium',
+            'supplier_name' => 'Toko Kertas Indah',
+            'price_per_unit' => 5000,
+            'stock_quantity' => 0,
+            'min_stock' => 50,
+            'unit' => 'lembar',
+            'description' => 'Kertas karton untuk gift box',
+        ]);
+
+        $materialPita = Material::create([
+            'tenant_id' => $tenantCraft->id,
+            'material_type_id' => $materialTypeCraftBase->id,
+            'code' => 'PIT-001',
+            'name' => 'Pita Satin',
+            'supplier_name' => 'Toko Pita Cantik',
+            'price_per_unit' => 15000,
+            'stock_quantity' => 0,
+            'min_stock' => 20,
+            'unit' => 'roll',
+            'description' => 'Pita satin untuk dekorasi',
+        ]);
+
+        // Material Receipts for Craft
+        MaterialReceipt::create([
+            'tenant_id' => $tenantCraft->id,
+            'material_id' => $materialKertas->id,
+            'receipt_number' => 'RCV-C-2026-001',
+            'supplier_name' => 'Toko Kertas Indah',
+            'quantity' => 100,
+            'remaining_quantity' => 100,
+            'status' => 'active',
+            'unit' => 'lembar',
+            'price_per_unit' => 5000,
+            'total_cost' => 500000,
+            'receipt_date' => now()->subDays(3),
+            'batch_number' => 'BATCH-KRT-001',
+        ]);
+
+        MaterialReceipt::create([
+            'tenant_id' => $tenantCraft->id,
+            'material_id' => $materialPita->id,
+            'receipt_number' => 'RCV-C-2026-002',
+            'supplier_name' => 'Toko Pita Cantik',
+            'quantity' => 30,
+            'remaining_quantity' => 30,
+            'status' => 'active',
+            'unit' => 'roll',
+            'price_per_unit' => 15000,
+            'total_cost' => 450000,
+            'receipt_date' => now()->subDays(3),
+            'batch_number' => 'BATCH-PIT-001',
+        ]);
+
+        // Pattern for Craft
+        Pattern::create([
+            'tenant_id' => $tenantCraft->id,
+            'code' => 'DSN-GIFTBOX-001',
+            'name' => 'Gift Box Premium',
+            'output_quantity' => 1,
+            'description' => 'Gift box premium ukuran medium',
+            'estimated_labor_cost' => 10000,
+            'instructions' => 'Lipat kertas, lem, dan hias dengan pita',
+            'is_active' => true,
+        ]);
+
+        // Customers for Craft
+        Customer::create([
+            'tenant_id' => $tenantCraft->id,
+            'code' => 'CUST-C001',
+            'name' => 'Event Organizer Sukses',
+            'phone' => '08123456789',
+            'email' => 'eo@example.com',
+            'address' => 'Jl. Event No. 1, Yogyakarta',
+        ]);
+
+        // Inventory Locations for Craft
+        InventoryLocation::create([
+            'tenant_id' => $tenantCraft->id,
+            'code' => 'RACK-C1',
+            'name' => 'Rak Produk Jadi',
+            'capacity' => 200,
+            'is_active' => true,
+        ]);
+
+        echo "📊 CRAFT Demo - Crafty Handmade:\n";
+        echo "   • Tenant: {$tenantCraft->name}\n";
+        echo "   • Users: 2 users\n";
+        echo "   • Staff: 1 (crafter)\n";
+        echo "   • Materials: 2 types (Kertas, Pita)\n";
+        echo "   • Patterns: 1 (Gift Box)\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        echo "🔑 CRAFT Login:\n";
+        echo "   🎨 Email: admin@crafty.com\n";
+        echo "   🔐 Password: password\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+
+        // ==========================================
+        // TENANT 4: GLOW BEAUTY LAB (COSMETIC)
+        // ==========================================
+        $tenantCosmetic = Tenant::create([
+            'name' => 'Glow Beauty Lab',
+            'business_category' => 'cosmetic',
+            'subscription_plan' => 'trial',
+            'subscription_expires_at' => now()->addDays(30),
+            'is_active' => true,
+        ]);
+
+        // Users for Cosmetic
+        User::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'name' => 'Admin Glow Beauty',
+            'email' => 'admin@glowbeauty.com',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+            'email_verified_at' => now(),
+        ]);
+
+        User::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'name' => 'Manager QC',
+            'email' => 'manager@glowbeauty.com',
+            'password' => Hash::make('password'),
+            'role' => 'manager',
+            'email_verified_at' => now(),
+        ]);
+
+        // Staff for Cosmetic
+        Staff::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'code' => 'STF-CO001',
+            'name' => 'Ibu Sari',
+            'position' => 'Formulator',
+            'phone' => '08123456002',
+            'is_active' => true,
+        ]);
+
+        // Material Types for Cosmetic
+        $materialTypeCosmeticBase = MaterialType::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'name' => 'Base Ingredient',
+            'code' => 'MAT-CO-BASE',
+            'unit' => 'gram',
+            'description' => 'Bahan dasar kosmetik',
+        ]);
+
+        $materialTypeCosmeticActive = MaterialType::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'name' => 'Active Ingredient',
+            'code' => 'MAT-CO-ACTIVE',
+            'unit' => 'ml',
+            'description' => 'Bahan aktif kosmetik',
+        ]);
+
+        // Materials for Cosmetic
+        $materialBaseOil = Material::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'material_type_id' => $materialTypeCosmeticBase->id,
+            'code' => 'OIL-001',
+            'name' => 'Jojoba Oil',
+            'supplier_name' => 'PT Cosmetic Supply Indonesia',
+            'price_per_unit' => 500,
+            'stock_quantity' => 0,
+            'min_stock' => 500,
+            'unit' => 'gram',
+            'description' => 'Jojoba oil untuk base serum',
+        ]);
+
+        $materialNiacinamide = Material::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'material_type_id' => $materialTypeCosmeticActive->id,
+            'code' => 'NIA-001',
+            'name' => 'Niacinamide 10%',
+            'supplier_name' => 'PT Cosmetic Supply Indonesia',
+            'price_per_unit' => 1500,
+            'stock_quantity' => 0,
+            'min_stock' => 200,
+            'unit' => 'ml',
+            'description' => 'Niacinamide untuk brightening serum',
+        ]);
+
+        // Material Receipts for Cosmetic
+        MaterialReceipt::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'material_id' => $materialBaseOil->id,
+            'receipt_number' => 'RCV-CO-2026-001',
+            'supplier_name' => 'PT Cosmetic Supply Indonesia',
+            'quantity' => 1000,
+            'remaining_quantity' => 1000,
+            'status' => 'active',
+            'unit' => 'gram',
+            'price_per_unit' => 500,
+            'total_cost' => 500000,
+            'receipt_date' => now()->subDays(5),
+            'batch_number' => 'BATCH-OIL-001',
+            'expired_date' => now()->addYears(2),
+        ]);
+
+        MaterialReceipt::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'material_id' => $materialNiacinamide->id,
+            'receipt_number' => 'RCV-CO-2026-002',
+            'supplier_name' => 'PT Cosmetic Supply Indonesia',
+            'quantity' => 500,
+            'remaining_quantity' => 500,
+            'status' => 'active',
+            'unit' => 'ml',
+            'price_per_unit' => 1500,
+            'total_cost' => 750000,
+            'receipt_date' => now()->subDays(5),
+            'batch_number' => 'BATCH-NIA-001',
+            'expired_date' => now()->addYears(1),
+        ]);
+
+        // Pattern (Formula) for Cosmetic
+        Pattern::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'code' => 'FRM-SERUM-001',
+            'name' => 'Brightening Serum 30ml',
+            'output_quantity' => 1,
+            'description' => 'Serum wajah untuk mencerahkan kulit',
+            'estimated_labor_cost' => 25000,
+            'instructions' => 'Campur base oil dengan niacinamide, aduk hingga homogen',
+            'is_active' => true,
+        ]);
+
+        // Contractors for Cosmetic
+        Contractor::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'code' => 'CTR-CO001',
+            'name' => 'Maklon Cantik Indonesia',
+            'type' => 'company',
+            'specialty' => 'Contract manufacturing skincare',
+            'contact_person' => 'Bu Diana',
+            'phone' => '08555666777',
+            'is_active' => true,
+        ]);
+
+        // Customers for Cosmetic
+        Customer::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'code' => 'CUST-CO001',
+            'name' => 'Klinik Kecantikan Bunda',
+            'phone' => '08666777888',
+            'email' => 'klinik@example.com',
+            'address' => 'Jl. Kecantikan No. 99, Surabaya',
+        ]);
+
+        // Inventory Locations for Cosmetic
+        InventoryLocation::create([
+            'tenant_id' => $tenantCosmetic->id,
+            'code' => 'RACK-CO1',
+            'name' => 'Rak Produk Jadi - Cool Storage',
+            'capacity' => 500,
+            'is_active' => true,
+        ]);
+
+        echo "📊 COSMETIC Demo - Glow Beauty Lab:\n";
+        echo "   • Tenant: {$tenantCosmetic->name}\n";
+        echo "   • Users: 2 users\n";
+        echo "   • Staff: 1 (formulator)\n";
+        echo "   • Contractors: 1 (maklon)\n";
+        echo "   • Materials: 2 types (Jojoba Oil, Niacinamide)\n";
+        echo "   • Formulas: 1 (Brightening Serum)\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        echo "🔑 COSMETIC Login:\n";
+        echo "   💄 Email: admin@glowbeauty.com\n";
         echo "   🔐 Password: password\n";
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
     }
