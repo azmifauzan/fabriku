@@ -500,8 +500,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### 🚀 Future Enhancements
 - 📱 Mobile app (React Native)
-- 🎨 Kategori baru: Kerajinan & Craft
-- 💄 Kategori baru: Kosmetik & Skincare
 - 📷 Barcode/QR code scanning
 - 🔔 Real-time notifications
 - 📧 Email automation
