@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
-import { Camera, Upload, X } from 'lucide-vue-next';
+import { Camera, Upload, X, Package, Truck, RotateCcw, FileText } from 'lucide-vue-next';
 import CameraCaptureModal from '@/Components/CameraCaptureModal.vue';
 
 interface Location {
@@ -41,6 +41,7 @@ interface Item {
     sku: string;
     name: string;
     production_order_id?: number;
+    source_type?: string;
     inventory_location_id: number;
     target_quantity: number;
     current_stock: number;
@@ -56,10 +57,21 @@ const props = defineProps<{
     item?: Item;
     locations: Location[];
     productionOrders: ProductionOrder[];
+    allowManualEntry?: boolean;
+    sourceTypes?: Record<string, string>;
 }>();
+
+// Entry type: 'production' or 'manual'
+const entryType = ref<'production' | 'manual'>(
+    props.item?.production_order_id ? 'production' : (props.item?.id ? 'manual' : 'production')
+);
+
+// Source type for manual entry
+const selectedSourceType = ref<string>(props.item?.source_type || 'opening_balance');
 
 const form = useForm({
     production_order_id: props.item?.production_order_id || null,
+    source_type: props.item?.source_type || 'production',
     sku: props.item?.sku || '',
     name: props.item?.name || '',
     inventory_location_id: props.item?.inventory_location_id || null,
@@ -69,6 +81,22 @@ const form = useForm({
     selling_price: props.item?.selling_price || '0',
     notes: props.item?.notes || '',
     image: null as File | null,
+});
+
+// Watch entry type changes to reset related fields
+watch(entryType, (newValue) => {
+    if (newValue === 'manual') {
+        form.production_order_id = null;
+        form.source_type = selectedSourceType.value;
+    } else {
+        form.source_type = 'production';
+    }
+});
+
+watch(selectedSourceType, (newValue) => {
+    if (entryType.value === 'manual') {
+        form.source_type = newValue;
+    }
 });
 
 // Auto-populate fields when production order is selected
@@ -92,6 +120,9 @@ const formatDate = (dateString: string | null) => {
 const productionUnit = computed(() => {
     return selectedProductionOrder.value?.preparation_order?.output_unit || 'pcs';
 });
+
+// Is manual entry mode
+const isManualEntry = computed(() => entryType.value === 'manual');
 
 watch(
     () => form.production_order_id,
@@ -177,6 +208,20 @@ const clearImage = () => {
         fileInput.value.value = '';
     }
 };
+
+// Source type icons
+const getSourceTypeIcon = (type: string) => {
+    switch (type) {
+        case 'opening_balance':
+            return FileText;
+        case 'purchase':
+            return Truck;
+        case 'return':
+            return RotateCcw;
+        default:
+            return Package;
+    }
+};
 </script>
 
 <template>
@@ -198,8 +243,100 @@ const clearImage = () => {
             </div>
 
             <form @submit.prevent="submit" class="space-y-6">
-                <!-- Production Order Selection -->
-                <div>
+                <!-- Entry Type Selection -->
+                <div v-if="allowManualEntry">
+                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Sumber Inventory</h3>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <!-- Production Order Option -->
+                        <label 
+                            class="relative flex cursor-pointer rounded-lg border p-4 transition-all"
+                            :class="entryType === 'production' 
+                                ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500 dark:bg-indigo-900/20' 
+                                : 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'"
+                        >
+                            <input 
+                                type="radio" 
+                                v-model="entryType" 
+                                value="production"
+                                class="sr-only" 
+                            />
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full" 
+                                     :class="entryType === 'production' ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'">
+                                    <Package class="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">Dari Production Order</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Item hasil produksi internal/eksternal</p>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Manual Entry Option -->
+                        <label 
+                            class="relative flex cursor-pointer rounded-lg border p-4 transition-all"
+                            :class="entryType === 'manual' 
+                                ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500 dark:bg-indigo-900/20' 
+                                : 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'"
+                        >
+                            <input 
+                                type="radio" 
+                                v-model="entryType" 
+                                value="manual"
+                                class="sr-only" 
+                            />
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full" 
+                                     :class="entryType === 'manual' ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'">
+                                    <FileText class="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">Manual Entry / Stock Awal</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Input manual untuk stock awal, pembelian, retur</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Source Type Selection (for Manual Entry) -->
+                <div v-if="isManualEntry && sourceTypes" class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+                    <h4 class="mb-3 font-medium text-blue-900 dark:text-blue-300">Tipe Sumber</h4>
+                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                        <label 
+                            v-for="(label, type) in sourceTypes" 
+                            :key="type"
+                            v-show="type !== 'production'"
+                            class="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-all"
+                            :class="selectedSourceType === type 
+                                ? 'border-blue-500 bg-blue-100 dark:bg-blue-800/30' 
+                                : 'border-blue-200 bg-white hover:bg-blue-50 dark:border-blue-700 dark:bg-blue-900/10 dark:hover:bg-blue-900/20'"
+                        >
+                            <input 
+                                type="radio" 
+                                v-model="selectedSourceType" 
+                                :value="type"
+                                class="text-blue-600 focus:ring-blue-500" 
+                            />
+                            <component :is="getSourceTypeIcon(type)" class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <span class="text-sm text-blue-900 dark:text-blue-200">{{ label }}</span>
+                        </label>
+                    </div>
+                    <p class="mt-3 text-xs text-blue-700 dark:text-blue-400">
+                        <span v-if="selectedSourceType === 'opening_balance'">
+                            <strong>Stock Awal:</strong> Gunakan untuk mencatat stock yang sudah ada sebelum menggunakan sistem.
+                        </span>
+                        <span v-else-if="selectedSourceType === 'purchase'">
+                            <strong>Pembelian:</strong> Gunakan untuk barang jadi yang dibeli langsung dari supplier.
+                        </span>
+                        <span v-else-if="selectedSourceType === 'return'">
+                            <strong>Retur:</strong> Gunakan untuk barang yang dikembalikan oleh customer.
+                        </span>
+                    </p>
+                </div>
+
+                <!-- Production Order Selection (only for production type) -->
+                <div v-if="!isManualEntry">
                     <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Pilih Production Order</h3>
                     <div>
                         <label for="production_order_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -220,11 +357,14 @@ const clearImage = () => {
                         <p v-if="form.errors.production_order_id" class="mt-1 text-sm text-red-600 dark:text-red-400">
                             {{ form.errors.production_order_id }}
                         </p>
+                        <p v-if="productionOrders.length === 0" class="mt-2 text-sm text-amber-600 dark:text-amber-400">
+                            Tidak ada production order yang tersedia. Gunakan "Manual Entry" untuk menambah stock awal.
+                        </p>
                     </div>
                 </div>
 
                 <!-- Production Order Info Box -->
-                <div v-if="selectedProductionOrder" class="rounded-lg border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20">
+                <div v-if="!isManualEntry && selectedProductionOrder" class="rounded-lg border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20">
                     <h3 class="mb-3 text-sm font-semibold text-indigo-900 dark:text-indigo-300">Informasi Production Order</h3>
                     <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                         <div>
@@ -265,13 +405,35 @@ const clearImage = () => {
                     </div>
                 </div>
 
+                <!-- Product Name (for Manual Entry) -->
+                <div v-if="isManualEntry">
+                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Informasi Produk</h3>
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Nama Produk <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="name"
+                            v-model="form.name"
+                            type="text"
+                            required
+                            placeholder="Contoh: Mukena Bali Putih, Kue Lapis Legit, dll"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            :class="{ 'border-red-300': form.errors.name }"
+                        />
+                        <p v-if="form.errors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.errors.name }}
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Stock Information -->
                 <div>
                     <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Data Stock</h3>
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
                             <label for="target_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Target Produksi <span class="text-red-500">*</span>
+                                {{ isManualEntry ? 'Jumlah Target' : 'Target Produksi' }} <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <input
@@ -280,15 +442,20 @@ const clearImage = () => {
                                     type="number"
                                     required
                                     min="0"
-                                    readonly
-                                    class="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 pr-16 text-sm shadow-sm transition-all dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                                    :class="{ 'border-red-300': form.errors.target_quantity }"
+                                    :readonly="!isManualEntry"
+                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-16 text-sm shadow-sm transition-all"
+                                    :class="[
+                                        { 'border-red-300': form.errors.target_quantity },
+                                        !isManualEntry ? 'bg-gray-50 dark:bg-gray-800 dark:text-gray-400' : 'focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
+                                    ]"
                                 />
                                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
                                     {{ productionUnit }}
                                 </span>
                             </div>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Dari production order</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                {{ isManualEntry ? 'Jumlah yang diharapkan' : 'Dari production order' }}
+                            </p>
                             <p v-if="form.errors.target_quantity" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.target_quantity }}
                             </p>
@@ -296,7 +463,7 @@ const clearImage = () => {
 
                         <div>
                             <label for="current_stock" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Hasil Produksi Aktual <span class="text-red-500">*</span>
+                                {{ isManualEntry ? 'Jumlah Stock' : 'Hasil Produksi Aktual' }} <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <input
@@ -312,7 +479,9 @@ const clearImage = () => {
                                     {{ productionUnit }}
                                 </span>
                             </div>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Jumlah barang jadi yang sebenarnya</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                {{ isManualEntry ? 'Jumlah stock saat ini' : 'Jumlah barang jadi yang sebenarnya' }}
+                            </p>
                             <p v-if="form.errors.current_stock" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.current_stock }}
                             </p>
@@ -328,18 +497,26 @@ const clearImage = () => {
                             <label for="unit_cost" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Harga Modal (COGS) <span class="text-red-500">*</span>
                             </label>
-                            <input
-                                id="unit_cost"
-                                v-model="form.unit_cost"
-                                type="number"
-                                step="0.01"
-                                required
-                                min="0"
-                                readonly
-                                class="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:bg-gray-800 dark:text-white"
-                                :class="{ 'border-red-300': form.errors.unit_cost }"
-                            />
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Dihitung otomatis dari biaya bahan + biaya produksi</p>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">Rp</span>
+                                <input
+                                    id="unit_cost"
+                                    v-model="form.unit_cost"
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    min="0"
+                                    :readonly="!isManualEntry"
+                                    class="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm shadow-sm transition-all"
+                                    :class="[
+                                        { 'border-red-300': form.errors.unit_cost },
+                                        !isManualEntry ? 'bg-gray-50 dark:bg-gray-800 dark:text-gray-400' : 'focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
+                                    ]"
+                                />
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                {{ isManualEntry ? 'Masukkan harga modal per unit' : 'Dihitung otomatis dari biaya bahan + biaya produksi' }}
+                            </p>
                             <p v-if="form.errors.unit_cost" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.unit_cost }}
                             </p>
@@ -349,16 +526,19 @@ const clearImage = () => {
                             <label for="selling_price" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Harga Jual <span class="text-red-500">*</span>
                             </label>
-                            <input
-                                id="selling_price"
-                                v-model="form.selling_price"
-                                type="number"
-                                step="0.01"
-                                required
-                                min="0"
-                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                :class="{ 'border-red-300': form.errors.selling_price }"
-                            />
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">Rp</span>
+                                <input
+                                    id="selling_price"
+                                    v-model="form.selling_price"
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    min="0"
+                                    class="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    :class="{ 'border-red-300': form.errors.selling_price }"
+                                />
+                            </div>
                             <p v-if="form.errors.selling_price" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.selling_price }}
                             </p>

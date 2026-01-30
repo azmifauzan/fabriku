@@ -7,7 +7,6 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AdminTenantController extends Controller
@@ -111,9 +110,17 @@ class AdminTenantController extends Controller
             'sales_orders_count' => $tenant->salesOrders()->count(),
         ];
 
+        // Get payment history for the tenant
+        $payments = \App\Models\SubscriptionPayment::where('tenant_id', $tenant->id)
+            ->with('admin')
+            ->latest()
+            ->take(10)
+            ->get();
+
         return Inertia::render('Admin/Tenants/Show', [
             'tenant' => $tenant,
             'stats' => $stats,
+            'payments' => $payments,
         ]);
     }
 
@@ -135,7 +142,7 @@ class AdminTenantController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'business_category' => ['required', 'string', 'in:garment,food,craft,cosmetic,other'],
-            'subscription_plan' => ['required', 'string', 'in:trial,basic,premium,enterprise'],
+            'subscription_plan' => ['required', 'string', 'in:trial,full,basic,premium,enterprise'],
             'subscription_expires_at' => ['required', 'date'],
             'is_active' => ['required', 'boolean'],
         ]);

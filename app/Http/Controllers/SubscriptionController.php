@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 class SubscriptionController extends Controller
 {
     public function index()
     {
         $tenant = auth()->user()->tenant;
         $settings = \App\Models\SystemSetting::getAllForTenant(null);
-        
+
         $pendingPayment = \App\Models\SubscriptionPayment::where('tenant_id', $tenant->id)
             ->where('status', 'pending')
             ->latest()
@@ -37,10 +35,11 @@ class SubscriptionController extends Controller
             'amount' => 'required|numeric',
         ]);
 
-        $path = $request->file('proof')->store('payment-proofs', 'public');
+        $tenantId = auth()->user()->tenant_id;
+        $path = $request->file('proof')->store("tenants/{$tenantId}/payment-proofs", 'fabriku_s3');
 
         \App\Models\SubscriptionPayment::create([
-            'tenant_id' => auth()->user()->tenant_id,
+            'tenant_id' => $tenantId,
             'amount' => $request->amount,
             'proof_path' => $path,
             'status' => 'pending',

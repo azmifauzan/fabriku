@@ -2,13 +2,41 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import FAQ from '@/components/Landing/FAQ.vue';
+import { Check, X } from 'lucide-vue-next';
 
-defineProps({
+const props = defineProps({
     canLogin: {
         type: Boolean,
-        required: true,
+        required: false,
+    },
+    settings: {
+        type: Object,
+        default: () => ({
+            membership_price_monthly: 25000,
+            membership_price_yearly: 250000,
+        }),
     },
 });
+
+const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+    }).format(value);
+};
+
+const features = [
+    { name: 'Dashboard & Analytics', free: true, full: true },
+    { name: 'Manajemen Bahan Baku', free: true, full: true },
+    { name: 'Produksi Internal & Outsourcing', free: true, full: true },
+    { name: 'Inventory Gudang', free: true, full: true },
+    { name: 'Penjualan & Sales Order', free: true, full: true },
+    { name: 'Export Laporan (Excel/PDF)', free: true, full: true },
+    { name: 'Laporan Lengkap & Analytics', free: true, full: true },
+    { name: 'Masa Aktif Full Access', free: '30 Hari', full: 'Sesuai Paket' },
+    { name: 'Setelah Expired', free: 'Read-Only', full: 'Perpanjang' },
+];
 </script>
 
 <template>
@@ -16,7 +44,7 @@ defineProps({
         <Head title="Fabriku - Platform Manajemen Produksi Multi-Kategori untuk UMKM" />
 
         <!-- Navigation -->
-        <nav class="bg-white/80 backdrop-blur-sm border-b border-gray-100">
+        <nav class="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 justify-between items-center">
                     <div class="flex items-center gap-2">
@@ -24,6 +52,14 @@ defineProps({
                             <span class="text-white font-bold text-lg">F</span>
                         </div>
                         <h1 class="text-xl font-bold text-gray-900">Fabriku</h1>
+                    </div>
+                    <div class="hidden md:flex items-center gap-6">
+                        <a href="#features" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                            Fitur
+                        </a>
+                        <a href="#pricing" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                            Harga
+                        </a>
                     </div>
                     <div class="flex items-center gap-3">
                         <Link href="/login" class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
@@ -87,10 +123,10 @@ defineProps({
                             </svg>
                         </Link>
                         <a
-                            href="#features"
+                            href="#pricing"
                             class="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                         >
-                            Lihat Fitur
+                            Lihat Harga
                         </a>
                     </div>
 
@@ -106,7 +142,7 @@ defineProps({
                             <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            <span>Akses penuh fitur</span>
+                            <span>Full akses 30 hari</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -209,6 +245,131 @@ defineProps({
                         <p class="text-gray-600 text-sm leading-relaxed">
                             Dashboard KPI, laporan produksi, inventory, sales, hingga profit & loss statement lengkap.
                         </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="py-24 bg-gradient-to-b from-white to-indigo-50">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <span class="text-indigo-600 font-semibold text-sm uppercase tracking-wide">Harga</span>
+                    <h2 class="mt-2 text-3xl sm:text-4xl font-bold text-gray-900">
+                        Pilih Paket yang Sesuai
+                    </h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                        Mulai dengan Free Trial 30 hari dengan full akses semua fitur, atau langsung upgrade ke Full Member untuk akses tanpa batas waktu
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <!-- Free Trial -->
+                    <div class="relative bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Free Trial</h3>
+                            <div class="text-4xl font-extrabold text-gray-900">
+                                Rp 0
+                                <span class="text-lg font-normal text-gray-500">/30 hari</span>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500">Full akses semua fitur</p>
+                            <p class="mt-1 text-xs text-amber-600 font-medium">Setelah expired: Read-only access</p>
+                        </div>
+
+                        <ul class="space-y-3 mb-8">
+                            <li v-for="feature in features" :key="feature.name" class="flex items-start gap-3">
+                                <component 
+                                    :is="feature.free === true ? Check : feature.free ? Check : X"
+                                    :class="feature.free === true ? 'text-green-500' : feature.free ? 'text-green-500' : 'text-gray-300'"
+                                    class="w-5 h-5 flex-shrink-0 mt-0.5"
+                                />
+                                <span :class="feature.free ? 'text-gray-700' : 'text-gray-400'">
+                                    {{ feature.name }}
+                                    <span v-if="typeof feature.free === 'string'" class="font-medium text-indigo-600">({{ feature.free }})</span>
+                                </span>
+                            </li>
+                        </ul>
+
+                        <Link
+                            href="/register"
+                            class="block w-full py-3 px-6 text-center font-semibold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors"
+                        >
+                            Coba Gratis
+                        </Link>
+                    </div>
+
+                    <!-- Full Member -->
+                    <div class="relative bg-indigo-600 rounded-2xl shadow-xl p-8 border-2 border-indigo-600">
+                        <div class="absolute -top-4 left-1/2 -translate-x-1/2">
+                            <span class="px-4 py-1 bg-yellow-400 text-yellow-900 text-sm font-bold rounded-full">
+                                RECOMMENDED
+                            </span>
+                        </div>
+
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-white mb-2">Full Member</h3>
+                            <div class="text-4xl font-extrabold text-white">
+                                {{ formatCurrency(settings.membership_price_monthly) }}
+                                <span class="text-lg font-normal text-indigo-200">/bulan</span>
+                            </div>
+                            <p class="mt-2 text-sm text-indigo-200">
+                                atau {{ formatCurrency(settings.membership_price_yearly) }}/tahun
+                                <span class="block text-yellow-300 font-medium">
+                                    (Hemat {{ formatCurrency((settings.membership_price_monthly * 12) - settings.membership_price_yearly) }})
+                                </span>
+                            </p>
+                            <p class="mt-2 text-xs text-indigo-100">Akses penuh tanpa batas waktu selama aktif</p>
+                        </div>
+
+                        <ul class="space-y-3 mb-8">
+                            <li v-for="feature in features" :key="feature.name" class="flex items-start gap-3">
+                                <Check class="w-5 h-5 text-indigo-300 flex-shrink-0 mt-0.5" />
+                                <span class="text-white">
+                                    {{ feature.name }}
+                                    <span v-if="typeof feature.full === 'string'" class="font-medium text-yellow-300">({{ feature.full }})</span>
+                                </span>
+                            </li>
+                        </ul>
+
+                        <Link
+                            href="/register"
+                            class="block w-full py-3 px-6 text-center font-semibold text-indigo-600 bg-white rounded-xl hover:bg-indigo-50 transition-colors"
+                        >
+                            Mulai Sekarang
+                        </Link>
+                    </div>
+                </div>
+
+                <!-- Feature Comparison Table (Mobile Hidden) -->
+                <div class="mt-16 hidden lg:block">
+                    <h3 class="text-xl font-bold text-gray-900 text-center mb-8">Perbandingan Fitur Lengkap</h3>
+                    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Fitur</th>
+                                    <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900">Free Trial</th>
+                                    <th class="px-6 py-4 text-center text-sm font-semibold text-indigo-600">Full Member</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr v-for="feature in features" :key="feature.name" class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-sm text-gray-700">{{ feature.name }}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <component 
+                                            :is="feature.free === true ? Check : feature.free ? Check : X"
+                                            :class="feature.free === true ? 'text-green-500' : feature.free ? 'text-green-500' : 'text-gray-300'"
+                                            class="w-5 h-5 inline-block"
+                                        />
+                                        <span v-if="typeof feature.free === 'string'" class="text-sm text-gray-600 ml-1">{{ feature.free }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center bg-indigo-50/50">
+                                        <Check class="w-5 h-5 text-indigo-600 inline-block" />
+                                        <span v-if="typeof feature.full === 'string'" class="text-sm text-indigo-600 ml-1">{{ feature.full }}</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

@@ -456,7 +456,8 @@ Admin Panel mengimplementasikan multiple security layers.
 
 - **Middleware**: `AdminMiddleware` untuk semua routes
 - **Active Check**: Hanya admin aktif yang bisa login
-- **Role Check**: Planned untuk granular access
+- **Role Check**: Full access control via Gates & Policies
+- **RBAC**: Granular permissions per role (segera aktif penuh)
 
 ### Best Security Practices
 

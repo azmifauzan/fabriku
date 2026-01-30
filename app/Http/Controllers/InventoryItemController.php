@@ -8,11 +8,15 @@ use App\Models\InventoryItem;
 use App\Models\InventoryLocation;
 use App\Models\Pattern;
 use App\Models\ProductionOrder;
+use App\Models\StockAdjustment;
+use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class InventoryItemController extends Controller
 {
+    public function __construct(private InventoryService $inventoryService) {}
+
     public function index(Request $request)
     {
         $query = InventoryItem::query()
@@ -88,6 +92,7 @@ class InventoryItemController extends Controller
 
         return Inertia::render('Inventory/Items/Show', [
             'item' => $item,
+            'adjustmentTypes' => StockAdjustment::getAdjustmentTypes(),
         ]);
     }
 
@@ -117,6 +122,13 @@ class InventoryItemController extends Controller
             'locations' => $locations,
             'patterns' => $patterns,
             'productionOrders' => $productionOrders,
+            'allowManualEntry' => true,
+            'sourceTypes' => [
+                'production' => 'Dari Production Order',
+                'opening_balance' => 'Stock Awal / Opening Balance',
+                'purchase' => 'Pembelian Langsung',
+                'return' => 'Retur Customer',
+            ],
             'categories' => [
                 'garment' => 'Garment',
                 'food' => 'Makanan',
@@ -130,6 +142,22 @@ class InventoryItemController extends Controller
     {
         $data = $request->safe()->except(['image']);
 
+        // Set source_type based on whether production_order_id is present
+        if (empty($data['production_order_id'])) {
+            $data['source_type'] = $data['source_type'] ?? 'opening_balance';
+        } else {
+            $data['source_type'] = 'production';
+
+            // Get product_name from production order's pattern if not provided
+            if (empty($data['product_name'])) {
+                $productionOrder = ProductionOrder::with('preparationOrder.pattern')
+                    ->find($data['production_order_id']);
+                if ($productionOrder && $productionOrder->preparationOrder && $productionOrder->preparationOrder->pattern) {
+                    $data['product_name'] = $productionOrder->preparationOrder->pattern->name;
+                }
+            }
+        }
+
         if ($request->hasFile('image')) {
             $data['image_path'] = $request->file('image')->store(
                 'tenants/'.auth()->user()->tenant_id.'/inventory',
@@ -138,6 +166,10 @@ class InventoryItemController extends Controller
         }
 
         $item = InventoryItem::create($data);
+
+        // Note: Opening balance is now reflected in the initial current_quantity
+        // Stock adjustments will track subsequent changes to stock
+        // The source_type field indicates how this item was initially created
 
         return redirect()
             ->route('inventory.items.show', $item)
@@ -175,6 +207,13 @@ class InventoryItemController extends Controller
             'locations' => $locations,
             'patterns' => $patterns,
             'productionOrders' => $productionOrders,
+            'allowManualEntry' => true,
+            'sourceTypes' => [
+                'production' => 'Dari Production Order',
+                'opening_balance' => 'Stock Awal / Opening Balance',
+                'purchase' => 'Pembelian Langsung',
+                'return' => 'Retur Customer',
+            ],
             'categories' => [
                 'garment' => 'Garment',
                 'food' => 'Makanan',
@@ -222,33 +261,50 @@ class InventoryItemController extends Controller
     }
 
     // Stock management endpoints
-    public function adjustStock(Request $request, InventoryItem $inventoryItem)
+    public function adjustStock(Request $request, InventoryItem $item)
     {
-        $request->validate([
+        $rules = [
             'type' => 'required|in:add,subtract,set',
             'quantity' => 'required|integer|min:0',
+            'adjustment_type' => 'required|in:'.implode(',', array_keys(StockAdjustment::getAdjustmentTypes())),
             'reason' => 'required|string|max:255',
-        ]);
+            'notes' => 'nullable|string|max:1000',
+        ];
 
-        $oldStock = $inventoryItem->current_stock;
-
-        switch ($request->type) {
-            case 'add':
-                $inventoryItem->increment('current_quantity', $request->quantity);
-                break;
-            case 'subtract':
-                $newStock = max(0, $oldStock - $request->quantity);
-                $inventoryItem->update(['current_quantity' => $newStock]);
-                break;
-            case 'set':
-                $inventoryItem->update(['current_quantity' => $request->quantity]);
-                break;
+        // Add custom validation for subtract to prevent negative stock
+        if ($request->type === 'subtract' && $request->quantity > $item->current_quantity) {
+            $rules['quantity'] = 'required|integer|min:0|max:'.$item->current_quantity;
         }
 
-        // Log stock adjustment (would be implemented with audit trail)
-        // StockMovement::create([...]);
+        $request->validate($rules, [
+            'quantity.max' => 'Jumlah pengurangan tidak boleh melebihi stock saat ini ('.$item->current_quantity.').',
+        ]);
 
-        return back()->with('success', 'Stock berhasil disesuaikan.');
+        try {
+            $adjustment = $this->inventoryService->adjustStock(
+                $item,
+                $request->type,
+                $request->quantity,
+                $request->adjustment_type,
+                $request->reason,
+                $request->notes
+            );
+
+            return back()->with('success', 'Stock berhasil disesuaikan.');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function adjustmentHistory(InventoryItem $item)
+    {
+        $adjustments = $this->inventoryService->getAdjustmentHistory($item);
+
+        return Inertia::render('Inventory/Items/AdjustmentHistory', [
+            'item' => $item->load(['inventoryLocation', 'productionOrder.preparationOrder.pattern']),
+            'adjustments' => $adjustments,
+            'adjustmentTypes' => StockAdjustment::getAdjustmentTypes(),
+        ]);
     }
 
     public function reserve(Request $request, InventoryItem $inventoryItem)

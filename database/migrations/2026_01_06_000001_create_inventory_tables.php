@@ -27,7 +27,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->string('sku')->unique();
-            $table->foreignId('production_order_id')->constrained()->cascadeOnDelete();
+            // production_order_id is nullable for manual entry (opening balance, purchase, return)
+            $table->foreignId('production_order_id')->nullable()->constrained()->nullOnDelete();
+            // source_type: 'production' = from production order, 'opening_balance' = manual entry / stock awal, 'purchase' = direct purchase, 'return' = customer return
+            $table->string('source_type')->default('production');
             $table->foreignId('location_id')->nullable()->constrained('inventory_locations')->nullOnDelete();
             $table->string('product_name');
             $table->string('product_code')->nullable();
@@ -41,12 +44,14 @@ return new class extends Migration
             $table->decimal('selling_price', 15, 2)->nullable();
             $table->date('expired_date')->nullable(); // for food products
             $table->text('notes')->nullable();
+            $table->string('image_path')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
             $table->index(['tenant_id', 'production_order_id']);
             $table->index(['tenant_id', 'location_id']);
             $table->index(['tenant_id', 'sku']);
+            $table->index(['tenant_id', 'source_type']);
         });
     }
 
