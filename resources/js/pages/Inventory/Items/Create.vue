@@ -35,6 +35,8 @@ interface ProductionOrder {
 interface Props {
     locations: Location[];
     productionOrders: ProductionOrder[];
+    allowManualEntry?: boolean;
+    sourceTypes?: Record<string, string>;
 }
 
 defineProps<Props>();
@@ -46,7 +48,12 @@ defineProps<Props>();
 
         <div class="px-6 py-6">
             <div class="mx-auto max-w-4xl">
-                <ItemForm :locations="locations" :production-orders="productionOrders" />
+                <ItemForm 
+                    :locations="locations" 
+                    :production-orders="productionOrders" 
+                    :allow-manual-entry="allowManualEntry"
+                    :source-types="sourceTypes"
+                />
             </div>
         </div>
     </AppLayout>

@@ -1,7 +1,7 @@
 # Database Schema - Fabriku
 
 ## Overview
-Database schema untuk Fabriku menggunakan PostgreSQL dengan multi-tenancy architecture. Setiap tenant memiliki data yang terisolasi dengan tenant_id. 
+Database schema untuk Fabriku menggunakan PostgreSQL dengan multi-tenancy architecture. Setiap tenant memiliki data yang terisolasi dengan tenant_id.
 
 **Design Philosophy**: Schema dirancang **category-agnostic** (tidak spesifik garment saja) untuk mendukung berbagai jenis bisnis UMKM. Terminologi menggunakan istilah generik yang bisa diaplikasikan untuk garment, makanan/kue, craft, dll.
 
@@ -15,64 +15,37 @@ Database schema untuk Fabriku menggunakan PostgreSQL dengan multi-tenancy archit
 
 ## Entity Relationship Diagram (ERD)
 
-```
-┌──────────────┐
-│   tenants    │
-└──────┬───────┘
-       │
-       │ (1:N)
-       │
-┌──────┴───────────────────────────────────────────┐
-│                                                   │
-│  ┌─────────┐    ┌──────────────┐    ┌─────────┐ │
-│  │  users  │    │   patterns   │    │customers│ │
-│  └─────────┘    └──────────────┘    └─────────┘ │
-│                                                   │
-│  ┌──────────────┐    ┌─────────────────┐        │
-│  │  materials   │    │  contractors    │        │
-│  └──────┬───────┘    └─────────────────┘        │
-│         │                                         │
-│         │ (1:N)                                   │
-│  ┌──────┴──────────────┐                        │
-│  │ material_receipts   │                        │
-│  └─────────────────────┘                        │
-│                                                   │
-│  ┌─────────────────────┐                        │
-│  │ preparation_orders  │  ← Generic: Cutting/   │
-│  │ (materials_used)    │    Mixing/Assembly     │
-│  └──────┬──────────────┘    Auto deduct stock   │
-│         │                                         │
-│         │ (N:1)                                   │
-│  ┌──────┴──────────────┐                        │
-│  │ production_orders   │                        │
-│  └──────┬──────────────┘                        │
-│         │                                         │
-│         │ (1:N)                                   │
-│  ┌──────┴──────────────┐                        │
-│  │ production_batches  │                        │
-│  └──────┬──────────────┘                        │
-│         │                                         │
-│         │ (1:N)                                   │
-│  ┌──────┴──────────────┐                        │
-│  │  inventory_items    │                        │
-│  └──────┬──────────────┘                        │
-│         │                                         │
-│         │ (N:1)                                   │
-│  ┌──────┴──────────────┐                        │
-│  │   sales_orders      │                        │
-│  └──────┬──────────────┘                        │
-│         │                                         │
-│         │ (1:N)                                   │
-│  ┌──────┴──────────────┐                        │
-│  │   sales_items       │                        │
-│  └─────────────────────┘                        │
-│                                                   │
-└───────────────────────────────────────────────────┘
+```mermaid
+erDiagram
+    tenants ||--o{ users : "has"
+    tenants ||--o{ roles : "defines"
+    roles ||--o{ user_roles : "assigned_to"
+    users ||--o{ user_roles : "has"
+    roles ||--o{ role_permissions : "has"
+    permissions ||--o{ role_permissions : "belongs_to"
+    
+    tenants ||--o{ materials : "owns"
+    material_types ||--o{ materials : "categorizes"
+    materials ||--o{ material_receipts : "has"
+    
+    tenants ||--o{ patterns : "owns"
+    patterns ||--o{ preparation_orders : "used_in"
+    preparation_orders ||--o{ production_orders : "precedes"
+    
+    production_orders ||--o{ production_batches : "results_in"
+    production_batches ||--o{ inventory_items : "stocks"
+    
+    tenants ||--o{ sales_orders : "processes"
+    customers ||--o{ sales_orders : "places"
+    sales_orders ||--o{ sales_items : "contains"
+    inventory_items ||--o{ sales_items : "deducts"
 ```
 
 ## Table Definitions
 
-### 1. tenants
+### 1. System & Multi-tenancy
+
+#### tenants
 Informasi organisasi/tenant dalam sistem SaaS.
 
 ```sql
@@ -91,13 +64,68 @@ CREATE TABLE tenants (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE INDEX idx_tenants_slug ON tenants(slug);
-CREATE INDEX idx_tenants_is_active ON tenants(is_active);
 ```
 
-### 2. users
-User accounts dengan multi-role support.
+#### system_settings
+System-wide or tenant-specific settings.
+
+```sql
+CREATE TABLE system_settings (
+    id BIGSERIAL PRIMARY KEY,
+    tenant_id BIGINT REFERENCES tenants(id) ON DELETE CASCADE, -- Nullable for global settings
+    key VARCHAR(100) NOT NULL,
+    value TEXT,
+    type VARCHAR(20) DEFAULT 'string', -- string, number, boolean, json
+    description TEXT,
+    is_public BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT system_settings_tenant_key_unique UNIQUE (tenant_id, key)
+);
+```
+
+#### subscription_payments
+Records of subscription payments.
+
+```sql
+CREATE TABLE subscription_payments (
+    id BIGSERIAL PRIMARY KEY,
+    tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    amount DECIMAL(15, 2) NOT NULL,
+    proof_path VARCHAR(255) NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending', -- pending, approved, rejected
+    admin_id BIGINT REFERENCES admin_users(id) ON DELETE SET NULL,
+    rejection_reason TEXT,
+    plan_type VARCHAR(50) DEFAULT 'monthly',
+    duration_months INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### 2. Authentication & RBAC
+
+#### admin_users
+Super administrators for the SaaS platform.
+
+```sql
+CREATE TABLE admin_users (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'admin',
+    phone VARCHAR(50),
+    is_active BOOLEAN DEFAULT TRUE,
+    last_login_at TIMESTAMP,
+    remember_token VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### users
+Tenant users.
 
 ```sql
 CREATE TABLE users (
@@ -107,132 +135,177 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL,
     email_verified_at TIMESTAMP,
     password VARCHAR(255) NOT NULL,
-    role VARCHAR(50) NOT NULL DEFAULT 'staff',
+    role VARCHAR(50) DEFAULT 'staff',
     phone VARCHAR(50),
     is_active BOOLEAN DEFAULT TRUE,
+    avatar_url VARCHAR(500),
     last_login_at TIMESTAMP,
-    remember_token VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT users_tenant_email_unique UNIQUE (tenant_id, email)
 );
-
-CREATE INDEX idx_users_tenant_id ON users(tenant_id);
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_role ON users(role);
 ```
 
-**Roles**: 
-- `admin` - Tenant administrator
-- `manager` - Manager (full access)
-- `production_staff` - Staff produksi
-- `warehouse_staff` - Staff gudang
-- `sales_staff` - Staff penjualan
-- `viewer` - Read-only access
+#### roles
+Roles defined for tenants.
 
-### 3. materials
-Master data bahan baku/bahan mentah (universal untuk semua kategori).
+```sql
+CREATE TABLE roles (
+    id BIGSERIAL PRIMARY KEY,
+    tenant_id BIGINT REFERENCES tenants(id) ON DELETE CASCADE, -- Nullable for system roles
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) NOT NULL,
+    description TEXT,
+    is_system_role BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT roles_tenant_slug_unique UNIQUE (tenant_id, slug)
+);
+```
 
-**Category Examples**:
-- **Garment**: kain, benang, resleting, kancing, dll
-- **Kue**: tepung, gula, telur, mentega, coklat, dll
+#### permissions
+Available system permissions.
+
+```sql
+CREATE TABLE permissions (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) UNIQUE NOT NULL,
+    module VARCHAR(50),
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### role_permissions
+Mapping between roles and permissions.
+
+```sql
+CREATE TABLE role_permissions (
+    id BIGSERIAL PRIMARY KEY,
+    role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    permission_id BIGINT NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT role_permissions_unique UNIQUE (role_id, permission_id)
+);
+```
+
+#### user_roles
+Mapping between users and roles.
+
+```sql
+CREATE TABLE user_roles (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT user_roles_unique UNIQUE (user_id, role_id)
+);
+```
+
+### 3. Materials Management
+
+#### material_types
+Categories for materials.
+
+```sql
+CREATE TABLE material_types (
+    id BIGSERIAL PRIMARY KEY,
+    tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(50) NOT NULL,
+    unit VARCHAR(50) NOT NULL,
+    description TEXT,
+    sort_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT material_types_code_unique UNIQUE (code) -- Global or tenant scoped based on implementation
+);
+```
+
+#### materials
+Raw materials / ingredients.
 
 ```sql
 CREATE TABLE materials (
     id BIGSERIAL PRIMARY KEY,
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    material_type_id BIGINT NOT NULL REFERENCES material_types(id) ON DELETE CASCADE,
     code VARCHAR(50) NOT NULL,
     name VARCHAR(255) NOT NULL,
-    type VARCHAR(100),  -- 'kain', 'benang', 'aksesoris', 'tepung', 'gula', 'telur', dll
-    unit VARCHAR(20) DEFAULT 'pcs',  -- 'meter', 'roll', 'kg', 'gram', 'pcs', 'butir', dll
+    supplier_name VARCHAR(255),
+    price_per_unit DECIMAL(15, 2) DEFAULT 0,
+    stock_quantity DECIMAL(15, 3) DEFAULT 0,
+    min_stock DECIMAL(15, 3) DEFAULT 0,
+    reorder_point DECIMAL(15, 3),
+    unit VARCHAR(50) NOT NULL,
+    image_path VARCHAR(255),
     description TEXT,
-    standard_price DECIMAL(15,2),
-    current_stock DECIMAL(15,2) DEFAULT 0,
-    reorder_point DECIMAL(15,2) DEFAULT 0,
-    is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
     CONSTRAINT materials_tenant_code_unique UNIQUE (tenant_id, code)
 );
-
-CREATE INDEX idx_materials_tenant_id ON materials(tenant_id);
-CREATE INDEX idx_materials_code ON materials(code);
 ```
 
-**Note**: Atribut dinamis (warna, expired date, dll) disimpan di tabel `material_attributes` terpisah untuk fleksibilitas.
-
-### 3.1 material_attributes
-Atribut dinamis untuk materials (unlimited attributes per material).
-
-```sql
-CREATE TABLE material_attributes (
-    id BIGSERIAL PRIMARY KEY,
-    material_id BIGINT NOT NULL REFERENCES materials(id) ON DELETE CASCADE,
-    attribute_name VARCHAR(100) NOT NULL,  -- 'warna', 'lebar_kain', 'expired_date', 'storage_temp', dll
-    attribute_value TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT material_attributes_unique UNIQUE (material_id, attribute_name)
-);
-
-CREATE INDEX idx_material_attributes_material_id ON material_attributes(material_id);
-```
-
-**Attribute Examples**:
-- **Garment**: warna='Merah', lebar_kain='150cm', gramasi='200gsm'
-- **Kue**: expired_date='2026-02-01', storage_temp='chilled', batch='A123'
-
-### 4. material_receipts
-Penerimaan bahan baku/mentah dari supplier (universal).
+#### material_receipts
+Stock-in records for materials.
 
 ```sql
 CREATE TABLE material_receipts (
     id BIGSERIAL PRIMARY KEY,
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    material_id BIGINT NOT NULL REFERENCES materials(id) ON DELETE CASCADE,
     receipt_number VARCHAR(50) NOT NULL,
-    material_id BIGINT NOT NULL REFERENCES materials(id) ON DELETE RESTRICT,
     supplier_name VARCHAR(255) NOT NULL,
+    quantity DECIMAL(15, 3) NOT NULL,
+    unit VARCHAR(50) NOT NULL,
+    price_per_unit DECIMAL(15, 2) NOT NULL,
+    total_cost DECIMAL(15, 2) NOT NULL,
     receipt_date DATE NOT NULL,
-    quantity DECIMAL(15,2) NOT NULL,
-    unit_price DECIMAL(15,2) NOT NULL,
-    total_price DECIMAL(15,2) NOT NULL,
-    rolls_count INTEGER,  -- Opsional, untuk kain dalam roll
-    length_per_roll DECIMAL(10,2),  -- Opsional
     batch_number VARCHAR(100),
+    image_path VARCHAR(255),
+    expired_date DATE,
+    received_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
     notes TEXT,
-    received_by BIGINT REFERENCES users(id),
-    attachments JSONB DEFAULT '[]',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT material_receipts_tenant_number_unique UNIQUE (tenant_id, receipt_number)
+    CONSTRAINT material_receipts_number_unique UNIQUE (receipt_number)
 );
-
-CREATE INDEX idx_material_receipts_tenant_id ON material_receipts(tenant_id);
-CREATE INDEX idx_material_receipts_material_id ON material_receipts(material_id);
-CREATE INDEX idx_material_receipts_receipt_date ON material_receipts(receipt_date);
-CREATE INDEX idx_material_receipts_batch_number ON material_receipts(batch_number);
 ```
 
-### 5. patterns
-Template produk (universal - garment patterns, food recipes, craft templates, dll).
+#### material_attributes
+Dynamic attributes for materials.
 
-**Category Values**: 'garment', 'food', 'craft', 'cosmetic', 'other'
+```sql
+CREATE TABLE material_attributes (
+    id BIGSERIAL PRIMARY KEY,
+    material_id BIGINT NOT NULL REFERENCES materials(id) ON DELETE CASCADE,
+    attribute_key VARCHAR(100) NOT NULL,
+    attribute_value VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
-**Product Type Examples**:
-- **Garment**: 'mukena', 'daster', 'gamis', 'jilbab', 'kemeja', 'celana', dll
-- **Food**: 'cake', 'brownies', 'cookies', 'roti', 'kue_kering', 'martabak', dll
-- **Craft**: 'gelang', 'tas', 'gantungan_kunci', 'bros', 'rajutan', dll
-- **Cosmetic**: 'sabun', 'lotion', 'lip_balm', 'scrub', 'body_butter', dll
+### 4. Production (Core)
+
+#### patterns
+Product templates.
 
 ```sql
 CREATE TABLE patterns (
     id BIGSERIAL PRIMARY KEY,
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    code VARCHAR(50) NOT NULL,  -- MKN-001, CAKE-001, BRG-001, SBN-001, dll
-    name VARCHAR(255) NOT NULL,  -- 'Mukena Dewasa', 'Brownies Coklat', 'Gelang Rajut'
-    category VARCHAR(50) NOT NULL DEFAULT 'other',  -- garment/food/craft/cosmetic/other
-    product_type VARCHAR(100) NOT NULL,  -- disesuaikan kategori
-    size VARCHAR(50),  -- 'all_size', 'L', 'XL' untuk garment; '24cm', '1kg' untuk food
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(50) DEFAULT 'other',
+    product_type VARCHAR(100) NOT NULL,
+    size VARCHAR(50),
     description TEXT,
     image_url VARCHAR(500),
     is_active BOOLEAN DEFAULT TRUE,
@@ -240,44 +313,23 @@ CREATE TABLE patterns (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT patterns_tenant_code_unique UNIQUE (tenant_id, code)
 );
-
-CREATE INDEX idx_patterns_tenant_id ON patterns(tenant_id);
-CREATE INDEX idx_patterns_category ON patterns(category);
-CREATE INDEX idx_patterns_product_type ON patterns(product_type);
 ```
 
-**Notes**:
-- **NO Bill of Materials (BOM)** - UMKM tidak perlu presisi pabrik
-- Pattern hanya template produk, bukan resep detail
-- Materials yang dipakai dicatat di `preparation_orders.materials_used` (flexible)
-
-### 6. preparation_orders
-Order persiapan bahan sebelum produksi (universal untuk semua kategori).
-
-**Terminology per Category**:
-- **Garment**: Cutting (pemotongan kain)
-- **Food**: Mixing/Prep (persiapan adonan/bahan)
-- **Craft**: Assembly Prep (persiapan komponen)
-- **Cosmetic**: Formulation (mixing formula)
-
-**Key Features**:
-- Pattern optional (bisa prep tanpa pattern)
-- Materials used stored as JSON (flexible, tidak terikat BOM)
-- Auto deduct material stock saat status = 'completed'
-- Output unit flexible (pieces/kg/batch/liter/dll)
+#### preparation_orders
+Pre-production steps (Cutting/Mixing/Prep).
 
 ```sql
 CREATE TABLE preparation_orders (
     id BIGSERIAL PRIMARY KEY,
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    order_number VARCHAR(50) NOT NULL,  -- PRP-2026-001
-    pattern_id BIGINT REFERENCES patterns(id) ON DELETE RESTRICT,  -- NULLABLE
+    order_number VARCHAR(50) NOT NULL,
+    pattern_id BIGINT REFERENCES patterns(id) ON DELETE RESTRICT,
     order_date DATE NOT NULL,
-    status VARCHAR(50) DEFAULT 'draft',  -- draft/in_progress/completed/cancelled
+    status VARCHAR(50) DEFAULT 'draft',
     prepared_by BIGINT REFERENCES users(id),
-    output_quantity DECIMAL(10,2) NOT NULL,  -- berapa jadi (5 pieces, 2.5 kg, 3 batch, dll)
-    output_unit VARCHAR(20) DEFAULT 'pieces',  -- pieces/kg/batch/liter/gram/pcs/dll
-    materials_used JSONB NOT NULL,  -- [{material_id, material_name, quantity, unit}]
+    output_quantity DECIMAL(10,2) NOT NULL,
+    output_unit VARCHAR(20) DEFAULT 'pieces',
+    materials_used JSONB NOT NULL,
     notes TEXT,
     started_at TIMESTAMP,
     completed_at TIMESTAMP,
@@ -285,46 +337,10 @@ CREATE TABLE preparation_orders (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT preparation_orders_tenant_number_unique UNIQUE (tenant_id, order_number)
 );
-
-CREATE INDEX idx_preparation_orders_tenant_id ON preparation_orders(tenant_id);
-CREATE INDEX idx_preparation_orders_status ON preparation_orders(status);
-CREATE INDEX idx_preparation_orders_order_date ON preparation_orders(order_date);
-CREATE INDEX idx_preparation_orders_pattern_id ON preparation_orders(pattern_id);
 ```
 
-**Status values**: `draft`, `in_progress`, `completed`, `cancelled`
-
-**materials_used JSON structure**:
-```json
-[
-  {
-    "material_id": 1,
-    "material_name": "Kain Katun Putih",
-    "quantity": 5.0,
-    "unit": "meter"
-  },
-  {
-    "material_id": 2,
-    "material_name": "Benang Jahit Hitam",
-    "quantity": 2.0,
-    "unit": "roll"
-  }
-]
-```
-
-**Stock Deduction Logic**:
-- When status changes to 'completed', loop through materials_used
-- Deduct each material.quantity from materials.current_stock
-- Log transaction untuk audit trail (optional)
-
-### 7. contractors
-Pihak ketiga untuk outsourcing produksi (universal).
-
-**Type Examples**:
-- **Garment**: penjahit, bordir, sablon
-- **Food**: dapur sharing, packaging, catering
-- **Craft**: pengrajin, assembler
-- **Cosmetic**: lab produksi, packaging
+#### contractors
+External production partners.
 
 ```sql
 CREATE TABLE contractors (
@@ -332,11 +348,11 @@ CREATE TABLE contractors (
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     code VARCHAR(50) NOT NULL,
     name VARCHAR(255) NOT NULL,
-    type VARCHAR(50),  -- 'penjahit', 'dapur', 'pengrajin', 'lab', dll
+    type VARCHAR(50),
     contact_person VARCHAR(255),
     phone VARCHAR(50),
     address TEXT,
-    price_per_unit DECIMAL(15,2),  -- per piece/kg/batch/dll
+    price_per_unit DECIMAL(15,2),
     rating DECIMAL(3,2),
     is_active BOOLEAN DEFAULT TRUE,
     notes TEXT,
@@ -344,29 +360,19 @@ CREATE TABLE contractors (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT contractors_tenant_code_unique UNIQUE (tenant_id, code)
 );
-
-CREATE INDEX idx_contractors_tenant_id ON contractors(tenant_id);
-CREATE INDEX idx_contractors_type ON contractors(type);
-CREATE INDEX idx_contractors_is_active ON contractors(is_active);
 ```
 
-### 8. production_orders
-Order produksi (internal & eksternal) - universal untuk semua kategori.
-
-**Production Type Examples**:
-- **Garment**: Sewing (jahit), Embroidery (bordir), Printing (sablon)
-- **Food**: Baking (panggang), Cooking (masak), Frying (goreng)
-- **Craft**: Assembly (rakit), Weaving (rajut), Carving (ukir)
-- **Cosmetic**: Mixing (campur), Filling (isi), Packaging (kemas)
+#### production_orders
+Production orders (Internal/External).
 
 ```sql
 CREATE TABLE production_orders (
     id BIGSERIAL PRIMARY KEY,
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    order_number VARCHAR(50) NOT NULL,  -- PO-2026-001
-    preparation_order_id BIGINT REFERENCES preparation_orders(id) ON DELETE RESTRICT,  -- NULLABLE
-    production_type VARCHAR(50) NOT NULL,  -- 'internal' or 'external'
-    contractor_id BIGINT REFERENCES contractors(id) ON DELETE RESTRICT,  -- for external
+    order_number VARCHAR(50) NOT NULL,
+    preparation_order_id BIGINT REFERENCES preparation_orders(id) ON DELETE RESTRICT,
+    production_type VARCHAR(50) NOT NULL,
+    contractor_id BIGINT REFERENCES contractors(id) ON DELETE RESTRICT,
     order_date DATE NOT NULL,
     quantity_target DECIMAL(10,2) NOT NULL,
     quantity_unit VARCHAR(20) DEFAULT 'pieces',
@@ -381,17 +387,10 @@ CREATE TABLE production_orders (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT production_orders_tenant_number_unique UNIQUE (tenant_id, order_number)
 );
-
-CREATE INDEX idx_production_orders_tenant_id ON production_orders(tenant_id);
-CREATE INDEX idx_production_orders_status ON production_orders(status);
-CREATE INDEX idx_production_orders_production_type ON production_orders(production_type);
 ```
 
-**production_type values**: `internal`, `external`
-**Status values**: `draft`, `pending`, `in_progress`, `completed`, `returned`, `cancelled`
-
-### 9. production_batches
-Batch hasil produksi jahit yang dikembalikan.
+#### production_batches
+Production results.
 
 ```sql
 CREATE TABLE production_batches (
@@ -410,14 +409,12 @@ CREATE TABLE production_batches (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT production_batches_tenant_number_unique UNIQUE (tenant_id, batch_number)
 );
-
-CREATE INDEX idx_production_batches_tenant_id ON production_batches(tenant_id);
-CREATE INDEX idx_production_batches_production_order_id ON production_batches(production_order_id);
-CREATE INDEX idx_production_batches_return_date ON production_batches(return_date);
 ```
 
-### 11. inventory_locations
-Lokasi penyimpanan di gudang (rak).
+### 5. Inventory & Sales
+
+#### inventory_locations
+Warehouse storage locations.
 
 ```sql
 CREATE TABLE inventory_locations (
@@ -432,19 +429,18 @@ CREATE TABLE inventory_locations (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT inventory_locations_tenant_code_unique UNIQUE (tenant_id, code)
 );
-
-CREATE INDEX idx_inventory_locations_tenant_id ON inventory_locations(tenant_id);
 ```
 
-### 12. inventory_items
-Produk jadi dalam gudang.
+#### inventory_items
+Finished goods stock.
 
 ```sql
 CREATE TABLE inventory_items (
     id BIGSERIAL PRIMARY KEY,
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     sku VARCHAR(100) NOT NULL,
-    production_batch_id BIGINT NOT NULL REFERENCES production_batches(id) ON DELETE RESTRICT,
+    production_batch_id BIGINT REFERENCES production_batches(id) ON DELETE RESTRICT, -- Nullable
+    production_order_id BIGINT REFERENCES production_orders(id) ON DELETE RESTRICT, -- Nullable
     pattern_id BIGINT NOT NULL REFERENCES patterns(id) ON DELETE RESTRICT,
     location_id BIGINT REFERENCES inventory_locations(id) ON DELETE SET NULL,
     initial_quantity INTEGER NOT NULL,
@@ -453,22 +449,16 @@ CREATE TABLE inventory_items (
     status VARCHAR(50) DEFAULT 'available',
     cost_per_piece DECIMAL(15,2),
     selling_price DECIMAL(15,2),
+    image_path VARCHAR(255),
     stored_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT inventory_items_tenant_sku_unique UNIQUE (tenant_id, sku)
 );
-
-CREATE INDEX idx_inventory_items_tenant_id ON inventory_items(tenant_id);
-CREATE INDEX idx_inventory_items_production_batch_id ON inventory_items(production_batch_id);
-CREATE INDEX idx_inventory_items_pattern_id ON inventory_items(pattern_id);
-CREATE INDEX idx_inventory_items_status ON inventory_items(status);
 ```
 
-**Status values**: `available`, `reserved`, `depleted`
-
-### 13. customers
-Data pelanggan.
+#### customers
+Customer data.
 
 ```sql
 CREATE TABLE customers (
@@ -490,15 +480,10 @@ CREATE TABLE customers (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT customers_tenant_code_unique UNIQUE (tenant_id, code)
 );
-
-CREATE INDEX idx_customers_tenant_id ON customers(tenant_id);
-CREATE INDEX idx_customers_type ON customers(type);
 ```
 
-**Type values**: `retail`, `wholesale`, `reseller`, `online`
-
-### 14. sales_orders
-Order penjualan.
+#### sales_orders
+Sales transactions.
 
 ```sql
 CREATE TABLE sales_orders (
@@ -523,20 +508,10 @@ CREATE TABLE sales_orders (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT sales_orders_tenant_number_unique UNIQUE (tenant_id, order_number)
 );
-
-CREATE INDEX idx_sales_orders_tenant_id ON sales_orders(tenant_id);
-CREATE INDEX idx_sales_orders_customer_id ON sales_orders(customer_id);
-CREATE INDEX idx_sales_orders_order_date ON sales_orders(order_date);
-CREATE INDEX idx_sales_orders_status ON sales_orders(status);
-CREATE INDEX idx_sales_orders_payment_status ON sales_orders(payment_status);
 ```
 
-**sales_channel values**: `offline`, `online`, `marketplace`, `reseller`
-**payment_status values**: `unpaid`, `partial`, `paid`
-**Status values**: `pending`, `confirmed`, `packed`, `shipped`, `delivered`, `cancelled`
-
-### 15. sales_items
-Item dalam order penjualan.
+#### sales_items
+Items within sales orders.
 
 ```sql
 CREATE TABLE sales_items (
@@ -551,14 +526,10 @@ CREATE TABLE sales_items (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE INDEX idx_sales_items_tenant_id ON sales_items(tenant_id);
-CREATE INDEX idx_sales_items_sales_order_id ON sales_items(sales_order_id);
-CREATE INDEX idx_sales_items_inventory_item_id ON sales_items(inventory_item_id);
 ```
 
-### 16. audit_logs
-Audit trail untuk tracking perubahan penting.
+#### audit_logs
+System audit trail.
 
 ```sql
 CREATE TABLE audit_logs (
@@ -574,79 +545,11 @@ CREATE TABLE audit_logs (
     user_agent TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE INDEX idx_audit_logs_tenant_id ON audit_logs(tenant_id);
-CREATE INDEX idx_audit_logs_auditable ON audit_logs(auditable_type, auditable_id);
-CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
-CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at);
-```
-
-## Calculated Fields & Views
-
-### Inventory Summary View
-```sql
-CREATE VIEW inventory_summary AS
-SELECT 
-    i.tenant_id,
-    p.product_type,
-    p.name AS product_name,
-    SUM(i.current_quantity) AS total_stock,
-    SUM(i.reserved_quantity) AS total_reserved,
-    SUM(i.current_quantity - i.reserved_quantity) AS available_stock,
-    COUNT(i.id) AS batch_count
-FROM inventory_items i
-JOIN patterns p ON i.pattern_id = p.id
-WHERE i.status = 'available'
-GROUP BY i.tenant_id, p.product_type, p.name;
-```
-
-### Production Efficiency View
-```sql
-CREATE VIEW production_efficiency AS
-SELECT 
-    co.tenant_id,
-    p.name AS pattern_name,
-    COUNT(co.id) AS total_orders,
-    SUM(co.material_used) AS total_material,
-    SUM(cr.actual_pieces) AS total_pieces,
-    AVG(cr.efficiency_percentage) AS avg_efficiency,
-    SUM(cr.waste_material) AS total_waste
-FROM cutting_orders co
-JOIN cutting_results cr ON co.id = cr.cutting_order_id
-JOIN patterns p ON co.pattern_id = p.id
-WHERE co.status = 'completed'
-GROUP BY co.tenant_id, p.name;
 ```
 
 ## Data Integrity Rules
 
-1. **Tenant Isolation**: Semua query harus di-scope by tenant_id
-2. **Soft Deletes**: Tidak digunakan, gunakan is_active flag untuk master data
-3. **Cascading**: DELETE CASCADE untuk detail tables, RESTRICT untuk references
-4. **Stock Validation**: Trigger untuk validasi stok sebelum sales
-5. **Audit Trail**: Automatic logging untuk critical operations
-
-## Migration Strategy
-
-1. Create tenant table first
-2. Create users table (depends on tenants)
-3. Create master data tables (materials, patterns, contractors, customers, locations)
-4. Create transaction tables in order of dependency
-5. Create views and indexes
-6. Seed initial data (roles, default settings)
-
-## Indexes Strategy
-
-- Primary keys (automatic)
-- Foreign keys (untuk join performance)
-- tenant_id (untuk tenant isolation)
-- Status fields (untuk filtering)
-- Date fields (untuk reporting)
-- Unique constraints (untuk business rules)
-
-## Backup & Recovery
-
-- Daily full backup
-- Point-in-time recovery enabled
-- Backup retention: 30 days
-- Test restore monthly
+1. **Tenant Isolation**: Semua query wajib di-scope by `tenant_id` (via Global Scope).
+2. **Soft Deletes**: Digunakan pada tabel `materials` dan tabel master data lain yang relevan.
+3. **RBAC**: Akses dikontrol via `user_roles` dan `permissions`, bukan kolom `role` di tabel users.
+4. **Foreign Keys**: Cascade delete untuk relasi child-parent dalam satu tenant (misal: pattern -> tenant), tetapi Restrict/Set Null untuk referensi transaksional.

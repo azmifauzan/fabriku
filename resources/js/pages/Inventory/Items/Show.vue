@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { History, RefreshCw } from 'lucide-vue-next';
+import AdjustStockModal from './AdjustStockModal.vue';
 
 interface Pattern {
     id: number;
@@ -37,6 +40,8 @@ interface Item {
     name: string;
     description?: string;
     category: string;
+    source_type?: string;
+    source_label?: string;
     current_stock: number;
     reserved_stock: number;
     target_quantity: number;
@@ -52,9 +57,22 @@ interface Item {
 
 interface Props {
     item: Item;
+    adjustmentTypes?: Record<string, string>;
 }
 
 const props = defineProps<Props>();
+
+// Default adjustment types if not passed from server
+const adjustmentTypes = props.adjustmentTypes || {
+    opening_balance: 'Stock Awal',
+    correction: 'Koreksi',
+    damage: 'Rusak',
+    loss: 'Hilang',
+    found: 'Ditemukan',
+    return: 'Retur',
+};
+
+const showAdjustModal = ref(false);
 
 const statusBadgeClass = (status: string) => {
     const classes: Record<string, string> = {
@@ -99,13 +117,32 @@ const productionUnit = () => {
                         </Link>
                         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ item.name }}</h1>
                         <p class="mt-1 font-mono text-sm text-gray-500 dark:text-gray-400">{{ item.sku }}</p>
+                        <p v-if="item.source_label" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Sumber: {{ item.source_label }}
+                        </p>
                     </div>
-                    <Link
-                        :href="`/inventory/items/${item.id}/edit`"
-                        class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-500"
-                    >
-                        Edit Item
-                    </Link>
+                    <div class="flex items-center gap-2">
+                        <Link
+                            :href="`/inventory/items/${item.id}/adjustments`"
+                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                            <History class="h-4 w-4" />
+                            Riwayat
+                        </Link>
+                        <button
+                            @click="showAdjustModal = true"
+                            class="inline-flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition-all hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                        >
+                            <RefreshCw class="h-4 w-4" />
+                            Adjust Stock
+                        </button>
+                        <Link
+                            :href="`/inventory/items/${item.id}/edit`"
+                            class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-500"
+                        >
+                            Edit Item
+                        </Link>
+                    </div>
                 </div>
 
                 <div class="grid gap-6 lg:grid-cols-3">
@@ -252,5 +289,13 @@ const productionUnit = () => {
                 </div>
             </div>
         </div>
+
+        <!-- Adjust Stock Modal -->
+        <AdjustStockModal
+            :show="showAdjustModal"
+            :item="item"
+            :adjustment-types="adjustmentTypes"
+            @close="showAdjustModal = false"
+        />
     </AppLayout>
 </template>

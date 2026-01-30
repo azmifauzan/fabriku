@@ -2,6 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { useSweetAlert } from '@/composables/useSweetAlert';
 
 const props = defineProps<{
     tenant: any;
@@ -10,6 +11,8 @@ const props = defineProps<{
     history: any[];
     server_time: string;
 }>();
+
+const { showSuccess, showError } = useSweetAlert()
 
 const form = useForm({
     plan_type: 'monthly', // monthly, yearly
@@ -35,7 +38,13 @@ const handlePlanChange = () => {
 const submit = () => {
     form.post(route('subscription.store'), {
         preserveScroll: true,
-        onSuccess: () => form.reset('proof'),
+        onSuccess: () => {
+            form.reset('proof')
+            showSuccess('Berhasil!', 'Bukti pembayaran berhasil dikirim. Menunggu konfirmasi admin.')
+        },
+        onError: () => {
+            showError('Gagal!', 'Terjadi kesalahan saat mengirim bukti pembayaran')
+        },
     });
 };
 
@@ -62,37 +71,37 @@ const formatDate = (date: string) => {
 
     <AppLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Membership & Subscription</h2>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">Membership & Subscription</h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 
                 <!-- Status Card -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Status Membership</h3>
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Status Membership</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                            <p class="text-sm text-gray-500">Tipe Member</p>
-                            <p class="text-xl font-bold capitalize text-primary-600">
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Tipe Member</p>
+                            <p class="text-xl font-bold capitalize text-purple-600 dark:text-purple-400">
                                 {{ tenant.subscription_plan === 'trial' ? 'Free Trial' : 'Full Member' }}
                             </p>
                         </div>
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                            <p class="text-sm text-gray-500">Status</p>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Status</p>
                             <span 
                                 class="px-2 py-1 text-xs font-semibold rounded-full"
-                                :class="isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                :class="isActive ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'"
                             >
                                 {{ isActive ? 'Aktif' : 'Tidak Aktif / Expired' }}
                             </span>
                         </div>
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                            <p class="text-sm text-gray-500">Berlaku Sampai</p>
-                            <p class="text-xl font-bold">
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Berlaku Sampai</p>
+                            <p class="text-xl font-bold text-gray-900 dark:text-white">
                                 {{ tenant.subscription_expires_at ? formatDate(tenant.subscription_expires_at) : '-' }}
                             </p>
-                            <p v-if="isExpired" class="text-xs text-red-600 mt-1">
+                            <p v-if="isExpired" class="text-xs text-red-600 dark:text-red-400 mt-1">
                                 Masa berlaku habis. Segera perpanjang!
                             </p>
                         </div>
@@ -100,8 +109,8 @@ const formatDate = (date: string) => {
                 </div>
 
                 <!-- Upgrade / Renewal Form -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                         {{ pendingPayment ? 'Menunggu Konfirmasi' : 'Perpanjang / Upgrade Membership' }}
                     </h3>
 
@@ -125,11 +134,29 @@ const formatDate = (date: string) => {
                         <!-- Info Rekening -->
                         <div>
                             <h4 class="font-medium text-gray-700 mb-3">Info Pembayaran</h4>
-                            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                            
+                            <!-- Multiple Bank Accounts -->
+                            <div v-if="settings.bank_accounts && settings.bank_accounts.length > 0" class="space-y-3">
+                                <div 
+                                    v-for="(bank, index) in settings.bank_accounts" 
+                                    :key="index"
+                                    class="bg-indigo-50 p-4 rounded-xl border border-indigo-100"
+                                >
+                                    <p class="text-sm text-gray-500 mb-1">Bank Transfer</p>
+                                    <p class="text-xl font-bold text-indigo-900">{{ bank.bank_name }}</p>
+                                    <p class="text-2xl font-mono my-2 select-all">{{ bank.account_number }}</p>
+                                    <p class="text-sm text-gray-600">a.n {{ bank.account_holder }}</p>
+                                </div>
+                            </div>
+                            <!-- Fallback for old single bank format -->
+                            <div v-else-if="settings.bank_name" class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
                                 <p class="text-sm text-gray-500 mb-1">Bank Transfer</p>
                                 <p class="text-xl font-bold text-indigo-900">{{ settings.bank_name }}</p>
                                 <p class="text-2xl font-mono my-2 select-all">{{ settings.account_number }}</p>
                                 <p class="text-sm text-gray-600">a.n {{ settings.account_holder }}</p>
+                            </div>
+                            <div v-else class="bg-gray-50 p-4 rounded-xl border border-gray-200 text-gray-500">
+                                <p>Rekening pembayaran belum dikonfigurasi. Silakan hubungi admin.</p>
                             </div>
                             
                             <div class="mt-4 space-y-2">
@@ -169,30 +196,30 @@ const formatDate = (date: string) => {
                         <div>
                             <form @submit.prevent="submit" class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Total Transfer</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Total Transfer</label>
                                     <input 
                                         type="text" 
                                         :value="formatCurrency(form.amount)"
                                         disabled
-                                        class="w-full bg-gray-100 border-gray-300 rounded-md shadow-sm"
+                                        class="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
                                     >
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Upload Bukti Transfer</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Bukti Transfer</label>
                                     <input 
                                         type="file" 
                                         @input="form.proof = ($event.target as HTMLInputElement).files?.[0] || null"
                                         accept="image/*"
-                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                        class="block w-full px-4 py-2 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-50 dark:file:bg-purple-900/30 file:text-purple-700 dark:file:text-purple-400 hover:file:bg-purple-100 dark:hover:file:bg-purple-900/50 focus:ring-2 focus:ring-purple-500"
                                     >
-                                    <p v-if="form.errors.proof" class="text-red-500 text-xs mt-1">{{ form.errors.proof }}</p>
+                                    <p v-if="form.errors.proof" class="mt-1 text-sm text-red-600">{{ form.errors.proof }}</p>
                                 </div>
 
                                 <button 
                                     type="submit" 
                                     :disabled="form.processing"
-                                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     {{ form.processing ? 'Mengupload...' : 'Konfirmasi Pembayaran' }}
                                 </button>
@@ -202,28 +229,28 @@ const formatDate = (date: string) => {
                 </div>
 
                 <!-- History -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Riwayat Pembayaran</h3>
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Riwayat Pembayaran</h3>
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-900/50">
                                 <tr>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nominal</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paket</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catatan</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nominal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Paket</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Catatan</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 <tr v-for="item in history" :key="item.id">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                         {{ formatDate(item.created_at) }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                         {{ formatCurrency(item.amount) }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 capitalize">
                                         {{ item.plan_type }} ({{ item.duration_months }} bln)
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -243,7 +270,7 @@ const formatDate = (date: string) => {
                                     </td>
                                 </tr>
                                 <tr v-if="history.length === 0">
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500 text-sm">
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
                                         Belum ada riwayat pembayaran
                                     </td>
                                 </tr>

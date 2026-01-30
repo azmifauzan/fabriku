@@ -4,8 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\InventoryItem;
 use App\Models\InventoryLocation;
-use App\Models\Pattern;
+use App\Models\ProductionOrder;
+use App\Models\StockAdjustment;
 use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class InventorySeeder extends Seeder
@@ -23,194 +25,260 @@ class InventorySeeder extends Seeder
             return;
         }
 
+        $user = User::where('tenant_id', $tenant->id)->first();
+
         $this->command->info('Seeding inventory locations...');
 
         // Create inventory locations (racks)
-        $locations = [
+        $locationData = [
             [
                 'tenant_id' => $tenant->id,
+                'code' => 'RAK-A1',
                 'name' => 'Rak A1 - Mukena Grade A',
                 'capacity' => 100,
                 'is_active' => true,
             ],
             [
                 'tenant_id' => $tenant->id,
+                'code' => 'RAK-A2',
                 'name' => 'Rak A2 - Mukena Grade B',
                 'capacity' => 100,
                 'is_active' => true,
             ],
             [
                 'tenant_id' => $tenant->id,
+                'code' => 'RAK-B1',
                 'name' => 'Rak B1 - Daster/Gamis',
                 'capacity' => 150,
                 'is_active' => true,
             ],
             [
                 'tenant_id' => $tenant->id,
+                'code' => 'RAK-C1',
                 'name' => 'Rak C1 - Produk Reject',
                 'capacity' => 50,
                 'is_active' => true,
             ],
         ];
 
-        foreach ($locations as $locationData) {
-            InventoryLocation::create($locationData);
+        foreach ($locationData as $data) {
+            InventoryLocation::create($data);
         }
 
         $this->command->info('Seeding inventory items...');
 
-        // Get patterns for reference
-        $mukenaBaliPattern = Pattern::where('tenant_id', $tenant->id)
-            ->where('product_type', 'mukena')
-            ->where('name', 'like', '%Bali%')
-            ->first();
+        // Get locations
+        $rakA1 = InventoryLocation::where('tenant_id', $tenant->id)->where('code', 'RAK-A1')->first();
+        $rakA2 = InventoryLocation::where('tenant_id', $tenant->id)->where('code', 'RAK-A2')->first();
+        $rakB1 = InventoryLocation::where('tenant_id', $tenant->id)->where('code', 'RAK-B1')->first();
+        $rakC1 = InventoryLocation::where('tenant_id', $tenant->id)->where('code', 'RAK-C1')->first();
 
-        $dasterPattern = Pattern::where('tenant_id', $tenant->id)
-            ->where('product_type', 'daster')
-            ->first();
+        // Get completed production orders
+        $completedOrders = ProductionOrder::where('tenant_id', $tenant->id)
+            ->where('status', 'completed')
+            ->with('preparationOrder.pattern')
+            ->get();
 
-        // Get locations by name instead of rack
-        $rakA1 = InventoryLocation::where('tenant_id', $tenant->id)->where('name', 'like', '%A1%')->first();
-        $rakA2 = InventoryLocation::where('tenant_id', $tenant->id)->where('name', 'like', '%A2%')->first();
-        $rakB1 = InventoryLocation::where('tenant_id', $tenant->id)->where('name', 'like', '%B1%')->first();
-        $rakC1 = InventoryLocation::where('tenant_id', $tenant->id)->where('name', 'like', '%C1%')->first();
+        $itemsCreated = 0;
+        $adjustmentsCreated = 0;
 
-        // Create inventory items
-        $items = [];
-
-        if ($mukenaBaliPattern) {
-            // Mukena Bali Grade A - Various colors and sizes
-            $colors = ['Putih', 'Cream', 'Abu-abu', 'Hitam', 'Navy'];
-            $sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-
-            foreach ($colors as $color) {
-                foreach ($sizes as $size) {
-                    $items[] = [
-                        'tenant_id' => $tenant->id,
-                        'pattern_id' => $mukenaBaliPattern->id,
-                        'name' => "Mukena Bali {$size} - {$color}",
-                        'attributes' => [
-                            'color' => $color,
-                            'size' => $size,
-                            'material' => 'Katun Jepang',
-                        ],
-                        'category' => 'garment',
-                        'current_stock' => fake()->numberBetween(5, 50),
-                        'reserved_stock' => 0,
-                        'minimum_stock' => 5,
-                        'unit_cost' => 85000,
-                        'selling_price' => 125000,
-                        'inventory_location_id' => $rakA1->id,
-                        'batch_number' => 'PB-2026-'.str_pad(fake()->numberBetween(1, 50), 4, '0', STR_PAD_LEFT),
-                        'quality_grade' => 'A',
-                        'status' => 'available',
-                    ];
-                }
+        // Create inventory items from production orders
+        foreach ($completedOrders as $order) {
+            $pattern = $order->preparationOrder?->pattern;
+            if (! $pattern) {
+                continue;
             }
 
-            // Add some Grade B mukena (slightly lower stock and price)
-            $items[] = [
+            $quantity = $order->preparationOrder->output_quantity ?? 50;
+            $laborCost = $order->labor_cost ?? 0;
+            $materialCost = 50000; // estimated
+
+            $item = InventoryItem::create([
                 'tenant_id' => $tenant->id,
-                'pattern_id' => $mukenaBaliPattern->id,
-                'name' => 'Mukena Bali L - Putih (Grade B)',
-                'attributes' => [
-                    'color' => 'Putih',
-                    'size' => 'L',
-                    'material' => 'Katun Jepang',
-                    'defect' => 'Jahitan sedikit tidak rata',
-                ],
-                'category' => 'garment',
-                'current_stock' => 8,
-                'reserved_stock' => 0,
-                'minimum_stock' => 3,
+                'sku' => 'INV-'.strtoupper(substr($pattern->product_type ?? 'item', 0, 4)).'-'.str_pad($itemsCreated + 1, 4, '0', STR_PAD_LEFT),
+                'production_order_id' => $order->id,
+                'source_type' => 'production',
+                'location_id' => $rakA1->id,
+                'product_name' => $pattern->name,
+                'product_code' => $pattern->code,
+                'target_quantity' => $quantity,
+                'current_quantity' => $quantity,
+                'reserved_quantity' => 0,
+                'minimum_stock' => 5,
+                'quality_grade' => 'A',
+                'status' => 'available',
+                'unit_cost' => ($materialCost + $laborCost) / max($quantity, 1),
+                'selling_price' => (($materialCost + $laborCost) / max($quantity, 1)) * 1.5,
+                'notes' => "Dari Production Order: {$order->order_number}",
+            ]);
+
+            $itemsCreated++;
+        }
+
+        // Create some manual entry items (opening balance)
+        $openingBalanceItems = [
+            [
+                'tenant_id' => $tenant->id,
+                'sku' => 'INV-OPEN-0001',
+                'production_order_id' => null,
+                'source_type' => 'opening_balance',
+                'location_id' => $rakA1->id,
+                'product_name' => 'Mukena Bali Premium - Putih',
+                'product_code' => 'MKN-BL-001',
+                'target_quantity' => 50,
+                'current_quantity' => 45,
+                'reserved_quantity' => 5,
+                'minimum_stock' => 10,
+                'quality_grade' => 'A',
+                'status' => 'available',
                 'unit_cost' => 85000,
-                'selling_price' => 100000,
-                'inventory_location_id' => $rakA2->id,
-                'batch_number' => 'PB-2026-0012',
+                'selling_price' => 125000,
+                'notes' => 'Stock awal migrasi dari sistem lama',
+            ],
+            [
+                'tenant_id' => $tenant->id,
+                'sku' => 'INV-OPEN-0002',
+                'production_order_id' => null,
+                'source_type' => 'opening_balance',
+                'location_id' => $rakA2->id,
+                'product_name' => 'Mukena Bali Premium - Cream (Grade B)',
+                'product_code' => 'MKN-BL-002',
+                'target_quantity' => 30,
+                'current_quantity' => 30,
+                'reserved_quantity' => 0,
+                'minimum_stock' => 5,
                 'quality_grade' => 'B',
                 'status' => 'available',
-            ];
-        }
+                'unit_cost' => 85000,
+                'selling_price' => 100000,
+                'notes' => 'Stock awal - Grade B (jahitan tidak rata)',
+            ],
+            [
+                'tenant_id' => $tenant->id,
+                'sku' => 'INV-PURCH-0001',
+                'production_order_id' => null,
+                'source_type' => 'purchase',
+                'location_id' => $rakB1->id,
+                'product_name' => 'Daster Rayon Premium - Biru Navy',
+                'product_code' => 'DST-RYN-001',
+                'target_quantity' => 100,
+                'current_quantity' => 100,
+                'reserved_quantity' => 0,
+                'minimum_stock' => 20,
+                'quality_grade' => 'A',
+                'status' => 'available',
+                'unit_cost' => 45000,
+                'selling_price' => 75000,
+                'notes' => 'Pembelian langsung dari supplier',
+            ],
+            [
+                'tenant_id' => $tenant->id,
+                'sku' => 'INV-LOW-0001',
+                'production_order_id' => null,
+                'source_type' => 'opening_balance',
+                'location_id' => $rakA1->id,
+                'product_name' => 'Mukena Bali Premium - Pink (Low Stock)',
+                'product_code' => 'MKN-BL-003',
+                'target_quantity' => 20,
+                'current_quantity' => 3, // Below minimum to trigger low stock alert
+                'reserved_quantity' => 0,
+                'minimum_stock' => 10,
+                'quality_grade' => 'A',
+                'status' => 'available',
+                'unit_cost' => 85000,
+                'selling_price' => 125000,
+                'notes' => 'Stock awal - Low stock untuk testing alert',
+            ],
+            [
+                'tenant_id' => $tenant->id,
+                'sku' => 'INV-REJ-0001',
+                'production_order_id' => null,
+                'source_type' => 'opening_balance',
+                'location_id' => $rakC1->id,
+                'product_name' => 'Mukena Bali - Reject (Defect Besar)',
+                'product_code' => 'MKN-BL-REJ',
+                'target_quantity' => 10,
+                'current_quantity' => 10,
+                'reserved_quantity' => 0,
+                'minimum_stock' => 0,
+                'quality_grade' => 'Reject',
+                'status' => 'damaged',
+                'unit_cost' => 85000,
+                'selling_price' => 40000,
+                'notes' => 'Produk reject - jahitan rusak dan ada noda besar',
+            ],
+        ];
 
-        if ($dasterPattern) {
-            // Daster items
-            $dasterColors = ['Merah', 'Biru', 'Hijau', 'Ungu'];
-            foreach ($dasterColors as $color) {
-                $items[] = [
+        foreach ($openingBalanceItems as $itemData) {
+            $item = InventoryItem::create($itemData);
+            $itemsCreated++;
+
+            // Create opening balance adjustment record if source_type is opening_balance
+            if ($itemData['source_type'] === 'opening_balance' && $user) {
+                StockAdjustment::create([
                     'tenant_id' => $tenant->id,
-                    'pattern_id' => $dasterPattern->id,
-                    'name' => "Daster All Size - {$color}",
-                    'attributes' => [
-                        'color' => $color,
-                        'size' => 'All Size',
-                        'material' => 'Katun Rayon',
-                    ],
-                    'category' => 'garment',
-                    'current_stock' => fake()->numberBetween(10, 40),
-                    'reserved_stock' => 0,
-                    'minimum_stock' => 5,
-                    'unit_cost' => 45000,
-                    'selling_price' => 75000,
-                    'inventory_location_id' => $rakB1->id,
-                    'batch_number' => 'PB-2026-'.str_pad(fake()->numberBetween(51, 80), 4, '0', STR_PAD_LEFT),
-                    'quality_grade' => 'A',
-                    'status' => 'available',
-                ];
+                    'inventory_item_id' => $item->id,
+                    'adjustment_type' => 'opening_balance',
+                    'quantity_before' => 0,
+                    'quantity_after' => $itemData['current_quantity'],
+                    'adjustment_quantity' => $itemData['current_quantity'],
+                    'reason' => 'Stock awal saat setup sistem',
+                    'notes' => $itemData['notes'] ?? null,
+                    'adjusted_by' => $user->id,
+                ]);
+                $adjustmentsCreated++;
             }
         }
 
-        // Add some low stock items (for testing alerts)
-        $items[] = [
-            'tenant_id' => $tenant->id,
-            'pattern_id' => $mukenaBaliPattern?->id,
-            'name' => 'Mukena Bali XL - Pink (Low Stock)',
-            'attributes' => [
-                'color' => 'Pink',
-                'size' => 'XL',
-                'material' => 'Katun Jepang',
-            ],
-            'category' => 'garment',
-            'current_stock' => 2, // Below minimum
-            'reserved_stock' => 0,
-            'minimum_stock' => 5,
-            'unit_cost' => 85000,
-            'selling_price' => 125000,
-            'inventory_location_id' => $rakA1->id,
-            'batch_number' => 'PB-2026-0099',
-            'quality_grade' => 'A',
-            'status' => 'available',
-        ];
+        // Create some stock adjustment history for testing
+        $existingItems = InventoryItem::where('tenant_id', $tenant->id)
+            ->where('source_type', 'production')
+            ->take(2)
+            ->get();
 
-        // Add reject items
-        $items[] = [
-            'tenant_id' => $tenant->id,
-            'pattern_id' => $mukenaBaliPattern?->id,
-            'name' => 'Mukena Bali M - Putih (Reject)',
-            'attributes' => [
-                'color' => 'Putih',
-                'size' => 'M',
-                'material' => 'Katun Jepang',
-                'defect' => 'Jahitan rusak parah, noda besar',
-            ],
-            'category' => 'garment',
-            'current_stock' => 5,
-            'reserved_stock' => 0,
-            'minimum_stock' => 0,
-            'unit_cost' => 85000,
-            'selling_price' => 50000,
-            'inventory_location_id' => $rakC1->id,
-            'batch_number' => 'PB-2026-0013',
-            'quality_grade' => 'reject',
-            'status' => 'available',
-        ];
+        foreach ($existingItems as $item) {
+            if (! $user) {
+                continue;
+            }
 
-        // Bulk insert items
-        foreach ($items as $itemData) {
-            InventoryItem::create($itemData);
+            // Correction adjustment
+            $oldQty = $item->current_quantity;
+            $newQty = $oldQty - 2;
+            StockAdjustment::create([
+                'tenant_id' => $tenant->id,
+                'inventory_item_id' => $item->id,
+                'adjustment_type' => 'correction',
+                'quantity_before' => $oldQty,
+                'quantity_after' => $newQty,
+                'adjustment_quantity' => -2,
+                'reason' => 'Koreksi setelah stock opname',
+                'notes' => 'Ditemukan selisih 2 pcs saat pengecekan fisik',
+                'adjusted_by' => $user->id,
+            ]);
+            $item->update(['current_quantity' => $newQty]);
+            $adjustmentsCreated++;
+
+            // Damage adjustment
+            $oldQty = $item->current_quantity;
+            $newQty = $oldQty - 1;
+            StockAdjustment::create([
+                'tenant_id' => $tenant->id,
+                'inventory_item_id' => $item->id,
+                'adjustment_type' => 'damage',
+                'quantity_before' => $oldQty,
+                'quantity_after' => $newQty,
+                'adjustment_quantity' => -1,
+                'reason' => 'Produk rusak',
+                'notes' => 'Ditemukan 1 pcs dengan jahitan sobek',
+                'adjusted_by' => $user->id,
+            ]);
+            $item->update(['current_quantity' => $newQty]);
+            $adjustmentsCreated++;
         }
 
         $this->command->info('✓ Inventory seeded successfully!');
-        $this->command->info("  - {$locations->count()} locations created");
-        $this->command->info('  - '.count($items).' inventory items created');
+        $this->command->info('  - '.count($locationData).' locations created');
+        $this->command->info("  - {$itemsCreated} inventory items created");
+        $this->command->info("  - {$adjustmentsCreated} stock adjustments created");
     }
 }

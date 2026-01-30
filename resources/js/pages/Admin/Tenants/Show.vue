@@ -1,12 +1,13 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '@/layouts/AdminLayout.vue'
-import { ArrowLeft, Edit, Power, PowerOff } from 'lucide-vue-next'
+import { ArrowLeft, Edit, Power, PowerOff, CreditCard } from 'lucide-vue-next'
 import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
     tenant: Object,
     stats: Object,
+    payments: Array,
 })
 
 const suspend = () => {
@@ -17,6 +18,36 @@ const suspend = () => {
 
 const activate = () => {
     router.post(`/admin/tenants/${props.tenant.id}/activate`)
+}
+
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+    }).format(amount)
+}
+
+const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    })
+}
+
+const getStatusColor = (status) => {
+    const colors = {
+        pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+        approved: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+        rejected: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+    }
+    return colors[status] || colors.pending
+}
+
+const isExpired = () => {
+    if (!props.tenant.subscription_expires_at) return false
+    return new Date(props.tenant.subscription_expires_at) < new Date()
 }
 </script>
 
@@ -127,8 +158,9 @@ const activate = () => {
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Subscription Expires</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                            {{ tenant.subscription_expires_at ? new Date(tenant.subscription_expires_at).toLocaleDateString() : 'N/A' }}
+                        <dd class="mt-1 text-sm" :class="isExpired() ? 'text-red-600 font-bold' : 'text-gray-900 dark:text-white'">
+                            {{ tenant.subscription_expires_at ? formatDate(tenant.subscription_expires_at) : 'N/A' }}
+                            <span v-if="isExpired()" class="text-xs">(Expired)</span>
                         </dd>
                     </div>
                     <div>
@@ -178,6 +210,59 @@ const activate = () => {
                                 >
                                     {{ user.is_active ? 'Active' : 'Inactive' }}
                                 </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payment History -->
+        <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <CreditCard class="w-5 h-5 text-purple-600" />
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Payment History</h2>
+                </div>
+                <Link
+                    href="/admin/payments"
+                    class="text-sm text-purple-600 hover:text-purple-700"
+                >
+                    View All Payments
+                </Link>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-900/50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tanggal</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Paket</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nominal</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tr v-for="payment in payments" :key="payment.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{ formatDate(payment.created_at) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white capitalize">
+                                {{ payment.plan_type }} ({{ payment.duration_months }} bln)
+                            </td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                                {{ formatCurrency(payment.amount) }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span :class="['px-2 py-1 text-xs font-medium rounded-full capitalize', getStatusColor(payment.status)]">
+                                    {{ payment.status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                {{ payment.admin?.name || '-' }}
+                            </td>
+                        </tr>
+                        <tr v-if="!payments || payments.length === 0">
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                Belum ada riwayat pembayaran
                             </td>
                         </tr>
                     </tbody>

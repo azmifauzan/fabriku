@@ -96,8 +96,10 @@ it('can create new inventory item', function () {
 it('validates required fields when creating item', function () {
     $response = $this->post('/inventory/items', []);
 
+    // production_order_id is no longer required (nullable for manual entry/opening balance)
+    // product_name is required when no production_order_id is provided
     $response->assertSessionHasErrors([
-        'production_order_id',
+        'product_name',
         'location_id', 'target_quantity', 'current_quantity', 'unit_cost',
     ]);
 });

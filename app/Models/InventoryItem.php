@@ -17,6 +17,7 @@ class InventoryItem extends Model
         'tenant_id',
         'sku',
         'production_order_id',
+        'source_type',
         'location_id',
         'product_name',
         'product_code',
@@ -42,6 +43,7 @@ class InventoryItem extends Model
         'batch_number',
         'expiry_date',
         'image_url',
+        'source_label',
     ];
 
     protected function casts(): array
@@ -217,6 +219,42 @@ class InventoryItem extends Model
         $this->decrement('current_quantity', $quantity);
 
         return true;
+    }
+
+    // Source type helpers
+    public function isManualEntry(): bool
+    {
+        return is_null($this->production_order_id);
+    }
+
+    public function isFromProduction(): bool
+    {
+        return ! is_null($this->production_order_id);
+    }
+
+    public function isOpeningBalance(): bool
+    {
+        return $this->source_type === 'opening_balance';
+    }
+
+    public function getSourceLabelAttribute(): string
+    {
+        if ($this->isFromProduction()) {
+            return 'Produksi #'.$this->productionOrder?->order_number;
+        }
+
+        return match ($this->source_type) {
+            'opening_balance' => 'Stock Awal',
+            'purchase' => 'Pembelian',
+            'return' => 'Retur',
+            default => 'Manual Entry',
+        };
+    }
+
+    // Relationship to stock adjustments
+    public function stockAdjustments()
+    {
+        return $this->hasMany(StockAdjustment::class);
     }
 
     public function getCurrentStockAttribute(): int
