@@ -43,7 +43,9 @@ Prefix: `/inventory`
 | GET | `/inventory/locations` | List locations |
 | POST | `/inventory/locations` | Create location |
 | GET | `/inventory/items` | List inventory items |
-| POST | `/inventory/items` | Create/Stock adjustment is handled here or via specific flows |
+| POST | `/inventory/items` | Create new item (from Production/Opening Balance) |
+| POST | `/inventory/items/{id}/adjust` | Adjust stock (Correction, Damage, etc) |
+| GET | `/inventory/items/{id}/adjustments` | View adjustment history |
 
 #### Materials & Production
 | Method | Endpoint | Description |

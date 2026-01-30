@@ -44,6 +44,13 @@
    ├─ Multi-channel sales
    ├─ Payment tracking
    └─ Auto stock deduction
+   └─ Auto stock deduction
+          ↓
+7. 📉 STOCK ADJUSTMENT
+   ├─ Opening Balance (Initial)
+   ├─ Correction (Opname)
+   ├─ Damage/Loss tracking
+   └─ Audit trail history
 ```
 
 ---
@@ -213,6 +220,33 @@ SELECT po.*,
 FROM production_orders po
 JOIN preparation_orders prep ON po.preparation_order_id = prep.id
 WHERE po.id = 1;
+```
+
+### 4. Stock Adjustment (Inventory Correction)
+
+**Types**:
+- `opening_balance`: Stock awal (saat migrasi sistem)
+- `correction`: Penyesuaian selisih stock opname
+- `damage`: Barang rusak di gudang
+- `loss`: Barang hilang
+- `found`: Barang ditemukan (lebih)
+- `return`: Retur dari customer (restock)
+
+**Logic**:
+- **Positive Quantity**: Menambah stock (`opening_balance`, `correction` (positive), `found`, `return`)
+- **Negative Quantity**: Mengurangi stock (`damage`, `loss`, `correction` (negative))
+- **Validation**: Cannot subtract more than current stock
+
+```php
+// Example: Stock Opname Correction via Service
+$inventoryService->adjustStock(
+    $item,
+    'subtract', // or 'add'
+    5,          // quantity difference
+    'correction',
+    'Selisih stock opname akhir bulan',
+    'Ditemukan selisih 5 pcs saat opname gudang A'
+);
 ```
 
 ---

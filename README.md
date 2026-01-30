@@ -298,8 +298,8 @@ Fabriku dirancang dengan arsitektur **category-agnostic** yang memungkinkan satu
 |----------|-------------|---------------|--------|
 | **Garment & Konveksi** | Pattern → Cutting → Sewing | Mukena, Daster, Gamis, Jilbab | ✅ Active |
 | **Makanan & Kue** | Resep → Mixing → Baking | Cake, Brownies, Cookies, Roti | ✅ Active |
-| **Kerajinan & Craft** | Desain → Persiapan → Pembuatan | Souvenir, Aksesoris, Dekorasi | 🔜 Coming Soon |
-| **Kosmetik & Skincare** | Formula → Mixing → Produksi | Skincare, Makeup, Herbal | 🔜 Coming Soon |
+| **Kerajinan & Craft** | Desain → Persiapan → Pembuatan | Souvenir, Aksesoris, Dekorasi | ✅ Active |
+| **Kosmetik & Skincare** | Formula → Mixing → Produksi | Skincare, Makeup, Herbal | ✅ Active |
 
 ### Fitur Multi-Kategori
 
@@ -463,6 +463,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ Inventory items with SKU generation
 - ✅ Link to production batches & patterns
 - ✅ Stock quantity tracking (initial, current, reserved)
+- ✅ Stock Adjustments (Opening Balance, Correction, Damage, etc)
 - ✅ Status management (available, reserved, depleted)
 - ✅ Selling price & cost tracking
 
