@@ -10,10 +10,10 @@ cp .env.example .env
 Edit `.env` dan set:
 ```env
 MAIL_MAILER=smtp
-MAIL_HOST=smtp-relay.brevo.com
+MAIL_HOST=smtp_host
 MAIL_PORT=587
-MAIL_USERNAME=976f25001@smtp-brevo.com
-MAIL_PASSWORD=9NXWKUZqj2ypIPb6
+MAIL_USERNAME=smtp_username
+MAIL_PASSWORD=smtp_password
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS="noreply@fabriku.my.id"
 MAIL_FROM_NAME="Fabriku"

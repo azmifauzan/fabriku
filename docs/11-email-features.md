@@ -97,10 +97,10 @@ Update file `.env` dengan kredensial email:
 
 ```env
 MAIL_MAILER=smtp
-MAIL_HOST=smtp-relay.brevo.com
+MAIL_HOST=
 MAIL_PORT=587
-MAIL_USERNAME=976f25001@smtp-brevo.com
-MAIL_PASSWORD=9NXWKUZqj2ypIPb6
+MAIL_USERNAME=
+MAIL_PASSWORD=
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS="noreply@fabriku.my.id"
 MAIL_FROM_NAME="${APP_NAME}"
