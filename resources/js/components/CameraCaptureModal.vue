@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import Modal from '@/Components/Modal.vue';
+import Modal from '@/components/Modal.vue';
 import { Camera, X, RefreshCw } from 'lucide-vue-next';
 
 const props = defineProps<{

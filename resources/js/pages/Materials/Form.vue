@@ -5,7 +5,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { Camera, Upload, X } from 'lucide-vue-next';
-import CameraCaptureModal from '@/Components/CameraCaptureModal.vue';
+import CameraCaptureModal from '@/components/CameraCaptureModal.vue';
 
 interface MaterialAttribute {
     id?: number;

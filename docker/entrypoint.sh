@@ -22,11 +22,26 @@ if [ "$FORCE_MIGRATE" = "true" ] || [ "$APP_ENV" != "production" ]; then
     php artisan migrate --force
 fi
 
+# Ensure all storage directories exist
+echo "📁 Setting up storage directories..."
+mkdir -p storage/framework/views
+mkdir -p storage/framework/cache/data
+mkdir -p storage/framework/sessions
+mkdir -p storage/logs
+mkdir -p storage/app/public
+chown -R www-data:www-data storage bootstrap/cache
+
 # Cache configuration
 echo "⚡ Caching configuration..."
 php artisan config:cache
 php artisan route:cache
-php artisan view:cache
+
+# Only cache views if views directory exists
+if [ -d "resources/views" ] && [ "$(ls -A resources/views 2>/dev/null)" ]; then
+    php artisan view:cache
+else
+    echo "⏭ Skipping view cache (no views found)"
+fi
 
 # Start supervisor (manages Apache, Cron, and Queue workers)
 echo "🎯 Starting services (Apache + Cron + Queue)..."

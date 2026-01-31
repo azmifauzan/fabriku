@@ -33,6 +33,11 @@ services:
       - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@fabriku.my.id}
       - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Fabriku}
       - FORCE_MIGRATE=${FORCE_MIGRATE:-false}
+      - FABRIKU_S3_ACCESS_KEY=${FABRIKU_S3_ACCESS_KEY}
+      - FABRIKU_S3_SECRET_KEY=${FABRIKU_S3_SECRET_KEY}
+      - FABRIKU_S3_BUCKET=${FABRIKU_S3_BUCKET}
+      - FABRIKU_S3_ENDPOINT=${FABRIKU_S3_ENDPOINT}
+      - FABRIKU_S3_URL=${FABRIKU_S3_URL}
     volumes:
       - ./storage:/var/www/html/storage
       - ./bootstrap/cache:/var/www/html/bootstrap/cache

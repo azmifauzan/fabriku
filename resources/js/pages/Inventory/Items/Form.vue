@@ -2,7 +2,7 @@
 import { Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { Camera, Upload, X, Package, Truck, RotateCcw, FileText } from 'lucide-vue-next';
-import CameraCaptureModal from '@/Components/CameraCaptureModal.vue';
+import CameraCaptureModal from '@/components/CameraCaptureModal.vue';
 
 interface Location {
     id: number;
