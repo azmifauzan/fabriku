@@ -52,17 +52,16 @@ Informasi organisasi/tenant dalam sistem SaaS.
 CREATE TABLE tenants (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) UNIQUE NOT NULL,
-    email VARCHAR(255),
-    phone VARCHAR(50),
-    address TEXT,
-    logo_url VARCHAR(500),
-    is_active BOOLEAN DEFAULT TRUE,
+    business_category VARCHAR(50) DEFAULT 'garment', -- garment, food, craft, cosmetic, etc
     subscription_plan VARCHAR(50) DEFAULT 'trial',
     subscription_expires_at TIMESTAMP,
-    settings JSONB DEFAULT '{}',
+    trial_reminder_7days_sent_at TIMESTAMP,
+    trial_reminder_3days_sent_at TIMESTAMP,
+    trial_reminder_1day_sent_at TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 ```
 
@@ -348,17 +347,18 @@ CREATE TABLE contractors (
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     code VARCHAR(50) NOT NULL,
     name VARCHAR(255) NOT NULL,
-    type VARCHAR(50),
     contact_person VARCHAR(255),
     phone VARCHAR(50),
+    email VARCHAR(255),
     address TEXT,
-    price_per_unit DECIMAL(15,2),
-    rating DECIMAL(3,2),
+    type ENUM('individual', 'company') DEFAULT 'individual',
+    specialty VARCHAR(255), -- jahit, bordir, sablon, baking, etc
     is_active BOOLEAN DEFAULT TRUE,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT contractors_tenant_code_unique UNIQUE (tenant_id, code)
+    deleted_at TIMESTAMP,
+    CONSTRAINT contractors_tenant_code_unique UNIQUE (code)
 );
 ```
 

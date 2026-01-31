@@ -11,9 +11,12 @@ return new class extends Migration
         Schema::create('tenants', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('business_category')->default('garment'); // garment, food, craft, etc
+            $table->string('business_category')->default('garment'); // garment, food, craft, cosmetic, etc
             $table->string('subscription_plan')->default('trial');
             $table->timestamp('subscription_expires_at')->nullable();
+            $table->timestamp('trial_reminder_7days_sent_at')->nullable();
+            $table->timestamp('trial_reminder_3days_sent_at')->nullable();
+            $table->timestamp('trial_reminder_1day_sent_at')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
