@@ -187,9 +187,11 @@ php artisan migrate
 # Seed database (optional, untuk development)
 php artisan db:seed
 
-# Seed akan membuat 2 demo tenants:
+# Seed akan membuat 4 demo tenants dengan data lengkap:
 # 1. Konveksi Fabriku (Garment) - admin@konveksi.com / password
 # 2. Kue Mama Homemade (Food) - admin@kuemama.com / password
+# 3. Crafty Handmade (Craft) - admin@crafty.com / password
+# 4. Glow Beauty Lab (Cosmetic) - admin@glowbeauty.com / password
 ```
 
 ### 6. Build Assets
@@ -230,17 +232,27 @@ Visit: http://localhost:8000
 - URL: http://localhost:8000/admin/login
 - Super Admin: `admin@fabriku.com` / `password`
 
-### 🔄 Demo Data Auto-Reset
+### 🔄 Demo Data Management
 
-Demo tenants are automatically reset every hour to maintain clean environments.
+Demo tenants are automatically reset every hour to maintain clean environments. The reset command now properly reseeds data to match the initial state.
 
-**Manual Reset:**
+**Manual Reset Commands:**
 ```bash
-# Reset all demo tenants
+# Reset all demo tenants and reseed with default data
 php artisan demo:reset
 
-# Reset specific tenant
+# Reset specific tenant (by ID or name pattern)
 php artisan demo:reset --tenant=1
+php artisan demo:reset --tenant="Konveksi"
+
+# Reset without reseeding (just clear data)
+php artisan demo:reset --no-reseed
+
+# Recalculate material stock (if needed)
+php artisan material:recalculate-stock
+
+# Send trial reminder emails
+php artisan trial:send-reminders
 ```
 
 **Production Setup (Cron):**

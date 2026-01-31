@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Tenant;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 class ResetDemoData extends Command
@@ -13,17 +14,17 @@ class ResetDemoData extends Command
      *
      * @var string
      */
-    protected $signature = 'demo:reset {--tenant= : Specific tenant ID or slug to reset}';
+    protected $signature = 'demo:reset {--tenant= : Specific tenant ID or slug to reset} {--no-reseed : Skip reseeding data}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Reset demo data to initial state for demo tenants';
+    protected $description = 'Reset demo data to initial state for demo tenants and reseed with default data';
 
     /**
-     * Execute the console command.
+     * Execute the command.
      */
     public function handle()
     {
@@ -38,12 +39,13 @@ class ResetDemoData extends Command
         ];
 
         $tenantOption = $this->option('tenant');
+        $noReseed = $this->option('no-reseed');
 
         if ($tenantOption) {
             // Reset specific tenant
             $tenant = is_numeric($tenantOption)
                 ? Tenant::find($tenantOption)
-                : Tenant::where('slug', $tenantOption)->first();
+                : Tenant::where('name', 'like', "%{$tenantOption}%")->first();
 
             if (! $tenant) {
                 $this->error("Tenant not found: {$tenantOption}");
@@ -71,7 +73,15 @@ class ResetDemoData extends Command
             }
         }
 
-        $this->info('Demo data reset completed!');
+        if (! $noReseed) {
+            $this->newLine();
+            $this->info('🌱 Reseeding demo data...');
+            Artisan::call('db:seed', ['--class' => 'DatabaseSeeder']);
+            $this->info('✅ Demo data reseeded successfully!');
+        }
+
+        $this->newLine();
+        $this->info('✅ Demo data reset completed!');
 
         return 0;
     }
@@ -82,30 +92,46 @@ class ResetDemoData extends Command
 
         DB::beginTransaction();
         try {
-            // Delete all data related to this tenant
+            // Delete in correct order to avoid FK constraints
+            $this->info('  - Clearing sales order items...');
+            DB::table('sales_order_items')->whereIn('sales_order_id', function ($query) use ($tenant) {
+                $query->select('id')->from('sales_orders')->where('tenant_id', $tenant->id);
+            })->delete();
+
             $this->info('  - Clearing sales orders...');
-            $tenant->users()->first()?->tenant->salesOrders()->delete();
-
-            $this->info('  - Clearing production orders...');
-            DB::table('production_orders')->where('tenant_id', $tenant->id)->delete();
-
-            $this->info('  - Clearing preparation orders...');
-            DB::table('preparation_orders')->where('tenant_id', $tenant->id)->delete();
+            DB::table('sales_orders')->where('tenant_id', $tenant->id)->delete();
 
             $this->info('  - Clearing inventory...');
             DB::table('inventory_items')->where('tenant_id', $tenant->id)->delete();
             DB::table('stock_adjustments')->where('tenant_id', $tenant->id)->delete();
 
-            $this->info('  - Clearing materials...');
-            DB::table('material_receipts')->where('tenant_id', $tenant->id)->delete();
-            DB::table('preparation_material_usage')->whereIn('preparation_order_id', function ($query) use ($tenant) {
+            $this->info('  - Clearing production orders...');
+            DB::table('production_orders')->where('tenant_id', $tenant->id)->delete();
+
+            $this->info('  - Clearing preparation material usages...');
+            DB::table('preparation_material_usages')->whereIn('preparation_order_id', function ($query) use ($tenant) {
                 $query->select('id')->from('preparation_orders')->where('tenant_id', $tenant->id);
             })->delete();
-            DB::table('materials')->where('tenant_id', $tenant->id)->delete();
-            DB::table('material_types')->where('tenant_id', $tenant->id)->delete();
+
+            $this->info('  - Clearing preparation orders...');
+            DB::table('preparation_orders')->where('tenant_id', $tenant->id)->delete();
 
             $this->info('  - Clearing patterns...');
             DB::table('patterns')->where('tenant_id', $tenant->id)->delete();
+
+            $this->info('  - Clearing material receipts...');
+            DB::table('material_receipts')->where('tenant_id', $tenant->id)->delete();
+
+            $this->info('  - Clearing material attributes...');
+            DB::table('material_attributes')->whereIn('material_id', function ($query) use ($tenant) {
+                $query->select('id')->from('materials')->where('tenant_id', $tenant->id);
+            })->delete();
+
+            $this->info('  - Clearing materials...');
+            DB::table('materials')->where('tenant_id', $tenant->id)->delete();
+
+            $this->info('  - Clearing material types...');
+            DB::table('material_types')->where('tenant_id', $tenant->id)->delete();
 
             $this->info('  - Clearing contractors...');
             DB::table('contractors')->where('tenant_id', $tenant->id)->delete();
@@ -119,10 +145,13 @@ class ResetDemoData extends Command
             $this->info('  - Clearing inventory locations...');
             DB::table('inventory_locations')->where('tenant_id', $tenant->id)->delete();
 
-            // Reset subscription to trial with fresh 30 days
+            // Keep users but reset subscription to trial with fresh 30 days
             $tenant->update([
                 'subscription_plan' => 'trial',
                 'subscription_expires_at' => now()->addDays(30),
+                'trial_reminder_7days_sent_at' => null,
+                'trial_reminder_3days_sent_at' => null,
+                'trial_reminder_1day_sent_at' => null,
                 'is_active' => true,
             ]);
 

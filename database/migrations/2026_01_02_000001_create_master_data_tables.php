@@ -30,12 +30,12 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->string('code')->unique();
             $table->string('name');
-            $table->enum('type', ['individual', 'company'])->default('individual');
-            $table->text('specialty')->nullable(); // jahit, bordir, sablon, etc - freeform text
             $table->string('contact_person')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
+            $table->enum('type', ['individual', 'company'])->default('individual');
+            $table->string('specialty')->nullable(); // jahit, bordir, sablon, baking, etc - freeform text
             $table->boolean('is_active')->default(true);
             $table->text('notes')->nullable();
             $table->timestamps();

@@ -39,32 +39,38 @@ class DatabaseSeeder extends Seeder
         // ==========================================
         // TENANT 1: KONVEKSI FABRIKU (GARMENT)
         // ==========================================
-        $tenantGarment = Tenant::create([
-            'name' => 'Konveksi Fabriku',
-            'business_category' => 'garment',
-            'subscription_plan' => 'trial',
-            'subscription_expires_at' => now()->addDays(30),
-            'is_active' => true,
-        ]);
+        $tenantGarment = Tenant::firstOrCreate(
+            ['name' => 'Konveksi Fabriku'],
+            [
+                'business_category' => 'garment',
+                'subscription_plan' => 'trial',
+                'subscription_expires_at' => now()->addDays(30),
+                'is_active' => true,
+            ]
+        );
 
         // Users for Garment
-        User::create([
-            'tenant_id' => $tenantGarment->id,
-            'name' => 'Admin Konveksi',
-            'email' => 'admin@konveksi.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'email_verified_at' => now(),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@konveksi.com'],
+            [
+                'tenant_id' => $tenantGarment->id,
+                'name' => 'Admin Konveksi',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
 
-        User::create([
-            'tenant_id' => $tenantGarment->id,
-            'name' => 'Manager Produksi',
-            'email' => 'manager@konveksi.com',
-            'password' => Hash::make('password'),
-            'role' => 'manager',
-            'email_verified_at' => now(),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'manager@konveksi.com'],
+            [
+                'tenant_id' => $tenantGarment->id,
+                'name' => 'Manager Produksi',
+                'password' => Hash::make('password'),
+                'role' => 'manager',
+                'email_verified_at' => now(),
+            ]
+        );
 
         // 3. Create Staff
         $staffPreparation = Staff::create([
@@ -267,16 +273,29 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 9. Create Preparation Orders (Cutting Orders) - COMPLETED
+        // NOTE: Stock will be auto-deducted by PreparationOrderObserver when status=completed
+        // Material usages will also create FIFO records via PreparationMaterialUsage
         $preparationMukena = PreparationOrder::create([
             'tenant_id' => $tenantGarment->id,
             'order_number' => 'PRP-2026-001',
             'pattern_id' => $patternMukena->id,
             'prepared_by' => $staffPreparation->id,
             'output_quantity' => 20,
-            // JSON material_usage for legacy/display purposes
             'material_usage' => [
-                ['material_id' => $materialKatun->id, 'material_name' => $materialKatun->name, 'quantity' => 52, 'unit' => $materialKatun->unit], // 2.5 x 20 + waste
-                ['material_id' => $materialBenang->id, 'material_name' => $materialBenang->name, 'quantity' => 2.5, 'unit' => $materialBenang->unit],
+                [
+                    'material_id' => $materialKatun->id,
+                    'material_name' => $materialKatun->name,
+                    'quantity' => 52,
+                    'unit' => $materialKatun->unit,
+                    'batch_id' => $receiptKatun->id, // Explicitly use first batch for FIFO
+                ],
+                [
+                    'material_id' => $materialBenang->id,
+                    'material_name' => $materialBenang->name,
+                    'quantity' => 2.5,
+                    'unit' => $materialBenang->unit,
+                    'batch_id' => $receiptBenang->id,
+                ],
             ],
             'waste_percentage' => 4.0,
             'status' => 'completed',
@@ -292,8 +311,20 @@ class DatabaseSeeder extends Seeder
             'prepared_by' => $staffPreparation->id,
             'output_quantity' => 15,
             'material_usage' => [
-                ['material_id' => $materialPolyester->id, 'material_name' => $materialPolyester->name, 'quantity' => 47, 'unit' => $materialPolyester->unit], // 3.0 x 15 + waste
-                ['material_id' => $materialBenang->id, 'material_name' => $materialBenang->name, 'quantity' => 2.5, 'unit' => $materialBenang->unit],
+                [
+                    'material_id' => $materialPolyester->id,
+                    'material_name' => $materialPolyester->name,
+                    'quantity' => 47,
+                    'unit' => $materialPolyester->unit,
+                    'batch_id' => $receiptPolyester->id,
+                ],
+                [
+                    'material_id' => $materialBenang->id,
+                    'material_name' => $materialBenang->name,
+                    'quantity' => 2.5,
+                    'unit' => $materialBenang->unit,
+                    'batch_id' => $receiptBenang->id,
+                ],
             ],
             'waste_percentage' => 4.5,
             'status' => 'completed',
@@ -340,8 +371,20 @@ class DatabaseSeeder extends Seeder
             'prepared_by' => $staffPreparation->id,
             'output_quantity' => 10,
             'material_usage' => [
-                ['material_id' => $materialKatun->id, 'material_name' => $materialKatun->name, 'quantity' => 26, 'unit' => $materialKatun->unit],
-                ['material_id' => $materialBenang->id, 'material_name' => $materialBenang->name, 'quantity' => 1.2, 'unit' => $materialBenang->unit],
+                [
+                    'material_id' => $materialKatun->id,
+                    'material_name' => $materialKatun->name,
+                    'quantity' => 26,
+                    'unit' => $materialKatun->unit,
+                    'batch_id' => $receiptKatun->id,
+                ],
+                [
+                    'material_id' => $materialBenang->id,
+                    'material_name' => $materialBenang->name,
+                    'quantity' => 1.2,
+                    'unit' => $materialBenang->unit,
+                    'batch_id' => $receiptBenang->id,
+                ],
             ],
             'waste_percentage' => 4.0,
             'status' => 'completed',
@@ -487,32 +530,38 @@ class DatabaseSeeder extends Seeder
         // ==========================================
         // TENANT 2: KUE MAMA HOMEMADE (FOOD)
         // ==========================================
-        $tenantFood = Tenant::create([
-            'name' => 'Kue Mama Homemade',
-            'business_category' => 'food',
-            'subscription_plan' => 'trial',
-            'subscription_expires_at' => now()->addDays(30),
-            'is_active' => true,
-        ]);
+        $tenantFood = Tenant::firstOrCreate(
+            ['name' => 'Kue Mama Homemade'],
+            [
+                'business_category' => 'food',
+                'subscription_plan' => 'trial',
+                'subscription_expires_at' => now()->addDays(30),
+                'is_active' => true,
+            ]
+        );
 
         // Users for Food
-        User::create([
-            'tenant_id' => $tenantFood->id,
-            'name' => 'Admin Kue Mama',
-            'email' => 'admin@kuemama.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'email_verified_at' => now(),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@kuemama.com'],
+            [
+                'tenant_id' => $tenantFood->id,
+                'name' => 'Admin Kue Mama',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
 
-        User::create([
-            'tenant_id' => $tenantFood->id,
-            'name' => 'Manager Dapur',
-            'email' => 'manager@kuemama.com',
-            'password' => Hash::make('password'),
-            'role' => 'manager',
-            'email_verified_at' => now(),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'manager@kuemama.com'],
+            [
+                'tenant_id' => $tenantFood->id,
+                'name' => 'Manager Dapur',
+                'password' => Hash::make('password'),
+                'role' => 'manager',
+                'email_verified_at' => now(),
+            ]
+        );
 
         // Staff for Food
         $staffMixing = Staff::create([
@@ -710,12 +759,8 @@ class DatabaseSeeder extends Seeder
             'notes' => 'Mixing 100 pcs cookies',
         ]);
 
-        // Update material stock after preparation
-        $materialTepung->decrement('stock_quantity', 2.9);
-        $materialGula->decrement('stock_quantity', 2.0);
-        $materialTelur->decrement('stock_quantity', 1.5);
-
         // Production Orders for Food (Baking)
+        // NOTE: Material stock already auto-deducted by PreparationOrderObserver
         $productionBrownies = ProductionOrder::create([
             'tenant_id' => $tenantFood->id,
             'order_number' => 'PO-F-2026-001',
@@ -902,32 +947,38 @@ class DatabaseSeeder extends Seeder
         // ==========================================
         // TENANT 3: CRAFTY HANDMADE (CRAFT)
         // ==========================================
-        $tenantCraft = Tenant::create([
-            'name' => 'Crafty Handmade',
-            'business_category' => 'craft',
-            'subscription_plan' => 'trial',
-            'subscription_expires_at' => now()->addDays(30),
-            'is_active' => true,
-        ]);
+        $tenantCraft = Tenant::firstOrCreate(
+            ['name' => 'Crafty Handmade'],
+            [
+                'business_category' => 'craft',
+                'subscription_plan' => 'trial',
+                'subscription_expires_at' => now()->addDays(30),
+                'is_active' => true,
+            ]
+        );
 
         // Users for Craft
-        User::create([
-            'tenant_id' => $tenantCraft->id,
-            'name' => 'Admin Crafty',
-            'email' => 'admin@crafty.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'email_verified_at' => now(),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@crafty.com'],
+            [
+                'tenant_id' => $tenantCraft->id,
+                'name' => 'Admin Crafty',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
 
-        User::create([
-            'tenant_id' => $tenantCraft->id,
-            'name' => 'Manager Produksi',
-            'email' => 'manager@crafty.com',
-            'password' => Hash::make('password'),
-            'role' => 'manager',
-            'email_verified_at' => now(),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'manager@crafty.com'],
+            [
+                'tenant_id' => $tenantCraft->id,
+                'name' => 'Manager Produksi',
+                'password' => Hash::make('password'),
+                'role' => 'manager',
+                'email_verified_at' => now(),
+            ]
+        );
 
         // Staff for Craft
         Staff::create([
@@ -1052,32 +1103,38 @@ class DatabaseSeeder extends Seeder
         // ==========================================
         // TENANT 4: GLOW BEAUTY LAB (COSMETIC)
         // ==========================================
-        $tenantCosmetic = Tenant::create([
-            'name' => 'Glow Beauty Lab',
-            'business_category' => 'cosmetic',
-            'subscription_plan' => 'trial',
-            'subscription_expires_at' => now()->addDays(30),
-            'is_active' => true,
-        ]);
+        $tenantCosmetic = Tenant::firstOrCreate(
+            ['name' => 'Glow Beauty Lab'],
+            [
+                'business_category' => 'cosmetic',
+                'subscription_plan' => 'trial',
+                'subscription_expires_at' => now()->addDays(30),
+                'is_active' => true,
+            ]
+        );
 
         // Users for Cosmetic
-        User::create([
-            'tenant_id' => $tenantCosmetic->id,
-            'name' => 'Admin Glow Beauty',
-            'email' => 'admin@glowbeauty.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'email_verified_at' => now(),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@glowbeauty.com'],
+            [
+                'tenant_id' => $tenantCosmetic->id,
+                'name' => 'Admin Glow Beauty',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
 
-        User::create([
-            'tenant_id' => $tenantCosmetic->id,
-            'name' => 'Manager QC',
-            'email' => 'manager@glowbeauty.com',
-            'password' => Hash::make('password'),
-            'role' => 'manager',
-            'email_verified_at' => now(),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'manager@glowbeauty.com'],
+            [
+                'tenant_id' => $tenantCosmetic->id,
+                'name' => 'Manager QC',
+                'password' => Hash::make('password'),
+                'role' => 'manager',
+                'email_verified_at' => now(),
+            ]
+        );
 
         // Staff for Cosmetic
         Staff::create([
