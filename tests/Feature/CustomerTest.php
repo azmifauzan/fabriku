@@ -27,14 +27,11 @@ it('can create a customer', function () {
     $customerData = [
         'code' => 'CUST-001',
         'name' => 'Toko Berkah',
-        'type' => 'retail',
         'phone' => '081234567890',
         'email' => 'toko@example.com',
         'address' => 'Jl. Merdeka No. 123',
         'city' => 'Jakarta',
         'province' => 'DKI Jakarta',
-        'discount_percentage' => 10,
-        'payment_term' => 'cash',
         'notes' => 'Customer loyal',
         'is_active' => true,
     ];
@@ -58,8 +55,6 @@ it('validates customer code uniqueness per tenant', function () {
     $response = $this->post(route('customers.store'), [
         'code' => 'CUST-001',
         'name' => 'Duplicate Customer',
-        'type' => 'retail',
-        'payment_term' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('code');
@@ -71,9 +66,8 @@ it('can update a customer', function () {
     $updateData = [
         'code' => $customer->code,
         'name' => 'Updated Customer Name',
-        'type' => 'reseller',
-        'payment_term' => 'credit_14',
-        'discount_percentage' => 15,
+        'phone' => '08123456789',
+        'email' => 'updated@example.com',
         'is_active' => true,
     ];
 
@@ -83,7 +77,7 @@ it('can update a customer', function () {
     $this->assertDatabaseHas('customers', [
         'id' => $customer->id,
         'name' => 'Updated Customer Name',
-        'type' => 'reseller',
+        'phone' => '08123456789',
     ]);
 });
 
@@ -134,15 +128,15 @@ it('can search customers', function () {
     );
 });
 
-it('can filter customers by type', function () {
-    Customer::factory(3)->create(['tenant_id' => $this->tenant->id, 'type' => 'retail']);
-    Customer::factory(2)->create(['tenant_id' => $this->tenant->id, 'type' => 'reseller']);
+it('can filter customers by status', function () {
+    Customer::factory(3)->create(['tenant_id' => $this->tenant->id, 'is_active' => true]);
+    Customer::factory(2)->create(['tenant_id' => $this->tenant->id, 'is_active' => false]);
 
-    $response = $this->get(route('customers.index', ['type' => 'reseller']));
+    $response = $this->get(route('customers.index', ['status' => '1']));
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->has('customers.data', 2)
+        ->has('customers.data', 3)
     );
 });
 

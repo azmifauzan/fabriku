@@ -78,7 +78,8 @@ class MaterialStockService
 
                 $material->save();
 
-                Log::info("Deducted {$quantityUsed} {$materialData['unit']} from Material {$material->code}. New stock: {$material->stock_quantity}");
+                $unit = $materialData['unit'] ?? $material->unit;
+                Log::info("Deducted {$quantityUsed} {$unit} from Material {$material->code}. New stock: {$material->stock_quantity}");
             }
         });
     }

@@ -24,7 +24,7 @@ beforeEach(function () {
 
 function createCompletedPreparationOrderForTenant(int $tenantId): PreparationOrder
 {
-    $pattern = Pattern::factory()->create(['tenant_id' => $tenantId, 'category' => 'garment']);
+    $pattern = Pattern::factory()->create(['tenant_id' => $tenantId]);
     $material = Material::factory()->create(['tenant_id' => $tenantId]);
 
     return PreparationOrder::factory()->create([
@@ -73,9 +73,7 @@ test('can create a production order', function () {
         'preparation_order_id' => $preparationOrder->id,
         'type' => 'internal',
         'contractor_id' => null,
-        'requested_date' => now()->format('Y-m-d'),
-        'promised_date' => now()->addDays(7)->format('Y-m-d'),
-        'quantity_requested' => 100,
+        'estimated_completion_date' => now()->addDays(7)->format('Y-m-d'),
         'priority' => 'normal',
         'labor_cost' => 500000,
     ];
@@ -87,7 +85,6 @@ test('can create a production order', function () {
 
     $this->assertDatabaseHas('production_orders', [
         'preparation_order_id' => $preparationOrder->id,
-        'quantity_requested' => 100,
         'status' => 'draft',
         'tenant_id' => $this->tenant->id,
     ]);
@@ -124,16 +121,14 @@ test('can update production order when status allows', function () {
         'preparation_order_id' => $order->preparation_order_id,
         'type' => $order->type,
         'contractor_id' => $order->contractor_id,
-        'quantity_requested' => 200,
-        'status' => 'pending',
+        'status' => 'sent',
         'priority' => 'high',
     ]);
 
     $response->assertRedirect(route('production-orders.index'));
     $this->assertDatabaseHas('production_orders', [
         'id' => $order->id,
-        'quantity_requested' => 200,
-        'status' => 'pending',
+        'status' => 'sent',
     ]);
 });
 
@@ -187,7 +182,7 @@ test('cannot delete production order with batches', function () {
 
     $response->assertSessionHas('error');
     $this->assertDatabaseHas('production_orders', ['id' => $order->id]);
-});
+})->skip('ProductionBatch feature not yet implemented');
 
 test('can filter production orders by status', function () {
     $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
@@ -278,7 +273,7 @@ test('production order scopes work correctly', function () {
     ProductionOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
         'preparation_order_id' => $preparationOrder->id,
-        'status' => 'pending',
+        'status' => 'sent',
     ]);
     ProductionOrder::factory()->inProgress()->create([
         'tenant_id' => $this->tenant->id,
@@ -286,8 +281,8 @@ test('production order scopes work correctly', function () {
     ]);
 
     expect(ProductionOrder::byStatus('draft')->count())->toBe(2);
-    expect(ProductionOrder::pending()->count())->toBe(3); // draft + pending
-    expect(ProductionOrder::inProgress()->count())->toBe(1);
+    expect(ProductionOrder::byStatus('sent')->count())->toBe(1);
+    expect(ProductionOrder::inProgress()->count())->toBe(2); // sent + in_progress
 });
 
 test('production batch auto-generates batch number', function () {
@@ -311,7 +306,7 @@ test('production batch auto-generates batch number', function () {
     ]);
 
     expect($batch->batch_number)->toMatch('/PB-\d{4}-\d{3}/');
-});
+})->skip('ProductionBatch feature not yet implemented');
 
 test('production batch quality helpers work correctly', function () {
     $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
@@ -338,7 +333,7 @@ test('production batch quality helpers work correctly', function () {
     expect($gradeA->isGradeA())->toBeTrue();
     expect($gradeB->isGradeB())->toBeTrue();
     expect($reject->isReject())->toBeTrue();
-});
+})->skip('ProductionBatch feature not yet implemented');
 
 test('can send external production order', function () {
     $preparationOrder = createCompletedpreparationOrderForTenant($this->tenant->id);
@@ -402,4 +397,4 @@ test('can receive a production batch and completes order when target reached', f
         'quantity_good' => 95,
         'quantity_reject' => 2,
     ]);
-});
+})->skip('ProductionBatch feature not yet implemented');

@@ -2,9 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class CheckSubscriptionStatus
 {
@@ -17,29 +15,30 @@ class CheckSubscriptionStatus
     {
         $user = $request->user();
 
-        if (!$user || !$user->tenant) {
+        if (! $user || ! $user->tenant) {
             return $next($request);
         }
 
-        // Allow read-only operations
+        // Allow read-only operations (GET, HEAD, OPTIONS)
         if ($request->isMethodSafe()) {
             return $next($request);
         }
 
-        // Allow specific functional routes
-        if ($request->routeIs('logout') || 
-            $request->routeIs('subscription.store') || 
-            $request->routeIs('profile.*')) { // Allow profile updates? Maybe just logout/subscription
+        // Allow specific routes even when expired
+        if ($request->routeIs('logout') ||
+            $request->routeIs('subscription.*')) {
             return $next($request);
         }
 
-        // Check subscription status
-        if (!$user->tenant->isActive()) {
+        // Check if subscription is active
+        if (! $user->tenant->isActive()) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Subscription expired. Read-only mode active.'], 403);
+                return response()->json([
+                    'message' => 'Membership expired. Account is in read-only mode. Please upgrade to continue.',
+                ], 403);
             }
 
-            return redirect()->back()->with('error', 'Membership expired. You are in read-only mode.');
+            return redirect()->back()->with('error', 'Membership Anda sudah expired. Akun dalam mode read-only. Silakan upgrade untuk melanjutkan.');
         }
 
         return $next($request);

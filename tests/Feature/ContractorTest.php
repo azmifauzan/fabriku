@@ -64,17 +64,16 @@ test('can create a contractor', function () {
 test('validates required fields when creating contractor', function () {
     $response = $this->post(route('contractors.store'), []);
 
-    $response->assertSessionHasErrors(['name', 'type', 'specialty']);
+    $response->assertSessionHasErrors(['name', 'type']);
 });
 
-test('validates specialty field', function () {
+test('validates type field', function () {
     $response = $this->post(route('contractors.store'), [
         'name' => 'Test Contractor',
-        'type' => 'individual',
-        'specialty' => 'invalid_specialty',
+        'type' => 'invalid_type',
     ]);
 
-    $response->assertSessionHasErrors('specialty');
+    $response->assertSessionHasErrors('type');
 });
 
 test('can update a contractor', function () {

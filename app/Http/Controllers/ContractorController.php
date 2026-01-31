@@ -20,6 +20,7 @@ class ContractorController extends Controller
                     ->orWhere('phone', 'like', "%{$search}%");
             })
             ->when(request('type'), fn ($query, $type) => $query->where('type', $type))
+            ->when(request('specialty'), fn ($query, $specialty) => $query->where('specialty', $specialty))
             ->when(request('status') !== null && request('status') !== '', fn ($query) => $query->where('is_active', (bool) request('status')))
             ->latest()
             ->paginate(15)

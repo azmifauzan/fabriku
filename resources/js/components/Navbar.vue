@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useDarkMode } from '@/composables/useDarkMode';
-import { Link } from '@inertiajs/vue3';
-import { LogOut, Menu, Moon, Sun, User } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { AlertCircle, ArrowUpCircle, Clock, LogOut, Menu, Moon, Sun, User } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 defineProps<{
     user: {
@@ -16,6 +17,25 @@ const emit = defineEmits<{
 }>();
 
 const { isDark, toggleDark } = useDarkMode();
+
+const page = usePage();
+const tenant = computed(() => page.props.tenant as any);
+
+const daysRemaining = computed(() => {
+    if (!tenant.value?.subscription_expires_at) return 0;
+    const expiresAt = new Date(tenant.value.subscription_expires_at);
+    const now = new Date();
+    const diff = expiresAt.getTime() - now.getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+});
+
+const isTrialActive = computed(() => {
+    return tenant.value?.subscription_plan === 'trial' && !tenant.value?.is_expired;
+});
+
+const isExpired = computed(() => {
+    return tenant.value?.is_expired === true;
+});
 </script>
 
 <template>
@@ -44,6 +64,60 @@ const { isDark, toggleDark } = useDarkMode();
 
             <!-- Right Section -->
             <div class="flex items-center gap-2 sm:gap-4">
+                <!-- Membership Status Badge -->
+                <div v-if="tenant">
+                    <!-- Trial Active - Show Days Remaining -->
+                    <Link 
+                        v-if="isTrialActive"
+                        href="/subscription"
+                        class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors dark:bg-amber-900/20 dark:hover:bg-amber-900/30"
+                    >
+                        <Clock :size="16" class="text-amber-600 dark:text-amber-400" />
+                        <span class="text-xs font-medium text-amber-700 dark:text-amber-300">
+                            Trial {{ daysRemaining }} hari lagi
+                        </span>
+                    </Link>
+                    
+                    <!-- Expired - Show Warning -->
+                    <Link 
+                        v-else-if="isExpired"
+                        href="/subscription"
+                        class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 transition-colors dark:bg-red-900/20 dark:hover:bg-red-900/30"
+                    >
+                        <AlertCircle :size="16" class="text-red-600 dark:text-red-400" />
+                        <span class="text-xs font-medium text-red-700 dark:text-red-300">
+                            Expired - Read Only
+                        </span>
+                    </Link>
+                    
+                    <!-- Mobile versions -->
+                    <Link 
+                        v-if="isTrialActive"
+                        href="/subscription"
+                        class="sm:hidden rounded-lg p-2 bg-amber-50 hover:bg-amber-100 transition-colors dark:bg-amber-900/20"
+                    >
+                        <Clock :size="18" class="text-amber-600 dark:text-amber-400" />
+                    </Link>
+                    
+                    <Link 
+                        v-else-if="isExpired"
+                        href="/subscription"
+                        class="sm:hidden rounded-lg p-2 bg-red-50 hover:bg-red-100 transition-colors dark:bg-red-900/20"
+                    >
+                        <AlertCircle :size="18" class="text-red-600 dark:text-red-400" />
+                    </Link>
+                </div>
+
+                <!-- Upgrade Button (Show for trial users) -->
+                <Link
+                    v-if="isTrialActive"
+                    href="/subscription"
+                    class="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium text-sm transition-all shadow-sm hover:shadow"
+                >
+                    <ArrowUpCircle :size="16" />
+                    <span>Upgrade</span>
+                </Link>
+
                 <!-- Theme Toggle -->
                 <button
                     @click="toggleDark()"

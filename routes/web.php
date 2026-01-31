@@ -76,6 +76,28 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [LoginController::class, 'store']);
     Route::get('register', [RegisterController::class, 'create'])->name('register');
     Route::post('register', [RegisterController::class, 'store']);
+
+    // Password Reset Routes
+    Route::get('forgot-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'create'])
+        ->name('password.request');
+    Route::post('forgot-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'store'])
+        ->name('password.email');
+    Route::get('reset-password/{token}', [\App\Http\Controllers\Auth\PasswordResetController::class, 'reset'])
+        ->name('password.reset');
+    Route::post('reset-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'update'])
+        ->name('password.update');
+});
+
+// Email Verification Routes
+Route::middleware('auth')->group(function () {
+    Route::get('verify-email', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'notice'])
+        ->name('verification.notice');
+    Route::get('verify-email/{id}/{hash}', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'verify'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+    Route::post('email/verification-notification', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
 });
 
 Route::post('logout', [LoginController::class, 'destroy'])
@@ -83,7 +105,7 @@ Route::post('logout', [LoginController::class, 'destroy'])
     ->name('logout');
 
 // Protected Routes
-Route::middleware(['auth', 'tenant', 'subscription.check'])->group(function () {
+Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Material Management

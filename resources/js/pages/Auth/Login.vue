@@ -1,23 +1,27 @@
 <script setup lang="ts">
 import { Form, Link } from '@inertiajs/vue3';
 import { Head } from '@inertiajs/vue3';
+import { Eye, EyeOff } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 const form = {
     email: '',
     password: '',
     remember: false,
 };
+
+const showPassword = ref(false);
 </script>
 
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4 py-12">
+    <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4 py-6">
         <Head title="Masuk - Fabriku" />
 
         <div class="w-full max-w-md">
             <!-- Card -->
-            <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
+            <div class="bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
                 <!-- Header -->
-                <div class="text-center mb-8">
+                <div class="text-center mb-6">
                     <Link href="/" class="inline-block">
                         <div class="flex items-center justify-center gap-2 mb-2">
                             <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -29,7 +33,7 @@ const form = {
                     <p class="text-gray-600">Masuk ke akun Anda</p>
                 </div>
 
-                <Form action="/login" method="post" class="space-y-6" v-slot="{ processing, errors }">
+                <Form action="/login" method="post" class="space-y-4" v-slot="{ processing, errors }">
                     <!-- Email -->
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
@@ -43,7 +47,7 @@ const form = {
                             required
                             v-model="form.email"
                             placeholder="email@contoh.com"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
                             :class="{ 'border-red-500': errors.email }"
                         />
                     </div>
@@ -53,17 +57,28 @@ const form = {
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
                             Password
                         </label>
-                        <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            autocomplete="current-password"
-                            required
-                            v-model="form.password"
-                            placeholder="Masukkan password"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
-                            :class="{ 'border-red-500': errors.password || errors.email }"
-                        />
+                        <div class="relative">
+                            <input
+                                id="password"
+                                name="password"
+                                :type="showPassword ? 'text' : 'password'"
+                                autocomplete="current-password"
+                                required
+                                v-model="form.password"
+                                placeholder="Masukkan password"
+                                class="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                                :class="{ 'border-red-500': errors.password || errors.email }"
+                            />
+                            <button
+                                type="button"
+                                @click="showPassword = !showPassword"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                tabindex="-1"
+                            >
+                                <Eye v-if="!showPassword" :size="20" />
+                                <EyeOff v-else :size="20" />
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Error Message -->
@@ -71,25 +86,33 @@ const form = {
                         {{ errors.email }}
                     </div>
 
-                    <!-- Remember Me -->
-                    <div class="flex items-center">
-                        <input
-                            id="remember"
-                            name="remember"
-                            type="checkbox"
-                            v-model="form.remember"
-                            class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <label for="remember" class="ml-2 block text-sm text-gray-700">
-                            Ingat saya
-                        </label>
+                    <!-- Remember Me & Forgot Password -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input
+                                id="remember"
+                                name="remember"
+                                type="checkbox"
+                                v-model="form.remember"
+                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <label for="remember" class="ml-2 block text-sm text-gray-700">
+                                Ingat saya
+                            </label>
+                        </div>
+                        <Link
+                            href="/forgot-password"
+                            class="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                        >
+                            Lupa Password?
+                        </Link>
                     </div>
 
                     <!-- Submit Button -->
                     <button
                         type="submit"
                         :disabled="processing"
-                        class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <span v-if="processing">Memproses...</span>
                         <span v-else>Masuk</span>
@@ -97,11 +120,22 @@ const form = {
                 </Form>
 
                 <!-- Demo Credentials -->
-                <div class="mt-8 pt-6 border-t border-gray-200">
-                    <p class="text-center text-sm font-semibold text-gray-700 mb-4">🎯 Demo Credentials</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <div class="flex items-center justify-center gap-2 mb-3">
+                        <p class="text-center text-sm font-semibold text-gray-700">🎯 Demo Credentials</p>
+                        <div class="group relative">
+                            <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-64 p-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-10">
+                                <p class="font-semibold mb-1">🔄 Auto-Reset Setiap Jam</p>
+                                <p>Data demo akan direset otomatis ke kondisi awal setiap 1 jam sekali untuk menjaga konsistensi demo.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
                         <!-- Garment Demo -->
-                        <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+                        <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-3">
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="text-lg">🧵</span>
                                 <span class="text-sm font-semibold text-gray-900">Konveksi Fabriku</span>
@@ -151,7 +185,7 @@ const form = {
                 </div>
 
                 <!-- Registration Link -->
-                <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+                <div class="mt-4 pt-4 border-t border-gray-200 text-center">
                     <p class="text-gray-600">
                         Belum punya akun?
                         <Link href="/register" class="text-indigo-600 font-semibold hover:text-indigo-500 transition-colors">

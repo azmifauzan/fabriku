@@ -30,7 +30,9 @@ class CustomerController extends Controller
         }
 
         // Filter by status
-        if ($request->has('is_active')) {
+        if ($request->filled('status')) {
+            $query->where('is_active', (bool) $request->get('status'));
+        } elseif ($request->has('is_active')) {
             $query->where('is_active', $request->boolean('is_active'));
         }
 

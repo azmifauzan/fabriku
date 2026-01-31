@@ -213,6 +213,9 @@ npm run dev
 
 # In another terminal, start queue worker (if needed)
 php artisan queue:work
+
+# In another terminal, start scheduler (for demo auto-reset)
+php artisan schedule:work
 ```
 
 Visit: http://localhost:8000
@@ -220,23 +223,133 @@ Visit: http://localhost:8000
 **Demo Credentials (Tenant Users):**
 - Konveksi Fabriku: `admin@konveksi.com` / `password`
 - Kue Mama Homemade: `admin@kuemama.com` / `password`
+- Crafty Handmade: `admin@crafty.com` / `password`
+- Glow Beauty Lab: `admin@glowbeauty.com` / `password`
 
 **Admin Panel Access:**
 - URL: http://localhost:8000/admin/login
 - Super Admin: `admin@fabriku.com` / `password`
 
-## 🐳 Docker Setup (Alternative)
+### 🔄 Demo Data Auto-Reset
+
+Demo tenants are automatically reset every hour to maintain clean environments.
+
+**Manual Reset:**
+```bash
+# Reset all demo tenants
+php artisan demo:reset
+
+# Reset specific tenant
+php artisan demo:reset --tenant=1
+```
+
+**Production Setup (Cron):**
+```bash
+* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+## 🐳 Docker Setup
+
+### Option 1: Production (External PostgreSQL & Redis)
+
+Single container yang menjalankan Apache, Queue Worker, dan Scheduler sekaligus untuk hemat resource.
+
+**Prerequisites:**
+- PostgreSQL 14+ on host (port 5432)
+- Redis 6+ on host (port 6379)
 
 ```bash
-# Start all services
-docker-compose up -d
+# 1. Create PostgreSQL database
+psql -U postgres -c "CREATE DATABASE fabriku;"
+psql -U postgres -c "CREATE USER fabriku WITH PASSWORD 'secret';"
+psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE fabriku TO fabriku;"
 
-# Run migrations
-docker-compose exec app php artisan migrate
+# 2. Copy environment file
+cp .env.docker.example .env
 
-# Access application
-# http://localhost:8000
+# 3. Update .env with your PostgreSQL and Redis hosts
+# DB_HOST=localhost
+# REDIS_HOST=localhost
+
+# 4. Generate key, build, and start
+docker compose run --rm app php artisan key:generate
+docker compose up -d
+docker compose exec app php artisan migrate --seed
 ```
+
+**Single Container Runs:**
+- ✅ Apache (Web Server)
+- ✅ Cron (Laravel Scheduler - hourly demo reset)
+- ✅ Queue Worker (Background jobs)
+
+All managed by Supervisor in one container.
+
+### Option 2: Development (All in Docker)
+
+Single app container + PostgreSQL + Redis untuk local development.
+
+```bash
+# 1. Copy environment file
+cp .env.dev.example .env
+
+# 2. Generate key, build, and start
+docker compose -f docker-compose.dev.yml run --rm app php artisan key:generate
+docker compose -f docker-compose.dev.yml up -d
+
+# 3. Wait and migrate
+sleep 10
+docker compose -f docker-compose.dev.yml exec app php artisan migrate --seed
+```
+
+**Services:**
+- ✅ App Container (Apache + Cron + Queue in one)
+- ✅ PostgreSQL 16 (separate container)
+- ✅ Redis 7 (separate container)
+
+**Access:**
+- Application: http://localhost:8000
+- PostgreSQL: localhost:5432 (fabriku/secret)
+- Redis: localhost:6379
+
+### 🛠️ Docker Helper Scripts
+
+**Windows:**
+```bash
+docker.bat setup          # Initial setup (build, start, migrate)
+docker.bat start          # Start containers
+docker.bat stop           # Stop containers
+docker.bat logs           # View all logs
+docker.bat logs app       # View specific service logs
+docker.bat artisan migrate # Run artisan commands
+docker.bat shell          # Access app container shell
+docker.bat demo-reset     # Reset demo data
+docker.bat help           # Show all commands
+```
+
+**Linux/Mac:**
+```bash
+chmod +x docker.sh        # Make executable
+./docker.sh setup         # Initial setup
+./docker.sh start         # Start containers
+./docker.sh artisan migrate
+./docker.sh demo-reset
+```
+
+**Using Makefile:**
+```bash
+make setup                # Initial setup
+make start                # Start containers
+make logs                 # View logs
+make logs-scheduler       # View scheduler logs
+make migrate              # Run migrations
+make demo-reset           # Reset demo data
+make shell                # Access container
+make help                 # Show all commands
+```
+
+See [docker/README.md](docker/README.md) for detailed Docker documentation.
+
+## 💻 Local Development Setup (Alternative)
 
 ## 🧪 Testing
 
