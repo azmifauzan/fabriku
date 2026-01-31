@@ -23,6 +23,9 @@ class Tenant extends Model
         'category_settings',
         'subscription_plan',
         'subscription_expires_at',
+        'trial_reminder_7days_sent_at',
+        'trial_reminder_3days_sent_at',
+        'trial_reminder_1day_sent_at',
         'settings',
     ];
 
@@ -31,6 +34,9 @@ class Tenant extends Model
         return [
             'is_active' => 'boolean',
             'subscription_expires_at' => 'datetime',
+            'trial_reminder_7days_sent_at' => 'datetime',
+            'trial_reminder_3days_sent_at' => 'datetime',
+            'trial_reminder_1day_sent_at' => 'datetime',
             'settings' => 'array',
             'category_settings' => 'array',
         ];
