@@ -4,7 +4,7 @@ import Modal from '@/components/Modal.vue';
 import FormField from '@/components/FormField.vue';
 import { watch, ref } from 'vue';
 import { Camera, Upload, X } from 'lucide-vue-next';
-import CameraCaptureModal from '@/Components/CameraCaptureModal.vue';
+import CameraCaptureModal from '@/components/CameraCaptureModal.vue';
 
 const props = defineProps<{
     show: boolean;
