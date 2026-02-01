@@ -9,9 +9,9 @@ class StaffSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run(\App\Models\Tenant $tenant = null): void
     {
-        $tenants = \App\Models\Tenant::all();
+        $tenants = $tenant ? [$tenant] : \App\Models\Tenant::all();
 
         foreach ($tenants as $tenant) {
             \App\Models\Staff::create([

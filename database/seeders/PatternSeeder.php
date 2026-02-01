@@ -8,12 +8,14 @@ use Illuminate\Database\Seeder;
 
 class PatternSeeder extends Seeder
 {
-    public function run(): void
+    public function run(Tenant $tenant = null): void
     {
-        $tenant = Tenant::where('slug', 'demo')->first();
+        if (!$tenant) {
+            $tenant = Tenant::where('slug', 'demo')->first();
+        }
 
         if (! $tenant) {
-            $this->command->warn('Demo tenant not found. Run TenantSeeder first.');
+            $this->command->warn('Tenant not found for PatternSeeder.');
 
             return;
         }

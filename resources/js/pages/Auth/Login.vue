@@ -11,6 +11,7 @@ const form = {
 };
 
 const showPassword = ref(false);
+const showDemoCredentials = ref(false);
 </script>
 
 <template>
@@ -121,67 +122,112 @@ const showPassword = ref(false);
 
                 <!-- Demo Credentials -->
                 <div class="mt-6 pt-4 border-t border-gray-200">
-                    <div class="flex items-center justify-center gap-2 mb-3">
-                        <p class="text-center text-sm font-semibold text-gray-700">🎯 Demo Credentials</p>
-                        <div class="group relative">
-                            <svg class="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <button 
+                        type="button"
+                        @click="showDemoCredentials = !showDemoCredentials"
+                        class="w-full flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 py-2 focus:outline-none"
+                    >
+                        <div class="flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-colors" :class="{ 'text-indigo-600': showDemoCredentials }">
+                            <p class="text-sm font-semibold">🎯 Demo Credentials</p>
+                             <svg 
+                                class="w-4 h-4 transition-transform duration-300" 
+                                :class="{ 'rotate-180': showDemoCredentials }"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
-                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-64 p-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-10">
-                                <p class="font-semibold mb-1">🔄 Auto-Reset Setiap Jam</p>
-                                <p>Data demo akan direset otomatis ke kondisi awal setiap 1 jam sekali untuk menjaga konsistensi demo.</p>
-                            </div>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <!-- Garment Demo -->
-                        <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-3">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-lg">🧵</span>
-                                <span class="text-sm font-semibold text-gray-900">Konveksi Fabriku</span>
-                            </div>
-                            <div class="space-y-1 text-xs text-gray-600">
-                                <p>Email: <span class="font-mono text-indigo-600">admin@konveksi.com</span></p>
-                                <p>Password: <span class="font-mono text-indigo-600">password</span></p>
-                            </div>
+                        <p class="text-[10px] text-gray-400" v-show="!showDemoCredentials">Klik untuk melihat akun demo</p>
+                    </button>
+
+                    <transition
+                        enter-active-class="transition-all duration-300 ease-out"
+                        enter-from-class="max-h-0 opacity-0 transform -translate-y-2"
+                        enter-to-class="max-h-[600px] opacity-100 transform translate-y-0"
+                        leave-active-class="transition-all duration-200 ease-in"
+                        leave-from-class="max-h-[600px] opacity-100 transform translate-y-0"
+                        leave-to-class="max-h-0 opacity-0 transform -translate-y-2"
+                    >
+                        <div v-show="showDemoCredentials" class="overflow-hidden">
+                        <div class="bg-indigo-50 text-indigo-700 text-xs p-2 rounded-lg mb-3 text-center border border-indigo-100">
+                            🔄 Data demo akan direset otomatis ke kondisi awal setiap 1 jam.
                         </div>
 
-                        <!-- Food Demo -->
-                        <div class="rounded-xl border border-pink-200 bg-pink-50 p-4">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-lg">🍰</span>
-                                <span class="text-sm font-semibold text-gray-900">Kue Mama Homemade</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <!-- Garment Demo -->
+                            <div class="rounded-xl border border-indigo-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-lg">🧵</span>
+                                    <span class="text-sm font-semibold text-gray-900">Konveksi</span>
+                                </div>
+                                <div class="space-y-1 text-xs text-gray-600">
+                                    <div class="flex justify-between">
+                                        <span>Email:</span>
+                                        <span class="font-mono text-indigo-600 font-medium cursor-pointer hover:bg-indigo-50 rounded px-1" onclick="navigator.clipboard.writeText('admin@konveksi.com')">admin@konveksi.com</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Pass:</span>
+                                        <span class="font-mono text-indigo-600 font-medium">password</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="space-y-1 text-xs text-gray-600">
-                                <p>Email: <span class="font-mono text-pink-600">admin@kuemama.com</span></p>
-                                <p>Password: <span class="font-mono text-pink-600">password</span></p>
-                            </div>
-                        </div>
 
-                        <!-- Craft Demo -->
-                        <div class="rounded-xl border border-purple-200 bg-purple-50 p-4">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-lg">🎨</span>
-                                <span class="text-sm font-semibold text-gray-900">Crafty Handmade</span>
+                            <!-- Food Demo -->
+                            <div class="rounded-xl border border-pink-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-lg">🍰</span>
+                                    <span class="text-sm font-semibold text-gray-900">Kue Mama</span>
+                                </div>
+                                <div class="space-y-1 text-xs text-gray-600">
+                                    <div class="flex justify-between">
+                                        <span>Email:</span>
+                                        <span class="font-mono text-pink-600 font-medium cursor-pointer hover:bg-pink-50 rounded px-1" onclick="navigator.clipboard.writeText('admin@kuemama.com')">admin@kuemama.com</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Pass:</span>
+                                        <span class="font-mono text-pink-600 font-medium">password</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="space-y-1 text-xs text-gray-600">
-                                <p>Email: <span class="font-mono text-purple-600">admin@crafty.com</span></p>
-                                <p>Password: <span class="font-mono text-purple-600">password</span></p>
-                            </div>
-                        </div>
 
-                        <!-- Cosmetic Demo -->
-                        <div class="rounded-xl border border-green-200 bg-green-50 p-4">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-lg">💄</span>
-                                <span class="text-sm font-semibold text-gray-900">Glow Beauty Lab</span>
+                            <!-- Craft Demo -->
+                            <div class="rounded-xl border border-purple-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-lg">🎨</span>
+                                    <span class="text-sm font-semibold text-gray-900">Crafty</span>
+                                </div>
+                                <div class="space-y-1 text-xs text-gray-600">
+                                    <div class="flex justify-between">
+                                        <span>Email:</span>
+                                        <span class="font-mono text-purple-600 font-medium cursor-pointer hover:bg-purple-50 rounded px-1" onclick="navigator.clipboard.writeText('admin@crafty.com')">admin@crafty.com</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Pass:</span>
+                                        <span class="font-mono text-purple-600 font-medium">password</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="space-y-1 text-xs text-gray-600">
-                                <p>Email: <span class="font-mono text-green-600">admin@glowbeauty.com</span></p>
-                                <p>Password: <span class="font-mono text-green-600">password</span></p>
+
+                            <!-- Cosmetic Demo -->
+                            <div class="rounded-xl border border-green-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-lg">💄</span>
+                                    <span class="text-sm font-semibold text-gray-900">Glow Beauty</span>
+                                </div>
+                                <div class="space-y-1 text-xs text-gray-600">
+                                    <div class="flex justify-between">
+                                        <span>Email:</span>
+                                        <span class="font-mono text-green-600 font-medium cursor-pointer hover:bg-green-50 rounded px-1" onclick="navigator.clipboard.writeText('admin@glowbeauty.com')">admin@glowbeauty.com</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Pass:</span>
+                                        <span class="font-mono text-green-600 font-medium">password</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                        </div>
+                    </transition>
                 </div>
 
                 <!-- Registration Link -->
