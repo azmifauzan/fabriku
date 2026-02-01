@@ -15,13 +15,14 @@ class InventorySeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run(Tenant $tenant = null): void
     {
-        $tenant = Tenant::where('slug', 'demo-garment')->first();
+        if (!$tenant) {
+             $tenant = Tenant::where('slug', 'demo-garment')->first();
+        }
 
         if (! $tenant) {
-            $this->command->warn('Demo tenant not found. Run TenantSeeder first.');
-
+            $this->command->warn('Tenant not found for InventorySeeder.');
             return;
         }
 

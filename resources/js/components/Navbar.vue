@@ -58,7 +58,10 @@ const isExpired = computed(() => {
                     <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-600">
                         <span class="text-sm font-bold text-white">F</span>
                     </div>
-                    <h1 class="text-lg font-bold text-indigo-600 sm:text-xl dark:text-indigo-400">Fabriku</h1>
+                    <div class="flex flex-col">
+                        <h1 class="text-lg font-bold text-indigo-600 sm:text-xl dark:text-indigo-400 leading-tight">Fabriku</h1>
+                        <span v-if="tenant?.name" class="text-xs font-medium text-gray-500 dark:text-gray-400 -mt-1">{{ tenant.name }}</span>
+                    </div>
                 </div>
             </div>
 

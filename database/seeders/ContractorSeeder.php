@@ -8,12 +8,14 @@ use Illuminate\Database\Seeder;
 
 class ContractorSeeder extends Seeder
 {
-    public function run(): void
+    public function run(Tenant $tenant = null): void
     {
-        // Get the demo tenant
-        $demoTenant = Tenant::where('slug', 'demo')->first();
+        // Get the demo tenant or use provided
+        if (! $tenant) {
+            $tenant = Tenant::where('slug', 'demo')->first();
+        }
 
-        if (! $demoTenant) {
+        if (! $tenant) {
             return;
         }
 
@@ -78,34 +80,34 @@ class ContractorSeeder extends Seeder
 
         foreach ($contractors as $contractorData) {
             Contractor::create(array_merge($contractorData, [
-                'tenant_id' => $demoTenant->id,
+                'tenant_id' => $tenant->id,
             ]));
         }
 
         // Create additional random contractors
         Contractor::factory()
             ->count(10)
-            ->forTenant($demoTenant->id)
+            ->forTenant($tenant->id)
             ->create();
 
         // Create some with specific states
         Contractor::factory()
             ->count(3)
-            ->forTenant($demoTenant->id)
+            ->forTenant($tenant->id)
             ->sewing()
             ->individual()
             ->create();
 
         Contractor::factory()
             ->count(2)
-            ->forTenant($demoTenant->id)
+            ->forTenant($tenant->id)
             ->baking()
             ->company()
             ->create();
 
         Contractor::factory()
             ->count(2)
-            ->forTenant($demoTenant->id)
+            ->forTenant($tenant->id)
             ->inactive()
             ->create();
     }

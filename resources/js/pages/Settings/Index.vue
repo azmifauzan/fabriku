@@ -116,7 +116,7 @@
 <script setup lang="ts">
 import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { Head, usePage, useForm, router } from '@inertiajs/vue3';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import { ref } from 'vue';
 
@@ -124,12 +124,13 @@ const props = defineProps({
     settings: Object,
 });
 
+const page = usePage();
 const { showSuccess } = useSweetAlert();
 const previewUrl = ref<string | null>(null);
 
 const form = useForm({
     settings: {
-        company_name: props.settings?.company_name || '',
+        company_name: props.settings?.company_name || (page.props.tenant as any)?.name || '',
         company_address: props.settings?.company_address || '',
         company_phone: props.settings?.company_phone || '',
         company_email: props.settings?.company_email || '',

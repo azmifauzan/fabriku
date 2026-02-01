@@ -4,23 +4,35 @@ namespace Database\Seeders;
 
 use App\Models\Material;
 use App\Models\MaterialReceipt;
+use App\Models\MaterialType;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class MaterialSeeder extends Seeder
 {
-    public function run(): void
+    public function run(Tenant $tenant = null, User $user = null): void
     {
-        $tenant = Tenant::where('slug', 'demo')->first();
+        if (! $tenant) {
+            $tenant = Tenant::where('slug', 'demo')->first();
+        }
 
         if (! $tenant) {
-            $this->command->warn('Demo tenant not found. Run TenantSeeder first.');
+            $this->command->warn('Tenant not found for MaterialSeeder.');
 
             return;
         }
 
-        $admin = User::where('email', 'admin@demo.com')->first();
+        // Use provided user or find first admin/user for the tenant
+        if (! $user) {
+            $user = User::where('tenant_id', $tenant->id)->first();
+        }
+
+        if (! $user) {
+             // Fallback or skip if no user found (though unlikely if tenant exists)
+             $this->command->warn('No user found for receipts.');
+             return;
+        }
 
         // Create materials
         $materials = [
@@ -67,16 +79,41 @@ class MaterialSeeder extends Seeder
         ];
 
         foreach ($materials as $materialData) {
-            $material = Material::create(array_merge($materialData, [
+            // Find material type
+            $typeCode = $materialData['type'] ?? 'lainnya';
+            $materialType = MaterialType::where('tenant_id', $tenant->id)
+                ->where('code', $typeCode)
+                ->first();
+            
+            // If type not found, try to find by name or default
+            if (!$materialType) {
+                 // Try to seed or fallback
+                 $materialType = MaterialType::firstOrCreate(
+                    ['tenant_id' => $tenant->id, 'code' => $typeCode],
+                    ['name' => ucfirst($typeCode), 'unit' => $materialData['unit'] ?? 'pcs']
+                 );
+            }
+
+            // Map fields
+            $createData = [
                 'tenant_id' => $tenant->id,
                 'is_active' => true,
-            ]));
+                'material_type_id' => $materialType->id,
+                'code' => $materialData['code'],
+                'name' => $materialData['name'],
+                'unit' => $materialData['unit'],
+                'price_per_unit' => $materialData['standard_price'] ?? 0,
+                'min_stock' => $materialData['reorder_point'] ?? 10,
+                'stock_quantity' => 0, // Initial stock
+            ];
+
+            $material = Material::create($createData);
 
             // Create 2-3 receipts for each material
             $receiptCount = rand(2, 3);
             for ($i = 0; $i < $receiptCount; $i++) {
                 $quantity = rand(50, 200);
-                $unitPrice = $material->standard_price * (1 + (rand(-10, 10) / 100));
+                $unitPrice = ($material->price_per_unit) * (1 + (rand(-10, 10) / 100));
 
                 MaterialReceipt::create([
                     'tenant_id' => $tenant->id,
@@ -88,7 +125,7 @@ class MaterialSeeder extends Seeder
                     'unit_price' => $unitPrice,
                     'total_price' => $quantity * $unitPrice,
                     'batch_number' => 'BATCH-'.rand(1000, 9999),
-                    'received_by' => $admin->id,
+                    'received_by' => $user->id,
                 ]);
             }
         }

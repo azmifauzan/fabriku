@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\MaterialType;
+use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 
 class MaterialTypeSeeder extends Seeder
@@ -10,9 +11,11 @@ class MaterialTypeSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run(Tenant $tenant = null): void
     {
-        $tenant = Tenant::where('slug', 'demo')->first();
+        if (!$tenant) {
+            $tenant = Tenant::where('slug', 'demo')->first();
+        }
 
         if (! $tenant) {
             $this->command->warn('Demo tenant not found. Run TenantSeeder first.');
