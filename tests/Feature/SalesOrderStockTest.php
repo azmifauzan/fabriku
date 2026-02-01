@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Customer;
 use App\Models\InventoryItem;
 use App\Models\InventoryLocation;
-use App\Models\Pattern;
 use App\Models\SalesOrder;
 use App\Models\Tenant;
 use App\Models\User;
@@ -49,7 +48,7 @@ it('reserves stock when draft order becomes confirmed', function () {
         'tenant_id' => $this->tenant->id,
         'status' => 'draft',
     ]);
-    
+
     $order->items()->create([
         'inventory_item_id' => $this->inventoryItem->id,
         'quantity' => 10,
@@ -72,7 +71,7 @@ it('deducts stock when confirmed order becomes shipped', function () {
         'tenant_id' => $this->tenant->id,
         'status' => 'confirmed',
     ]);
-    
+
     $order->items()->create([
         'inventory_item_id' => $this->inventoryItem->id,
         'quantity' => 10,
@@ -98,7 +97,7 @@ it('releases reserved stock when confirmed order is cancelled', function () {
         'tenant_id' => $this->tenant->id,
         'status' => 'draft',
     ]);
-    
+
     $order->items()->create([
         'inventory_item_id' => $this->inventoryItem->id,
         'quantity' => 10,
@@ -151,13 +150,13 @@ it('adjusts reserved stock when updating item quantity in confirmed order', func
 
     // Increase quantity
     $item->update(['quantity' => 8]);
-    
+
     $this->inventoryItem->refresh();
     expect($this->inventoryItem->reserved_quantity)->toBe(8);
 
     // Decrease quantity
     $item->update(['quantity' => 3]);
-    
+
     $this->inventoryItem->refresh();
     expect($this->inventoryItem->reserved_quantity)->toBe(3);
 });

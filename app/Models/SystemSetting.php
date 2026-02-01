@@ -43,7 +43,7 @@ class SystemSetting extends Model
             ->where('tenant_id', $tenantId)
             ->first();
 
-        if (!$setting) {
+        if (! $setting) {
             return $default;
         }
 

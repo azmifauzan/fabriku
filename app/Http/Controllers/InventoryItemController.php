@@ -159,7 +159,7 @@ class InventoryItemController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store(
+            $data['image_path'] = $request->file('image')->storePublicly(
                 'tenants/'.auth()->user()->tenant_id.'/inventory',
                 'fabriku_s3'
             );
@@ -233,7 +233,7 @@ class InventoryItemController extends Controller
                 \Storage::disk('fabriku_s3')->delete($item->image_path);
             }
 
-            $data['image_path'] = $request->file('image')->store(
+            $data['image_path'] = $request->file('image')->storePublicly(
                 'tenants/'.auth()->user()->tenant_id.'/inventory',
                 'fabriku_s3'
             );

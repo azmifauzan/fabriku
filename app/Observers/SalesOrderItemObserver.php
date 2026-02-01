@@ -30,7 +30,7 @@ class SalesOrderItemObserver
         if (in_array($salesOrder->status, ['confirmed', 'processing'])) {
             if ($item->isDirty('quantity')) {
                 $difference = $item->quantity - $item->getOriginal('quantity');
-                
+
                 if ($difference > 0) {
                     $item->inventoryItem->increment('reserved_quantity', $difference);
                 } else {

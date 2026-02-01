@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
 use App\Models\Customer;
 use App\Models\InventoryItem;
 use App\Models\Tenant;
+use App\Models\User;
 
 beforeEach(function () {
     $this->tenant = Tenant::factory()->create();

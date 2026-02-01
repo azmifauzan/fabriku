@@ -72,9 +72,10 @@ class MaterialController extends Controller
         $initialStock = $request->stock_quantity ?? 0;
 
         if ($request->hasFile('image')) {
-            $tenantId = auth()->user()->tenant_id;
-            $path = $request->file('image')->store("tenants/{$tenantId}/materials", 'fabriku_s3');
-            $data['image_path'] = $path;
+            $data['image_path'] = $request->file('image')->storePublicly(
+                'tenants/'.auth()->user()->tenant_id.'/materials',
+                'fabriku_s3'
+            );
         }
 
         $material = Material::create($data);
@@ -216,7 +217,7 @@ class MaterialController extends Controller
             }
 
             $tenantId = auth()->user()->tenant_id;
-            $path = $request->file('image')->store("tenants/{$tenantId}/materials", 'fabriku_s3');
+            $path = $request->file('image')->storePublicly("tenants/{$tenantId}/materials", 'fabriku_s3');
             $data['image_path'] = $path;
         }
 

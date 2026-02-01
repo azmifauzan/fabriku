@@ -47,7 +47,7 @@ class MaterialStockService
                     $receipt = MaterialReceipt::where('material_id', $materialId)
                         ->where('id', $batchId)
                         ->first();
-                    
+
                     if ($receipt) {
                         $this->deductFromBatch($receipt, $quantityUsed, $order);
                     } else {
@@ -57,16 +57,16 @@ class MaterialStockService
                         // Given user wants explicit selection, failing/logging is appropriate if batch is invalid.
                     }
                 } else {
-                     // Legacy support or fallback: Find oldest active batch(es) (FIFO)
-                     // Or just update main stock if we strictly don't want to assign batch (not recommended for tracking)
-                     // For correct implementation matching user request, we should enforce batch usage.
-                     // But if data comes from old legacy system, we might need to handle it.
-                     // For now, let's try to find any active batch to associate with.
-                     $this->deductFifo($material, $quantityUsed, $order);
+                    // Legacy support or fallback: Find oldest active batch(es) (FIFO)
+                    // Or just update main stock if we strictly don't want to assign batch (not recommended for tracking)
+                    // For correct implementation matching user request, we should enforce batch usage.
+                    // But if data comes from old legacy system, we might need to handle it.
+                    // For now, let's try to find any active batch to associate with.
+                    $this->deductFifo($material, $quantityUsed, $order);
                 }
 
                 // Update total stock quantity on Material model (Master Record)
-                // This is kept in sync effectively as sum of receipts preferably, 
+                // This is kept in sync effectively as sum of receipts preferably,
                 // but for performance we just deduct what was used.
                 $material->stock_quantity -= $quantityUsed;
 
@@ -87,17 +87,17 @@ class MaterialStockService
     private function deductFromBatch(MaterialReceipt $receipt, float $quantity, PreparationOrder $order): void
     {
         $deducted = min($receipt->remaining_quantity, $quantity); // Can't deduct more than available in this batch normally, but if force...
-        
+
         // If we strictly don't allow negatives in batch:
         // $deducted = min($receipt->remaining_quantity, $quantity);
-        // But what if they used MORE than recorded? We should probably allow it but mark as 0 or negative? 
+        // But what if they used MORE than recorded? We should probably allow it but mark as 0 or negative?
         // Usually system prevents this. Assuming validation passed.
-        
+
         $receipt->remaining_quantity -= $quantity;
-        
+
         if ($receipt->remaining_quantity <= 0) {
-           $receipt->remaining_quantity = 0;
-           $receipt->status = 'exhausted';
+            $receipt->remaining_quantity = 0;
+            $receipt->status = 'exhausted';
         }
 
         $receipt->save();
@@ -121,16 +121,18 @@ class MaterialStockService
         $remainingToDeduct = $quantityNeeded;
 
         foreach ($receipts as $receipt) {
-            if ($remainingToDeduct <= 0) break;
+            if ($remainingToDeduct <= 0) {
+                break;
+            }
 
             $available = $receipt->remaining_quantity;
             $deduct = min($available, $remainingToDeduct);
 
             $this->deductFromBatch($receipt, $deduct, $order);
-            
+
             $remainingToDeduct -= $deduct;
         }
-        
+
         if ($remainingToDeduct > 0) {
             Log::warning("Material {$material->code} missing stock assignment for {$remainingToDeduct} items (FIFO fallback)");
         }
@@ -165,16 +167,16 @@ class MaterialStockService
             } else {
                 // Also check if specific batch is requested, does it have enough?
                 if (isset($materialData['batch_id'])) {
-                     $receipt = MaterialReceipt::find($materialData['batch_id']);
-                     if (!$receipt || $receipt->remaining_quantity < $materialData['quantity']) {
+                    $receipt = MaterialReceipt::find($materialData['batch_id']);
+                    if (! $receipt || $receipt->remaining_quantity < $materialData['quantity']) {
                         $insufficientMaterials[] = [
                             'material_id' => $material->id,
-                            'material_name' => $material->name . ' (Batch ' . ($receipt?->batch_number ?? 'Unknown') . ')',
+                            'material_name' => $material->name.' (Batch '.($receipt?->batch_number ?? 'Unknown').')',
                             'required' => $materialData['quantity'],
                             'available' => $receipt?->remaining_quantity ?? 0,
                             'shortage' => $materialData['quantity'] - ($receipt?->remaining_quantity ?? 0),
                         ];
-                     }
+                    }
                 }
             }
         }

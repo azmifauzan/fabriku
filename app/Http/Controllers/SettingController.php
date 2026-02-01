@@ -21,7 +21,7 @@ class SettingController extends Controller
     public function update(Request $request)
     {
         $tenantId = auth()->user()->tenant_id;
-        
+
         $validated = $request->validate([
             'settings' => 'required|array',
             'company_logo' => 'nullable|image|max:2048', // Max 2MB
@@ -38,8 +38,10 @@ class SettingController extends Controller
         // Handle other settings
         foreach ($validated['settings'] as $key => $value) {
             // Skip if value is null
-            if ($value === null) continue;
-            
+            if ($value === null) {
+                continue;
+            }
+
             SystemSetting::set($key, $value, 'string', $tenantId);
         }
 

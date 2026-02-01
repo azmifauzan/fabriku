@@ -213,8 +213,6 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-
-
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('order_number', 'ilike', "%{$request->search}%")
@@ -316,8 +314,8 @@ class ReportController extends Controller
                 'output_quantity' => $outputQuantity,
                 'output_quantity' => $outputQuantity,
                 'labor_cost' => $order->labor_cost ?? 0,
-                'material_cost' => $order->preparationOrder?->materialUsages->sum(fn($u) => $u->quantity * ($u->materialReceipt->price_per_unit ?? 0)) ?? 0,
-                'total_cost' => ($order->labor_cost ?? 0) + ($order->preparationOrder?->materialUsages->sum(fn($u) => $u->quantity * ($u->materialReceipt->price_per_unit ?? 0)) ?? 0),
+                'material_cost' => $order->preparationOrder?->materialUsages->sum(fn ($u) => $u->quantity * ($u->materialReceipt->price_per_unit ?? 0)) ?? 0,
+                'total_cost' => ($order->labor_cost ?? 0) + ($order->preparationOrder?->materialUsages->sum(fn ($u) => $u->quantity * ($u->materialReceipt->price_per_unit ?? 0)) ?? 0),
                 'status' => $order->status,
                 'sent_date' => $order->sent_date?->format('Y-m-d'),
                 'estimated_date' => $order->estimated_completion_date?->format('Y-m-d'),
