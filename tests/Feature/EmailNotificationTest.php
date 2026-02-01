@@ -1,8 +1,8 @@
 <?php
 
 use App\Mail\ResetPasswordEmail;
-use App\Mail\VerifyEmail;
 use App\Models\User;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Support\Facades\Notification;
 
 test('user receives custom email verification notification', function () {
@@ -14,19 +14,24 @@ test('user receives custom email verification notification', function () {
 
     $user->sendEmailVerificationNotification();
 
-    Notification::assertSentTo($user, \App\Notifications\VerifyEmailNotification::class);
+    Notification::assertSentTo($user, VerifyEmailNotification::class);
 });
 
-test('verify email has correct indonesian content and branding', function () {
-    $verificationUrl = 'https://fabriku.test/verify-email/123';
-    $userName = 'John Doe';
+test('verify email notification has correct indonesian content', function () {
+    $user = User::factory()->create([
+        'name' => 'John Doe',
+        'email' => 'test@example.com',
+        'email_verified_at' => null,
+    ]);
 
-    $mail = new VerifyEmail($verificationUrl, $userName);
-    $envelope = $mail->envelope();
+    $notification = new VerifyEmailNotification();
+    $mailMessage = $notification->toMail($user);
 
-    expect($envelope->subject)->toBe('Verifikasi Alamat Email Anda')
-        ->and($mail->verificationUrl)->toBe($verificationUrl)
-        ->and($mail->userName)->toBe($userName);
+    expect($mailMessage->subject)->toBe('Verifikasi Alamat Email Anda')
+        ->and($mailMessage->greeting)->toContain('Halo John Doe')
+        ->and($mailMessage->introLines)->toContain('Terima kasih telah mendaftar di Fabriku.')
+        ->and($mailMessage->actionText)->toBe('Verifikasi Email')
+        ->and($mailMessage->salutation)->toBe('Salam, Tim Fabriku');
 });
 
 test('user receives custom password reset notification', function () {
@@ -51,16 +56,10 @@ test('reset password email has correct indonesian content and branding', functio
         ->and($mail->userName)->toBe($userName);
 });
 
-test('email templates render correctly', function () {
-    $verificationUrl = 'https://fabriku.test/verify';
+test('reset password email template renders correctly', function () {
+    $resetUrl = 'https://fabriku.test/reset';
     $userName = 'Test User';
 
-    $mail = new VerifyEmail($verificationUrl, $userName);
-    $content = $mail->content();
-
-    expect($content->view)->toBe('emails.verify-email');
-
-    $resetUrl = 'https://fabriku.test/reset';
     $resetMail = new ResetPasswordEmail($resetUrl, $userName);
     $resetContent = $resetMail->content();
 
