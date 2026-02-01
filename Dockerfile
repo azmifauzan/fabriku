@@ -83,8 +83,8 @@ VOLUME ["/var/www/html/storage/app/public"]
 EXPOSE 80
 
 # Add health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD health-check.sh
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD /usr/local/bin/health-check.sh
 
 # Use entrypoint to run setup tasks then start apache
 ENTRYPOINT ["app-entrypoint.sh"]

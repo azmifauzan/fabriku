@@ -37,7 +37,3 @@ it('returns null image_url when no image_path exists', function () {
 
     expect($item->image_url)->toBeNull();
 });
-
-
-
-

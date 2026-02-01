@@ -274,19 +274,19 @@ class SalesOrderController extends Controller
     public function export(SalesOrder $salesOrder)
     {
         $salesOrder->load(['customer', 'items.inventoryItem']);
-        
-        $csvFileName = 'Invoice-' . str_replace('/', '-', $salesOrder->invoice_number ?? $salesOrder->order_number) . '.csv';
+
+        $csvFileName = 'Invoice-'.str_replace('/', '-', $salesOrder->invoice_number ?? $salesOrder->order_number).'.csv';
         $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$csvFileName",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$csvFileName",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
-        
-        $callback = function() use($salesOrder) {
+
+        $callback = function () use ($salesOrder) {
             $file = fopen('php://output', 'w');
-            
+
             // Header Info
             fputcsv($file, ['INVOICE', $salesOrder->invoice_number ?? '-']);
             fputcsv($file, ['Order Number', $salesOrder->order_number]);
@@ -294,10 +294,10 @@ class SalesOrderController extends Controller
             fputcsv($file, ['Customer', $salesOrder->customer->name]);
             fputcsv($file, ['Resi', $salesOrder->resi_number ?? '-']);
             fputcsv($file, []); // Empty line
-            
+
             // Items Header
             fputcsv($file, ['Item', 'Quantity', 'Unit Price', 'Discount', 'Total']);
-            
+
             // Items
             foreach ($salesOrder->items as $item) {
                 fputcsv($file, [
@@ -305,21 +305,21 @@ class SalesOrderController extends Controller
                     $item->quantity,
                     $item->unit_price,
                     $item->discount_amount,
-                    $item->subtotal
+                    $item->subtotal,
                 ]);
             }
-            
+
             fputcsv($file, []); // Empty line
-            
+
             // Totals
             fputcsv($file, ['', '', '', 'Subtotal', $salesOrder->subtotal]);
             fputcsv($file, ['', '', '', 'Discount', $salesOrder->discount_amount]);
             fputcsv($file, ['', '', '', 'Tax', $salesOrder->tax_amount]);
             fputcsv($file, ['', '', '', 'Total', $salesOrder->total_amount]);
-            
+
             fclose($file);
         };
-        
+
         return response()->stream($callback, 200, $headers);
     }
 }

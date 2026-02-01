@@ -6,7 +6,6 @@ use App\Models\Material;
 use App\Models\MaterialReceipt;
 use App\Models\PreparationOrder;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class RecalculateMaterialStock extends Command
 {
@@ -64,7 +63,7 @@ class RecalculateMaterialStock extends Command
                 $status = $diff < 0.01 ? '✓' : '⚠️ MISMATCH';
 
                 // Update if not dry run and there's a mismatch
-                if (!$dryRun && $diff >= 0.01) {
+                if (! $dryRun && $diff >= 0.01) {
                     $material->stock_quantity = $expectedStock;
                     $material->save();
                     $status = '✅ FIXED';

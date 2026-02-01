@@ -2,19 +2,40 @@
 
 ## Overview
 
-Aplikasi Fabriku sekarang memiliki fitur email yang lengkap untuk meningkatkan user experience dan komunikasi dengan pengguna.
+Aplikasi Fabriku memiliki sistem email yang lengkap dengan desain custom berbahasa Indonesia yang konsisten dengan branding Fabriku untuk meningkatkan user experience dan komunikasi dengan pengguna.
+
+## Custom Email Templates
+
+Semua email menggunakan template custom dengan:
+- **Bahasa Indonesia** untuk semua konten
+- **Logo dan branding Fabriku** dengan gradient purple (#667eea → #764ba2)
+- **Desain responsif** yang konsisten
+- **User-friendly layout** dengan CTA button yang jelas
 
 ## Fitur-Fitur Email
 
 ### 1. Email Verification (Verifikasi Email)
 
-Setelah registrasi, pengguna harus memverifikasi email mereka sebelum dapat mengakses dashboard.
+Email verifikasi custom dalam bahasa Indonesia yang dikirim setelah registrasi.
+
+**Karakteristik:**
+- Subject: "Verifikasi Alamat Email Anda"
+- Gradient header purple dengan logo Fabriku
+- Tombol CTA "Verifikasi Email Saya"
+- Link alternatif untuk browser yang tidak support button
+- Warning tentang expirasi 60 menit
+- Tips keamanan
 
 **Flow:**
-1. User mendaftar → email verifikasi otomatis dikirim
-2. User klik link verifikasi di email
+1. User mendaftar → email verifikasi custom otomatis dikirim (bahasa Indonesia)
+2. User klik tombol "Verifikasi Email Saya" di email
 3. Email terverifikasi → Welcome email dikirim
 4. User dapat akses dashboard
+
+**Template:** 
+- Mailable: `app/Mail/VerifyEmail.php`
+- Notification: `app/Notifications/VerifyEmailNotification.php`
+- View: `resources/views/emails/verify-email.blade.php`
 
 **Routes:**
 - `GET /verify-email` - Halaman pemberitahuan verifikasi
@@ -28,7 +49,7 @@ php artisan test --filter=EmailVerification
 
 ### 2. Welcome Email
 
-Email selamat datang dikirim otomatis setelah user berhasil verifikasi email.
+Email selamat datang dalam bahasa Indonesia dikirim otomatis setelah user berhasil verifikasi email.
 
 **Konten:**
 - Ucapan selamat datang
@@ -36,18 +57,35 @@ Email selamat datang dikirim otomatis setelah user berhasil verifikasi email.
 - Link ke dashboard
 - Panduan langkah selanjutnya
 
-**Template:** `resources/views/emails/welcome.blade.php`
+**Template:** 
+- Mailable: `app/Mail/WelcomeEmail.php`
+- View: `resources/views/emails/welcome.blade.php`
 
-### 3. Forgot Password (Lupa Password)
+### 3. Reset Password (Lupa Password)
 
-User dapat reset password jika lupa.
+Email reset password custom dalam bahasa Indonesia dengan desain yang user-friendly.
+
+**Karakteristik:**
+- Subject: "Reset Password Akun Anda"
+- Gradient header purple dengan logo Fabriku
+- Tombol CTA "Reset Password"
+- Link alternatif untuk browser yang tidak support button
+- Warning tentang expirasi 60 menit
+- Tips keamanan password
+- Pesan jika user tidak request reset
 
 **Flow:**
 1. User klik "Lupa Password?"
-2. Masukkan email → link reset dikirim ke email
-3. User klik link → redirect ke form reset password
-4. User masukkan password baru
-5. Password berhasil direset → redirect ke login
+2. Masukkan email → email reset custom dikirim (bahasa Indonesia)
+3. User klik tombol "Reset Password" di email
+4. Redirect ke form reset password
+5. User masukkan password baru
+6. Password berhasil direset → redirect ke login
+
+**Template:**
+- Mailable: `app/Mail/ResetPasswordEmail.php`
+- Notification: `app/Notifications/ResetPasswordNotification.php`
+- View: `resources/views/emails/reset-password.blade.php`
 
 **Routes:**
 - `GET /forgot-password` - Form request reset password

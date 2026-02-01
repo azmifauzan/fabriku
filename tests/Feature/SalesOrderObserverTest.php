@@ -1,21 +1,20 @@
 <?php
 
-use App\Models\User;
-use App\Models\SalesOrder;
-use App\Models\Customer;
 use App\Models\InventoryItem;
+use App\Models\SalesOrder;
 use App\Models\Tenant;
+use App\Models\User;
 
 beforeEach(function () {
     $this->tenant = Tenant::factory()->create();
     $this->user = User::factory()->create(['tenant_id' => $this->tenant->id]);
     $this->actingAs($this->user);
-    
+
     $this->inventoryItem = InventoryItem::factory()->create([
         'tenant_id' => $this->tenant->id,
         'current_quantity' => 100,
         'reserved_quantity' => 0,
-        'status' => 'available'
+        'status' => 'available',
     ]);
 });
 
@@ -24,7 +23,7 @@ test('soft deleting confirmed order releases reserved stock', function () {
         'tenant_id' => $this->tenant->id,
         'status' => 'confirmed',
     ]);
-    
+
     $order->items()->create([
         'inventory_item_id' => $this->inventoryItem->id,
         'quantity' => 10,
@@ -47,7 +46,7 @@ test('restoring confirmed order reserves stock', function () {
         'tenant_id' => $this->tenant->id,
         'status' => 'confirmed',
     ]);
-    
+
     $order->items()->create([
         'inventory_item_id' => $this->inventoryItem->id,
         'quantity' => 10,
@@ -71,7 +70,7 @@ test('force deleting confirmed order releases reserved stock', function () {
         'tenant_id' => $this->tenant->id,
         'status' => 'confirmed',
     ]);
-    
+
     $order->items()->create([
         'inventory_item_id' => $this->inventoryItem->id,
         'quantity' => 10,
@@ -94,7 +93,7 @@ test('force deleting already soft deleted order does not double release', functi
         'tenant_id' => $this->tenant->id,
         'status' => 'confirmed',
     ]);
-    
+
     $order->items()->create([
         'inventory_item_id' => $this->inventoryItem->id,
         'quantity' => 10,
