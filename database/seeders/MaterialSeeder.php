@@ -18,8 +18,9 @@ class MaterialSeeder extends Seeder
         }
 
         if (! $tenant) {
-            $this->command->warn('Tenant not found for MaterialSeeder.');
-
+            if ($this->command) {
+                $this->command->warn('Tenant not found for MaterialSeeder.');
+            }
             return;
         }
 
@@ -30,7 +31,9 @@ class MaterialSeeder extends Seeder
 
         if (! $user) {
              // Fallback or skip if no user found (though unlikely if tenant exists)
-             $this->command->warn('No user found for receipts.');
+             if ($this->command) {
+                 $this->command->warn('No user found for receipts.');
+             }
              return;
         }
 
@@ -122,14 +125,19 @@ class MaterialSeeder extends Seeder
                     'supplier_name' => fake()->company(),
                     'receipt_date' => now()->subDays($i * 7),
                     'quantity' => $quantity,
-                    'unit_price' => $unitPrice,
-                    'total_price' => $quantity * $unitPrice,
+                    'remaining_quantity' => $quantity,
+                    'unit' => $material->unit,
+                    'price_per_unit' => $unitPrice,
+                    'total_cost' => $quantity * $unitPrice,
                     'batch_number' => 'BATCH-'.rand(1000, 9999),
                     'received_by' => $user->id,
+                    'status' => 'active',
                 ]);
             }
         }
 
-        $this->command->info('Materials and receipts seeded successfully!');
+        if ($this->command) {
+            $this->command->info('Materials and receipts seeded successfully!');
+        }
     }
 }

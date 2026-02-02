@@ -72,10 +72,11 @@ RUN php artisan key:generate --force
 RUN php artisan storage:link || true
 
 # Setup cron for Laravel scheduler
-RUN echo "* * * * * www-data cd /var/www/html && /usr/local/bin/php artisan schedule:run >> /var/log/cron.log 2>&1" > /etc/cron.d/laravel-scheduler \
+RUN echo "* * * * * cd /var/www/html && /usr/local/bin/php artisan schedule:run >> /var/log/cron.log 2>&1" > /etc/cron.d/laravel-scheduler \
     && chmod 0644 /etc/cron.d/laravel-scheduler \
     && crontab /etc/cron.d/laravel-scheduler \
-    && touch /var/log/cron.log
+    && touch /var/log/cron.log \
+    && chmod 666 /var/log/cron.log
 
 # Create volume for persistent storage
 VOLUME ["/var/www/html/storage/app/public"]
