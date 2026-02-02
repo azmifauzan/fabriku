@@ -23,18 +23,18 @@ class PreparationOrderFactory extends Factory
         return [
             'tenant_id' => Tenant::factory(),
             'pattern_id' => \App\Models\Pattern::factory(),
-            'preparation_date' => fake()->dateTimeBetween('-30 days', 'now'),
-            'status' => fake()->randomElement($statuses),
+            'preparation_date' => $this->faker->dateTimeBetween('-30 days', 'now'),
+            'status' => $this->faker->randomElement($statuses),
             'prepared_by' => \App\Models\User::factory(),
-            'output_quantity' => fake()->numberBetween(10, 200),
+            'output_quantity' => $this->faker->numberBetween(10, 200),
             'material_usage' => [
                 [
                     'material_id' => 1,
-                    'quantity' => fake()->randomFloat(2, 1, 10),
+                    'quantity' => $this->faker->randomFloat(2, 1, 10),
                 ],
             ],
-            'waste_percentage' => fake()->randomFloat(2, 0, 10),
-            'notes' => fake()->optional()->sentence(),
+            'waste_percentage' => $this->faker->randomFloat(2, 0, 10),
+            'notes' => $this->faker->optional()->sentence(),
         ];
     }
 }

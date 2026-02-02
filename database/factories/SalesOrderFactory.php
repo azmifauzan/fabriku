@@ -18,31 +18,31 @@ class SalesOrderFactory extends Factory
     {
         $channels = ['offline', 'online', 'reseller', 'marketplace'];
 
-        $subtotal = fake()->randomFloat(2, 100000, 5000000);
-        $discountAmount = fake()->randomFloat(2, 0, $subtotal * 0.2);
+        $subtotal = $this->faker->randomFloat(2, 100000, 5000000);
+        $discountAmount = $this->faker->randomFloat(2, 0, $subtotal * 0.2);
         $taxAmount = 0;
-        $shippingCost = fake()->randomFloat(2, 0, 50000);
+        $shippingCost = $this->faker->randomFloat(2, 0, 50000);
         $totalAmount = $subtotal - $discountAmount + $taxAmount + $shippingCost;
 
         return [
             'tenant_id' => 1,
-            'order_number' => strtoupper(fake()->unique()->bothify('SO-######')),
+            'order_number' => strtoupper($this->faker->unique()->bothify('SO-######')),
             'customer_id' => \App\Models\Customer::factory(),
-            'order_date' => fake()->dateTimeBetween('-3 months', 'now'),
-            'delivery_date' => fake()->optional()->dateTimeBetween('now', '+30 days'),
-            'channel' => fake()->randomElement($channels),
-            'status' => fake()->randomElement(['draft', 'confirmed', 'completed']),
+            'order_date' => $this->faker->dateTimeBetween('-3 months', 'now'),
+            'delivery_date' => $this->faker->optional()->dateTimeBetween('now', '+30 days'),
+            'channel' => $this->faker->randomElement($channels),
+            'status' => $this->faker->randomElement(['draft', 'confirmed', 'completed']),
             'subtotal' => $subtotal,
             'discount_amount' => $discountAmount,
             'discount_percentage' => 0,
             'tax_amount' => $taxAmount,
-            'shipping_cost' => fake()->randomFloat(2, 0, 50000),
+            'shipping_cost' => $this->faker->randomFloat(2, 0, 50000),
             'total_amount' => $totalAmount,
-            'payment_method' => fake()->randomElement(['cash', 'transfer', 'credit']),
-            'payment_status' => fake()->randomElement(['unpaid', 'pending', 'partial', 'paid']),
-            'paid_amount' => fake()->randomElement([0, $totalAmount / 2, $totalAmount]),
-            'shipping_address' => fake()->optional()->address(),
-            'notes' => fake()->optional()->sentence(),
+            'payment_method' => $this->faker->randomElement(['cash', 'transfer', 'credit']),
+            'payment_status' => $this->faker->randomElement(['unpaid', 'pending', 'partial', 'paid']),
+            'paid_amount' => $this->faker->randomElement([0, $totalAmount / 2, $totalAmount]),
+            'shipping_address' => $this->faker->optional()->address(),
+            'notes' => $this->faker->optional()->sentence(),
         ];
     }
 
