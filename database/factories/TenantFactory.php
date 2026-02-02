@@ -17,8 +17,8 @@ class TenantFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->company(),
-            'business_category' => fake()->randomElement(['garment', 'food']),
+            'name' => $this->faker->company(),
+            'business_category' => $this->faker->randomElement(['garment', 'food']),
             'subscription_plan' => 'trial',
             'subscription_expires_at' => now()->addDays(30),
             'is_active' => true,

@@ -1,4 +1,4 @@
-FROM php:8.5-apache
+FROM php:8.4-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -64,11 +64,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN composer install --prefer-dist --no-interaction --optimize-autoloader || true
+RUN composer install --prefer-dist --no-interaction --optimize-autoloader --no-dev
+RUN php artisan key:generate --force
 RUN npm install
 RUN npm run build
 RUN npm prune --production
-RUN php artisan key:generate --force
 RUN php artisan storage:link || true
 
 # Setup cron for Laravel scheduler

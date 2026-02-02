@@ -17,13 +17,13 @@ class InventoryLocationFactory extends Factory
      */
     public function definition(): array
     {
-        $code = strtoupper(fake()->unique()->lexify('LOC-???-###'));
+        $code = strtoupper($this->faker->unique()->lexify('LOC-???-###'));
 
         return [
             'tenant_id' => Tenant::factory(),
             'code' => $code,
-            'name' => fake()->unique()->bothify('Rack ?#-?#'),
-            'capacity' => fake()->optional(0.8)->numberBetween(100, 2000),
+            'name' => $this->faker->unique()->bothify('Rack ?#-?#'),
+            'capacity' => $this->faker->optional(0.8)->numberBetween(100, 2000),
             'is_active' => true,
         ];
     }
@@ -34,7 +34,7 @@ class InventoryLocationFactory extends Factory
     public function smallCapacity(): static
     {
         return $this->state([
-            'capacity' => fake()->numberBetween(50, 200),
+            'capacity' => $this->faker->numberBetween(50, 200),
         ]);
     }
 
@@ -44,7 +44,7 @@ class InventoryLocationFactory extends Factory
     public function largeCapacity(): static
     {
         return $this->state([
-            'capacity' => fake()->numberBetween(1000, 5000),
+            'capacity' => $this->faker->numberBetween(1000, 5000),
         ]);
     }
 
