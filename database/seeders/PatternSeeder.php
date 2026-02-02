@@ -15,8 +15,9 @@ class PatternSeeder extends Seeder
         }
 
         if (! $tenant) {
-            $this->command->warn('Tenant not found for PatternSeeder.');
-
+            if ($this->command) {
+                $this->command->warn('Tenant not found for PatternSeeder.');
+            }
             return;
         }
 
@@ -56,6 +57,8 @@ class PatternSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        $this->command->info('Patterns seeded successfully!');
+        if ($this->command) {
+            $this->command->info('Patterns seeded successfully!');
+        }
     }
 }

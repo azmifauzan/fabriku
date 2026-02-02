@@ -41,19 +41,35 @@ class Contractor extends Model
 
         static::creating(function (Contractor $contractor) {
             if (! $contractor->tenant_id) {
-                $contractor->tenant_id = auth()->user()->tenant_id;
+                $contractor->tenant_id = auth()->user()?->tenant_id;
             }
 
             if (empty($contractor->code)) {
-                $contractor->code = self::generateCode();
+                $contractor->code = self::generateCodeForTenant($contractor->tenant_id);
             }
         });
     }
 
     public static function generateCode(): string
     {
+        // Get tenant_id from authenticated user
+        $tenantId = auth()->user()?->tenant_id;
+        
+        if (!$tenantId) {
+            throw new \Exception('Cannot generate contractor code without tenant_id');
+        }
+
+        return self::generateCodeForTenant($tenantId);
+    }
+
+    public static function generateCodeForTenant(?int $tenantId): string
+    {
+        if (!$tenantId) {
+            throw new \Exception('Cannot generate contractor code without tenant_id');
+        }
+
         $lastContractor = self::withoutGlobalScope(TenantScope::class)
-            ->where('tenant_id', auth()->user()->tenant_id)
+            ->where('tenant_id', $tenantId)
             ->latest('id')
             ->first();
 

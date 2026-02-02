@@ -22,13 +22,17 @@ class InventorySeeder extends Seeder
         }
 
         if (! $tenant) {
-            $this->command->warn('Tenant not found for InventorySeeder.');
+            if ($this->command) {
+                $this->command->warn('Tenant not found for InventorySeeder.');
+            }
             return;
         }
 
         $user = User::where('tenant_id', $tenant->id)->first();
 
-        $this->command->info('Seeding inventory locations...');
+        if ($this->command) {
+            $this->command->info('Seeding inventory locations...');
+        }
 
         // Create inventory locations (racks)
         $locationData = [
@@ -66,7 +70,9 @@ class InventorySeeder extends Seeder
             InventoryLocation::create($data);
         }
 
-        $this->command->info('Seeding inventory items...');
+        if ($this->command) {
+            $this->command->info('Seeding inventory items...');
+        }
 
         // Get locations
         $rakA1 = InventoryLocation::where('tenant_id', $tenant->id)->where('code', 'RAK-A1')->first();
@@ -277,9 +283,11 @@ class InventorySeeder extends Seeder
             $adjustmentsCreated++;
         }
 
-        $this->command->info('✓ Inventory seeded successfully!');
-        $this->command->info('  - '.count($locationData).' locations created');
-        $this->command->info("  - {$itemsCreated} inventory items created");
-        $this->command->info("  - {$adjustmentsCreated} stock adjustments created");
+        if ($this->command) {
+            $this->command->info('✓ Inventory seeded successfully!');
+            $this->command->info('  - '.count($locationData).' locations created');
+            $this->command->info("  - {$itemsCreated} inventory items created");
+            $this->command->info("  - {$adjustmentsCreated} stock adjustments created");
+        }
     }
 }
