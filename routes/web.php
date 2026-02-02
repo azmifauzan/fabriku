@@ -15,6 +15,8 @@ Route::get('/', function () {
         'settings' => [
             'membership_price_monthly' => $settings['membership_price_monthly'] ?? 25000,
             'membership_price_yearly' => $settings['membership_price_yearly'] ?? 250000,
+            'pro_price_monthly' => $settings['pro_price_monthly'] ?? 35000,
+            'pro_price_yearly' => $settings['pro_price_yearly'] ?? 350000,
         ],
     ]);
 })->name('home');
@@ -149,10 +151,15 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('material', [\App\Http\Controllers\ReportController::class, 'material'])->name('material');
+        Route::get('material/export', [\App\Http\Controllers\ReportController::class, 'exportMaterial'])->name('material.export');
         Route::get('inventory', [\App\Http\Controllers\ReportController::class, 'inventory'])->name('inventory');
+        Route::get('inventory/export', [\App\Http\Controllers\ReportController::class, 'exportInventory'])->name('inventory.export');
         Route::get('sales', [\App\Http\Controllers\ReportController::class, 'sales'])->name('sales');
+        Route::get('sales/export', [\App\Http\Controllers\ReportController::class, 'exportSales'])->name('sales.export');
         Route::get('sales-recap', [\App\Http\Controllers\ReportController::class, 'salesRecap'])->name('sales-recap');
+        Route::get('sales-recap/export', [\App\Http\Controllers\ReportController::class, 'exportSalesRecap'])->name('sales-recap.export');
         Route::get('production', [\App\Http\Controllers\ReportController::class, 'production'])->name('production');
+        Route::get('production/export', [\App\Http\Controllers\ReportController::class, 'exportProduction'])->name('production.export');
     });
 
     // Settings
@@ -162,4 +169,13 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
     // Subscription
     Route::get('subscription', [\App\Http\Controllers\SubscriptionController::class, 'index'])->name('subscription.index');
     Route::post('subscription', [\App\Http\Controllers\SubscriptionController::class, 'store'])->name('subscription.store');
+
+    // Assistant API
+    Route::prefix('assistant')->name('assistant.')->group(function () {
+        Route::post('message', [\App\Http\Controllers\AssistantController::class, 'sendMessage'])->name('message');
+        Route::get('history', [\App\Http\Controllers\AssistantController::class, 'getHistory'])->name('history');
+        Route::post('clear', [\App\Http\Controllers\AssistantController::class, 'clearHistory'])->name('clear');
+        Route::get('usage', [\App\Http\Controllers\AssistantController::class, 'getUsage'])->name('usage');
+        Route::get('status', [\App\Http\Controllers\AssistantController::class, 'getStatus'])->name('status');
+    });
 });

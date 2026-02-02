@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { FileBarChart, Filter } from 'lucide-vue-next';
+import { Download, FileBarChart, FileSpreadsheet, Filter } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface ProductionOrder {
@@ -48,6 +48,7 @@ const status = ref(props.filters.status || '');
 const productionType = ref(props.filters.production_type || '');
 const startDate = ref(props.filters.start_date || '');
 const endDate = ref(props.filters.end_date || '');
+const showExportMenu = ref(false);
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -90,6 +91,18 @@ const getStatusClass = (orderStatus: string) => {
     };
     return classes[orderStatus] || classes.draft;
 };
+
+const exportReport = (format: 'pdf' | 'excel') => {
+    const params = new URLSearchParams({
+        format,
+        ...(status.value && { status: status.value }),
+        ...(productionType.value && { production_type: productionType.value }),
+        ...(startDate.value && { start_date: startDate.value }),
+        ...(endDate.value && { end_date: endDate.value }),
+    });
+    window.location.href = `/reports/production/export?${params.toString()}`;
+    showExportMenu.value = false;
+};
 </script>
 
 <template>
@@ -101,11 +114,44 @@ const getStatusClass = (orderStatus: string) => {
                 <!-- Header -->
                 <div class="rounded-lg bg-white shadow-sm dark:bg-gray-800">
                     <div class="p-6">
-                        <div class="flex items-center gap-3">
-                            <FileBarChart :size="24" class="text-indigo-500" />
-                            <div>
-                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Laporan Produksi</h2>
-                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Ringkasan efisiensi dan biaya produksi</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <FileBarChart :size="24" class="text-indigo-500" />
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Laporan Produksi</h2>
+                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Ringkasan efisiensi dan biaya produksi</p>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <button
+                                    type="button"
+                                    @click="showExportMenu = !showExportMenu"
+                                    class="flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                                >
+                                    <Download :size="16" />
+                                    Export
+                                </button>
+                                <div
+                                    v-if="showExportMenu"
+                                    class="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800"
+                                >
+                                    <button
+                                        type="button"
+                                        @click="exportReport('pdf')"
+                                        class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                    >
+                                        <Download :size="16" class="text-red-500" />
+                                        Export PDF
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="exportReport('excel')"
+                                        class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                    >
+                                        <FileSpreadsheet :size="16" class="text-green-500" />
+                                        Export Excel
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

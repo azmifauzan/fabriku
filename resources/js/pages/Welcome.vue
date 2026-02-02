@@ -14,6 +14,8 @@ const props = defineProps({
         default: () => ({
             membership_price_monthly: 25000,
             membership_price_yearly: 250000,
+            pro_price_monthly: 35000,
+            pro_price_yearly: 350000,
         }),
     },
 });
@@ -27,15 +29,16 @@ const formatCurrency = (value: number) => {
 };
 
 const features = [
-    { name: 'Dashboard & Analytics', free: true, full: true },
-    { name: 'Manajemen Bahan Baku', free: true, full: true },
-    { name: 'Produksi Internal & Outsourcing', free: true, full: true },
-    { name: 'Inventory Gudang', free: true, full: true },
-    { name: 'Penjualan & Sales Order', free: true, full: true },
-    { name: 'Export Laporan (Excel/PDF)', free: true, full: true },
-    { name: 'Laporan Lengkap & Analytics', free: true, full: true },
-    { name: 'Masa Aktif Full Access', free: '30 Hari', full: 'Sesuai Paket' },
-    { name: 'Setelah Expired', free: 'Read-Only', full: 'Perpanjang' },
+    { name: 'Dashboard & Analytics', free: true, full: true, pro: true },
+    { name: 'Manajemen Bahan Baku', free: true, full: true, pro: true },
+    { name: 'Produksi Internal & Outsourcing', free: true, full: true, pro: true },
+    { name: 'Inventory Gudang', free: true, full: true, pro: true },
+    { name: 'Penjualan & Sales Order', free: true, full: true, pro: true },
+    { name: 'Export Laporan (Excel/PDF)', free: true, full: true, pro: true },
+    { name: 'Laporan Lengkap & Analytics', free: true, full: true, pro: true },
+    { name: 'Fabriku Assistant (AI Chat)', free: '50 pesan/hari', full: '200 pesan/hari', pro: '500 pesan/hari' },
+    { name: 'Masa Aktif Full Access', free: '30 Hari', full: 'Sesuai Paket', pro: 'Sesuai Paket' },
+    { name: 'Setelah Expired', free: 'Read-Only', full: 'Perpanjang', pro: 'Perpanjang' },
 ];
 </script>
 
@@ -263,27 +266,27 @@ const features = [
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
                     <!-- Free Trial -->
-                    <div class="relative bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                    <div class="relative bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
                         <div class="text-center mb-6">
                             <h3 class="text-xl font-bold text-gray-900 mb-2">Free Trial</h3>
-                            <div class="text-4xl font-extrabold text-gray-900">
+                            <div class="text-3xl font-extrabold text-gray-900">
                                 Rp 0
-                                <span class="text-lg font-normal text-gray-500">/30 hari</span>
+                                <span class="text-base font-normal text-gray-500">/30 hari</span>
                             </div>
                             <p class="mt-2 text-sm text-gray-500">Full akses semua fitur</p>
                             <p class="mt-1 text-xs text-amber-600 font-medium">Setelah expired: Read-only access</p>
                         </div>
 
-                        <ul class="space-y-3 mb-8">
-                            <li v-for="feature in features" :key="feature.name" class="flex items-start gap-3">
+                        <ul class="space-y-2.5 mb-6">
+                            <li v-for="feature in features" :key="feature.name" class="flex items-start gap-2.5">
                                 <component 
                                     :is="feature.free === true ? Check : feature.free ? Check : X"
                                     :class="feature.free === true ? 'text-green-500' : feature.free ? 'text-green-500' : 'text-gray-300'"
-                                    class="w-5 h-5 flex-shrink-0 mt-0.5"
+                                    class="w-4 h-4 flex-shrink-0 mt-0.5"
                                 />
-                                <span :class="feature.free ? 'text-gray-700' : 'text-gray-400'">
+                                <span :class="feature.free ? 'text-gray-700 text-sm' : 'text-gray-400 text-sm'">
                                     {{ feature.name }}
                                     <span v-if="typeof feature.free === 'string'" class="font-medium text-indigo-600">({{ feature.free }})</span>
                                 </span>
@@ -292,50 +295,89 @@ const features = [
 
                         <Link
                             href="/register"
-                            class="block w-full py-3 px-6 text-center font-semibold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors"
+                            class="block w-full py-2.5 px-4 text-center font-semibold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors"
                         >
                             Coba Gratis
                         </Link>
                     </div>
 
                     <!-- Full Member -->
-                    <div class="relative bg-indigo-600 rounded-2xl shadow-xl p-8 border-2 border-indigo-600">
+                    <div class="relative bg-white rounded-2xl shadow-lg border-2 border-indigo-200 p-6">
                         <div class="absolute -top-4 left-1/2 -translate-x-1/2">
-                            <span class="px-4 py-1 bg-yellow-400 text-yellow-900 text-sm font-bold rounded-full">
-                                RECOMMENDED
+                            <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">
+                                POPULER
                             </span>
                         </div>
 
                         <div class="text-center mb-6">
-                            <h3 class="text-xl font-bold text-white mb-2">Full Member</h3>
-                            <div class="text-4xl font-extrabold text-white">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Full Member</h3>
+                            <div class="text-3xl font-extrabold text-gray-900">
                                 {{ formatCurrency(settings.membership_price_monthly) }}
-                                <span class="text-lg font-normal text-indigo-200">/bulan</span>
+                                <span class="text-base font-normal text-gray-500">/bulan</span>
                             </div>
-                            <p class="mt-2 text-sm text-indigo-200">
+                            <p class="mt-2 text-sm text-gray-500">
                                 atau {{ formatCurrency(settings.membership_price_yearly) }}/tahun
-                                <span class="block text-yellow-300 font-medium">
+                                <span class="block text-green-600 font-medium text-xs">
                                     (Hemat {{ formatCurrency((settings.membership_price_monthly * 12) - settings.membership_price_yearly) }})
                                 </span>
                             </p>
-                            <p class="mt-2 text-xs text-indigo-100">Akses penuh tanpa batas waktu selama aktif</p>
                         </div>
 
-                        <ul class="space-y-3 mb-8">
-                            <li v-for="feature in features" :key="feature.name" class="flex items-start gap-3">
-                                <Check class="w-5 h-5 text-indigo-300 flex-shrink-0 mt-0.5" />
-                                <span class="text-white">
+                        <ul class="space-y-2.5 mb-6">
+                            <li v-for="feature in features" :key="feature.name" class="flex items-start gap-2.5">
+                                <Check class="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                                <span class="text-gray-700 text-sm">
                                     {{ feature.name }}
-                                    <span v-if="typeof feature.full === 'string'" class="font-medium text-yellow-300">({{ feature.full }})</span>
+                                    <span v-if="typeof feature.full === 'string'" class="font-medium text-indigo-600">({{ feature.full }})</span>
                                 </span>
                             </li>
                         </ul>
 
                         <Link
                             href="/register"
-                            class="block w-full py-3 px-6 text-center font-semibold text-indigo-600 bg-white rounded-xl hover:bg-indigo-50 transition-colors"
+                            class="block w-full py-2.5 px-4 text-center font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors"
                         >
                             Mulai Sekarang
+                        </Link>
+                    </div>
+
+                    <!-- Pro Member -->
+                    <div class="relative bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl shadow-xl p-6">
+                        <div class="absolute -top-4 left-1/2 -translate-x-1/2">
+                            <span class="px-3 py-1 bg-yellow-400 text-yellow-900 text-xs font-bold rounded-full">
+                                BEST VALUE
+                            </span>
+                        </div>
+
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-white mb-2">Pro Member</h3>
+                            <div class="text-3xl font-extrabold text-white">
+                                {{ formatCurrency(settings.pro_price_monthly) }}
+                                <span class="text-base font-normal text-indigo-200">/bulan</span>
+                            </div>
+                            <p class="mt-2 text-sm text-indigo-200">
+                                atau {{ formatCurrency(settings.pro_price_yearly) }}/tahun
+                                <span class="block text-yellow-300 font-medium text-xs">
+                                    (Hemat {{ formatCurrency((settings.pro_price_monthly * 12) - settings.pro_price_yearly) }})
+                                </span>
+                            </p>
+                        </div>
+
+                        <ul class="space-y-2.5 mb-6">
+                            <li v-for="feature in features" :key="feature.name" class="flex items-start gap-2.5">
+                                <Check class="w-4 h-4 text-indigo-300 flex-shrink-0 mt-0.5" />
+                                <span class="text-white text-sm">
+                                    {{ feature.name }}
+                                    <span v-if="typeof feature.pro === 'string'" class="font-medium text-yellow-300">({{ feature.pro }})</span>
+                                </span>
+                            </li>
+                        </ul>
+
+                        <Link
+                            href="/register"
+                            class="block w-full py-2.5 px-4 text-center font-semibold text-indigo-700 bg-white rounded-xl hover:bg-indigo-50 transition-colors"
+                        >
+                            Upgrade ke Pro
                         </Link>
                     </div>
                 </div>
@@ -350,6 +392,7 @@ const features = [
                                     <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Fitur</th>
                                     <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900">Free Trial</th>
                                     <th class="px-6 py-4 text-center text-sm font-semibold text-indigo-600">Full Member</th>
+                                    <th class="px-6 py-4 text-center text-sm font-semibold text-purple-600">Pro Member</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
@@ -366,6 +409,10 @@ const features = [
                                     <td class="px-6 py-4 text-center bg-indigo-50/50">
                                         <Check class="w-5 h-5 text-indigo-600 inline-block" />
                                         <span v-if="typeof feature.full === 'string'" class="text-sm text-indigo-600 ml-1">{{ feature.full }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center bg-purple-50/50">
+                                        <Check class="w-5 h-5 text-purple-600 inline-block" />
+                                        <span v-if="typeof feature.pro === 'string'" class="text-sm text-purple-600 ml-1">{{ feature.pro }}</span>
                                     </td>
                                 </tr>
                             </tbody>
