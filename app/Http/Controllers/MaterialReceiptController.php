@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateMaterialReceiptRequest;
 use App\Models\Material;
 use App\Models\MaterialReceipt;
 use Illuminate\Http\Request;
@@ -73,5 +74,44 @@ class MaterialReceiptController extends Controller
         }
 
         return redirect()->back()->with('success', 'Stok berhasil ditambahkan.');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateMaterialReceiptRequest $request, MaterialReceipt $materialReceipt): \Illuminate\Http\RedirectResponse
+    {
+        $data = $request->safe()->except(['image']);
+
+        // Calculate quantity difference and update remaining_quantity accordingly
+        $oldQuantity = $materialReceipt->quantity;
+        $newQuantity = $data['quantity'];
+        $quantityDiff = $newQuantity - $oldQuantity;
+
+        // Update remaining_quantity (add/subtract the difference)
+        $data['remaining_quantity'] = $materialReceipt->remaining_quantity + $quantityDiff;
+
+        // Update total_cost based on new quantity and price
+        $data['total_cost'] = $data['quantity'] * $data['price_per_unit'];
+
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($materialReceipt->image_path) {
+                \Illuminate\Support\Facades\Storage::disk('fabriku_s3')->delete($materialReceipt->image_path);
+            }
+
+            $tenantId = $request->user()->tenant_id;
+            $path = $request->file('image')->storePublicly("tenants/{$tenantId}/receipts", 'fabriku_s3');
+            $data['image_path'] = $path;
+        }
+
+        $materialReceipt->update($data);
+
+        // Update material stock_quantity
+        if ($quantityDiff != 0) {
+            $materialReceipt->material->increment('stock_quantity', $quantityDiff);
+        }
+
+        return redirect()->back()->with('success', 'Data batch berhasil diperbarui.');
     }
 }

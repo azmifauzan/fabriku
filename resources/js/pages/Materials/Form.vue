@@ -249,25 +249,25 @@ const clearImage = () => {
                         </div>
                     </FormSection>
 
-                    <!-- Stock and Pricing -->
-                    <FormSection title="Stok dan Harga" description="Informasi stok dan pricing">
+                    <!-- Stock and Pricing - Only show for new materials -->
+                    <FormSection v-if="!isEditing" title="Stok dan Harga Awal" description="Informasi stok awal saat membuat material baru. Setelah dibuat, stok dan harga dikelola per batch.">
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <FormField
                                 v-model="form.stock_quantity"
-                                label="Jumlah Stok"
+                                label="Jumlah Stok Awal"
                                 type="number"
                                 placeholder="0"
                                 :error="form.errors.stock_quantity"
-                                hint="Stok bahan baku saat ini"
+                                hint="Stok awal bahan baku"
                             />
 
                             <FormField
                                 v-model="form.price_per_unit"
-                                label="Harga (Rp)"
+                                label="Harga Satuan (Rp)"
                                 type="number"
                                 placeholder="0"
                                 :error="form.errors.price_per_unit"
-                                hint="Harga per satuan (opsional)"
+                                hint="Harga per satuan untuk batch awal"
                             />
 
                             <FormField
@@ -287,6 +287,23 @@ const clearImage = () => {
                                 :error="form.errors.supplier_name"
                             />
                         </div>
+                    </FormSection>
+
+                    <!-- Minimum Stock - Show for editing -->
+                    <FormSection v-else title="Pengaturan Stok" description="Pengaturan minimum stok untuk peringatan stok rendah">
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            <FormField
+                                v-model="form.min_stock"
+                                label="Minimum Stok"
+                                type="number"
+                                placeholder="0"
+                                :error="form.errors.min_stock"
+                                hint="Peringatan stok rendah (opsional)"
+                            />
+                        </div>
+                        <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                            <span class="font-semibold">Catatan:</span> Stok, harga, dan supplier dikelola per batch melalui halaman detail material. Gunakan fitur "Restock Barang" untuk menambah stok baru.
+                        </p>
                     </FormSection>
 
                     <!-- Description -->
