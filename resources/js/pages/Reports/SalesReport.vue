@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { FileBarChart, Filter, Search, TrendingUp } from 'lucide-vue-next';
+import { Download, FileBarChart, FileSpreadsheet, Filter, Search, TrendingUp } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface Order {
@@ -9,7 +9,6 @@ interface Order {
     order_number: string;
     order_date: string;
     customer_name: string;
-    customer_type: string;
     total_items: number;
     subtotal: number;
     discount: number;
@@ -31,7 +30,6 @@ interface Summary {
 
 interface Filters {
     status?: string;
-    customer_type?: string;
     search?: string;
     start_date?: string;
     end_date?: string;
@@ -52,9 +50,9 @@ const props = defineProps<{
 
 const search = ref(props.filters.search || '');
 const status = ref(props.filters.status || '');
-const customerType = ref(props.filters.customer_type || '');
 const startDate = ref(props.filters.start_date || props.defaultDates.start_date);
 const endDate = ref(props.filters.end_date || props.defaultDates.end_date);
+const showExportMenu = ref(false);
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -70,7 +68,6 @@ const applyFilter = () => {
         {
             search: search.value,
             status: status.value,
-            customer_type: customerType.value,
             start_date: startDate.value,
             end_date: endDate.value,
         },
@@ -84,7 +81,6 @@ const applyFilter = () => {
 const resetFilter = () => {
     search.value = '';
     status.value = '';
-    customerType.value = '';
     startDate.value = props.defaultDates.start_date;
     endDate.value = props.defaultDates.end_date;
     applyFilter();
@@ -108,6 +104,18 @@ const getPaymentStatusClass = (paymentStatus: string) => {
     };
     return classes[paymentStatus] || classes.unpaid;
 };
+
+const exportReport = (format: 'pdf' | 'excel') => {
+    const params = new URLSearchParams({
+        format,
+        ...(search.value && { search: search.value }),
+        ...(status.value && { status: status.value }),
+        ...(startDate.value && { start_date: startDate.value }),
+        ...(endDate.value && { end_date: endDate.value }),
+    });
+    window.location.href = `/reports/sales/export?${params.toString()}`;
+    showExportMenu.value = false;
+};
 </script>
 
 <template>
@@ -119,11 +127,44 @@ const getPaymentStatusClass = (paymentStatus: string) => {
                 <!-- Header -->
                 <div class="rounded-lg bg-white shadow-sm dark:bg-gray-800">
                     <div class="p-6">
-                        <div class="flex items-center gap-3">
-                            <FileBarChart :size="24" class="text-indigo-500" />
-                            <div>
-                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Laporan Penjualan</h2>
-                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Ringkasan penjualan dan revenue</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <FileBarChart :size="24" class="text-indigo-500" />
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Laporan Penjualan</h2>
+                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Ringkasan penjualan dan revenue</p>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <button
+                                    type="button"
+                                    @click="showExportMenu = !showExportMenu"
+                                    class="flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                                >
+                                    <Download :size="16" />
+                                    Export
+                                </button>
+                                <div
+                                    v-if="showExportMenu"
+                                    class="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800"
+                                >
+                                    <button
+                                        type="button"
+                                        @click="exportReport('pdf')"
+                                        class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                    >
+                                        <Download :size="16" class="text-red-500" />
+                                        Export PDF
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="exportReport('excel')"
+                                        class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                    >
+                                        <FileSpreadsheet :size="16" class="text-green-500" />
+                                        Export Excel
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -209,18 +250,6 @@ const getPaymentStatusClass = (paymentStatus: string) => {
                                     <option value="completed">Completed</option>
                                     <option value="pending">Pending</option>
                                     <option value="cancelled">Cancelled</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"> Tipe Customer </label>
-                                <select
-                                    v-model="customerType"
-                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                >
-                                    <option value="">Semua Tipe</option>
-                                    <option value="retail">Retail</option>
-                                    <option value="reseller">Reseller</option>
-                                    <option value="wholesale">Wholesale</option>
                                 </select>
                             </div>
                             <div>

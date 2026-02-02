@@ -33,6 +33,17 @@ class CheckSubscriptionStatus
         // Check if subscription is active
         if (! $user->tenant->isActive()) {
             if ($request->expectsJson()) {
+                // Provide a more helpful message for assistant routes
+                if ($request->routeIs('assistant.*')) {
+                    return response()->json([
+                        'success' => false,
+                        'type' => 'subscription_expired',
+                        'message' => '⏰ Masa aktif langganan Anda telah berakhir. '.
+                            'Fabriku Assistant tidak dapat digunakan sampai Anda memperpanjang langganan. '.
+                            'Silakan perpanjang langganan di menu Pengaturan > Langganan untuk melanjutkan menggunakan fitur ini.',
+                    ], 403);
+                }
+
                 return response()->json([
                     'message' => 'Membership expired. Account is in read-only mode. Please upgrade to continue.',
                 ], 403);

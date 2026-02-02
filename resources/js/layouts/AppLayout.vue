@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ChatWidget from '@/components/ChatWidget.vue';
 import Footer from '@/components/Footer.vue';
 import Navbar from '@/components/Navbar.vue';
 import Sidebar from '@/components/Sidebar.vue';
@@ -90,5 +91,8 @@ const currentRoute = computed(() => page.url);
             <!-- Footer -->
             <Footer />
         </main>
+
+        <!-- Chat Widget -->
+        <ChatWidget />
     </div>
 </template>

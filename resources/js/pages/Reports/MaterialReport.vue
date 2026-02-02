@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { AlertTriangle, FileBarChart, Filter, Search } from 'lucide-vue-next';
+import { AlertTriangle, Download, FileBarChart, FileSpreadsheet, Filter, Search } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface Material {
@@ -46,6 +46,7 @@ const search = ref(props.filters.search || '');
 const materialType = ref(props.filters.material_type || '');
 const startDate = ref(props.filters.start_date || '');
 const endDate = ref(props.filters.end_date || '');
+const showExportMenu = ref(false);
 
 
 
@@ -88,6 +89,18 @@ const resetFilter = () => {
     endDate.value = '';
     applyFilter();
 };
+
+const exportReport = (format: 'pdf' | 'excel') => {
+    const params = new URLSearchParams({
+        format,
+        ...(search.value && { search: search.value }),
+        ...(materialType.value && { material_type: materialType.value }),
+        ...(startDate.value && { start_date: startDate.value }),
+        ...(endDate.value && { end_date: endDate.value }),
+    });
+    window.location.href = `/reports/material/export?${params.toString()}`;
+    showExportMenu.value = false;
+};
 </script>
 
 <template>
@@ -99,11 +112,44 @@ const resetFilter = () => {
                 <!-- Header -->
                 <div class="rounded-lg bg-white shadow-sm dark:bg-gray-800">
                     <div class="p-6">
-                        <div class="flex items-center gap-3">
-                            <FileBarChart :size="24" class="text-indigo-500" />
-                            <div>
-                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Laporan Material</h2>
-                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Ringkasan penerimaan dan penggunaan material</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <FileBarChart :size="24" class="text-indigo-500" />
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Laporan Material</h2>
+                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Ringkasan penerimaan dan penggunaan material</p>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <button
+                                    type="button"
+                                    @click="showExportMenu = !showExportMenu"
+                                    class="flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                                >
+                                    <Download :size="16" />
+                                    Export
+                                </button>
+                                <div
+                                    v-if="showExportMenu"
+                                    class="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800"
+                                >
+                                    <button
+                                        type="button"
+                                        @click="exportReport('pdf')"
+                                        class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                    >
+                                        <Download :size="16" class="text-red-500" />
+                                        Export PDF
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="exportReport('excel')"
+                                        class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                    >
+                                        <FileSpreadsheet :size="16" class="text-green-500" />
+                                        Export Excel
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -28,6 +28,26 @@ class EnsureTenantContext
 
         // Ensure tenant is active
         if (! $user->tenant->isActive()) {
+            // For API/JSON requests (like assistant), return proper JSON response
+            if ($request->expectsJson()) {
+                // Provide a more helpful message for assistant routes
+                if ($request->routeIs('assistant.*')) {
+                    return response()->json([
+                        'success' => false,
+                        'type' => 'subscription_expired',
+                        'message' => '⏰ Masa aktif langganan Anda telah berakhir. '.
+                            'Fabriku Assistant tidak dapat digunakan sampai Anda memperpanjang langganan. '.
+                            'Silakan perpanjang langganan di menu Pengaturan > Langganan untuk melanjutkan menggunakan fitur ini.',
+                    ], 403);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'type' => 'subscription_expired',
+                    'message' => 'Tenant subscription has expired or is inactive.',
+                ], 403);
+            }
+
             auth()->logout();
             abort(403, 'Tenant subscription has expired or is inactive.');
         }
