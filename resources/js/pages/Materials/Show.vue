@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { AlertTriangle, Plus, QrCode } from 'lucide-vue-next';
+import { AlertTriangle, Pencil, Plus, QrCode } from 'lucide-vue-next';
 import RestockModal from './Partials/RestockModal.vue';
+import EditBatchModal from './Partials/EditBatchModal.vue';
 import { ref } from 'vue';
 
 interface MaterialAttribute {
@@ -92,7 +93,19 @@ const formatDate = (date: string) => {
 };
 
 const showRestockModal = ref(false);
+const showEditBatchModal = ref(false);
+const selectedBatch = ref<MaterialReceipt | null>(null);
 const activeTab = ref<'batches' | 'usages'>('batches');
+
+const openEditBatchModal = (batch: MaterialReceipt) => {
+    selectedBatch.value = batch;
+    showEditBatchModal.value = true;
+};
+
+const closeEditBatchModal = () => {
+    showEditBatchModal.value = false;
+    selectedBatch.value = null;
+};
 </script>
 
 <template>
@@ -218,6 +231,7 @@ const activeTab = ref<'batches' | 'usages'>('batches');
                                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Sisa</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Status</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Barcode</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
@@ -258,9 +272,18 @@ const activeTab = ref<'batches' | 'usages'>('batches');
                                                 </div>
                                                 <span v-else>-</span>
                                             </td>
+                                            <td class="px-6 py-4">
+                                                <button
+                                                    @click="openEditBatchModal(receipt)"
+                                                    class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+                                                >
+                                                    <Pencil class="h-3.5 w-3.5" />
+                                                    Edit
+                                                </button>
+                                            </td>
                                         </tr>
                                         <tr v-if="!material.receipts?.length">
-                                            <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
                                                 Belum ada data batch.
                                             </td>
                                         </tr>
@@ -368,6 +391,13 @@ const activeTab = ref<'batches' | 'usages'>('batches');
             :supplier-name="material.supplier_name"
             :current-price="material.price_per_unit"
             @close="showRestockModal = false"
+        />
+
+        <EditBatchModal
+            :show="showEditBatchModal"
+            :batch="selectedBatch"
+            :unit="material.unit"
+            @close="closeEditBatchModal"
         />
     </AppLayout>
 </template>
