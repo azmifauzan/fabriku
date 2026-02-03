@@ -7,6 +7,15 @@ import {
     XCircle, RefreshCw, Play, Trash2, Send, Database, HardDrive,
     Cpu, MemoryStick
 } from 'lucide-vue-next'
+import {
+    index as monitoringIndex,
+    retryJob as retryJobAction,
+    deleteJob as deleteJobAction,
+    retryAllJobs as retryAllJobsAction,
+    flushJobs as flushJobsAction,
+    runCommand as runCommandAction,
+    testTelegram as testTelegramAction
+} from '@/actions/App/Http/Controllers/Admin/AdminMonitoringController'
 
 const props = defineProps({
     tab: String,
@@ -29,7 +38,7 @@ const tabs = [
 
 const switchTab = (tabId) => {
     activeTab.value = tabId
-    router.get(route('admin.monitoring.index'), { tab: tabId }, {
+    router.get(monitoringIndex.url(), { tab: tabId }, {
         preserveState: true,
         preserveScroll: true,
     })
@@ -37,36 +46,36 @@ const switchTab = (tabId) => {
 
 const retryJob = (uuid) => {
     if (confirm('Retry this failed job?')) {
-        router.post(route('admin.monitoring.jobs.retry', uuid))
+        router.post(retryJobAction.url(uuid))
     }
 }
 
 const deleteJob = (uuid) => {
     if (confirm('Delete this failed job?')) {
-        router.delete(route('admin.monitoring.jobs.delete', uuid))
+        router.delete(deleteJobAction.url(uuid))
     }
 }
 
 const retryAllJobs = () => {
     if (confirm('Retry all failed jobs?')) {
-        router.post(route('admin.monitoring.jobs.retry-all'))
+        router.post(retryAllJobsAction.url())
     }
 }
 
 const flushJobs = () => {
     if (confirm('Delete ALL failed jobs? This cannot be undone.')) {
-        router.post(route('admin.monitoring.jobs.flush'))
+        router.post(flushJobsAction.url())
     }
 }
 
 const runCommand = (command) => {
     if (confirm(`Run "${command}" command now?`)) {
-        router.post(route('admin.monitoring.run-command'), { command })
+        router.post(runCommandAction.url(), { command })
     }
 }
 
 const testTelegram = () => {
-    router.post(route('admin.monitoring.test-telegram'))
+    router.post(testTelegramAction.url())
 }
 
 const formatDate = (date) => {
