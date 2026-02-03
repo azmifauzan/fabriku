@@ -148,6 +148,10 @@ const menuItems = computed(() => {
 });
 
 const isActive = (href: string) => {
+    // Exact match for /settings to avoid matching /settings/telegram
+    if (href === '/settings') {
+        return props.currentRoute === '/settings';
+    }
     return props.currentRoute.startsWith(href);
 };
 
