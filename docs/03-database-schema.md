@@ -1,7 +1,11 @@
 # Database Schema - Fabriku
 
+> **Last Updated**: February 3, 2026
+
 ## Overview
-Database schema untuk Fabriku menggunakan PostgreSQL dengan multi-tenancy architecture. Setiap tenant memiliki data yang terisolasi dengan tenant_id.
+Database schema untuk Fabriku menggunakan PostgreSQL 16 dengan multi-tenancy architecture. Setiap tenant memiliki data yang terisolasi dengan tenant_id.
+
+**Total Tables**: 37 tables
 
 **Design Philosophy**: Schema dirancang **category-agnostic** (tidak spesifik garment saja) untuk mendukung berbagai jenis bisnis UMKM. Terminologi menggunakan istilah generik yang bisa diaplikasikan untuk garment, makanan/kue, craft, dll.
 

@@ -1,5 +1,14 @@
 # Laravel Schedule Monitoring Guide
 
+> **Last Updated**: February 3, 2026
+
+## Overview
+
+Fabriku menggunakan Laravel Scheduler untuk menjalankan tasks berkala seperti:
+- **Demo Reset** - Reset data demo tenant setiap jam
+- **Trial Reminders** - Kirim email reminder trial setiap hari jam 9 pagi
+- **Cleanup Jobs** - Bersihkan data expired
+
 ## Cara Cek Schedule di Production
 
 ### 1. Melihat Daftar Scheduled Tasks

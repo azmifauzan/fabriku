@@ -1,5 +1,7 @@
 # 🐳 Single Container Architecture
 
+> **Last Updated**: February 3, 2026
+
 ## Mengapa Single Container?
 
 ✅ **Hemat Resource** - 1 container vs 3 containers  
@@ -29,6 +31,11 @@
 │  • Apache 2.4 (Web Server)              │
 │  • Cron (Laravel Scheduler)             │
 │  • Queue Worker (Background Jobs)       │
+│                                         │
+│  Stack:                                 │
+│  • PHP 8.4.11                           │
+│  • Laravel 12.47                        │
+│  • Node.js 20 (build only)              │
 │                                         │
 └─────────────────────────────────────────┘
               │
