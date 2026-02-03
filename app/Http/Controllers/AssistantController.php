@@ -108,7 +108,7 @@ class AssistantController extends Controller
                 'features' => [
                     'chat' => true,
                     'actions' => false, // Phase 2
-                    'telegram' => false, // Phase 3
+                    'telegram' => ! empty(config('telegram.bot_token')),
                     'whatsapp' => false, // Phase 4
                 ],
             ],

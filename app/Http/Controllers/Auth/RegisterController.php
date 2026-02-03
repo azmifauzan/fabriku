@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\TenantRegistered;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
@@ -44,7 +45,9 @@ class RegisterController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
+        /** @var Tenant $tenant */
         $tenant = null;
+        /** @var User $user */
         $user = null;
 
         DB::transaction(function () use ($validated, &$tenant, &$user) {
@@ -73,6 +76,9 @@ class RegisterController extends Controller
 
         // Trigger verification email
         event(new Registered($user));
+
+        // Notify admin via Telegram
+        event(new TenantRegistered($tenant, $user));
 
         // Auto-login the user
         Auth::login($user);

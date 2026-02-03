@@ -27,6 +27,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'role',
         'phone',
+        'telegram_chat_id',
+        'telegram_connect_token',
+        'telegram_connect_token_expires_at',
         'is_active',
         'last_login_at',
     ];
@@ -53,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
+            'telegram_connect_token_expires_at' => 'datetime',
         ];
     }
 
@@ -145,5 +149,62 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));
+    }
+
+    /**
+     * Check if user has Telegram connected
+     */
+    public function hasTelegramConnected(): bool
+    {
+        return ! empty($this->telegram_chat_id);
+    }
+
+    /**
+     * Generate a unique token for Telegram connection
+     */
+    public function generateTelegramConnectToken(): string
+    {
+        $token = strtoupper(bin2hex(random_bytes(4))); // 8 char hex token
+
+        $this->update([
+            'telegram_connect_token' => $token,
+            'telegram_connect_token_expires_at' => now()->addHour(),
+        ]);
+
+        return $token;
+    }
+
+    /**
+     * Find user by Telegram connect token
+     */
+    public static function findByTelegramConnectToken(string $token): ?self
+    {
+        return self::where('telegram_connect_token', strtoupper($token))
+            ->where('telegram_connect_token_expires_at', '>', now())
+            ->first();
+    }
+
+    /**
+     * Connect Telegram to this user
+     */
+    public function connectTelegram(string $chatId): void
+    {
+        $this->update([
+            'telegram_chat_id' => $chatId,
+            'telegram_connect_token' => null,
+            'telegram_connect_token_expires_at' => null,
+        ]);
+    }
+
+    /**
+     * Disconnect Telegram from this user
+     */
+    public function disconnectTelegram(): void
+    {
+        $this->update([
+            'telegram_chat_id' => null,
+            'telegram_connect_token' => null,
+            'telegram_connect_token_expires_at' => null,
+        ]);
     }
 }

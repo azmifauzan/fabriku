@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Scopes\TenantScope;
+use App\Models\Traits\HasAuditLogs;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Contractor extends Model
 {
     /** @use HasFactory<\Database\Factories\ContractorFactory> */
-    use HasFactory, SoftDeletes;
+    use HasAuditLogs, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -54,8 +55,8 @@ class Contractor extends Model
     {
         // Get tenant_id from authenticated user
         $tenantId = auth()->user()?->tenant_id;
-        
-        if (!$tenantId) {
+
+        if (! $tenantId) {
             throw new \Exception('Cannot generate contractor code without tenant_id');
         }
 
@@ -64,7 +65,7 @@ class Contractor extends Model
 
     public static function generateCodeForTenant(?int $tenantId): string
     {
-        if (!$tenantId) {
+        if (! $tenantId) {
             throw new \Exception('Cannot generate contractor code without tenant_id');
         }
 
