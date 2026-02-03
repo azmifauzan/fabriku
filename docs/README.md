@@ -1,5 +1,7 @@
 # Fabriku - Multi-Category Production & Sales Management
 
+> **Last Updated**: February 3, 2026
+
 ## 🎯 Project Vision
 Fabriku adalah aplikasi SaaS yang membantu UMKM mengelola produksi dan penjualan secara efisien, **mendukung berbagai jenis kategori bisnis** dengan satu platform terpadu.
 
@@ -54,32 +56,66 @@ Namun terminologi dan business rules disesuaikan per kategori.
 
 ## 🏗️ Tech Stack
 
-- **Backend**: Laravel 12, PHP 8.4
-- **Frontend**: Vue 3, Inertia.js v2, Tailwind CSS v4
-- **Database**: PostgreSQL (multi-tenant architecture)
-- **Testing**: Pest v4 (with browser testing support)
-- **Build**: Vite, Laravel Wayfinder (type-safe routing)
+### Backend
+- **Framework**: Laravel 12.47.0
+- **Language**: PHP 8.4.11
+- **Database**: PostgreSQL 16 (multi-tenant architecture)
+- **Cache/Queue**: Redis 7
+- **PDF**: DomPDF
+- **Excel**: Maatwebsite Excel 3.1
+- **AI**: OpenAI API (GPT-4o)
+- **Messaging**: Telegram Bot SDK
+
+### Frontend
+- **Framework**: Vue 3.5.18 (Composition API)
+- **SPA**: Inertia.js v2.3.7
+- **Styling**: Tailwind CSS v4.1.11
+- **Type Safety**: TypeScript 5.2.2
+- **Routing**: Laravel Wayfinder 0.1.13
+- **Build**: Vite 7
+- **Icons**: Lucide Vue Next
+
+### Testing & Development
+- **Testing**: Pest v4.3.1 (with browser testing support)
+- **Code Style**: Laravel Pint 1.27
+- **Linting**: ESLint 9 + Prettier 3
+- **Debug**: Laravel Pail, Laravel Boost MCP
 
 ## 📁 Documentation Structure
 
-- **[User Manual](08-user-manual.md)** - 📖 **Panduan lengkap cara menggunakan aplikasi** (START HERE!)
+### User Guides
+- **[📖 User Manual](08-user-manual.md)** - Panduan lengkap cara menggunakan aplikasi (START HERE!)
+- **[🔐 Admin Panel Guide](10-admin-panel.md)** - Panduan Admin Panel untuk platform management
+
+### Technical Documentation
 - [01-business-requirements.md](01-business-requirements.md) - User stories & business rules
 - [02-system-architecture.md](02-system-architecture.md) - Technical architecture & patterns
-- [03-database-schema.md](03-database-schema.md) - Database design & ERD
-- [04-api-endpoints.md](04-api-endpoints.md) - API specifications
+- [03-database-schema.md](03-database-schema.md) - Database design (37 tables)
+- [04-api-endpoints.md](04-api-endpoints.md) - API specifications (175+ routes)
 - [05-user-flows.md](05-user-flows.md) - User journey & UI flows
 - [06-mvp-development-plan.md](06-mvp-development-plan.md) - Implementation roadmap
-- [07-frontend-ui-architecture.md](07-frontend-ui-architecture.md) - Frontend UI/UX - Layout system, mobile-first design, dark mode
+- [07-frontend-ui-architecture.md](07-frontend-ui-architecture.md) - Frontend UI/UX design system
 - [09-workflow-summary.md](09-workflow-summary.md) - Workflow & data flow summary
+
+### Feature Documentation
+- **[🤖 AI Assistant](12-fabriku-assistant.md)** - Fabriku AI Chat Assistant documentation
+- [📧 Email Features](11-email-features.md) - Email system & notifications
 - [multi-category-architecture.md](multi-category-architecture.md) - Multi-category design patterns
 - [refactoring-preparation-simplification.md](refactoring-preparation-simplification.md) - Preparation simplification (BOM removal)
+
+### DevOps & Deployment
+- [DOCKER-ARCHITECTURE.md](DOCKER-ARCHITECTURE.md) - Docker container architecture
+- [DOCKER-QUICKREF.md](DOCKER-QUICKREF.md) - Docker quick reference commands
+- [EMAIL-SETUP.md](EMAIL-SETUP.md) - Email SMTP configuration
+- [SCHEDULE-MONITORING.md](SCHEDULE-MONITORING.md) - Scheduled tasks monitoring
 
 ## 🚀 Development Progress
 
 ### ✅ Phase 1: Foundation (Completed)
-- Multi-tenancy setup
+- Multi-tenancy setup dengan category selection
 - Authentication & user management (Login & Register)
 - Tenant context middleware
+- Landing page dengan multi-category showcase
 
 ### ✅ Phase 2: Material Management (Completed)
 - Material master data dengan atribut dinamis
@@ -104,7 +140,7 @@ Namun terminologi dan business rules disesuaikan per kategori.
 ### ✅ Phase 4: Production Management (Completed)
 - Contractors/Partners management (CRUD)
 - Production orders (internal & external)
-- Status workflow (draft → pending → in_progress → completed)
+- Status workflow (draft → sent → in_progress → completed)
 - Action endpoints: send, start, mark-complete
 - Quality control tracking
 - Cost calculation
@@ -114,8 +150,10 @@ Namun terminologi dan business rules disesuaikan per kategori.
 - Inventory items with SKU generation
 - Link to production batches & patterns
 - Stock quantity tracking (initial, current, reserved)
-- Status management (available, reserved, depleted)
+- Stock Adjustments (Opening Balance, Correction, Damage, etc)
+- Status management (available, reserved, damaged, expired)
 - Selling price & cost tracking
+- Image upload support
 
 ### ✅ Phase 6: Sales Management (Completed)
 - Customer management (CRUD)
@@ -123,21 +161,48 @@ Namun terminologi dan business rules disesuaikan per kategori.
 - Sales order creation with line items
 - Multi-channel support (offline, online, marketplace)
 - Payment tracking (unpaid, partial, paid)
-- Order status workflow
+- Order status workflow (draft → confirmed → processing → completed)
+- Invoice generation & printing
+- Export to PDF
 
 ### ✅ Phase 7: Dashboard & Reporting (Completed)
 - Dashboard with real-time KPI
-- Material Report
-- Inventory Report
-- Sales Report
-- Production Report
+- Material Report with export
+- Inventory Report with export
+- Sales Report with export
+- Production Report with export
+- Sales Recap Report
 
-### 🔄 Phase 8: Polish & Testing (In Progress)
-- Feature test files coverage enhancement
-- Browser testing (Pest 4) implementation
+### ✅ Phase 8: Polish & Testing (Completed)
+- Comprehensive testing (32 test files)
+- Browser testing (Pest 4)
 - UI/UX polish & consistency
 - Performance optimization
-- Documentation finalization (Current Task)
+- Documentation finalization
+
+### ✅ Phase 9: Admin Panel (Completed)
+- Admin authentication & authorization (separate guard)
+- Tenant management (Full CRUD, suspend/activate)
+- User management across tenants
+- Role & Permission system (RBAC)
+- Audit logging with change tracking
+- Platform statistics dashboard
+- Subscription payment management
+- System monitoring & job management
+- 15+ admin pages with modern UI
+
+### ✅ Phase 10: AI Assistant & Integrations (Completed)
+- AI Assistant with OpenAI GPT-4o integration
+- Natural language business queries
+- Conversation management & history
+- Telegram Bot integration
+- Multi-channel support (Web, Telegram)
+- Assistant usage tracking per tenant/user
+- Pending action confirmation system
+- Email system with custom templates (Bahasa Indonesia)
+- Trial reminder automation (7 days, 3 days, 1 day)
+- Email verification & welcome emails
+- Email logging & tracking
 
 ## 🎨 Design Philosophy
 
@@ -164,6 +229,17 @@ Setiap implementasi wajib melalui validasi:
 3. ✅ **Feature Tests** - Pest tests dengan coverage 80%+
 4. ✅ **Browser Tests** - Manual/automated UI testing
 
+## � Project Statistics
+
+| Metric | Count |
+|--------|-------|
+| Database Tables | 37 |
+| API Routes | 175+ |
+| Test Files | 32 |
+| Vue Pages | 60+ |
+| Models | 28 |
+| Controllers | 25+ |
+
 ## 🗄️ Database Migration Workflow (Dev)
 
 Untuk perubahan schema selama development:
@@ -181,7 +257,7 @@ Development mengikuti Laravel best practices dengan focus pada:
 
 ---
 
-**Status**: 🔄 MVP Development - Phase 8/8 In Progress (MVP Feature Complete)
+**Status**: ✅ MVP Complete - All 10 Phases Completed
 
-**Current Focus**: Polish & Testing - comprehensive test coverage, UI consistency, documentation finalization
+**Current Version**: v1.0.0 (Production Ready)
 

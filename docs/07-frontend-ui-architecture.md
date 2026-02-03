@@ -1,26 +1,32 @@
 # Frontend UI Architecture - Fabriku
 
+> **Last Updated**: February 3, 2026
+
 ## Overview
 
-Fabriku menggunakan modern frontend stack dengan Vue 3, Inertia.js v2, dan Tailwind CSS v4, dioptimalkan untuk pengalaman mobile-first yang responsif dengan dukungan dark mode.
+Fabriku menggunakan modern frontend stack dengan Vue 3.5, Inertia.js v2.3, dan Tailwind CSS v4.1, dioptimalkan untuk pengalaman mobile-first yang responsif dengan dukungan dark mode.
 
 ## Tech Stack
 
 ### Core Technologies
-- **Vue 3.5.13** - Progressive JavaScript framework
-- **Inertia.js v2** - Modern monolithic SPA framework
+- **Vue 3.5.18** - Progressive JavaScript framework
+- **Inertia.js v2.3.7** - Modern monolithic SPA framework
 - **TypeScript 5.2.2** - Type safety dan developer experience
-- **Tailwind CSS v4** - Utility-first CSS framework
+- **Tailwind CSS v4.1.11** - Utility-first CSS framework
 - **Vite 7** - Lightning-fast build tool
-- **Laravel Wayfinder v0.1.3** - Type-safe routing
+- **Laravel Wayfinder v0.1.13** - Type-safe routing
 
 ### Icon Library
-- **lucide-vue-next** - Modern, beautiful icon set dengan 1000+ icons
+- **lucide-vue-next 0.562** - Modern, beautiful icon set dengan 1000+ icons
 
 ### State Management & Utilities
 - **@vueuse/core 12.8.2** - Collection of Vue composition utilities
-- **class-variance-authority** - Type-safe variant styling
+- **class-variance-authority 0.7.1** - Type-safe variant styling
 - **clsx & tailwind-merge** - Conditional class management
+- **SweetAlert2 11.26** - Beautiful, responsive alerts
+
+### Total Vue Pages
+- **60+ pages** across tenant and admin panels
 
 ---
 

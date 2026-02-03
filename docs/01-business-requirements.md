@@ -1,9 +1,13 @@
 # Business Requirements - Fabriku
 
+> **Last Updated**: February 3, 2026
+
 ## Overview
-Fabriku adalah aplikasi SaaS (Software as a Service) yang dirancang untuk membantu UMKM dalam mengelola proses produksi dan penjualan mereka secara efisien dan terintegrasi. Aplikasi ini mendukung **multi-kategori bisnis** dengan studi kasus utama:
+Fabriku adalah aplikasi SaaS (Software as a Service) yang dirancang untuk membantu UMKM dalam mengelola proses produksi dan penjualan mereka secara efisien dan terintegrasi. Aplikasi ini mendukung **multi-kategori bisnis**:
 1. **Garment** - Produksi pakaian jadi (mukena, daster, gamis, dll)
 2. **Kue Rumahan** - Produksi makanan/kue untuk dijual
+3. **Kerajinan** - Craft & handmade products
+4. **Kosmetik** - Skincare & beauty products
 
 ## Business Goals
 1. Menyediakan solusi manajemen produksi yang mudah digunakan untuk berbagai jenis UMKM
@@ -11,13 +15,15 @@ Fabriku adalah aplikasi SaaS (Software as a Service) yang dirancang untuk memban
 3. Memberikan visibilitas penuh terhadap inventory dan cash flow
 4. Menghasilkan laporan yang akurat untuk pengambilan keputusan bisnis
 5. Sistem yang fleksibel untuk mendukung berbagai kategori bisnis dengan proses produksi berbeda
+6. AI-powered assistant untuk mempermudah operasional
 
 ## Target Users
-- Pemilik UMKM (garment, makanan/kue, dan kategori lain di masa depan)
+- Pemilik UMKM (garment, makanan/kue, kerajinan, kosmetik)
 - Staff produksi
 - Staff gudang/inventory
 - Staff penjualan
 - Mitra produksi eksternal (penjahit outsourcing, dapur sharing, dll)
+- Super Admin (platform management)
 
 ## Core Features
 
