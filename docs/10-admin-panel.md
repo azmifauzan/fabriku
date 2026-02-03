@@ -1,5 +1,6 @@
 # Admin Panel Guide
 
+> **Last Updated**: February 3, 2026  
 > **Panduan lengkap untuk Super Admin mengelola platform Fabriku**
 
 ## 📋 Daftar Isi
@@ -10,6 +11,8 @@
 - [Tenant Management](#tenant-management)
 - [User Management](#user-management)
 - [Role & Permission Management](#role--permission-management)
+- [Subscription Payments](#subscription-payments)
+- [System Monitoring](#system-monitoring)
 - [Audit Logs](#audit-logs)
 - [Security](#security)
 - [Best Practices](#best-practices)
@@ -23,8 +26,12 @@ Admin Panel adalah interface khusus untuk Super Admin mengelola platform Fabriku
 ✅ **Tenant Management** - Kelola semua tenant di platform  
 ✅ **User Management** - Administrasi user lintas tenant  
 ✅ **RBAC System** - Role-Based Access Control lengkap  
+✅ **Subscription Payments** - Kelola pembayaran & approval  
+✅ **System Monitoring** - Job queue, scheduler, dan command runner  
 ✅ **Audit Logs** - Activity tracking dengan change comparison  
 ✅ **Statistics** - Platform-wide metrics dan analytics
+
+### Total Admin Pages: 15+
 
 ### Akses Level
 

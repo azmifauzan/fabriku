@@ -6,11 +6,13 @@ Fabriku adalah aplikasi berbasis web yang dirancang untuk membantu UMKM dalam me
 
 Platform ini mengelola workflow universal: **Bahan Baku → Pattern/Resep → Persiapan → Produksi → Inventory → Penjualan**, dengan terminologi dan business rules yang disesuaikan per kategori bisnis.
 
-[![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php)](https://php.net)
-[![Vue.js](https://img.shields.io/badge/Vue.js-3-4FC08D?style=flat&logo=vue.js)](https://vuejs.org)
-[![Inertia.js](https://img.shields.io/badge/Inertia.js-2-9553E9?style=flat)](https://inertiajs.com)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com)
+[![Laravel](https://img.shields.io/badge/Laravel-12.47-FF2D20?style=flat&logo=laravel)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.4.11-777BB4?style=flat&logo=php)](https://php.net)
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.5-4FC08D?style=flat&logo=vue.js)](https://vuejs.org)
+[![Inertia.js](https://img.shields.io/badge/Inertia.js-2.3-9553E9?style=flat)](https://inertiajs.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat&logo=postgresql)](https://postgresql.org)
+[![Pest](https://img.shields.io/badge/Pest-4.3-f472b6?style=flat)](https://pestphp.com)
 
 ## ✨ Fitur Utama
 
@@ -76,6 +78,29 @@ Platform ini mengelola workflow universal: **Bahan Baku → Pattern/Resep → Pe
 - Laporan inventory (Inventory Report)
 - Laporan penjualan (Sales Report)
 - Laporan produksi (Production Report)
+- Export ke PDF & Excel
+
+### 🤖 AI Assistant (Fabriku Assistant)
+- Chat assistant berbasis OpenAI GPT
+- Natural language query untuk data bisnis
+- Multi-channel support (Web, Telegram)
+- Conversation history & context awareness
+- Usage tracking per tenant
+- Smart suggestions & proactive alerts
+
+### 📱 Telegram Integration
+- Telegram Bot untuk notifikasi
+- Connect account via QR code atau token
+- Real-time notifications untuk admin
+- Support perintah bisnis via chat
+
+### 📧 Email System
+- Custom email templates (Bahasa Indonesia)
+- Email verification dengan design modern
+- Welcome email untuk user baru
+- Reset password flow
+- Trial reminder emails (7 hari, 3 hari, 1 hari)
+- Email logging & tracking
 
 ### 🔐 Admin Panel (Platform Management)
 - **Super Admin Dashboard**: Platform-wide statistics and tenant overview
@@ -102,26 +127,33 @@ Platform ini mengelola workflow universal: **Bahan Baku → Pattern/Resep → Pe
 ## 🏗️ Technology Stack
 
 ### Backend
-- **Framework**: Laravel 12
-- **Language**: PHP 8.4
-- **Database**: PostgreSQL (recommended) / MySQL
-- **Cache**: Redis
+- **Framework**: Laravel 12.47.0
+- **Language**: PHP 8.4.11
+- **Database**: PostgreSQL 16 (recommended) / MySQL 8.0+
+- **Cache**: Redis 7
 - **Queue**: Redis
-- **Testing**: Pest 4 (with Browser Testing)
+- **Testing**: Pest 4.3.1 (with Browser Testing)
+- **PDF Generation**: DomPDF
+- **Excel Export**: Maatwebsite Excel 3.1
+- **AI Integration**: OpenAI API
+- **Notifications**: Telegram Bot SDK
 
 ### Frontend
-- **Framework**: Vue 3 (Composition API)
-- **SSR**: Inertia.js v2
-- **Styling**: Tailwind CSS 4
-- **Type Safety**: TypeScript
-- **Routing**: Laravel Wayfinder
-- **Build Tool**: Vite
+- **Framework**: Vue 3.5.18 (Composition API with `<script setup>`)
+- **SSR**: Inertia.js v2.3.7
+- **Styling**: Tailwind CSS 4.1.11
+- **Type Safety**: TypeScript 5.2.2
+- **Routing**: Laravel Wayfinder 0.1.13
+- **Build Tool**: Vite 7
+- **Icons**: Lucide Vue Next 0.562
+- **Utilities**: VueUse Core 12.8
+- **Alerts**: SweetAlert2
 
 ### Development Tools
-- **Code Style**: Laravel Pint
-- **Static Analysis**: PHPStan (optional)
-- **Linting**: ESLint + Prettier
+- **Code Style**: Laravel Pint 1.27
+- **Linting**: ESLint 9.32 + Prettier 3.6
 - **Version Control**: Git
+- **Debug**: Laravel Pail, Laravel Boost MCP
 
 ## 📋 Prerequisites
 
@@ -399,19 +431,32 @@ npm run format
 
 Dokumentasi lengkap tersedia di folder `docs/`:
 
+### User Guides
 - **[User Manual](docs/08-user-manual.md)** - 📖 **Panduan lengkap cara menggunakan aplikasi**
 - **[Admin Panel Guide](docs/10-admin-panel.md)** - 🔐 **Panduan Admin Panel untuk platform management**
+
+### Technical Documentation
 - [README](docs/README.md) - Project overview dan category comparison
 - [Business Requirements](docs/01-business-requirements.md) - Kebutuhan bisnis multi-category
 - [System Architecture](docs/02-system-architecture.md) - Arsitektur sistem dan design patterns
-- [Database Schema](docs/03-database-schema.md) - Struktur database category-agnostic
-- [API Endpoints](docs/04-api-endpoints.md) - Dokumentasi API lengkap
+- [Database Schema](docs/03-database-schema.md) - Struktur database (37 tables)
+- [API Endpoints](docs/04-api-endpoints.md) - Dokumentasi API (175+ routes)
 - [User Flows](docs/05-user-flows.md) - Alur kerja pengguna per kategori
 - [MVP Development Plan](docs/06-mvp-development-plan.md) - Rencana implementasi MVP
 - [Frontend UI Architecture](docs/07-frontend-ui-architecture.md) - UI/UX design system
 - [Workflow Summary](docs/09-workflow-summary.md) - Ringkasan workflow dan data flow
+
+### Feature Documentation
+- **[AI Assistant](docs/12-fabriku-assistant.md)** - 🤖 **Dokumentasi Fabriku Assistant (AI Chat)**
+- [Email Features](docs/11-email-features.md) - Sistem email dan notifikasi
 - [Multi-Category Architecture](docs/multi-category-architecture.md) - Panduan arsitektur multi-kategori
 - [Refactoring Summary](docs/refactoring-preparation-simplification.md) - Preparation simplification
+
+### DevOps & Deployment
+- [Docker Architecture](docs/DOCKER-ARCHITECTURE.md) - Arsitektur Docker container
+- [Docker Quick Reference](docs/DOCKER-QUICKREF.md) - Command reference Docker
+- [Email Setup](docs/EMAIL-SETUP.md) - Konfigurasi email SMTP
+- [Schedule Monitoring](docs/SCHEDULE-MONITORING.md) - Monitoring scheduled tasks
 
 ## 🏢 Multi-Kategori Bisnis
 
@@ -608,7 +653,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ Production Report
 
 ### ✅ Phase 8: Polish & Testing (Completed)
-- ✅ Comprehensive testing (14 test files)
+- ✅ Comprehensive testing (32 test files)
 - ✅ Browser testing (Pest 4)
 - ✅ UI/UX polish & consistency
 - ✅ Performance optimization
@@ -621,17 +666,33 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ Role & Permission system (RBAC)
 - ✅ Audit logging with change tracking
 - ✅ Platform statistics dashboard
+- ✅ Subscription payment management
+- ✅ System monitoring & job management
 - ✅ 15 admin pages with modern UI
 
+### ✅ Phase 10: AI Assistant & Integrations (Completed)
+- ✅ AI Assistant with OpenAI integration (GPT-4o)
+- ✅ Natural language business queries
+- ✅ Conversation management & history
+- ✅ Telegram Bot integration
+- ✅ Multi-channel support (Web, Telegram)
+- ✅ Assistant usage tracking per tenant/user
+- ✅ Pending action confirmation system
+- ✅ Email system with custom templates
+- ✅ Trial reminder automation
+- ✅ Email verification & welcome emails
+
 ### 🚀 Future Enhancements
-- 📱 Mobile app (React Native)
+- 📱 Mobile app (React Native / Flutter)
 - 📷 Barcode/QR code scanning
-- 🔔 Real-time notifications
-- 📧 Email automation
-- 🛒 E-commerce integration
-- 💳 Payment gateway integration
+- 📩 WhatsApp Business API integration
+- 🛒 E-commerce integration (Tokopedia, Shopee, etc)
+- 💳 Payment gateway integration (Midtrans, Xendit)
 - 📊 Advanced analytics & AI forecasting
-- 🌐 Multi-warehouse support
+- 🌐 Multi-warehouse management
+- 🤝 Supplier portal
+- 💰 Accounting integration
+- 📦 Shipping integration (JNE, J&T, SiCepat)
 
 ## 📸 Screenshots
 

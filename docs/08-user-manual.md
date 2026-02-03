@@ -1,7 +1,7 @@
 # User Manual - Fabriku
 
-**Version**: 1.0 (Simplified Preparation)  
-**Last Updated**: 15 Januari 2026
+**Version**: 2.0 (Full MVP)  
+**Last Updated**: 3 Februari 2026
 
 ---
 
@@ -14,8 +14,13 @@
 5. [Modul Pattern](#modul-pattern)
 6. [Modul Preparation Order](#modul-preparation-order)
 7. [Modul Production Order](#modul-production-order)
-8. [Tips & Best Practices](#tips--best-practices)
-9. [FAQ](#faq)
+8. [Modul Inventory](#modul-inventory)
+9. [Modul Sales Order](#modul-sales-order)
+10. [Reports & Analytics](#reports--analytics)
+11. [AI Assistant](#ai-assistant)
+12. [Telegram Integration](#telegram-integration)
+13. [Tips & Best Practices](#tips--best-practices)
+14. [FAQ](#faq)
 
 ---
 
@@ -23,14 +28,23 @@
 
 ### Apa itu Fabriku?
 
-Fabriku adalah aplikasi manajemen produksi dan penjualan untuk UMKM yang mendukung berbagai kategori bisnis. Saat ini fokus pada **Garment/Konveksi** dengan rencana ekspansi ke kategori lainnya.
+Fabriku adalah aplikasi SaaS manajemen produksi dan penjualan untuk UMKM yang mendukung berbagai kategori bisnis:
+- **Garment/Konveksi** - Mukena, daster, gamis, dll
+- **Makanan & Kue** - Cake, brownies, cookies, dll
+- **Kerajinan** - Souvenir, aksesoris, dll
+- **Kosmetik** - Skincare, makeup, herbal
 
 ### Fitur Utama
 
 ✅ **Manajemen Bahan Baku** - Track stok material dengan atribut dinamis  
-✅ **Pattern Library** - Template produk dengan spesifikasi lengkap  
+✅ **Pattern/Recipe Library** - Template produk dengan spesifikasi lengkap  
 ✅ **Preparation Order** - Proses persiapan bahan (cutting/mixing)  
 ✅ **Production Order** - Track produksi internal & outsourcing  
+✅ **Inventory Management** - Stok produk jadi dengan SKU & lokasi  
+✅ **Sales Order** - Penjualan multi-channel dengan payment tracking  
+✅ **Reports & Analytics** - Laporan lengkap dengan export  
+✅ **AI Assistant** - Chat assistant berbasis AI untuk query bisnis  
+✅ **Telegram Bot** - Notifikasi & akses via Telegram  
 ✅ **Multi-Tenant** - Data terpisah per bisnis  
 ✅ **Dark Mode** - UI modern dengan tema gelap/terang
 
@@ -44,18 +58,24 @@ Fabriku adalah aplikasi manajemen produksi dan penjualan untuk UMKM yang menduku
 2. Masukkan **email** dan **password**
 3. Klik tombol **"Sign In"**
 
+**Demo Credentials:**
+- Konveksi Fabriku: `admin@konveksi.com` / `password`
+- Kue Mama Homemade: `admin@kuemama.com` / `password`
+
 ### Tampilan Dashboard
 
 Setelah login, Anda akan melihat dashboard dengan:
-- **Ringkasan Statistik**: Pending preparation, production status, inventory alerts
+- **KPI Cards**: Total material, patterns, production, inventory, sales
+- **Charts**: Sales trend, production status, inventory alerts
 - **Menu Navigasi** (sidebar kiri):
   - Dashboard
-  - Master Data (Bahan Baku)
+  - Master Data (Bahan Baku, Jenis Bahan, Pattern, Kontraktor)
   - Preparation Order
-  - Sewing Order (Production)
-  - Inventory Items
-  - Sales Order
+  - Production Order
+  - Inventory (Lokasi, Items)
+  - Sales (Customer, Order)
   - Reports
+  - Settings
 
 ---
 
@@ -64,17 +84,17 @@ Setelah login, Anda akan melihat dashboard dengan:
 ### Overview Workflow
 
 ```
-1. INPUT BAHAN BAKU
+1. INPUT BAHAN BAKU → Material Receipt
    ↓
 2. BUAT PATTERN (Optional)
    ↓
-3. BUAT PREPARATION ORDER
+3. BUAT PREPARATION ORDER → Material dikurangi otomatis
    ↓
-4. BUAT PRODUCTION ORDER
+4. BUAT PRODUCTION ORDER → Internal/Outsourcing
    ↓
-5. INVENTORY PRODUK JADI
+5. INVENTORY PRODUK JADI → Auto-create dari production
    ↓
-6. PENJUALAN
+6. PENJUALAN → Stock dikurangi otomatis
 ```
 
 ### Penjelasan Singkat
