@@ -250,7 +250,7 @@ const formatExpiresAt = (dateStr: string | null) => {
                     </div>
 
                     <!-- Generate Token Button -->
-                    <div class="flex gap-3">
+                    <div class="flex justify-center">
                         <button
                             @click="generateToken"
                             :disabled="loading"
