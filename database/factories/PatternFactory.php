@@ -19,12 +19,12 @@ class PatternFactory extends Factory
     {
         return [
             'tenant_id' => Tenant::factory(),
-            'code' => strtoupper($this->faker->unique()->bothify('PTN-###')),
-            'name' => $this->faker->words(3, true),
-            'output_quantity' => $this->faker->numberBetween(1, 10),
-            'description' => $this->faker->optional()->sentence(),
-            'estimated_labor_cost' => $this->faker->randomFloat(2, 5000, 50000),
-            'instructions' => $this->faker->optional()->sentence(),
+            'code' => strtoupper(fake()->unique()->bothify('PTN-###')),
+            'name' => fake()->words(3, true),
+            'output_quantity' => fake()->numberBetween(1, 10),
+            'description' => fake()->optional()->sentence(),
+            'estimated_labor_cost' => fake()->randomFloat(2, 5000, 50000),
+            'instructions' => fake()->optional()->sentence(),
             'is_active' => true,
         ];
     }

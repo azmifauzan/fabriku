@@ -14,14 +14,14 @@ class MaterialFactory extends Factory
         return [
             'tenant_id' => Tenant::factory(),
             'material_type_id' => \App\Models\MaterialType::factory(),
-            'code' => strtoupper($this->faker->unique()->lexify('MAT-???-###')),
-            'name' => $this->faker->words(3, true),
-            'supplier_name' => $this->faker->optional()->company(),
-            'price_per_unit' => $this->faker->randomFloat(2, 10000, 500000),
+            'code' => strtoupper(fake()->unique()->lexify('MAT-???-###')),
+            'name' => fake()->words(3, true),
+            'supplier_name' => fake()->optional()->company(),
+            'price_per_unit' => fake()->randomFloat(2, 10000, 500000),
             'stock_quantity' => 0,
-            'min_stock' => $this->faker->randomFloat(2, 10, 100),
-            'unit' => $this->faker->randomElement($units),
-            'description' => $this->faker->optional()->sentence(),
+            'min_stock' => fake()->randomFloat(2, 10, 100),
+            'unit' => fake()->randomElement($units),
+            'description' => fake()->optional()->sentence(),
         ];
     }
 

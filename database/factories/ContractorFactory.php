@@ -17,21 +17,21 @@ class ContractorFactory extends Factory
             'Bordir dan sablon',
             'Produksi garment massal',
         ];
-        $type = $this->faker->randomElement($types);
-        $specialty = $this->faker->randomElement($specialties);
+        $type = fake()->randomElement($types);
+        $specialty = fake()->randomElement($specialties);
 
         return [
             'tenant_id' => Tenant::factory(),
-            'code' => strtoupper($this->faker->unique()->lexify('CTR-???-###')),
-            'name' => $type === 'company' ? $this->faker->company() : $this->faker->name(),
+            'code' => strtoupper(fake()->unique()->lexify('CTR-???-###')),
+            'name' => $type === 'company' ? fake()->company() : fake()->name(),
             'type' => $type,
             'specialty' => $specialty,
-            'contact_person' => $this->faker->name(),
-            'phone' => $this->faker->phoneNumber(),
-            'email' => $this->faker->optional(0.7)->safeEmail(),
-            'address' => $this->faker->optional(0.8)->address(),
+            'contact_person' => fake()->name(),
+            'phone' => fake()->phoneNumber(),
+            'email' => fake()->optional(0.7)->safeEmail(),
+            'address' => fake()->optional(0.8)->address(),
             'is_active' => true,
-            'notes' => $this->faker->optional(0.3)->sentence(),
+            'notes' => fake()->optional(0.3)->sentence(),
         ];
     }
 
@@ -44,21 +44,17 @@ class ContractorFactory extends Factory
 
     public function individual(): self
     {
-        $faker = \Faker\Factory::create();
-
         return $this->state(fn (array $attributes) => [
             'type' => 'individual',
-            'name' => $faker->name(),
+            'name' => fake()->name(),
         ]);
     }
 
     public function company(): self
     {
-        $faker = \Faker\Factory::create();
-
         return $this->state(fn (array $attributes) => [
             'type' => 'company',
-            'name' => $faker->company(),
+            'name' => fake()->company(),
         ]);
     }
 
