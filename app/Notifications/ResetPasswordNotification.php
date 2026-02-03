@@ -17,9 +17,9 @@ class ResetPasswordNotification extends BaseResetPassword
             'email' => $notifiable->getEmailForPasswordReset(),
         ], false));
 
-        return new ResetPasswordEmail(
+        return (new ResetPasswordEmail(
             resetUrl: $resetUrl,
             userName: $notifiable->name
-        );
+        ))->to($notifiable->getEmailForPasswordReset());
     }
 }

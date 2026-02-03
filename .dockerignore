@@ -12,7 +12,6 @@
 
 # Dependencies
 /node_modules
-/vendor
 
 # Environment
 .env
@@ -21,20 +20,29 @@
 
 # Build
 /public/hot
-/public/build
-/public/storage
 
 # Storage
 /storage/*.key
 /storage/logs/*.log
+/storage/app/*
+!/storage/app/.gitignore
+!/storage/app/public
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
 
 # Testing
 .phpunit.result.cache
 /coverage
+/tests
 
 # Documentation
 /docs
 README.md
+*.md
 
 # Docker
 docker-compose*.yml
@@ -44,3 +52,15 @@ Dockerfile
 # OS
 .DS_Store
 Thumbs.db
+
+# Cache & Logs
+*.log
+.phpunit.cache
+bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+
+# Development files
+phpunit.xml
+phpstan.neon
+pint.json
+.php-cs-fixer.cache
