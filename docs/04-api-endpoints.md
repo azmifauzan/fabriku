@@ -1,8 +1,12 @@
 # API Endpoints & Routes - Fabriku
 
+> **Last Updated**: February 3, 2026
+
 ## Overview
 
 Fabriku menggunakan **Inertia.js** untuk routing dan rendering modern. Ini berarti sebagian besar endpoint mengembalikan JSON (Inertia response) yang dirender oleh frontend, bukan REST API murni. Namun, struktur endpoint mengikuti resource controller Laravel standar.
+
+**Total Routes**: 175+ routes
 
 ## Base URL
 ```
@@ -144,3 +148,51 @@ Laravel validation errors are returned in the `props.errors` object for Inertia,
   }
 }
 ```
+
+## Route Groups (Additional)
+
+### 4. AI Assistant
+Prefix: `/assistant`
+Middleware: `auth`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/assistant/message` | Send message to AI assistant |
+| GET | `/assistant/history` | Get conversation history |
+| POST | `/assistant/clear` | Clear conversation history |
+| GET | `/assistant/status` | Get assistant status |
+| GET | `/assistant/usage` | Get usage statistics |
+
+### 5. Telegram Integration
+Prefix: `/telegram`, `/api/telegram`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/settings/telegram` | Telegram settings page |
+| POST | `/telegram/generate-token` | Generate connect token |
+| POST | `/telegram/disconnect` | Disconnect Telegram |
+| POST | `/telegram/test` | Send test message |
+| POST | `/api/telegram/webhook` | Webhook endpoint for bot |
+
+### 6. Email Verification
+Prefix: `/verify-email`, `/email`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/verify-email` | Show verification notice |
+| GET | `/verify-email/{id}/{hash}` | Verify email (signed URL) |
+| POST | `/email/verification-notification` | Resend verification |
+
+### 7. Admin Monitoring
+Prefix: `/admin/monitoring`
+Middleware: `auth:admin`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/admin/monitoring` | System monitoring dashboard |
+| POST | `/admin/monitoring/run-command` | Run artisan command |
+| POST | `/admin/monitoring/test-telegram` | Test Telegram notification |
+| POST | `/admin/monitoring/jobs/flush` | Flush failed jobs |
+| POST | `/admin/monitoring/jobs/retry-all` | Retry all failed jobs |
+| DELETE | `/admin/monitoring/jobs/{uuid}` | Delete specific job |
+| POST | `/admin/monitoring/jobs/{uuid}/retry` | Retry specific job |

@@ -1,8 +1,10 @@
 # System Architecture - Fabriku
 
+> **Last Updated**: February 3, 2026
+
 ## Architecture Overview
 
-Fabriku menggunakan arsitektur modern berbasis Laravel 12 dengan Inertia.js dan Vue 3, dirancang sebagai aplikasi SaaS multi-tenant yang scalable dan maintainable.
+Fabriku menggunakan arsitektur modern berbasis Laravel 12.47 dengan Inertia.js dan Vue 3.5, dirancang sebagai aplikasi SaaS multi-tenant yang scalable dan maintainable.
 
 ## High-Level Architecture
 
@@ -53,13 +55,14 @@ Fabriku menggunakan arsitektur modern berbasis Laravel 12 dengan Inertia.js dan 
 ### 1. Frontend Architecture
 
 **Technology Stack**:
-- **Vue 3.5.13** (Composition API with `<script setup>`)
-- **Inertia.js v2** (Modern monolithic SPA)
-- **Tailwind CSS v4** (Utility-first CSS)
+- **Vue 3.5.18** (Composition API with `<script setup>`)
+- **Inertia.js v2.3.7** (Modern monolithic SPA)
+- **Tailwind CSS v4.1.11** (Utility-first CSS)
 - **TypeScript 5.2.2** (Type safety)
-- **Laravel Wayfinder v0.1.3** (Type-safe routing)
-- **Lucide Vue Next** (Modern icon library)
-- **VueUse Core** (Composition utilities)
+- **Laravel Wayfinder v0.1.13** (Type-safe routing)
+- **Lucide Vue Next 0.562** (Modern icon library)
+- **VueUse Core 12.8** (Composition utilities)
+- **SweetAlert2** (Alert dialogs)
 
 **UI/UX Features**:
 - ✅ **Mobile-First Responsive Design**
@@ -94,8 +97,17 @@ resources/js/
 ├── composables/        # Vue composables
 │   └── useDarkMode.ts  # Dark mode utility
 ├── pages/              # Inertia pages
-│   ├── Auth/           # Login, Register
-│   ├── Dashboard.vue   # Main dashboard with KPIs
+│   ├── Admin/          # Admin panel pages (15+ pages)
+│   │   ├── Dashboard.vue
+│   │   ├── Tenants/     # Tenant management
+│   │   ├── Users/       # User management
+│   │   ├── Roles/       # Role & permissions
+│   │   ├── AuditLogs/   # Audit log viewer
+│   │   ├── Payments/    # Subscription payments
+│   │   ├── Monitoring/  # System monitoring
+│   │   └── Settings/    # System settings
+│   ├── Auth/           # Login, Register, Reset Password
+│   ├── Dashboard/      # Main dashboard with KPIs
 │   ├── Welcome.vue     # Landing page
 │   ├── Materials/      # Bahan baku CRUD
 │   ├── MaterialTypes/  # Jenis bahan CRUD
@@ -107,8 +119,10 @@ resources/js/
 │   ├── Customers/      # Customer CRUD
 │   ├── SalesOrders/    # Sales orders CRUD
 │   ├── Staff/          # Staff management
+│   ├── Settings/       # App settings & Telegram
 │   └── Reports/        # Material, Inventory, Sales, Production reports
 ├── actions/            # Wayfinder generated routes
+├── routes/             # Wayfinder named routes
 ├── types/              # TypeScript types
 └── lib/                # Utilities & helpers
 ```
@@ -121,26 +135,53 @@ resources/js/
 app/
 ├── Http/
 │   ├── Controllers/           # Request handlers
+│   │   ├── Admin/             # Admin panel controllers
+│   │   │   ├── AdminDashboardController.php
+│   │   │   ├── AdminTenantController.php
+│   │   │   ├── AdminUserController.php
+│   │   │   ├── AdminRoleController.php
+│   │   │   ├── AdminAuditLogController.php
+│   │   │   ├── AdminPaymentController.php
+│   │   │   ├── AdminMonitoringController.php
+│   │   │   └── AdminSettingController.php
+│   │   ├── Api/               # API controllers
+│   │   │   └── TelegramWebhookController.php
+│   │   ├── Auth/              # Authentication controllers
+│   │   ├── AssistantController.php    # AI Assistant
 │   │   ├── MaterialController.php
-│   │   ├── CuttingController.php
-│   │   ├── ProductionController.php
-│   │   ├── InventoryController.php
-│   │   └── SalesController.php
+│   │   ├── PreparationOrderController.php
+│   │   ├── ProductionOrderController.php
+│   │   ├── InventoryItemController.php
+│   │   ├── SalesOrderController.php
+│   │   ├── ReportController.php
+│   │   ├── TelegramController.php
+│   │   └── SubscriptionController.php
 │   ├── Requests/              # Form validation
 │   └── Middleware/            # Request filtering
 ├── Services/                  # Business logic
-│   ├── MaterialService.php
-│   ├── CuttingService.php
-│   ├── ProductionService.php
+│   ├── Assistant/             # AI Assistant services
+│   │   ├── AssistantService.php
+│   │   ├── ConversationManager.php
+│   │   └── OpenAIClient.php
+│   ├── Telegram/              # Telegram services
+│   │   └── TelegramNotificationService.php
 │   ├── InventoryService.php
-│   ├── SalesService.php
-│   └── ReportService.php
-├── Models/                    # Eloquent models
+│   ├── MaterialStockService.php
+│   └── ProductionService.php
+├── Models/                    # Eloquent models (28 models)
 ├── Policies/                  # Authorization
 ├── Events/                    # Domain events
 ├── Listeners/                 # Event handlers
 ├── Jobs/                      # Async tasks
-└── Observers/                 # Model observers
+├── Mail/                      # Mailable classes
+├── Notifications/             # Custom notifications
+├── Exports/                   # Excel exports
+├── Observers/                 # Model observers
+└── Console/Commands/          # Artisan commands
+    ├── RecalculateMaterialStock.php
+    ├── ResetDemoData.php
+    ├── SendTrialReminders.php
+    └── TelegramSetupWebhook.php
 ```
 
 ### 3. Database Architecture
