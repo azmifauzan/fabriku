@@ -44,6 +44,17 @@ const hasMessages = computed(() => messages.value.length > 0);
 const canSend = computed(() => inputMessage.value.trim().length > 0 && !isSending.value);
 const remainingMessages = computed(() => usage.value?.remaining ?? 0);
 
+// Get CSRF token from cookie (more reliable than meta tag)
+const getCsrfToken = (): string => {
+    // Try XSRF-TOKEN cookie first (Laravel's encrypted cookie)
+    const xsrfMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+    if (xsrfMatch) {
+        return decodeURIComponent(xsrfMatch[1]);
+    }
+    // Fallback to meta tag
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+};
+
 // Scroll to bottom of messages
 const scrollToBottom = () => {
     nextTick(() => {
@@ -119,18 +130,15 @@ const sendMessage = async (content?: string) => {
     scrollToBottom();
     
     try {
-        // Get CSRF token
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-        
         const response = await fetch('/assistant/message', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': csrfToken,
+                'X-XSRF-TOKEN': getCsrfToken(),
             },
-            credentials: 'same-origin',
+            credentials: 'include',
             body: JSON.stringify({ message: messageContent }),
         });
         
@@ -185,17 +193,15 @@ const clearConversation = async () => {
     if (!confirm('Hapus semua riwayat percakapan?')) return;
     
     try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-        
         const response = await fetch('/assistant/clear', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': csrfToken,
+                'X-XSRF-TOKEN': getCsrfToken(),
             },
-            credentials: 'same-origin',
+            credentials: 'include',
         });
         
         if (response.ok) {

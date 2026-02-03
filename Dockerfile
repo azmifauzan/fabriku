@@ -1,75 +1,140 @@
-FROM php:8.4-apache
+# ============================================
+# Stage 1: Build PHP dependencies
+# ============================================
+FROM php:8.4-cli AS composer-builder
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
+# Install GD and ZIP dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
-    libonig-dev \
-    libxml2-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     libzip-dev \
-    libpq-dev \
-    zip \
-    unzip \
-    supervisor \
-    cron \
-    nano \
-    ca-certificates \
-    netcat-openbsd \
-    tzdata \
-    gnupg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd zip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
+WORKDIR /app
+
+# Copy composer files
+COPY composer*.json composer.lock ./
+
+# Install dependencies (with cache mount)
+RUN --mount=type=cache,target=/tmp/cache \
+    --mount=from=composer:2,src=/usr/bin/composer,target=/usr/bin/composer \
+    composer install --prefer-dist --no-interaction --optimize-autoloader --no-dev --no-scripts
+
+# ============================================
+# Stage 2: Build Node.js assets (requires PHP for Wayfinder)
+# ============================================
+FROM php:8.4-cli AS node-builder
+
+# Install Node.js and SQLite for Wayfinder
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nodejs \
+    npm \
+    libsqlite3-dev \
+    && docker-php-ext-install pdo_sqlite \
+    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install npm dependencies
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --prefer-offline --no-audit
+
+# Copy vendor for Wayfinder
+COPY --from=composer-builder /app/vendor ./vendor
+
+# Copy application files needed for build
+COPY artisan composer.json ./
+COPY app ./app
+COPY bootstrap ./bootstrap
+COPY config ./config
+COPY routes ./routes
+COPY database ./database
+COPY resources ./resources
+COPY public ./public
+COPY vite.config.ts tsconfig.json .env.example ./
+COPY storage ./storage
+
+# Create .env for artisan commands and generate Wayfinder types before build
+RUN cp .env.example .env && php artisan key:generate \
+    && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views \
+    && touch database/database.sqlite \
+    && php artisan wayfinder:generate --with-form \
+    && npm run build
+
+# ============================================
+# Stage 3: Final production image
+# ============================================
+FROM php:8.4-apache
+
+# Install only runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    supervisor \
+    cron \
+    netcat-openbsd \
+    tzdata \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Install PHP extensions (will install required libraries automatically)
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN install-php-extensions pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip redis @composer
+RUN install-php-extensions pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip redis \
+    && rm -f /usr/local/bin/install-php-extensions
+
+# Copy composer binary from official image
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 ENV TZ="Asia/Jakarta"
 
-# Enable Apache modules and set document root to public
+# Enable Apache modules and set document root
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN a2enmod rewrite headers \
   && sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/*.conf \
   && sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-COPY docker/supervisord.conf /etc/supervisor/supervisord.conf
-
 # Configure PHP upload limits
-RUN echo "upload_max_filesize = 20M" >> /usr/local/etc/php/conf.d/uploads.ini \
-  && echo "post_max_size = 20M" >> /usr/local/etc/php/conf.d/uploads.ini \
-  && echo "max_execution_time = 300" >> /usr/local/etc/php/conf.d/uploads.ini \
-  && echo "max_input_time = 300" >> /usr/local/etc/php/conf.d/uploads.ini \
-  && echo "memory_limit = 256M" >> /usr/local/etc/php/conf.d/uploads.ini
+RUN { \
+        echo "upload_max_filesize = 20M"; \
+        echo "post_max_size = 20M"; \
+        echo "max_execution_time = 300"; \
+        echo "max_input_time = 300"; \
+        echo "memory_limit = 256M"; \
+    } > /usr/local/etc/php/conf.d/uploads.ini
 
-# Create working dir
 WORKDIR /var/www/html
 
-# Copy application files
-COPY . .
-RUN mv .env.example .env
-
-# Copy entrypoint script and health check
+# Copy configuration files
+COPY docker/supervisord.conf /etc/supervisor/supervisord.conf
 COPY docker/app-entrypoint.sh /usr/local/bin/app-entrypoint.sh
 COPY docker/health-check.sh /usr/local/bin/health-check.sh
-RUN chmod +x /usr/local/bin/app-entrypoint.sh /usr/local/bin/health-check.sh || true
+RUN chmod +x /usr/local/bin/app-entrypoint.sh /usr/local/bin/health-check.sh
 
-# Ensure storage and cache directories exist and set permissions
-RUN mkdir -p storage/app/public storage/app/public/uploads/user_photos storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache public \
-  && chown -R www-data:www-data storage bootstrap/cache public || true
+# Copy application files (leverage .dockerignore)
+COPY --chown=www-data:www-data . .
 
-# Install Node.js and npm
-RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
-    && apt-get install -y nodejs \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Copy built assets from node-builder
+COPY --from=node-builder --chown=www-data:www-data /app/public/build ./public/build
 
-RUN composer install --prefer-dist --no-interaction --optimize-autoloader --no-dev
-RUN php artisan key:generate --force
-RUN npm install
-RUN npm run build
-RUN npm prune --production
-RUN php artisan storage:link || true
+# Copy vendor from composer-builder
+COPY --from=composer-builder --chown=www-data:www-data /app/vendor ./vendor
+
+# Setup environment and directories
+RUN mv .env.example .env \
+    && mkdir -p storage/app/public storage/app/public/uploads/user_photos \
+                storage/framework/cache storage/framework/sessions storage/framework/views \
+                storage/logs bootstrap/cache public \
+    && chown -R www-data:www-data storage bootstrap/cache public \
+    && php artisan key:generate --force \
+    && php artisan storage:link || true
 
 # Setup cron for Laravel scheduler
 RUN echo "* * * * * cd /var/www/html && /usr/local/bin/php artisan schedule:run >> /var/log/cron.log 2>&1" > /etc/cron.d/laravel-scheduler \
@@ -83,10 +148,9 @@ VOLUME ["/var/www/html/storage/app/public"]
 
 EXPOSE 80
 
-# Add health check
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD /usr/local/bin/health-check.sh
 
-# Use entrypoint to run setup tasks then start apache
 ENTRYPOINT ["app-entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
