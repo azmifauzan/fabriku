@@ -12,16 +12,7 @@ Artisan::command('inspire', function () {
 // Schedule demo data reset every hour
 Schedule::command('demo:reset')
     ->hourly()
-    ->withoutOverlapping()
-    ->onSuccess(function () {
-        Log::info('Scheduled demo:reset completed successfully');
-    })
-    ->onFailure(function () {
-        Log::error('Scheduled demo:reset failed');
-    })
-    ->before(function () {
-        Log::info('Starting scheduled demo:reset');
-    });
+    ->withoutOverlapping();
 
 // Send trial reminder emails daily at 9 AM
 Schedule::command('trial:send-reminders')
