@@ -42,7 +42,14 @@ class TelegramService
         ], $options);
 
         try {
-            $response = Http::post("{$this->apiBaseUrl}/sendMessage", $params);
+            $http = Http::timeout(30);
+
+            // Disable SSL verification in local development
+            if (config('app.env') === 'local') {
+                $http = $http->withOptions(['verify' => false]);
+            }
+
+            $response = $http->post("{$this->apiBaseUrl}/sendMessage", $params);
 
             if ($response->successful()) {
                 return [
@@ -106,7 +113,13 @@ class TelegramService
         }
 
         try {
-            $response = Http::post("{$this->apiBaseUrl}/setWebhook", $params);
+            $http = Http::timeout(30);
+
+            if (config('app.env') === 'local') {
+                $http = $http->withOptions(['verify' => false]);
+            }
+
+            $response = $http->post("{$this->apiBaseUrl}/setWebhook", $params);
 
             if ($response->successful() && $response->json('ok')) {
                 return ['success' => true, 'webhook_url' => $webhookUrl];
@@ -131,7 +144,13 @@ class TelegramService
         }
 
         try {
-            $response = Http::post("{$this->apiBaseUrl}/deleteWebhook");
+            $http = Http::timeout(30);
+
+            if (config('app.env') === 'local') {
+                $http = $http->withOptions(['verify' => false]);
+            }
+
+            $response = $http->post("{$this->apiBaseUrl}/deleteWebhook");
 
             return [
                 'success' => $response->successful() && $response->json('ok'),
@@ -151,7 +170,13 @@ class TelegramService
         }
 
         try {
-            $response = Http::get("{$this->apiBaseUrl}/getWebhookInfo");
+            $http = Http::timeout(30);
+
+            if (config('app.env') === 'local') {
+                $http = $http->withOptions(['verify' => false]);
+            }
+
+            $response = $http->get("{$this->apiBaseUrl}/getWebhookInfo");
 
             if ($response->successful()) {
                 return ['success' => true, 'info' => $response->json('result')];
