@@ -23,7 +23,7 @@ class EmailVerificationController extends Controller
     /**
      * Handle email verification.
      */
-    public function verify(EmailVerificationRequest $request): RedirectResponse
+    public function verify(EmailVerificationRequest $request): Response|RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
             return redirect()->route('dashboard');
@@ -33,7 +33,12 @@ class EmailVerificationController extends Controller
             event(new Verified($request->user()));
         }
 
-        return redirect()->route('dashboard')->with('success', 'Email Anda telah berhasil diverifikasi!');
+        // Logout the user after verification so they can login fresh
+        auth()->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return Inertia::render('Auth/EmailVerified');
     }
 
     /**

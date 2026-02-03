@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Scopes\TenantScope;
+use App\Models\Traits\HasAuditLogs;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MaterialReceipt extends Model
 {
-    use HasFactory;
+    use HasAuditLogs, HasFactory;
 
     protected $fillable = [
         'tenant_id',

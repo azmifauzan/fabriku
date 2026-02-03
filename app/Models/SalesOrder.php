@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Scopes\TenantScope;
+use App\Models\Traits\HasAuditLogs;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SalesOrder extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasAuditLogs, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
