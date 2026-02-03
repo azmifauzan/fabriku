@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useDarkMode } from '@/composables/useDarkMode';
 import { Link, usePage } from '@inertiajs/vue3';
-import { AlertCircle, ArrowUpCircle, Clock, LogOut, Menu, Moon, Sun, User } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { AlertCircle, ArrowUpCircle, ChevronDown, Clock, LogOut, Menu, MessageCircle, Moon, Settings, Sun, User } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 defineProps<{
     user: {
@@ -17,6 +17,7 @@ const emit = defineEmits<{
 }>();
 
 const { isDark, toggleDark } = useDarkMode();
+const userMenuOpen = ref(false);
 
 const page = usePage();
 const tenant = computed(() => page.props.tenant as any);
@@ -132,41 +133,97 @@ const isExpired = computed(() => {
                 </button>
 
                 <!-- User Info - Desktop -->
-                <div v-if="user" class="hidden items-center gap-3 sm:flex">
-                    <div class="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-1.5 dark:bg-gray-700">
+                <div v-if="user" class="relative hidden sm:flex">
+                    <button
+                        @click="userMenuOpen = !userMenuOpen"
+                        class="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-1.5 transition-colors hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600"
+                    >
                         <User :size="16" class="text-gray-500 dark:text-gray-400" />
-                        <div class="flex flex-col">
+                        <div class="flex flex-col text-left">
                             <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ user.name }}</span>
                             <span class="text-xs text-gray-500 dark:text-gray-400">{{ user.role }}</span>
                         </div>
-                    </div>
+                        <ChevronDown :size="16" class="text-gray-400 transition-transform" :class="{ 'rotate-180': userMenuOpen }" />
+                    </button>
 
-                    <!-- Logout -->
-                    <Link
-                        href="/logout"
-                        method="post"
-                        as="button"
-                        class="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-                        aria-label="Logout"
+                    <!-- Dropdown Menu -->
+                    <div 
+                        v-show="userMenuOpen" 
+                        @click.away="userMenuOpen = false"
+                        class="absolute right-0 top-full mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800"
                     >
-                        <LogOut :size="20" />
-                    </Link>
+                        <div class="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ user.name }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ user.role }}</p>
+                        </div>
+                        
+                        <Link
+                            href="/settings/telegram"
+                            class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                            @click="userMenuOpen = false"
+                        >
+                            <MessageCircle :size="16" class="text-indigo-500" />
+                            <span>Hubungkan Telegram</span>
+                        </Link>
+                        
+                        <div class="border-t border-gray-200 dark:border-gray-700">
+                            <Link
+                                href="/logout"
+                                method="post"
+                                as="button"
+                                class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                                @click="userMenuOpen = false"
+                            >
+                                <LogOut :size="16" />
+                                <span>Logout</span>
+                            </Link>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- User Info - Mobile (Icon Only) -->
-                <div v-if="user" class="flex items-center gap-2 sm:hidden">
-                    <button class="rounded-lg bg-gray-50 p-2 dark:bg-gray-700" aria-label="User menu">
+                <div v-if="user" class="relative flex items-center gap-2 sm:hidden">
+                    <button 
+                        @click="userMenuOpen = !userMenuOpen"
+                        class="rounded-lg bg-gray-50 p-2 dark:bg-gray-700" 
+                        aria-label="User menu"
+                    >
                         <User :size="18" class="text-gray-600 dark:text-gray-300" />
                     </button>
-                    <Link
-                        href="/logout"
-                        method="post"
-                        as="button"
-                        class="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-                        aria-label="Logout"
+                    
+                    <!-- Mobile Dropdown Menu -->
+                    <div 
+                        v-show="userMenuOpen" 
+                        @click.away="userMenuOpen = false"
+                        class="absolute right-0 top-full mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800"
                     >
-                        <LogOut :size="18" />
-                    </Link>
+                        <div class="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ user.name }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ user.role }}</p>
+                        </div>
+                        
+                        <Link
+                            href="/settings/telegram"
+                            class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                            @click="userMenuOpen = false"
+                        >
+                            <MessageCircle :size="16" class="text-indigo-500" />
+                            <span>Hubungkan Telegram</span>
+                        </Link>
+                        
+                        <div class="border-t border-gray-200 dark:border-gray-700">
+                            <Link
+                                href="/logout"
+                                method="post"
+                                as="button"
+                                class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                                @click="userMenuOpen = false"
+                            >
+                                <LogOut :size="16" />
+                                <span>Logout</span>
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

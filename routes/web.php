@@ -65,6 +65,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Audit Logs
         Route::get('audit-logs', [\App\Http\Controllers\Admin\AdminAuditLogController::class, 'index'])->name('audit-logs.index');
         Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AdminAuditLogController::class, 'show'])->name('audit-logs.show');
+
+        // Monitoring
+        Route::get('monitoring', [\App\Http\Controllers\Admin\AdminMonitoringController::class, 'index'])->name('monitoring.index');
+        Route::post('monitoring/jobs/{uuid}/retry', [\App\Http\Controllers\Admin\AdminMonitoringController::class, 'retryJob'])->name('monitoring.jobs.retry');
+        Route::delete('monitoring/jobs/{uuid}', [\App\Http\Controllers\Admin\AdminMonitoringController::class, 'deleteJob'])->name('monitoring.jobs.delete');
+        Route::post('monitoring/jobs/retry-all', [\App\Http\Controllers\Admin\AdminMonitoringController::class, 'retryAllJobs'])->name('monitoring.jobs.retry-all');
+        Route::post('monitoring/jobs/flush', [\App\Http\Controllers\Admin\AdminMonitoringController::class, 'flushJobs'])->name('monitoring.jobs.flush');
+        Route::post('monitoring/run-command', [\App\Http\Controllers\Admin\AdminMonitoringController::class, 'runCommand'])->name('monitoring.run-command');
+        Route::post('monitoring/test-telegram', [\App\Http\Controllers\Admin\AdminMonitoringController::class, 'testTelegram'])->name('monitoring.test-telegram');
     });
 });
 
@@ -177,5 +186,17 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
         Route::post('clear', [\App\Http\Controllers\AssistantController::class, 'clearHistory'])->name('clear');
         Route::get('usage', [\App\Http\Controllers\AssistantController::class, 'getUsage'])->name('usage');
         Route::get('status', [\App\Http\Controllers\AssistantController::class, 'getStatus'])->name('status');
+    });
+
+    // Telegram Integration
+    Route::prefix('telegram')->name('telegram.')->group(function () {
+        Route::post('generate-token', [\App\Http\Controllers\TelegramController::class, 'generateToken'])->name('generate-token');
+        Route::post('disconnect', [\App\Http\Controllers\TelegramController::class, 'disconnect'])->name('disconnect');
+        Route::post('test', [\App\Http\Controllers\TelegramController::class, 'testMessage'])->name('test');
+    });
+
+    // Settings
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('telegram', [\App\Http\Controllers\TelegramController::class, 'index'])->name('telegram');
     });
 });

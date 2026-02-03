@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Scopes\TenantScope;
+use App\Models\Traits\HasAuditLogs;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockAdjustment extends Model
 {
-    use HasFactory;
+    use HasAuditLogs, HasFactory;
 
     // Adjustment types
     public const TYPE_OPENING_BALANCE = 'opening_balance';

@@ -2,23 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PaymentProofUploaded;
+use App\Models\SubscriptionPayment;
+use App\Models\SystemSetting;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
 class SubscriptionController extends Controller
 {
     public function index()
     {
         $tenant = auth()->user()->tenant;
-        $settings = \App\Models\SystemSetting::getAllForTenant(null);
+        $settings = SystemSetting::getAllForTenant(null);
 
-        $pendingPayment = \App\Models\SubscriptionPayment::where('tenant_id', $tenant->id)
+        $pendingPayment = SubscriptionPayment::where('tenant_id', $tenant->id)
             ->where('status', 'pending')
             ->latest()
             ->first();
 
-        $history = \App\Models\SubscriptionPayment::where('tenant_id', $tenant->id)
+        $history = SubscriptionPayment::where('tenant_id', $tenant->id)
             ->latest()
             ->get();
 
-        return \Inertia\Inertia::render('Dashboard/Subscription/Index', [
+        return Inertia::render('Dashboard/Subscription/Index', [
             'tenant' => $tenant,
             'settings' => $settings,
             'pendingPayment' => $pendingPayment,
@@ -27,7 +33,7 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    public function store(\Illuminate\Http\Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'plan_type' => 'required|in:monthly,yearly',
@@ -38,7 +44,7 @@ class SubscriptionController extends Controller
         $tenantId = auth()->user()->tenant_id;
         $path = $request->file('proof')->store("tenants/{$tenantId}/payment-proofs", 'fabriku_s3');
 
-        \App\Models\SubscriptionPayment::create([
+        $payment = SubscriptionPayment::create([
             'tenant_id' => $tenantId,
             'amount' => $request->amount,
             'proof_path' => $path,
@@ -46,6 +52,9 @@ class SubscriptionController extends Controller
             'plan_type' => $request->plan_type,
             'duration_months' => $request->plan_type === 'yearly' ? 12 : 1,
         ]);
+
+        // Notify admin via Telegram
+        event(new PaymentProofUploaded($payment));
 
         return redirect()->back()->with('success', 'Bukti pembayaran berhasil diupload. Mohon tunggu verifikasi admin.');
     }
