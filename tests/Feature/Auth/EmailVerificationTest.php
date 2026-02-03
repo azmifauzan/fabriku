@@ -31,7 +31,8 @@ test('email can be verified', function () {
     );
 
     get($verificationUrl)
-        ->assertRedirect(route('dashboard'));
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page->component('Auth/EmailVerified'));
 
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
 

@@ -12,7 +12,8 @@ import {
     X,
     ChevronDown,
     CreditCard,
-    Settings
+    Settings,
+    Activity
 } from 'lucide-vue-next'
 
 const page = usePage()
@@ -28,6 +29,7 @@ const navigation = [
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Roles', href: '/admin/roles', icon: Shield },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
+    { name: 'Monitoring', href: '/admin/monitoring', icon: Activity },
     { name: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
 ]
 

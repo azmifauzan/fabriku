@@ -24,14 +24,12 @@ test('verify email notification has correct indonesian content', function () {
         'email_verified_at' => null,
     ]);
 
-    $notification = new VerifyEmailNotification();
+    $notification = new VerifyEmailNotification;
     $mailMessage = $notification->toMail($user);
 
     expect($mailMessage->subject)->toBe('Verifikasi Alamat Email Anda')
-        ->and($mailMessage->greeting)->toContain('Halo John Doe')
-        ->and($mailMessage->introLines)->toContain('Terima kasih telah mendaftar di Fabriku.')
-        ->and($mailMessage->actionText)->toBe('Verifikasi Email')
-        ->and($mailMessage->salutation)->toBe('Salam, Tim Fabriku');
+        ->and($mailMessage->view)->toBe('emails.verify')
+        ->and($mailMessage->viewData['user']->name)->toBe('John Doe');
 });
 
 test('user receives custom password reset notification', function () {
