@@ -19,25 +19,25 @@ class InventoryItemFactory extends Factory
      */
     public function definition(): array
     {
-        $targetQuantity = $this->faker->numberBetween(50, 500);
-        $currentStock = $this->faker->numberBetween(0, $targetQuantity);
-        $reservedStock = $this->faker->numberBetween(0, min($currentStock, 50));
+        $targetQuantity = fake()->numberBetween(50, 500);
+        $currentStock = fake()->numberBetween(0, $targetQuantity);
+        $reservedStock = fake()->numberBetween(0, min($currentStock, 50));
 
         return [
             'tenant_id' => Tenant::factory(),
-            'sku' => $this->faker->unique()->regexify('[A-Z]{2}[0-9]{6}'),
+            'sku' => fake()->unique()->regexify('[A-Z]{2}[0-9]{6}'),
             'production_order_id' => ProductionOrder::factory(),
             'location_id' => InventoryLocation::factory(),
-            'product_name' => $this->faker->words(3, true),
-            'product_code' => $this->faker->optional()->bothify('PRD-###'),
+            'product_name' => fake()->words(3, true),
+            'product_code' => fake()->optional()->bothify('PRD-###'),
             'target_quantity' => $targetQuantity,
             'current_quantity' => $currentStock,
             'reserved_quantity' => $reservedStock,
-            'quality_grade' => $this->faker->randomElement(['A', 'B', 'Reject']),
-            'unit_cost' => $this->faker->randomFloat(2, 1, 100),
-            'selling_price' => $this->faker->randomFloat(2, 10, 200),
-            'expired_date' => $this->faker->optional(0.3)->dateTimeBetween('now', '+1 year'),
-            'notes' => $this->faker->optional(0.4)->sentence(),
+            'quality_grade' => fake()->randomElement(['A', 'B', 'Reject']),
+            'unit_cost' => fake()->randomFloat(2, 1, 100),
+            'selling_price' => fake()->randomFloat(2, 10, 200),
+            'expired_date' => fake()->optional(0.3)->dateTimeBetween('now', '+1 year'),
+            'notes' => fake()->optional(0.4)->sentence(),
         ];
     }
 
@@ -50,7 +50,7 @@ class InventoryItemFactory extends Factory
             $targetQuantity = $attributes['target_quantity'] ?? 100;
 
             return [
-                'current_quantity' => $this->faker->numberBetween(0, (int) ($targetQuantity * 0.1)),
+                'current_quantity' => fake()->numberBetween(0, (int) ($targetQuantity * 0.1)),
                 'reserved_quantity' => 0,
             ];
         });
@@ -73,8 +73,8 @@ class InventoryItemFactory extends Factory
     public function highStock(): static
     {
         return $this->state([
-            'current_quantity' => $this->faker->numberBetween(1000, 5000),
-            'reserved_quantity' => $this->faker->numberBetween(0, 100),
+            'current_quantity' => fake()->numberBetween(1000, 5000),
+            'reserved_quantity' => fake()->numberBetween(0, 100),
         ]);
     }
 
@@ -85,8 +85,8 @@ class InventoryItemFactory extends Factory
     {
         return $this->state([
             'quality_grade' => 'A',
-            'unit_cost' => $this->faker->randomFloat(2, 50, 100),
-            'selling_price' => $this->faker->randomFloat(2, 100, 200),
+            'unit_cost' => fake()->randomFloat(2, 50, 100),
+            'selling_price' => fake()->randomFloat(2, 100, 200),
         ]);
     }
 
@@ -97,8 +97,8 @@ class InventoryItemFactory extends Factory
     {
         return $this->state([
             'quality_grade' => 'B',
-            'unit_cost' => $this->faker->randomFloat(2, 30, 70),
-            'selling_price' => $this->faker->randomFloat(2, 60, 140),
+            'unit_cost' => fake()->randomFloat(2, 30, 70),
+            'selling_price' => fake()->randomFloat(2, 60, 140),
         ]);
     }
 
@@ -109,9 +109,9 @@ class InventoryItemFactory extends Factory
     {
         return $this->state([
             'quality_grade' => 'Reject',
-            'unit_cost' => $this->faker->randomFloat(2, 10, 30),
-            'selling_price' => $this->faker->randomFloat(2, 1, 20),
-            'notes' => 'Reject quality - '.$this->faker->sentence(),
+            'unit_cost' => fake()->randomFloat(2, 10, 30),
+            'selling_price' => fake()->randomFloat(2, 1, 20),
+            'notes' => 'Reject quality - '.fake()->sentence(),
         ]);
     }
 
@@ -124,7 +124,7 @@ class InventoryItemFactory extends Factory
             $currentQuantity = $attributes['current_quantity'] ?? 100;
 
             return [
-                'reserved_quantity' => $this->faker->numberBetween(1, (int) $currentQuantity),
+                'reserved_quantity' => fake()->numberBetween(1, (int) $currentQuantity),
             ];
         });
     }

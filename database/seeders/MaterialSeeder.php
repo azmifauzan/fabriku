@@ -11,7 +11,7 @@ use Illuminate\Database\Seeder;
 
 class MaterialSeeder extends Seeder
 {
-    public function run(Tenant $tenant = null, User $user = null): void
+    public function run(?Tenant $tenant = null, ?User $user = null): void
     {
         if (! $tenant) {
             $tenant = Tenant::where('slug', 'demo')->first();
@@ -21,6 +21,7 @@ class MaterialSeeder extends Seeder
             if ($this->command) {
                 $this->command->warn('Tenant not found for MaterialSeeder.');
             }
+
             return;
         }
 
@@ -30,11 +31,12 @@ class MaterialSeeder extends Seeder
         }
 
         if (! $user) {
-             // Fallback or skip if no user found (though unlikely if tenant exists)
-             if ($this->command) {
-                 $this->command->warn('No user found for receipts.');
-             }
-             return;
+            // Fallback or skip if no user found (though unlikely if tenant exists)
+            if ($this->command) {
+                $this->command->warn('No user found for receipts.');
+            }
+
+            return;
         }
 
         // Create materials
@@ -87,20 +89,19 @@ class MaterialSeeder extends Seeder
             $materialType = MaterialType::where('tenant_id', $tenant->id)
                 ->where('code', $typeCode)
                 ->first();
-            
+
             // If type not found, try to find by name or default
-            if (!$materialType) {
-                 // Try to seed or fallback
-                 $materialType = MaterialType::firstOrCreate(
+            if (! $materialType) {
+                // Try to seed or fallback
+                $materialType = MaterialType::firstOrCreate(
                     ['tenant_id' => $tenant->id, 'code' => $typeCode],
                     ['name' => ucfirst($typeCode), 'unit' => $materialData['unit'] ?? 'pcs']
-                 );
+                );
             }
 
             // Map fields
             $createData = [
                 'tenant_id' => $tenant->id,
-                'is_active' => true,
                 'material_type_id' => $materialType->id,
                 'code' => $materialData['code'],
                 'name' => $materialData['name'],

@@ -18,12 +18,12 @@ class CustomerFactory extends Factory
     {
         return [
             'tenant_id' => 1,
-            'code' => $this->faker->unique()->numerify('CUST-####'),
-            'name' => $this->faker->company(),
-            'phone' => $this->faker->phoneNumber(),
-            'email' => $this->faker->optional()->safeEmail(),
-            'address' => $this->faker->optional()->address(),
-            'notes' => $this->faker->optional()->sentence(),
+            'code' => fake()->unique()->numerify('CUST-####'),
+            'name' => fake()->company(),
+            'phone' => fake()->phoneNumber(),
+            'email' => fake()->optional()->safeEmail(),
+            'address' => fake()->optional()->address(),
+            'notes' => fake()->optional()->sentence(),
         ];
     }
 }

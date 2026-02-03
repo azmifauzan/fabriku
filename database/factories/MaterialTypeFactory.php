@@ -25,14 +25,14 @@ class MaterialTypeFactory extends Factory
             ['name' => 'Mentega', 'code' => 'MENTEGA', 'unit' => 'kg'],
         ];
 
-        $type = $this->faker->randomElement($types);
+        $type = fake()->randomElement($types);
 
         return [
             'tenant_id' => \App\Models\Tenant::factory(),
             'name' => $type['name'],
-            'code' => strtoupper($this->faker->unique()->lexify($type['code'].'-???')),
+            'code' => strtoupper(fake()->unique()->lexify($type['code'].'-???')),
             'unit' => $type['unit'],
-            'description' => $this->faker->optional()->sentence(),
+            'description' => fake()->optional()->sentence(),
         ];
     }
 }

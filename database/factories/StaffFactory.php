@@ -18,11 +18,11 @@ class StaffFactory extends Factory
     {
         return [
             'tenant_id' => \App\Models\Tenant::factory(),
-            'code' => $this->faker->unique()->numerify('STF-###'),
-            'name' => $this->faker->name(),
-            'position' => $this->faker->randomElement(['production', 'quality_control', 'packaging', 'warehouse', 'supervisor']),
-            'phone' => $this->faker->phoneNumber(),
-            'email' => $this->faker->unique()->safeEmail(),
+            'code' => fake()->unique()->numerify('STF-###'),
+            'name' => fake()->name(),
+            'position' => fake()->randomElement(['production', 'quality_control', 'packaging', 'warehouse', 'supervisor']),
+            'phone' => fake()->phoneNumber(),
+            'email' => fake()->unique()->safeEmail(),
             'is_active' => true,
         ];
     }

@@ -10,20 +10,20 @@ class ProductionBatchFactory extends Factory
 {
     public function definition(): array
     {
-        $received = $this->faker->numberBetween(50, 200);
-        $qualityRate = $this->faker->randomFloat(2, 85, 98); // 85-98% quality rate
+        $received = fake()->numberBetween(50, 200);
+        $qualityRate = fake()->randomFloat(2, 85, 98); // 85-98% quality rate
         $good = (int) ($received * $qualityRate / 100);
-        $defect = $this->faker->numberBetween(0, (int) ($received * 0.1));
+        $defect = fake()->numberBetween(0, (int) ($received * 0.1));
         $reject = $received - $good - $defect;
 
         $grades = ['A', 'B', 'C', 'reject'];
-        $grade = $this->faker->randomElement($grades);
+        $grade = fake()->randomElement($grades);
 
-        $productionDate = $this->faker->dateTimeBetween('-2 weeks', '-1 day');
-        $receivedDate = $this->faker->dateTimeBetween($productionDate, 'now');
+        $productionDate = fake()->dateTimeBetween('-2 weeks', '-1 day');
+        $receivedDate = fake()->dateTimeBetween($productionDate, 'now');
 
         // For food products, add expiry date
-        $expiryDate = $this->faker->optional(0.3)->dateTimeBetween($receivedDate, '+30 days');
+        $expiryDate = fake()->optional(0.3)->dateTimeBetween($receivedDate, '+30 days');
 
         return [
             'tenant_id' => Tenant::factory(),
@@ -33,18 +33,18 @@ class ProductionBatchFactory extends Factory
             'quantity_defect' => max(0, $defect),
             'quantity_reject' => max(0, $reject),
             'grade' => $grade,
-            'labor_cost_actual' => $this->faker->optional(0.7)->randomFloat(2, 50000, 500000),
-            'production_cost' => $this->faker->optional(0.8)->randomFloat(2, 100000, 1000000),
+            'labor_cost_actual' => fake()->optional(0.7)->randomFloat(2, 50000, 500000),
+            'production_cost' => fake()->optional(0.8)->randomFloat(2, 100000, 1000000),
             'production_date' => $productionDate,
             'received_date' => $receivedDate,
             'expiry_date' => $expiryDate,
-            'qc_notes' => $this->faker->optional(0.4)->sentence(),
-            'defect_reasons' => $this->faker->optional(0.3)->sentence(),
-            'qc_checklist' => $this->faker->optional(0.2)->randomElements([
-                'color_check' => $this->faker->boolean(),
-                'size_check' => $this->faker->boolean(),
-                'stitching_quality' => $this->faker->boolean(),
-                'packaging_check' => $this->faker->boolean(),
+            'qc_notes' => fake()->optional(0.4)->sentence(),
+            'defect_reasons' => fake()->optional(0.3)->sentence(),
+            'qc_checklist' => fake()->optional(0.2)->randomElements([
+                'color_check' => fake()->boolean(),
+                'size_check' => fake()->boolean(),
+                'stitching_quality' => fake()->boolean(),
+                'packaging_check' => fake()->boolean(),
             ]),
         ];
     }
@@ -79,7 +79,7 @@ class ProductionBatchFactory extends Factory
     public function withExpiry(int $days = 30): self
     {
         return $this->state(fn (array $attributes) => [
-            'expiry_date' => $this->faker->dateTimeBetween($attributes['received_date'], "+{$days} days"),
+            'expiry_date' => fake()->dateTimeBetween($attributes['received_date'], "+{$days} days"),
         ]);
     }
 

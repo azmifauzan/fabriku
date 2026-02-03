@@ -20,19 +20,19 @@ class StockAdjustmentFactory extends Factory
      */
     public function definition(): array
     {
-        $quantityBefore = $this->faker->numberBetween(50, 200);
-        $adjustmentQuantity = $this->faker->numberBetween(-30, 50);
+        $quantityBefore = fake()->numberBetween(50, 200);
+        $adjustmentQuantity = fake()->numberBetween(-30, 50);
         $quantityAfter = max(0, $quantityBefore + $adjustmentQuantity);
 
         return [
             'tenant_id' => Tenant::factory(),
             'inventory_item_id' => InventoryItem::factory(),
-            'adjustment_type' => $this->faker->randomElement(StockAdjustment::getAdjustmentTypes()),
+            'adjustment_type' => fake()->randomElement(StockAdjustment::getAdjustmentTypes()),
             'quantity_before' => $quantityBefore,
             'quantity_after' => $quantityAfter,
             'adjustment_quantity' => $quantityAfter - $quantityBefore,
-            'reason' => $this->faker->sentence(),
-            'notes' => $this->faker->optional()->paragraph(),
+            'reason' => fake()->sentence(),
+            'notes' => fake()->optional()->paragraph(),
             'adjusted_by' => User::factory(),
         ];
     }
