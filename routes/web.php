@@ -144,6 +144,11 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
         Route::get('visualization', [\App\Http\Controllers\InventoryVisualizationController::class, 'index'])->name('visualization');
         Route::resource('locations', \App\Http\Controllers\InventoryLocationController::class);
 
+        // QR Code routes
+        Route::get('items/{item}/qrcode/print', [\App\Http\Controllers\InventoryItemController::class, 'printQrCode'])->name('items.qrcode.print');
+        Route::get('items/{item}/qrcode/generate', [\App\Http\Controllers\InventoryItemController::class, 'generateQrCode'])->name('items.qrcode.generate');
+        Route::post('items/scan-lookup', [\App\Http\Controllers\InventoryItemController::class, 'scanLookup'])->name('items.scan-lookup');
+
         // Stock adjustment routes (must be before resource to avoid conflicts)
         Route::post('items/{item}/adjust', [\App\Http\Controllers\InventoryItemController::class, 'adjustStock'])->name('items.adjust');
         Route::get('items/{item}/adjustments', [\App\Http\Controllers\InventoryItemController::class, 'adjustmentHistory'])->name('items.adjustments');

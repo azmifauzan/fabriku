@@ -10,6 +10,10 @@ use App\Models\Pattern;
 use App\Models\ProductionOrder;
 use App\Models\StockAdjustment;
 use App\Services\InventoryService;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -348,5 +352,51 @@ class InventoryItemController extends Controller
         // StockMovement::create([...]);
 
         return back()->with('success', 'Item berhasil dipindahkan.');
+    }
+
+    // QR Code features
+    public function printQrCode(InventoryItem $item)
+    {
+        $item->load(['inventoryLocation', 'productionOrder.preparationOrder.pattern']);
+
+        return Inertia::render('Inventory/Items/PrintQrCode', [
+            'item' => $item,
+        ]);
+    }
+
+    public function generateQrCode(InventoryItem $item)
+    {
+        // Generate QR code containing the item's SKU using BaconQrCode
+        $renderer = new ImageRenderer(
+            new RendererStyle(300),
+            new SvgImageBackEnd
+        );
+
+        $writer = new Writer($renderer);
+        $qrCode = $writer->writeString($item->sku);
+
+        return response($qrCode)
+            ->header('Content-Type', 'image/svg+xml');
+    }
+
+    public function scanLookup(Request $request)
+    {
+        $request->validate([
+            'sku' => 'required|string',
+        ]);
+
+        $item = InventoryItem::where('sku', $request->sku)->first();
+
+        if (! $item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Item dengan SKU tersebut tidak ditemukan.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'redirect_url' => route('inventory.items.show', $item),
+        ]);
     }
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useBusinessContext } from '@/composables/useBusinessContext';
 import AppLayout from '@/layouts/AppLayout.vue';
+import QrScanner from '@/components/QrScanner.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { AlertTriangle, Box, ClipboardList, Factory, Layers, Package, ShoppingCart, TrendingUp } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -154,8 +155,23 @@ const getStatusBadgeClass = (status: string) => {
                 <!-- Welcome Message -->
                 <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
                     <div class="p-6">
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Fabriku</h2>
-                        <p class="mt-1 text-gray-600 dark:text-gray-400">Ringkasan bisnis dan aktivitas terkini</p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Fabriku</h2>
+                                <p class="mt-1 text-gray-600 dark:text-gray-400">Ringkasan bisnis dan aktivitas terkini</p>
+                            </div>
+                            <QrScanner v-slot="{ startScanning }">
+                                <button
+                                    @click="startScanning"
+                                    class="inline-flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition-all hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                                >
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                    </svg>
+                                    Scan QR Code
+                                </button>
+                            </QrScanner>
+                        </div>
                     </div>
                 </div>
 
