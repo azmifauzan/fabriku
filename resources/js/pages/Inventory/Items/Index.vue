@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import QrScanner from '@/components/QrScanner.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Eye } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -100,7 +101,30 @@ const isLowStock = (item: Item) => {
                     description="Kelola barang jadi hasil produksi"
                     create-link="/inventory/items/create"
                     create-text="Tambah Item"
-                />
+                >
+                    <template #actions>
+                        <QrScanner v-slot="{ startScanning }">
+                            <button
+                                @click="startScanning"
+                                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                            >
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                </svg>
+                                Scan QR Code
+                            </button>
+                        </QrScanner>
+                        <Link
+                            href="/inventory/items/create"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-indigo-700 hover:shadow-md"
+                        >
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span class="whitespace-nowrap">Tambah Item</span>
+                        </Link>
+                    </template>
+                </PageHeader>
 
                 <!-- Filters -->
                 <div class="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -212,13 +236,24 @@ const isLowStock = (item: Item) => {
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap">
-                                        <Link
-                                            :href="`/inventory/items/${item.id}`"
-                                            class="inline-flex items-center justify-center rounded-lg p-2 text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
-                                            title="Lihat detail item"
-                                        >
-                                            <Eye :size="18" />
-                                        </Link>
+                                        <div class="flex items-center gap-2">
+                                            <Link
+                                                :href="`/inventory/items/${item.id}`"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+                                                title="Lihat detail item"
+                                            >
+                                                <Eye :size="18" />
+                                            </Link>
+                                            <Link
+                                                :href="`/inventory/items/${item.id}/qrcode/print`"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700"
+                                                title="Print QR Code"
+                                            >
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                                </svg>
+                                            </Link>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>

@@ -37,6 +37,22 @@ const isTrialActive = computed(() => {
 const isExpired = computed(() => {
     return tenant.value?.is_expired === true;
 });
+
+const companyName = computed(() => {
+    return tenant.value?.company_name || tenant.value?.name || 'Fabriku';
+});
+
+const companyLogo = computed(() => {
+    return tenant.value?.logo || null;
+});
+
+const companyInitials = computed(() => {
+    const name = companyName.value;
+    const words = name.split(' ').filter(word => word.length > 0);
+    if (words.length === 0) return 'F';
+    if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+    return (words[0][0] + words[1][0]).toUpperCase();
+});
 </script>
 
 <template>
@@ -56,12 +72,14 @@ const isExpired = computed(() => {
 
                 <!-- Logo -->
                 <div class="flex items-center gap-2">
-                    <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-600">
-                        <span class="text-sm font-bold text-white">F</span>
+                    <div v-if="companyLogo" class="flex h-8 w-8 flex-shrink-0 overflow-hidden rounded-lg">
+                        <img :src="companyLogo" :alt="companyName" class="h-full w-full object-contain" />
+                    </div>
+                    <div v-else class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-600">
+                        <span class="text-sm font-bold text-white">{{ companyInitials }}</span>
                     </div>
                     <div class="flex flex-col">
-                        <h1 class="text-lg font-bold text-indigo-600 sm:text-xl dark:text-indigo-400 leading-tight">Fabriku</h1>
-                        <span v-if="tenant?.name" class="text-xs font-medium text-gray-500 dark:text-gray-400 -mt-1">{{ tenant.name }}</span>
+                        <h1 class="text-lg font-bold text-indigo-600 sm:text-xl dark:text-indigo-400 leading-tight">{{ companyName }}</h1>
                     </div>
                 </div>
             </div>

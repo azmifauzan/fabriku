@@ -37,6 +37,7 @@ class HandleInertiaRequests extends Middleware
     {
         $tenant = $request->user()?->tenant;
         $categoryConfig = $tenant?->getCategoryConfig() ?? [];
+        $tenantId = $tenant?->id;
 
         return [
             ...parent::share($request),
@@ -77,6 +78,8 @@ class HandleInertiaRequests extends Middleware
                     'product_types' => $categoryConfig['product_types'] ?? [],
                     'sizes' => $categoryConfig['sizes'] ?? [],
                 ],
+                'logo' => $tenantId ? \App\Models\SystemSetting::get('company_logo', null, $tenantId) : null,
+                'company_name' => $tenantId ? \App\Models\SystemSetting::get('company_name', null, $tenantId) : null,
             ] : null,
             'flash' => [
                 'success' => $request->session()->get('success'),
