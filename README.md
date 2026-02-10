@@ -1,10 +1,15 @@
 # Fabriku
 
-> **Platform SaaS Multi-Kategori untuk Manajemen Produksi & Penjualan UMKM**
+> **Platform SaaS Multi-Kategori untuk Manajemen Produksi & Penjualan UMKM**  
+> **Status**: ✅ Production Ready | **Last Updated**: February 10, 2026
 
 Fabriku adalah aplikasi berbasis web yang dirancang untuk membantu UMKM dalam mengelola seluruh proses bisnis mereka dari berbagai kategori industri. Saat ini mendukung **Garment & Konveksi** dan **Makanan & Kue**, dengan rencana ekspansi ke kategori lain (Kerajinan, Kosmetik, dll).
 
 Platform ini mengelola workflow universal: **Bahan Baku → Pattern/Resep → Persiapan → Produksi → Inventory → Penjualan**, dengan terminologi dan business rules yang disesuaikan per kategori bisnis.
+
+**🎯 Current Version**: v1.0.0  
+**📊 Test Coverage**: 100+ integration & feature tests  
+**🏢 Multi-Tenant Support**: Full tenant isolation & security
 
 [![Laravel](https://img.shields.io/badge/Laravel-12.47-FF2D20?style=flat&logo=laravel)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.4.11-777BB4?style=flat&logo=php)](https://php.net)
@@ -653,8 +658,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ Production Report
 
 ### ✅ Phase 8: Polish & Testing (Completed)
-- ✅ Comprehensive testing (32 test files)
-- ✅ Browser testing (Pest 4)
+- ✅ Comprehensive testing (100+ integration & feature tests)
+- ✅ Browser testing with Pest 4
+- ✅ Integration tests covering complete user journeys
+- ✅ Unit tests for models, services, and utilities
 - ✅ UI/UX polish & consistency
 - ✅ Performance optimization
 - ✅ Documentation finalization
@@ -693,6 +700,115 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 🤝 Supplier portal
 - 💰 Accounting integration
 - 📦 Shipping integration (JNE, J&T, SiCepat)
+
+## 🧪 Testing
+
+Fabriku menggunakan **Pest 4** dengan coverage yang komprehensif:
+
+### Test Structure
+```
+tests/
+├── Feature/           # Feature & Integration Tests (100+ tests)
+│   ├── Integration/   # Complete user journey tests
+│   │   ├── CompleteUserJourneyTest.php
+│   │   ├── RegistrationAndAuthenticationTest.php
+│   │   ├── MaterialToPreparationFlowTest.php
+│   │   ├── InventoryAndQRCodeTest.php
+│   │   ├── SubscriptionAndSettingsTest.php
+│   │   └── AssistantAndReportsTest.php
+│   ├── Auth/          # Authentication tests
+│   ├── *Test.php      # Feature tests for each module
+│   └── ...
+├── Unit/              # Unit tests
+└── Browser/           # Browser tests (Pest 4)
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+php artisan test
+
+# Run specific test suite
+php artisan test --filter Integration
+
+# Run with coverage
+php artisan test --coverage
+
+# Run single test file
+php artisan test tests/Feature/Integration/CompleteUserJourneyTest.php
+
+# Run tests in parallel (faster)
+php artisan test --parallel
+
+# Compact output
+php artisan test --compact
+```
+
+### Integration Test Coverage
+
+✅ **Complete User Journey** (Garment & Food workflows)
+- Material receipt → Preparation → Production → Inventory → Sales
+- Multi-category business support
+
+✅ **Authentication & Registration**
+- User registration flow with email verification
+- Login/logout functionality
+- Password reset flow
+- Subscription enforcement
+
+✅ **Material Management**
+- Material types, materials, receipts
+- Stock tracking with FIFO/FEFO
+- Batch tracking
+- Expiry date alerts (food category)
+
+✅ **Preparation & Production**
+- Cutting/mixing orders
+- Material usage tracking
+- Stock deduction automation
+- Quality control
+
+✅ **Inventory Management**
+- Location management
+- Stock adjustments (damage, lost, found)
+- QR code generation & scanning
+- Expiry tracking for food items
+
+✅ **Sales Orders**
+- Order creation & management
+- Stock reservation & deduction
+- Payment tracking
+- Multi-channel sales
+
+✅ **Reports & Analytics**
+- Material, Inventory, Production, Sales reports
+- Export to Excel/PDF
+- Date range filtering
+
+✅ **Settings & Subscriptions**
+- Company settings management
+- Subscription plan upgrades
+- Trial management
+- Multi-user tenant access
+
+✅ **AI Assistant & Integrations**
+- OpenAI GPT-4 integration
+- Telegram bot connectivity
+- Email notifications
+
+### Code Quality
+
+```bash
+# Format code with Pint
+vendor/bin/pint
+
+# Lint JavaScript/Vue
+npm run lint
+
+# Format frontend code
+npm run format
+```
 
 ## 📸 Screenshots
 
