@@ -36,43 +36,73 @@ const expandedMenus = ref<string[]>([]);
 const businessCategory = computed(() => (page.props.tenant as any)?.business_category as string | undefined);
 const terminology = computed(() => ((page.props.tenant as any)?.terminology ?? {}) as Record<string, string>);
 
-const menuItems = computed(() => {
-    const isFood = businessCategory.value === 'food';
+// Get user permissions from shared data
+const userPermissions = computed(() => {
+    const user = (page.props.auth as any)?.user;
+    return user?.permissions ?? [];
+});
 
+const isAdmin = computed(() => {
+    const user = (page.props.auth as any)?.user;
+    return user?.role === 'admin';
+});
+
+// Check if user has a specific permission
+const hasPermission = (permissionSlug: string): boolean => {
+    if (isAdmin.value) return true;
+    if (userPermissions.value.includes('*')) return true;
+    return userPermissions.value.includes(permissionSlug);
+};
+
+// Check if user has any of the given permissions
+const hasAnyPermission = (slugs: string[]): boolean => {
+    return slugs.some((slug) => hasPermission(slug));
+};
+
+const allMenuItems = computed(() => {
     return [
         {
             name: 'Dashboard',
             href: '/dashboard',
             icon: Home,
+            permission: null, // always visible
         },
         {
             name: 'Master Data',
             href: '/master-data',
             icon: Settings,
+            permission: null, // filtered by children
             children: [
                 {
                     name: 'Jenis Bahan',
                     href: '/material-types',
+                    permission: 'material.view',
                 },
                 {
                     name: 'Staff',
                     href: '/staff',
+                    permission: null, // admin-only, handled separately
+                    adminOnly: true,
                 },
                 {
                     name: 'Lokasi Inventory',
                     href: '/inventory/locations',
+                    permission: 'inventory.view',
                 },
                 {
                     name: 'Customer',
                     href: '/customers',
+                    permission: 'sales.view',
                 },
                 {
                     name: terminology.value.pattern || 'Pattern',
                     href: '/patterns',
+                    permission: 'pattern.view',
                 },
                 {
                     name: terminology.value.contractor || 'Kontraktor',
                     href: '/contractors',
+                    permission: 'production.view',
                 },
             ],
         },
@@ -80,29 +110,35 @@ const menuItems = computed(() => {
             name: terminology.value.material || 'Bahan Baku',
             href: '/materials',
             icon: Package,
+            permission: 'material.view',
         },
         {
             name: 'Preparation',
             href: '/preparation-orders',
             icon: CheckCircle2,
+            permission: 'preparation.view',
         },
         {
             name: 'Production Order',
             href: '/production-orders',
             icon: Factory,
+            permission: 'production.view',
         },
         {
             name: 'Inventory',
             href: '/inventory',
             icon: Warehouse,
+            permission: 'inventory.view',
             children: [
                 {
                     name: 'Items',
                     href: '/inventory/items',
+                    permission: 'inventory.view',
                 },
                 {
                     name: 'Visualisasi',
                     href: '/inventory/visualization',
+                    permission: 'inventory.view',
                 },
             ],
         },
@@ -110,14 +146,17 @@ const menuItems = computed(() => {
             name: 'Sales Order',
             href: '/sales-orders',
             icon: ShoppingCart,
+            permission: 'sales.view',
             children: [
                 {
                     name: 'List',
                     href: '/sales-orders',
+                    permission: 'sales.view',
                 },
                 {
                     name: 'Settings',
                     href: '/settings',
+                    permission: 'settings.view',
                 },
             ],
         },
@@ -125,26 +164,64 @@ const menuItems = computed(() => {
             name: 'Reports',
             href: '/reports',
             icon: BarChart3,
+            permission: 'report.view',
             children: [
                 {
                     name: 'Material',
                     href: '/reports/material',
+                    permission: 'report.view',
                 },
                 {
                     name: 'Inventory',
                     href: '/reports/inventory',
+                    permission: 'report.view',
                 },
                 {
                     name: 'Penjualan',
                     href: '/reports/sales',
+                    permission: 'report.view',
                 },
                 {
                     name: 'Produksi',
                     href: '/reports/production',
+                    permission: 'report.view',
                 },
             ],
         },
     ];
+});
+
+// Filter menu items based on permissions
+const menuItems = computed(() => {
+    return allMenuItems.value
+        .filter((item) => {
+            // If item has children, filter children first
+            if (item.children) {
+                const visibleChildren = item.children.filter((child: any) => {
+                    if (child.adminOnly) return isAdmin.value;
+                    if (!child.permission) return true;
+                    return hasPermission(child.permission);
+                });
+                return visibleChildren.length > 0;
+            }
+
+            // Top-level item without children
+            if (!item.permission) return true;
+            return hasPermission(item.permission);
+        })
+        .map((item) => {
+            if (item.children) {
+                return {
+                    ...item,
+                    children: item.children.filter((child: any) => {
+                        if (child.adminOnly) return isAdmin.value;
+                        if (!child.permission) return true;
+                        return hasPermission(child.permission);
+                    }),
+                };
+            }
+            return item;
+        });
 });
 
 const isActive = (href: string) => {
@@ -159,7 +236,7 @@ const isActive = (href: string) => {
 const checkAndExpandActiveMenu = () => {
     menuItems.value.forEach((item) => {
         if (item.children) {
-            const hasActiveChild = item.children.some((child) => isActive(child.href));
+            const hasActiveChild = item.children.some((child: any) => isActive(child.href));
             if (hasActiveChild && !expandedMenus.value.includes(item.href)) {
                 expandedMenus.value.push(item.href);
             }

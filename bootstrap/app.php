@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant' => EnsureTenantContext::class,
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'subscription.check' => \App\Http\Middleware\CheckSubscriptionStatus::class,
+            'permission' => \App\Http\Middleware\CheckPermission::class,
         ]);
 
         // Trust all proxies for reverse proxy setup

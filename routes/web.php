@@ -120,27 +120,39 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Material Management
-    Route::resource('materials', \App\Http\Controllers\MaterialController::class);
-    Route::resource('material-receipts', \App\Http\Controllers\MaterialReceiptController::class);
-    Route::resource('material-types', \App\Http\Controllers\MaterialTypeController::class);
+    Route::resource('materials', \App\Http\Controllers\MaterialController::class)
+        ->middleware('permission:material.view');
+    Route::resource('material-receipts', \App\Http\Controllers\MaterialReceiptController::class)
+        ->middleware('permission:material.view');
+    Route::resource('material-types', \App\Http\Controllers\MaterialTypeController::class)
+        ->middleware('permission:material.view');
+
+    // Staff Management (admin-only enforced in controller)
     Route::resource('staff', \App\Http\Controllers\StaffController::class);
 
     // Pattern & Preparation Management (renamed from Cutting)
-    Route::resource('patterns', \App\Http\Controllers\PatternController::class);
-    Route::resource('preparation-orders', \App\Http\Controllers\PreparationOrderController::class);
+    Route::resource('patterns', \App\Http\Controllers\PatternController::class)
+        ->middleware('permission:pattern.view');
+    Route::resource('preparation-orders', \App\Http\Controllers\PreparationOrderController::class)
+        ->middleware('permission:preparation.view');
 
     // Production Management
-    Route::resource('contractors', \App\Http\Controllers\ContractorController::class);
-    Route::resource('production-orders', \App\Http\Controllers\ProductionOrderController::class);
+    Route::resource('contractors', \App\Http\Controllers\ContractorController::class)
+        ->middleware('permission:production.view');
+    Route::resource('production-orders', \App\Http\Controllers\ProductionOrderController::class)
+        ->middleware('permission:production.view');
     Route::post('production-orders/{production_order}/send', [\App\Http\Controllers\ProductionOrderController::class, 'send'])
-        ->name('production-orders.send');
+        ->name('production-orders.send')
+        ->middleware('permission:production.edit');
     Route::post('production-orders/{production_order}/start', [\App\Http\Controllers\ProductionOrderController::class, 'start'])
-        ->name('production-orders.start');
+        ->name('production-orders.start')
+        ->middleware('permission:production.edit');
     Route::post('production-orders/{production_order}/mark-complete', [\App\Http\Controllers\ProductionOrderController::class, 'markComplete'])
-        ->name('production-orders.mark-complete');
+        ->name('production-orders.mark-complete')
+        ->middleware('permission:production.edit');
 
     // Inventory Management
-    Route::prefix('inventory')->name('inventory.')->group(function () {
+    Route::prefix('inventory')->name('inventory.')->middleware('permission:inventory.view')->group(function () {
         Route::get('visualization', [\App\Http\Controllers\InventoryVisualizationController::class, 'index'])->name('visualization');
         Route::resource('locations', \App\Http\Controllers\InventoryLocationController::class);
 
@@ -157,13 +169,17 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
     });
 
     // Sales Management
-    Route::resource('customers', \App\Http\Controllers\CustomerController::class);
-    Route::get('sales-orders/{sales_order}/print', [\App\Http\Controllers\SalesOrderController::class, 'print'])->name('sales-orders.print');
-    Route::get('sales-orders/{sales_order}/export', [\App\Http\Controllers\SalesOrderController::class, 'export'])->name('sales-orders.export');
-    Route::resource('sales-orders', \App\Http\Controllers\SalesOrderController::class);
+    Route::resource('customers', \App\Http\Controllers\CustomerController::class)
+        ->middleware('permission:sales.view');
+    Route::get('sales-orders/{sales_order}/print', [\App\Http\Controllers\SalesOrderController::class, 'print'])->name('sales-orders.print')
+        ->middleware('permission:sales.view');
+    Route::get('sales-orders/{sales_order}/export', [\App\Http\Controllers\SalesOrderController::class, 'export'])->name('sales-orders.export')
+        ->middleware('permission:sales.view');
+    Route::resource('sales-orders', \App\Http\Controllers\SalesOrderController::class)
+        ->middleware('permission:sales.view');
 
     // Reports
-    Route::prefix('reports')->name('reports.')->group(function () {
+    Route::prefix('reports')->name('reports.')->middleware('permission:report.view')->group(function () {
         Route::get('material', [\App\Http\Controllers\ReportController::class, 'material'])->name('material');
         Route::get('material/export', [\App\Http\Controllers\ReportController::class, 'exportMaterial'])->name('material.export');
         Route::get('inventory', [\App\Http\Controllers\ReportController::class, 'inventory'])->name('inventory');
