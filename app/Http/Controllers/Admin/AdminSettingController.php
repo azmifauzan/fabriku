@@ -18,6 +18,11 @@ class AdminSettingController extends Controller
             $settings['bank_accounts'] = [];
         }
 
+        // Ensure max_staff_per_tenant has a default
+        if (! isset($settings['max_staff_per_tenant'])) {
+            $settings['max_staff_per_tenant'] = 5;
+        }
+
         return Inertia::render('Admin/Settings/Index', [
             'settings' => $settings,
         ]);
@@ -33,11 +38,13 @@ class AdminSettingController extends Controller
             'membership_price_monthly' => 'required|numeric|min:0',
             'membership_price_yearly' => 'required|numeric|min:0',
             'membership_features' => 'nullable|array',
+            'max_staff_per_tenant' => 'required|integer|min:1|max:100',
         ]);
 
         SystemSetting::set('bank_accounts', $request->bank_accounts, 'json');
         SystemSetting::set('membership_price_monthly', $request->membership_price_monthly, 'number');
         SystemSetting::set('membership_price_yearly', $request->membership_price_yearly, 'number');
+        SystemSetting::set('max_staff_per_tenant', $request->max_staff_per_tenant, 'number');
 
         if ($request->has('membership_features')) {
             SystemSetting::set('membership_features', $request->membership_features, 'json');

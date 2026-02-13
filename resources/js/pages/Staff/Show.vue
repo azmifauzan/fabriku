@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Shield, User } from 'lucide-vue-next';
+import { computed } from 'vue';
+
+interface Role {
+    id: number;
+    name: string;
+    slug: string;
+    description: string | null;
+}
 
 interface PreparationOrder {
     id: number;
@@ -19,6 +28,8 @@ interface StaffData {
     is_active: boolean;
     created_at: string;
     preparationOrders_count: number;
+    role: Role | null;
+    user: { id: number; email: string } | null;
 }
 
 interface Props {
@@ -30,6 +41,9 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const page = usePage();
+const isAdmin = computed(() => (page.props.auth as any)?.user?.role === 'admin');
 </script>
 
 <template>
@@ -58,7 +72,7 @@ defineProps<Props>();
                             <div class="border-b border-gray-200 p-6 dark:border-gray-700">
                                 <div class="flex items-center justify-between">
                                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Informasi Staff</h3>
-                                    <div class="flex gap-2">
+                                    <div v-if="isAdmin" class="flex gap-2">
                                         <Link
                                             :href="`/staff/${staff.id}/edit`"
                                             class="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out hover:bg-indigo-700 focus:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none active:bg-indigo-900 dark:focus:ring-offset-gray-800"
@@ -79,8 +93,17 @@ defineProps<Props>();
                                         <dd class="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">{{ staff.name }}</dd>
                                     </div>
                                     <div>
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Posisi</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ staff.position || '-' }}</dd>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Role</dt>
+                                        <dd class="mt-1">
+                                            <span
+                                                v-if="staff.role"
+                                                class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300"
+                                            >
+                                                <Shield :size="12" />
+                                                {{ staff.role.name }}
+                                            </span>
+                                            <span v-else class="text-sm text-gray-400">-</span>
+                                        </dd>
                                     </div>
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
@@ -104,6 +127,19 @@ defineProps<Props>();
                                     <div v-if="staff.email">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ staff.email }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Akun Login</dt>
+                                        <dd class="mt-1">
+                                            <span
+                                                v-if="staff.user"
+                                                class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                                            >
+                                                <User :size="12" />
+                                                Memiliki akun login
+                                            </span>
+                                            <span v-else class="text-sm text-gray-400">Belum memiliki akun</span>
+                                        </dd>
                                     </div>
                                     <div class="sm:col-span-2">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Dibuat pada</dt>
@@ -220,6 +256,23 @@ defineProps<Props>();
                                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.total_preparations }}</dd>
                                     </div>
                                 </dl>
+                            </div>
+                        </div>
+
+                        <!-- Role Info Card -->
+                        <div v-if="staff.role" class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                            <div class="p-6">
+                                <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-gray-100">Info Role</h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Nama Role</dt>
+                                        <dd class="mt-1 text-sm font-medium text-indigo-600 dark:text-indigo-400">{{ staff.role.name }}</dd>
+                                    </div>
+                                    <div v-if="staff.role.description">
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Deskripsi</dt>
+                                        <dd class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ staff.role.description }}</dd>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -16,9 +16,11 @@ class Staff extends Model
 
     protected $fillable = [
         'tenant_id',
+        'user_id',
         'code',
         'name',
         'position',
+        'role_id',
         'phone',
         'email',
         'is_active',
@@ -45,6 +47,16 @@ class Staff extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
     }
 
     public function preparationOrders(): HasMany

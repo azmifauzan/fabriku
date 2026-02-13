@@ -33,6 +33,7 @@ const form = useForm({
     membership_price_yearly: props.settings.membership_price_yearly || 250000,
     pro_price_monthly: props.settings.pro_price_monthly || 35000,
     pro_price_yearly: props.settings.pro_price_yearly || 350000,
+    max_staff_per_tenant: props.settings.max_staff_per_tenant || 5,
 })
 
 const addBankAccount = () => {
@@ -204,6 +205,26 @@ const formatCurrency = (value) => {
                             >
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ formatCurrency(form.pro_price_yearly) }} <span class="text-green-600 dark:text-green-400">(Hemat {{ formatCurrency((form.pro_price_monthly * 12) - form.pro_price_yearly) }})</span></p>
                             <div v-if="form.errors.pro_price_yearly" class="mt-1 text-sm text-red-600">{{ form.errors.pro_price_yearly }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tenant Limits -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Batas Tenant</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Pengaturan kuota dan batas untuk setiap tenant</p>
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Maksimal Staff per Tenant</label>
+                            <input 
+                                v-model="form.max_staff_per_tenant"
+                                type="number" 
+                                min="1"
+                                max="100"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                            >
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Jumlah maksimal staff yang dapat dibuat oleh setiap tenant</p>
+                            <div v-if="form.errors.max_staff_per_tenant" class="mt-1 text-sm text-red-600">{{ form.errors.max_staff_per_tenant }}</div>
                         </div>
                     </div>
                 </div>
