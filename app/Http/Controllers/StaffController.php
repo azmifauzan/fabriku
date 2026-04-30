@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PreparationOrder;
 use App\Models\Role;
 use App\Models\Staff;
 use App\Models\SystemSetting;
@@ -11,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class StaffController extends Controller
@@ -123,7 +125,7 @@ class StaffController extends Controller
         }
 
         $validated = $request->validate([
-            'code' => ['required', 'string', 'max:50', 'unique:staff,code,NULL,id,tenant_id,'.auth()->user()->tenant_id],
+            'code' => ['required', 'string', 'max:50', Rule::unique('staff', 'code')->where('tenant_id', $user->tenant_id)],
             'name' => ['required', 'string', 'max:255'],
             'role_id' => ['required', 'exists:roles,id'],
             'phone' => ['nullable', 'string', 'max:20'],
@@ -207,7 +209,7 @@ class StaffController extends Controller
         }
 
         $validated = $request->validate([
-            'code' => ['required', 'string', 'max:50', 'unique:staff,code,'.$staff->id.',id,tenant_id,'.auth()->user()->tenant_id],
+            'code' => ['required', 'string', 'max:50', Rule::unique('staff', 'code')->where('tenant_id', $user->tenant_id)->ignore($staff->id)],
             'name' => ['required', 'string', 'max:255'],
             'role_id' => ['required', 'exists:roles,id'],
             'phone' => ['nullable', 'string', 'max:20'],
@@ -254,7 +256,7 @@ class StaffController extends Controller
         }
 
         // Check if any preparation orders use this staff
-        if (\App\Models\PreparationOrder::where('prepared_by', $staff->id)->exists()) {
+        if (PreparationOrder::where('prepared_by', $staff->id)->exists()) {
             return back()->with('error', 'Staff tidak bisa dihapus karena masih digunakan oleh order preparation.');
         }
 

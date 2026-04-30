@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Scopes\TenantScope;
 use App\Models\Traits\HasAuditLogs;
+use Database\Factories\ContractorFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Contractor extends Model
 {
-    /** @use HasFactory<\Database\Factories\ContractorFactory> */
+    /** @use HasFactory<ContractorFactory> */
     use HasAuditLogs, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -69,14 +70,21 @@ class Contractor extends Model
             throw new \Exception('Cannot generate contractor code without tenant_id');
         }
 
-        $lastContractor = self::withoutGlobalScope(TenantScope::class)
+        $baseQuery = fn () => self::withoutGlobalScopes([TenantScope::class])
+            ->withTrashed()
             ->where('tenant_id', $tenantId)
-            ->latest('id')
-            ->first();
+            ->where('code', 'like', 'CNT-%');
 
-        $nextNumber = $lastContractor ? (int) substr($lastContractor->code, -4) + 1 : 1;
+        $maxNumber = $baseQuery()
+            ->selectRaw('MAX(CAST(SUBSTRING(code, 5) AS INTEGER)) as max_num')
+            ->value('max_num') ?? 0;
 
-        return 'CNT-'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        do {
+            $maxNumber++;
+            $code = 'CNT-'.str_pad($maxNumber, 4, '0', STR_PAD_LEFT);
+        } while ($baseQuery()->where('code', $code)->exists());
+
+        return $code;
     }
 
     // Relationships
