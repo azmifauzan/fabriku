@@ -17,7 +17,7 @@ class UpdateContractorRequest extends FormRequest
         $contractorId = $this->route('contractor')->id;
 
         return [
-            'code' => 'sometimes|string|max:50|unique:contractors,code,'.$contractorId.',id,tenant_id,'.auth()->user()->tenant_id,
+            'code' => 'nullable|string|max:50|unique:contractors,code,'.$contractorId.',id,tenant_id,'.auth()->user()->tenant_id,
             'name' => ['required', 'string', 'max:255'],
             'contact_person' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],

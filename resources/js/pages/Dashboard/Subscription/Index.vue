@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
+import { store } from '@/actions/App/Http/Controllers/SubscriptionController';
 
 const props = defineProps<{
     tenant: any;
@@ -36,7 +37,7 @@ const handlePlanChange = () => {
 };
 
 const submit = () => {
-    form.post(route('subscription.store'), {
+    form.post(store(), {
         preserveScroll: true,
         onSuccess: () => {
             form.reset('proof')

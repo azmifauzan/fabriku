@@ -35,21 +35,22 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $tenant = $request->user()?->tenant;
+        $user = $request->user();
+        $tenant = $user && ! ($user instanceof \App\Models\AdminUser) ? $user->tenant : null;
         $categoryConfig = $tenant?->getCategoryConfig() ?? [];
         $tenantId = $tenant?->id;
 
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user() ? [
-                    'id' => $request->user()->id,
-                    'name' => $request->user()->name,
-                    'email' => $request->user()->email,
-                    'role' => $request->user()->role,
-                    'permissions' => $request->user()->isAdmin()
+                'user' => $user && ! ($user instanceof \App\Models\AdminUser) ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'permissions' => $user->isAdmin()
                         ? ['*'] // Admin has all permissions
-                        : $request->user()->roles()
+                        : $user->roles()
                             ->with('permissions')
                             ->get()
                             ->pluck('permissions')

@@ -34,7 +34,7 @@ class StorePreparationOrderRequest extends FormRequest
             'pattern_id' => 'required|exists:patterns,id',
             'order_date' => 'required|date',
             'preparation_date' => 'sometimes|date',
-            'prepared_by' => 'nullable|exists:users,id',
+            'prepared_by' => 'nullable|exists:staff,id',
             'output_quantity' => 'required|numeric|min:0.01',
             'output_unit' => 'required|string|max:20',
             'materials_used' => 'required|array|min:1',

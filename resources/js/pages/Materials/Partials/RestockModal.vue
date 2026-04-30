@@ -5,6 +5,7 @@ import FormField from '@/components/FormField.vue';
 import { watch, ref } from 'vue';
 import { Camera, Upload, X } from 'lucide-vue-next';
 import CameraCaptureModal from '@/components/CameraCaptureModal.vue';
+import { store } from '@/actions/App/Http/Controllers/MaterialReceiptController';
 
 const props = defineProps<{
     show: boolean;
@@ -74,7 +75,7 @@ const clearImage = () => {
 };
 
 const submit = () => {
-    form.post(route('material-receipts.store'), {
+    form.post(store(), {
         preserveScroll: true,
         forceFormData: true,
         onSuccess: () => {

@@ -43,6 +43,14 @@ class AdminUser extends Authenticatable
     }
 
     /**
+     * Check if this is an admin user (always true for AdminUser model)
+     */
+    public function isAdmin(): bool
+    {
+        return true;
+    }
+
+    /**
      * Check if admin is active
      */
     public function isActive(): bool
