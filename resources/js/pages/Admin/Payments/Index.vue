@@ -5,6 +5,7 @@ import { ref, computed } from 'vue'
 import { Search, Clock, CheckCircle, XCircle, Eye } from 'lucide-vue-next'
 import { useSweetAlert } from '@/composables/useSweetAlert'
 import Swal from 'sweetalert2'
+import { approve as approveAction, reject as rejectAction } from '@/actions/App/Http/Controllers/Admin/AdminPaymentController'
 
 const props = defineProps({
     payments: Object,
@@ -60,7 +61,7 @@ const approve = async (payment) => {
     approving.value = payment.id
     const form = useForm({})
     
-    form.post(route('admin.payments.approve', payment.id), {
+    form.post(approveAction(payment.id), {
         onSuccess: () => {
             showSuccess('Berhasil!', 'Pembayaran berhasil diapprove')
         },
@@ -98,7 +99,7 @@ const openRejectModal = async (payment) => {
             reason: result.value
         })
         
-        form.post(route('admin.payments.reject', payment.id), {
+        form.post(rejectAction(payment.id), {
             onSuccess: () => {
                 showSuccess('Berhasil!', 'Pembayaran berhasil direject')
             },
@@ -118,7 +119,7 @@ const reject = () => {
         reason: rejectionReason.value
     })
     
-    form.post(route('admin.payments.reject', selectedPayment.value.id), {
+    form.post(rejectAction(selectedPayment.value.id), {
         onSuccess: () => {
             showRejectModal.value = false
             selectedPayment.value = null

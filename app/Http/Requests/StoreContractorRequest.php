@@ -15,7 +15,7 @@ class StoreContractorRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => 'sometimes|string|max:50|unique:contractors,code,NULL,id,tenant_id,'.auth()->user()->tenant_id,
+            'code' => 'nullable|string|max:50|unique:contractors,code,NULL,id,tenant_id,'.auth()->user()->tenant_id,
             'name' => ['required', 'string', 'max:255'],
             'contact_person' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],

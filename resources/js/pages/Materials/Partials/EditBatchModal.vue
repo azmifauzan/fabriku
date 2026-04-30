@@ -5,6 +5,7 @@ import FormField from '@/components/FormField.vue';
 import { watch, ref } from 'vue';
 import { Camera, Upload, X } from 'lucide-vue-next';
 import CameraCaptureModal from '@/components/CameraCaptureModal.vue';
+import { update } from '@/actions/App/Http/Controllers/MaterialReceiptController';
 
 interface Batch {
     id: number;
@@ -99,7 +100,7 @@ const clearImage = () => {
 const submit = () => {
     if (!props.batch) return;
     
-    form.post(route('material-receipts.update', props.batch.id) + '?_method=PUT', {
+    form.post(update(props.batch.id), {
         preserveScroll: true,
         forceFormData: true,
         onSuccess: () => {
