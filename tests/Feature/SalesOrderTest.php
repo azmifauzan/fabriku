@@ -10,7 +10,7 @@ use App\Models\User;
 
 beforeEach(function () {
     $this->tenant = Tenant::factory()->create();
-    $this->user = User::factory()->create(['tenant_id' => $this->tenant->id]);
+    $this->user = User::factory()->admin()->create(['tenant_id' => $this->tenant->id]);
     $this->actingAs($this->user);
 
     // Create dependencies
@@ -184,6 +184,40 @@ it('cannot edit completed sales order', function () {
     $response->assertForbidden();
 });
 
+it('can edit completed sales order with unpaid payment status', function () {
+    $order = SalesOrder::factory()->completed()->create([
+        'tenant_id' => $this->tenant->id,
+        'customer_id' => $this->customer->id,
+        'payment_status' => 'unpaid',
+        'paid_amount' => 0,
+    ]);
+
+    $updateData = [
+        'customer_id' => $this->customer->id,
+        'order_date' => now()->toDateString(),
+        'channel' => 'offline',
+        'payment_method' => 'transfer',
+        'payment_status' => 'paid',
+        'paid_amount' => $order->total_amount,
+        'items' => [
+            [
+                'inventory_item_id' => $this->inventoryItem->id,
+                'quantity' => 1,
+                'unit_price' => 150000,
+                'discount_amount' => 0,
+            ],
+        ],
+    ];
+
+    $response = $this->put(route('sales-orders.update', $order), $updateData);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('sales_orders', [
+        'id' => $order->id,
+        'payment_status' => 'paid',
+    ]);
+});
+
 it('can view sales order with items', function () {
     $order = SalesOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
@@ -250,4 +284,176 @@ it('enforces tenant isolation for sales orders', function () {
     $response = $this->get(route('sales-orders.show', $otherOrder));
 
     $response->assertNotFound();
+});
+
+it('can print invoice for a sales order', function () {
+    $order = SalesOrder::factory()->create(['tenant_id' => $this->tenant->id]);
+
+    $response = $this->get(route('sales-orders.print', $order));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('SalesOrders/Print')
+        ->has('salesOrder')
+        ->has('settings')
+    );
+});
+
+it('can view delivery order (surat jalan) for a sales order', function () {
+    $order = SalesOrder::factory()->create(['tenant_id' => $this->tenant->id]);
+
+    $response = $this->get(route('sales-orders.delivery-order', $order));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('SalesOrders/DeliveryOrder')
+        ->has('salesOrder')
+        ->has('settings')
+    );
+});
+
+it('cannot access delivery order of another tenant', function () {
+    $otherTenant = Tenant::factory()->create();
+    $otherOrder = SalesOrder::factory()->create(['tenant_id' => $otherTenant->id]);
+
+    $response = $this->get(route('sales-orders.delivery-order', $otherOrder));
+
+    $response->assertNotFound();
+});
+
+it('reserves stock when creating a sales order', function () {
+    $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 0]);
+
+    $orderData = [
+        'customer_id' => $this->customer->id,
+        'order_date' => now()->toDateString(),
+        'channel' => 'offline',
+        'payment_method' => 'cash',
+        'items' => [
+            [
+                'inventory_item_id' => $this->inventoryItem->id,
+                'quantity' => 10,
+                'unit_price' => 150000,
+                'discount_amount' => 0,
+            ],
+        ],
+    ];
+
+    $this->post(route('sales-orders.store'), $orderData);
+
+    $this->assertDatabaseHas('inventory_items', [
+        'id' => $this->inventoryItem->id,
+        'reserved_quantity' => 10,
+    ]);
+});
+
+it('rejects order when quantity exceeds available stock', function () {
+    $this->inventoryItem->update(['current_quantity' => 45, 'reserved_quantity' => 5]);
+
+    $orderData = [
+        'customer_id' => $this->customer->id,
+        'order_date' => now()->toDateString(),
+        'channel' => 'offline',
+        'payment_method' => 'cash',
+        'items' => [
+            [
+                'inventory_item_id' => $this->inventoryItem->id,
+                'quantity' => 45,
+                'unit_price' => 150000,
+                'discount_amount' => 0,
+            ],
+        ],
+    ];
+
+    $response = $this->post(route('sales-orders.store'), $orderData);
+
+    $response->assertSessionHasErrors('items.0.quantity');
+    $this->assertDatabaseCount('sales_orders', 0);
+    $this->assertDatabaseHas('inventory_items', [
+        'id' => $this->inventoryItem->id,
+        'reserved_quantity' => 5,
+    ]);
+});
+
+it('allows order when quantity matches available stock exactly', function () {
+    $this->inventoryItem->update(['current_quantity' => 45, 'reserved_quantity' => 5]);
+
+    $orderData = [
+        'customer_id' => $this->customer->id,
+        'order_date' => now()->toDateString(),
+        'channel' => 'offline',
+        'payment_method' => 'cash',
+        'items' => [
+            [
+                'inventory_item_id' => $this->inventoryItem->id,
+                'quantity' => 40,
+                'unit_price' => 150000,
+                'discount_amount' => 0,
+            ],
+        ],
+    ];
+
+    $response = $this->post(route('sales-orders.store'), $orderData);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('inventory_items', [
+        'id' => $this->inventoryItem->id,
+        'reserved_quantity' => 45,
+    ]);
+});
+
+it('releases reserved stock when deleting a sales order', function () {
+    $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 10]);
+
+    $order = SalesOrder::factory()->draft()->create(['tenant_id' => $this->tenant->id]);
+    $order->items()->create([
+        'inventory_item_id' => $this->inventoryItem->id,
+        'quantity' => 10,
+        'unit_price' => 150000,
+        'discount_amount' => 0,
+        'subtotal' => 1500000,
+    ]);
+
+    $this->delete(route('sales-orders.destroy', $order));
+
+    $this->assertDatabaseHas('inventory_items', [
+        'id' => $this->inventoryItem->id,
+        'reserved_quantity' => 0,
+    ]);
+});
+
+it('adjusts reserved stock when updating a sales order', function () {
+    $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 10]);
+
+    $order = SalesOrder::factory()->draft()->create(['tenant_id' => $this->tenant->id]);
+    $order->items()->create([
+        'inventory_item_id' => $this->inventoryItem->id,
+        'quantity' => 10,
+        'unit_price' => 150000,
+        'discount_amount' => 0,
+        'subtotal' => 1500000,
+    ]);
+
+    $updateData = [
+        'customer_id' => $this->customer->id,
+        'order_date' => now()->toDateString(),
+        'channel' => 'offline',
+        'payment_method' => 'cash',
+        'items' => [
+            [
+                'inventory_item_id' => $this->inventoryItem->id,
+                'quantity' => 5,
+                'unit_price' => 150000,
+                'discount_amount' => 0,
+            ],
+        ],
+    ];
+
+    $this->put(route('sales-orders.update', $order), $updateData);
+
+    // Old reservation (10) released, new reservation (5) added → net 10 - 10 + 5 = 5
+    $this->assertDatabaseHas('inventory_items', [
+        'id' => $this->inventoryItem->id,
+        'reserved_quantity' => 5,
+    ]);
 });

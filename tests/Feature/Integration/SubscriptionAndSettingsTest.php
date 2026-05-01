@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Material;
 use App\Models\SubscriptionPayment;
 use App\Models\SystemSetting;
 use App\Models\Tenant;
@@ -120,7 +121,7 @@ describe('Subscription Management Integration', function () {
         expect($payment->status)->toBe('PENDING');
     });
 
-    it('redirects to subscription page when expired', function () {
+    it('allows viewing pages in read-only mode when expired', function () {
         // Update tenant to expired
         $this->tenant->update([
             'subscription_expires_at' => now()->subDay(),
@@ -129,7 +130,8 @@ describe('Subscription Management Integration', function () {
         $response = $this->actingAs($this->user)
             ->get(route('dashboard'));
 
-        $response->assertRedirect(route('subscription.index'));
+        // Should still be accessible (read-only mode)
+        $response->assertSuccessful();
     });
 
     it('shows correct trial days remaining', function () {
@@ -206,7 +208,7 @@ describe('Multi-User Tenant Access', function () {
             'email_verified_at' => now(),
         ]);
 
-        $otherMaterial = \App\Models\Material::factory()->create([
+        $otherMaterial = Material::factory()->create([
             'tenant_id' => $otherTenant->id,
             'name' => 'Other Tenant Material',
         ]);

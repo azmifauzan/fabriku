@@ -128,12 +128,16 @@ const getProgressBarColor = (percentage: number) => {
                     >
                         <!-- Card Header -->
                         <div
-                            class="flex cursor-pointer items-start justify-between border-b border-gray-100 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50"
-                            @click="toggleLocation(location.id)"
+                            class="flex items-start justify-between border-b border-gray-100 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50"
                         >
-                            <div class="flex-1">
+                            <Link
+                                :href="`/inventory/locations/${location.id}`"
+                                class="group flex-1"
+                            >
                                 <div class="flex items-center gap-2">
-                                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ location.name }}</h3>
+                                    <h3 class="font-semibold text-gray-900 transition-colors group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">
+                                        {{ location.name }}
+                                    </h3>
                                     <span class="rounded bg-gray-200 px-1.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
                                         {{ location.code }}
                                     </span>
@@ -147,8 +151,11 @@ const getProgressBarColor = (percentage: number) => {
                                         </span>
                                     </span>
                                 </div>
-                            </div>
-                            <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                            </Link>
+                            <button
+                                class="ml-2 shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                @click="toggleLocation(location.id)"
+                            >
                                 <ChevronUp v-if="expandedLocations.includes(location.id)" :size="20" />
                                 <ChevronDown v-else :size="20" />
                             </button>

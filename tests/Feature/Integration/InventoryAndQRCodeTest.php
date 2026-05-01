@@ -255,6 +255,7 @@ describe('QR Code Integration', function () {
         $this->user = User::factory()->create([
             'tenant_id' => $this->tenant->id,
             'email_verified_at' => now(),
+            'role' => 'admin',
         ]);
 
         $this->item = InventoryItem::factory()->create([
@@ -275,19 +276,21 @@ describe('QR Code Integration', function () {
     it('looks up item by QR scan', function () {
         $response = $this->actingAs($this->user)
             ->post(route('inventory.items.scan-lookup'), [
-                'sku' => $this->item->sku,
+                'qr_code' => $this->item->sku,
             ]);
 
         $response->assertSuccessful()
-            ->assertJsonFragment([
-                'sku' => 'TEST-QR-001',
+            ->assertJson([
+                'success' => true,
+                'redirect_url' => route('inventory.items.show', $this->item),
+                'type' => 'item',
             ]);
     });
 
     it('handles invalid QR scan data', function () {
         $response = $this->actingAs($this->user)
             ->post(route('inventory.items.scan-lookup'), [
-                'sku' => 'INVALID-SKU',
+                'qr_code' => 'INVALID-SKU',
             ]);
 
         $response->assertStatus(404);

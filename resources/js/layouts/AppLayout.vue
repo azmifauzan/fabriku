@@ -3,14 +3,28 @@ import ChatWidget from '@/components/ChatWidget.vue';
 import Footer from '@/components/Footer.vue';
 import Navbar from '@/components/Navbar.vue';
 import Sidebar from '@/components/Sidebar.vue';
+import { useSweetAlert } from '@/composables/useSweetAlert';
 import { usePage } from '@inertiajs/vue3';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const page = usePage();
 const isSidebarOpen = ref(false);
 const isMobile = ref(false);
 const didInitSidebar = ref(false);
 const wasAutoClosedForMobile = ref(false);
+
+const { showSuccess, showError, showWarning } = useSweetAlert();
+const flash = computed(() => page.props.flash as { success?: string; error?: string; warning?: string } | null);
+
+watch(flash, (newFlash) => {
+    if (newFlash?.success) {
+        showSuccess('Berhasil!', newFlash.success);
+    } else if (newFlash?.error) {
+        showError('Gagal', newFlash.error);
+    } else if (newFlash?.warning) {
+        showWarning('Perhatian', newFlash.warning);
+    }
+}, { immediate: true, deep: true });
 
 const checkMobile = () => {
     const nextIsMobile = window.innerWidth < 768;

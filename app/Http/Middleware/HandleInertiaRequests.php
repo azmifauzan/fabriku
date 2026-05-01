@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\AdminUser;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -36,14 +38,14 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        $tenant = $user && ! ($user instanceof \App\Models\AdminUser) ? $user->tenant : null;
+        $tenant = $user && ! ($user instanceof AdminUser) ? $user->tenant : null;
         $categoryConfig = $tenant?->getCategoryConfig() ?? [];
         $tenantId = $tenant?->id;
 
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $user && ! ($user instanceof \App\Models\AdminUser) ? [
+                'user' => $user && ! ($user instanceof AdminUser) ? [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
@@ -90,12 +92,13 @@ class HandleInertiaRequests extends Middleware
                     'product_types' => $categoryConfig['product_types'] ?? [],
                     'sizes' => $categoryConfig['sizes'] ?? [],
                 ],
-                'logo' => $tenantId ? \App\Models\SystemSetting::get('company_logo', null, $tenantId) : null,
-                'company_name' => $tenantId ? \App\Models\SystemSetting::get('company_name', null, $tenantId) : null,
+                'logo' => $tenantId ? SystemSetting::get('company_logo', null, $tenantId) : null,
+                'company_name' => $tenantId ? SystemSetting::get('company_name', null, $tenantId) : null,
             ] : null,
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
+                'warning' => $request->session()->get('warning'),
             ],
         ];
     }

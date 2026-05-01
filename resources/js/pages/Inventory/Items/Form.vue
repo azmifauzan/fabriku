@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, router } from '@inertiajs/vue3';
+import axios from 'axios';
 import { computed, ref, watch } from 'vue';
-import { Camera, Upload, X, Package, Truck, RotateCcw, FileText } from 'lucide-vue-next';
+import { Camera, Upload, X, Package, Truck, RotateCcw, FileText, Plus, Tag } from 'lucide-vue-next';
 import CameraCaptureModal from '@/components/CameraCaptureModal.vue';
 
 interface Location {
@@ -36,12 +37,18 @@ interface ProductionOrder {
     preparation_order?: PreparationOrder;
 }
 
+interface Category {
+    id: number;
+    name: string;
+}
+
 interface Item {
     id?: number;
     sku: string;
     name: string;
     production_order_id?: number;
     source_type?: string;
+    category_id?: number;
     inventory_location_id: number;
     target_quantity: number;
     current_stock: number;
@@ -57,6 +64,7 @@ const props = defineProps<{
     item?: Item;
     locations: Location[];
     productionOrders: ProductionOrder[];
+    categories: Category[];
     allowManualEntry?: boolean;
     sourceTypes?: Record<string, string>;
 }>();
@@ -72,6 +80,7 @@ const selectedSourceType = ref<string>(props.item?.source_type || 'opening_balan
 const form = useForm({
     production_order_id: props.item?.production_order_id || null,
     source_type: props.item?.source_type || 'production',
+    category_id: props.item?.category_id || null,
     sku: props.item?.sku || '',
     name: props.item?.name || '',
     inventory_location_id: props.item?.inventory_location_id || null,
@@ -220,6 +229,47 @@ const getSourceTypeIcon = (type: string) => {
             return RotateCcw;
         default:
             return Package;
+    }
+};
+
+// Add category modal
+const showAddCategoryModal = ref(false);
+const categoryList = ref<Category[]>([...props.categories]);
+const addCategoryName = ref('');
+const addCategoryDescription = ref('');
+const addCategoryProcessing = ref(false);
+const addCategoryErrors = ref<{ name?: string }>({});
+
+const resetAddCategoryForm = () => {
+    addCategoryName.value = '';
+    addCategoryDescription.value = '';
+    addCategoryErrors.value = {};
+};
+
+const addCategory = async () => {
+    if (!addCategoryName.value.trim()) return;
+
+    addCategoryProcessing.value = true;
+    addCategoryErrors.value = {};
+
+    try {
+        const response = await axios.post('/inventory/categories', {
+            name: addCategoryName.value,
+            description: addCategoryDescription.value || null,
+        });
+        const newCategory: Category = response.data;
+        categoryList.value.push(newCategory);
+        form.category_id = newCategory.id;
+        showAddCategoryModal.value = false;
+        resetAddCategoryForm();
+    } catch (error: any) {
+        if (error.response?.data?.errors?.name) {
+            addCategoryErrors.value = { name: error.response.data.errors.name[0] };
+        } else {
+            addCategoryErrors.value = { name: 'Gagal menyimpan kategori.' };
+        }
+    } finally {
+        addCategoryProcessing.value = false;
     }
 };
 </script>
@@ -408,22 +458,56 @@ const getSourceTypeIcon = (type: string) => {
                 <!-- Product Name (for Manual Entry) -->
                 <div v-if="isManualEntry">
                     <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Informasi Produk</h3>
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Nama Produk <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            id="name"
-                            v-model="form.name"
-                            type="text"
-                            required
-                            placeholder="Contoh: Mukena Bali Putih, Kue Lapis Legit, dll"
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            :class="{ 'border-red-300': form.errors.name }"
-                        />
-                        <p v-if="form.errors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">
-                            {{ form.errors.name }}
-                        </p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Nama Produk <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                id="name"
+                                v-model="form.name"
+                                type="text"
+                                required
+                                placeholder="Contoh: Mukena Bali Putih, Kue Lapis Legit, dll"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                :class="{ 'border-red-300': form.errors.name }"
+                            />
+                            <p v-if="form.errors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.errors.name }}
+                            </p>
+                        </div>
+
+                        <!-- Category -->
+                        <div>
+                            <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Kategori
+                            </label>
+                            <div class="flex gap-2">
+                                <select
+                                    id="category_id"
+                                    v-model="form.category_id"
+                                    class="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    :class="{ 'border-red-300': form.errors.category_id }"
+                                >
+                                    <option :value="null">Pilih Kategori (opsional)</option>
+                                    <option v-for="cat in categoryList" :key="cat.id" :value="cat.id">
+                                        {{ cat.name }}
+                                    </option>
+                                </select>
+                                <button
+                                    type="button"
+                                    @click="showAddCategoryModal = true"
+                                    class="flex items-center gap-1 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm text-indigo-700 transition-colors hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
+                                    title="Tambah kategori baru"
+                                >
+                                    <Plus class="h-4 w-4" />
+                                    <span class="hidden sm:inline">Tambah</span>
+                                </button>
+                            </div>
+                            <p v-if="form.errors.category_id" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ form.errors.category_id }}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -431,9 +515,10 @@ const getSourceTypeIcon = (type: string) => {
                 <div>
                     <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Data Stock</h3>
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div>
+                        <!-- Jumlah Target: only shown for production order entry -->
+                        <div v-if="!isManualEntry">
                             <label for="target_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {{ isManualEntry ? 'Jumlah Target' : 'Target Produksi' }} <span class="text-red-500">*</span>
+                                Target Produksi <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <input
@@ -442,20 +527,15 @@ const getSourceTypeIcon = (type: string) => {
                                     type="number"
                                     required
                                     min="0"
-                                    :readonly="!isManualEntry"
-                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-16 text-sm shadow-sm transition-all"
-                                    :class="[
-                                        { 'border-red-300': form.errors.target_quantity },
-                                        !isManualEntry ? 'bg-gray-50 dark:bg-gray-800 dark:text-gray-400' : 'focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
-                                    ]"
+                                    readonly
+                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-16 text-sm shadow-sm transition-all bg-gray-50 dark:bg-gray-800 dark:text-gray-400"
+                                    :class="{ 'border-red-300': form.errors.target_quantity }"
                                 />
                                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
                                     {{ productionUnit }}
                                 </span>
                             </div>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                {{ isManualEntry ? 'Jumlah yang diharapkan' : 'Dari production order' }}
-                            </p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Dari production order</p>
                             <p v-if="form.errors.target_quantity" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.target_quantity }}
                             </p>
@@ -669,5 +749,77 @@ const getSourceTypeIcon = (type: string) => {
             @close="showCameraModal = false"
             @capture="handleCameraCapture"
         />
+
+        <!-- Add Category Modal -->
+        <Teleport to="body">
+            <div v-if="showAddCategoryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+                <div class="w-full max-w-md rounded-xl bg-white shadow-xl dark:bg-gray-800">
+                    <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+                        <div class="flex items-center gap-2">
+                            <Tag class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Tambah Kategori</h3>
+                        </div>
+                        <button
+                            type="button"
+                            @click="showAddCategoryModal = false; resetAddCategoryForm();"
+                            class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                        >
+                            <X class="h-5 w-5" />
+                        </button>
+                    </div>
+
+                    <div class="space-y-4 px-6 py-5">
+                        <div>
+                            <label for="new_category_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Nama Kategori <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                id="new_category_name"
+                                v-model="addCategoryName"
+                                type="text"
+                                placeholder="Contoh: Pakaian Wanita, Tas, Sepatu"
+                                class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                :class="{ 'border-red-300': addCategoryErrors.name }"
+                                @keyup.enter="addCategory"
+                            />
+                            <p v-if="addCategoryErrors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ addCategoryErrors.name }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <label for="new_category_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Deskripsi <span class="text-gray-400 text-xs font-normal">(opsional)</span>
+                            </label>
+                            <input
+                                id="new_category_description"
+                                v-model="addCategoryDescription"
+                                type="text"
+                                placeholder="Deskripsi singkat kategori"
+                                class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+                        <button
+                            type="button"
+                            @click="showAddCategoryModal = false; resetAddCategoryForm();"
+                            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="button"
+                            @click="addCategory"
+                            :disabled="addCategoryProcessing || !addCategoryName.trim()"
+                            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {{ addCategoryProcessing ? 'Menyimpan...' : 'Simpan Kategori' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
     </div>
 </template>

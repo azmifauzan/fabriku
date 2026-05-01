@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateInventoryItemRequest extends FormRequest
@@ -34,6 +35,11 @@ class UpdateInventoryItemRequest extends FormRequest
             }
         }
 
+        // For manual entry, default target_quantity to 0 if not provided
+        if (empty($this->input('production_order_id')) && ! $this->has('target_quantity')) {
+            $data['target_quantity'] = 0;
+        }
+
         if (! empty($data)) {
             $this->merge($data);
         }
@@ -42,7 +48,7 @@ class UpdateInventoryItemRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -66,11 +72,14 @@ class UpdateInventoryItemRequest extends FormRequest
             'location_id' => 'required|exists:inventory_locations,id',
             'inventory_location_id' => 'sometimes|exists:inventory_locations,id', // backwards compatibility
 
-            'target_quantity' => 'required|integer|min:0',
+            'target_quantity' => $isManualEntry ? 'nullable|integer|min:0' : 'required|integer|min:0',
             'current_quantity' => 'required|integer|min:0',
             'current_stock' => 'sometimes|integer|min:0', // backwards compatibility
             'stock_quantity' => 'sometimes|integer|min:0', // backwards compatibility
             'minimum_stock' => 'integer|min:0',
+
+            // Category
+            'category_id' => 'nullable|exists:inventory_item_categories,id',
 
             'unit_cost' => 'required|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',

@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { useSweetAlert } from '@/composables/useSweetAlert';
 import { Form, Link } from '@inertiajs/vue3';
 import { Head } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
 import { Eye, EyeOff } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const form = {
     email: '',
@@ -12,6 +14,16 @@ const form = {
 
 const showPassword = ref(false);
 const showDemoCredentials = ref(false);
+
+const page = usePage();
+const { showError } = useSweetAlert();
+const flash = computed(() => page.props.flash as { success?: string; error?: string; warning?: string } | null);
+
+watch(flash, (newFlash) => {
+    if (newFlash?.error) {
+        showError('Sesi Berakhir', newFlash.error);
+    }
+}, { immediate: true, deep: true });
 </script>
 
 <template>

@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreInventoryLocationRequest;
 use App\Http\Requests\UpdateInventoryLocationRequest;
 use App\Models\InventoryLocation;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -45,26 +49,26 @@ class InventoryLocationController extends Controller
 
     public function show(InventoryLocation $location)
     {
-        $location->load([
-            'inventoryItems' => function ($query) {
-                $query->with('productionOrder.preparationOrder.pattern')->latest()->limit(10);
-            },
-        ]);
+        $location->load('inventoryItems');
 
-        // Map is_active boolean to status string for frontend
         $location->status = $location->is_active ? 'active' : 'inactive';
 
+        $items = $location->inventoryItems->map(fn ($item) => [
+            'id' => $item->id,
+            'sku' => $item->sku,
+            'name' => $item->product_name,
+            'current_stock' => $item->current_quantity,
+            'quality_grade' => $item->quality_grade,
+            'status' => $item->status,
+            'image_url' => $item->image_url,
+        ]);
+
         return Inertia::render('Inventory/Locations/Show', [
-            'location' => $location,
-            'recentItems' => $location->inventoryItems,
-            'stats' => [
-                'total_items' => $location->inventoryItems()->count(),
-                'total_stock' => $location->inventoryItems()->sum('current_quantity'),
-                'total_value' => $location->inventoryItems()->sum(\DB::raw('current_quantity * unit_cost')),
-                'low_stock_items' => $location->inventoryItems()->lowStock()->count(),
+            'location' => array_merge($location->toArray(), [
+                'items' => $items,
+                'current_capacity' => $location->used_capacity,
                 'available_capacity' => $location->available_capacity,
-                'used_capacity' => $location->used_capacity,
-            ],
+            ]),
         ]);
     }
 
@@ -96,6 +100,29 @@ class InventoryLocationController extends Controller
         return redirect()
             ->route('inventory.locations.index')
             ->with('success', 'Location berhasil diupdate.');
+    }
+
+    public function printQrCode(InventoryLocation $location)
+    {
+        return Inertia::render('Inventory/Locations/PrintQrCode', [
+            'location' => $location,
+        ]);
+    }
+
+    public function generateQrCode(InventoryLocation $location)
+    {
+        $url = route('inventory.locations.show', $location);
+
+        $renderer = new ImageRenderer(
+            new RendererStyle(300),
+            new SvgImageBackEnd
+        );
+
+        $writer = new Writer($renderer);
+        $qrCode = $writer->writeString($url);
+
+        return response($qrCode)
+            ->header('Content-Type', 'image/svg+xml');
     }
 
     public function destroy(InventoryLocation $location)
