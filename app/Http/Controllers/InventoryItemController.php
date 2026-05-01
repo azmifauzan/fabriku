@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreInventoryItemRequest;
 use App\Http\Requests\UpdateInventoryItemRequest;
 use App\Models\InventoryItem;
+use App\Models\InventoryItemCategory;
 use App\Models\InventoryLocation;
 use App\Models\Pattern;
 use App\Models\ProductionOrder;
@@ -46,6 +47,11 @@ class InventoryItemController extends Controller
             $query->where('location_id', $locationId);
         }
 
+        // Filter by category
+        if ($categoryId = $request->get('category_id')) {
+            $query->where('category_id', $categoryId);
+        }
+
         // Filter by quality grade (mainly for garment)
         // Removed: quality_grade filtering
 
@@ -72,10 +78,11 @@ class InventoryItemController extends Controller
         return Inertia::render('Inventory/Items/Index', [
             'items' => $items,
             'filters' => $request->only([
-                'search', 'status', 'location_id', 'inventory_location_id',
+                'search', 'status', 'category_id', 'location_id', 'inventory_location_id',
                 'low_stock', 'expiring_soon', 'expired',
             ]),
             'locations' => InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'capacity']),
+            'categories' => InventoryItemCategory::active()->orderBy('sort_order')->orderBy('name')->get(['id', 'name']),
             'stats' => [
                 'total_items' => InventoryItem::count(),
                 'total_stock' => InventoryItem::sum('current_quantity'),
@@ -92,6 +99,7 @@ class InventoryItemController extends Controller
             'inventoryLocation',
             'productionOrder.preparationOrder.pattern',
             'tenant',
+            'category',
         ]);
 
         return Inertia::render('Inventory/Items/Show', [
@@ -133,12 +141,7 @@ class InventoryItemController extends Controller
                 'purchase' => 'Pembelian Langsung',
                 'return' => 'Retur Customer',
             ],
-            'categories' => [
-                'garment' => 'Garment',
-                'food' => 'Makanan',
-                'craft' => 'Kerajinan',
-                'other' => 'Lainnya',
-            ],
+            'categories' => InventoryItemCategory::active()->orderBy('sort_order')->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -207,7 +210,7 @@ class InventoryItemController extends Controller
             });
 
         return Inertia::render('Inventory/Items/Edit', [
-            'item' => $inventoryItem->load('productionOrder.preparationOrder.pattern'),
+            'item' => $inventoryItem->load('productionOrder.preparationOrder.pattern', 'category'),
             'locations' => $locations,
             'patterns' => $patterns,
             'productionOrders' => $productionOrders,
@@ -218,12 +221,7 @@ class InventoryItemController extends Controller
                 'purchase' => 'Pembelian Langsung',
                 'return' => 'Retur Customer',
             ],
-            'categories' => [
-                'garment' => 'Garment',
-                'food' => 'Makanan',
-                'craft' => 'Kerajinan',
-                'other' => 'Lainnya',
-            ],
+            'categories' => InventoryItemCategory::active()->orderBy('sort_order')->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -382,21 +380,47 @@ class InventoryItemController extends Controller
     public function scanLookup(Request $request)
     {
         $request->validate([
-            'sku' => 'required|string',
+            'qr_code' => 'required|string',
         ]);
 
-        $item = InventoryItem::where('sku', $request->sku)->first();
+        $qrCode = $request->qr_code;
+
+        // Check if it's a location URL (location QR codes contain the location's URL)
+        if (str_contains($qrCode, '/inventory/locations/')) {
+            preg_match('/\/inventory\/locations\/(\d+)/', $qrCode, $matches);
+
+            if (! empty($matches[1])) {
+                $location = InventoryLocation::find($matches[1]);
+
+                if ($location) {
+                    return response()->json([
+                        'success' => true,
+                        'redirect_url' => route('inventory.locations.show', $location),
+                        'type' => 'location',
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Lokasi tidak ditemukan.',
+            ], 404);
+        }
+
+        // Otherwise treat as item SKU
+        $item = InventoryItem::where('sku', $qrCode)->first();
 
         if (! $item) {
             return response()->json([
                 'success' => false,
-                'message' => 'Item dengan SKU tersebut tidak ditemukan.',
+                'message' => 'Item atau lokasi tidak ditemukan.',
             ], 404);
         }
 
         return response()->json([
             'success' => true,
             'redirect_url' => route('inventory.items.show', $item),
+            'type' => 'item',
         ]);
     }
 }

@@ -7,6 +7,8 @@ use App\Http\Requests\UpdateSalesOrderRequest;
 use App\Models\Customer;
 use App\Models\InventoryItem;
 use App\Models\SalesOrder;
+use App\Models\SystemSetting;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -142,14 +144,25 @@ class SalesOrderController extends Controller
                 'resi_number' => $validated['resi_number'] ?? null,
             ]);
 
-            // Create items
+            // Create items and reserve stock
             $salesOrder->items()->createMany($items);
+
+            foreach ($validated['items'] as $item) {
+                $inventoryItem = InventoryItem::lockForUpdate()->find($item['inventory_item_id']);
+                $inventoryItem?->reserveStock((int) $item['quantity']);
+            }
 
             DB::commit();
 
             return redirect()
                 ->route('sales-orders.show', $salesOrder)
                 ->with('success', 'Sales order berhasil dibuat.');
+        } catch (UniqueConstraintViolationException $e) {
+            DB::rollBack();
+
+            return back()->withErrors([
+                'order_number' => 'Nomor order sudah digunakan. Silakan coba lagi.',
+            ])->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -228,9 +241,22 @@ class SalesOrderController extends Controller
                 'resi_number' => $validated['resi_number'] ?? null,
             ]);
 
+            // Release reserved stock for old items
+            $salesOrder->load('items');
+            foreach ($salesOrder->items as $oldItem) {
+                $inventoryItem = InventoryItem::lockForUpdate()->find($oldItem->inventory_item_id);
+                $inventoryItem?->releaseReservedStock((int) $oldItem->quantity);
+            }
+
             // Delete old items and create new ones
             $salesOrder->items()->delete();
             $salesOrder->items()->createMany($items);
+
+            // Reserve stock for new items
+            foreach ($validated['items'] as $item) {
+                $inventoryItem = InventoryItem::lockForUpdate()->find($item['inventory_item_id']);
+                $inventoryItem?->reserveStock((int) $item['quantity']);
+            }
 
             DB::commit();
 
@@ -251,7 +277,21 @@ class SalesOrderController extends Controller
             ]);
         }
 
-        $salesOrder->delete();
+        DB::beginTransaction();
+        try {
+            $salesOrder->load('items');
+            foreach ($salesOrder->items as $item) {
+                $inventoryItem = InventoryItem::lockForUpdate()->find($item->inventory_item_id);
+                $inventoryItem?->releaseReservedStock((int) $item->quantity);
+            }
+
+            $salesOrder->delete();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
 
         return redirect()
             ->route('sales-orders.index')
@@ -263,9 +303,20 @@ class SalesOrderController extends Controller
         // For now, return a simple view or just a placeholder message for testing
         // Ideally this would generate a PDF
         $salesOrder->load(['customer', 'items.inventoryItem']);
-        $settings = \App\Models\SystemSetting::getAllForTenant(auth()->user()->tenant_id);
+        $settings = SystemSetting::getAllForTenant(auth()->user()->tenant_id);
 
         return Inertia::render('SalesOrders/Print', [
+            'salesOrder' => $salesOrder,
+            'settings' => $settings,
+        ]);
+    }
+
+    public function deliveryOrder(SalesOrder $salesOrder)
+    {
+        $salesOrder->load(['customer', 'items.inventoryItem']);
+        $settings = SystemSetting::getAllForTenant(auth()->user()->tenant_id);
+
+        return Inertia::render('SalesOrders/DeliveryOrder', [
             'salesOrder' => $salesOrder,
             'settings' => $settings,
         ]);

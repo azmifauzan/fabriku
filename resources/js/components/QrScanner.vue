@@ -31,7 +31,7 @@
 
                 <!-- Instructions -->
                 <div class="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                    <p>Posisikan QR code dalam frame kamera untuk melakukan scan.</p>
+                    <p>Posisikan QR code item atau lokasi dalam frame kamera untuk melakukan scan.</p>
                 </div>
             </div>
         </div>
@@ -93,7 +93,7 @@ async function stopScanning() {
 }
 
 async function onScanSuccess(decodedText: string) {
-    statusMessage.value = 'QR Code terdeteksi! Mencari item...'
+    statusMessage.value = 'QR Code terdeteksi! Mencari data...'
     statusClass.value = 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
 
     try {
@@ -102,20 +102,21 @@ async function onScanSuccess(decodedText: string) {
             await html5QrCode.pause(true)
         }
 
-        // Look up the item by SKU
+        // Look up the item/location by QR code value
         const response = await fetch('/inventory/items/scan-lookup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
             },
-            body: JSON.stringify({ sku: decodedText }),
+            body: JSON.stringify({ qr_code: decodedText }),
         })
 
         const data = await response.json()
 
         if (data.success && data.redirect_url) {
-            statusMessage.value = 'Item ditemukan! Mengarahkan...'
+            const label = data.type === 'location' ? 'Lokasi' : 'Item'
+            statusMessage.value = `${label} ditemukan! Mengarahkan...`
             statusClass.value = 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
 
             // Clean up before navigation
@@ -124,7 +125,7 @@ async function onScanSuccess(decodedText: string) {
             // Navigate to item detail page
             router.visit(data.redirect_url)
         } else {
-            statusMessage.value = data.message || 'Item tidak ditemukan.'
+            statusMessage.value = data.message || 'Item atau lokasi tidak ditemukan.'
             statusClass.value = 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
 
             // Resume scanning after 2 seconds
@@ -137,7 +138,7 @@ async function onScanSuccess(decodedText: string) {
         }
     } catch (error) {
         console.error('Error during scan lookup:', error)
-        statusMessage.value = 'Terjadi kesalahan saat mencari item.'
+        statusMessage.value = 'Terjadi kesalahan saat mencari data.'
         statusClass.value = 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
 
         // Resume scanning after error

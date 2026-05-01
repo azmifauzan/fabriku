@@ -11,7 +11,7 @@ class EnsureTenantContext
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -48,8 +48,9 @@ class EnsureTenantContext
                 ], 403);
             }
 
-            auth()->logout();
-            abort(403, 'Tenant subscription has expired or is inactive.');
+            // For web requests: allow through in read-only mode.
+            // The subscription.check middleware handles write operations,
+            // and the UI shows the expired status via the tenant.is_expired shared prop.
         }
 
         return $next($request);

@@ -3,7 +3,7 @@ import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Edit, Eye, Search, Trash2, X } from 'lucide-vue-next';
+import { Edit, Eye, QrCode, Search, Trash2, X } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface Location {
@@ -235,6 +235,13 @@ const capacityBarClass = (percentage: number) => {
                                                 title="Lihat detail lokasi"
                                             >
                                                 <Eye :size="18" />
+                                            </Link>
+                                            <Link
+                                                :href="`/inventory/locations/${location.id}/qrcode/print`"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-emerald-600 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30"
+                                                title="Print QR Code lokasi"
+                                            >
+                                                <QrCode :size="18" />
                                             </Link>
                                             <Link
                                                 :href="`/inventory/locations/${location.id}/edit`"

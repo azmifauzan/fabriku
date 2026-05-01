@@ -3,15 +3,16 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckSubscriptionStatus
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  \Closure(Request): (Response)  $next
      */
-    public function handle(\Illuminate\Http\Request $request, \Closure $next): \Symfony\Component\HttpFoundation\Response
+    public function handle(Request $request, \Closure $next): Response
     {
         $user = $request->user();
 
@@ -49,7 +50,7 @@ class CheckSubscriptionStatus
                 ], 403);
             }
 
-            return redirect()->back()->with('error', 'Membership Anda sudah expired. Akun dalam mode read-only. Silakan upgrade untuk melanjutkan.');
+            return redirect()->back()->with('warning', 'Langganan Anda telah berakhir. Akun dalam mode read-only. Silakan perpanjang langganan untuk melanjutkan.');
         }
 
         return $next($request);

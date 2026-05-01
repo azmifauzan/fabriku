@@ -1,11 +1,16 @@
 <?php
 
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\CheckPermission;
+use App\Http\Middleware\CheckSubscriptionStatus;
 use App\Http\Middleware\EnsureTenantContext;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -23,18 +28,23 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'tenant' => EnsureTenantContext::class,
-            'admin' => \App\Http\Middleware\AdminMiddleware::class,
-            'subscription.check' => \App\Http\Middleware\CheckSubscriptionStatus::class,
-            'permission' => \App\Http\Middleware\CheckPermission::class,
+            'admin' => AdminMiddleware::class,
+            'subscription.check' => CheckSubscriptionStatus::class,
+            'permission' => CheckPermission::class,
         ]);
 
         // Trust all proxies for reverse proxy setup
-        $middleware->trustProxies(at: '*', headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |
-            \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST |
-            \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT |
-            \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO |
-            \Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB);
+        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_FOR |
+            Request::HEADER_X_FORWARDED_HOST |
+            Request::HEADER_X_FORWARDED_PORT |
+            Request::HEADER_X_FORWARDED_PROTO |
+            Request::HEADER_X_FORWARDED_AWS_ELB);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (HttpException $e, Request $request) {
+            if ($e->getStatusCode() === 419) {
+                return redirect()->route('login')
+                    ->with('error', 'Sesi Anda telah berakhir. Silakan masuk kembali.');
+            }
+        });
     })->create();

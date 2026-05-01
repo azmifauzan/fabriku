@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateInventoryLocationRequest extends FormRequest
@@ -17,14 +18,14 @@ class UpdateInventoryLocationRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         $locationId = $this->route('location')->id;
 
         return [
-            'code' => 'sometimes|string|max:50|unique:inventory_locations,code,'.$locationId.',id,tenant_id,'.auth()->user()->tenant_id,
+            'code' => 'nullable|string|max:50|unique:inventory_locations,code,'.$locationId.',id,tenant_id,'.auth()->user()->tenant_id,
             'name' => 'required|string|max:255|unique:inventory_locations,name,'.$locationId.',id,tenant_id,'.auth()->user()->tenant_id,
             'capacity' => 'nullable|integer|min:1',
             'is_active' => 'sometimes|boolean',

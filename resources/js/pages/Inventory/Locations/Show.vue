@@ -9,6 +9,7 @@ interface InventoryItem {
     current_stock: number;
     quality_grade: string;
     status: string;
+    image_url?: string;
 }
 
 interface Location {
@@ -71,6 +72,20 @@ const capacityPercentage = () => {
                                 <div class="flex items-center justify-between">
                                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Informasi Lokasi</h3>
                                     <div class="flex gap-2">
+                                        <Link
+                                            :href="`/inventory/locations/${location.id}/qrcode/print`"
+                                            class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold tracking-widest text-gray-700 uppercase transition duration-150 ease-in-out hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-800"
+                                        >
+                                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                                                />
+                                            </svg>
+                                            QR Code
+                                        </Link>
                                         <Link
                                             :href="`/inventory/locations/${location.id}/edit`"
                                             class="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out hover:bg-indigo-700 focus:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none active:bg-indigo-900 dark:focus:ring-offset-gray-800"
@@ -163,21 +178,55 @@ const capacityPercentage = () => {
                     <div class="border-b border-gray-200 p-6 dark:border-gray-700">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Items di Lokasi Ini</h3>
                     </div>
-                    <div class="overflow-x-auto">
+
+                    <!-- Mobile: card list -->
+                    <div class="divide-y divide-gray-200 sm:hidden dark:divide-gray-700">
+                        <Link
+                            v-for="item in location.items"
+                            :key="item.id"
+                            :href="`/inventory/items/${item.id}`"
+                            class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                        >
+                            <img
+                                v-if="item.image_url"
+                                :src="item.image_url"
+                                :alt="item.name"
+                                class="h-14 w-14 shrink-0 rounded-lg border border-gray-200 object-cover dark:border-gray-700"
+                            />
+                            <div
+                                v-else
+                                class="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-700"
+                            >
+                                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-medium text-gray-900 dark:text-white">{{ item.name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.sku }}</p>
+                                <div class="mt-1 flex items-center gap-2">
+                                    <span class="text-xs text-gray-600 dark:text-gray-400">Stok: <strong>{{ item.current_stock }}</strong></span>
+                                    <span class="text-xs text-gray-400">·</span>
+                                    <span class="text-xs text-gray-600 capitalize dark:text-gray-400">{{ item.status }}</span>
+                                </div>
+                            </div>
+                            <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </Link>
+                    </div>
+
+                    <!-- Desktop: table -->
+                    <div class="hidden overflow-x-auto sm:block">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-900/50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                        SKU
-                                    </th>
+                                    <th class="w-14 px-4 py-3"></th>
                                     <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Nama
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Stok
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                                        Grade
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Status
@@ -193,17 +242,28 @@ const capacityPercentage = () => {
                                     :key="item.id"
                                     class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
                                 >
-                                    <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                                        {{ item.sku }}
+                                    <td class="px-4 py-3">
+                                        <img
+                                            v-if="item.image_url"
+                                            :src="item.image_url"
+                                            :alt="item.name"
+                                            class="h-10 w-10 rounded-md border border-gray-200 object-cover dark:border-gray-700"
+                                        />
+                                        <div
+                                            v-else
+                                            class="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-700"
+                                        >
+                                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                                        {{ item.name }}
+                                        <p class="font-medium">{{ item.name }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.sku }}</p>
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">
                                         {{ item.current_stock }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">
-                                        {{ item.quality_grade }}
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">
                                         {{ item.status }}

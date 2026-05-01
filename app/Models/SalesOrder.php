@@ -116,7 +116,16 @@ class SalesOrder extends Model
 
     public function canBeEdited(): bool
     {
-        return in_array($this->status, ['draft', 'confirmed']);
+        if (in_array($this->status, ['draft', 'confirmed'])) {
+            return true;
+        }
+
+        // Completed orders can still be edited if payment has not been received
+        if ($this->status === 'completed' && $this->payment_status !== 'paid') {
+            return true;
+        }
+
+        return false;
     }
 
     public function canBeCancelled(): bool

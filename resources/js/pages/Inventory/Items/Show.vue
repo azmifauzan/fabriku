@@ -34,12 +34,17 @@ interface InventoryLocation {
     code: string;
 }
 
+interface ItemCategory {
+    id: number;
+    name: string;
+}
+
 interface Item {
     id: number;
     sku: string;
     name: string;
     description?: string;
-    category: string;
+    category?: ItemCategory;
     source_type?: string;
     source_label?: string;
     current_stock: number;
@@ -110,21 +115,21 @@ const productionUnit = () => {
 
         <div class="px-6 py-6">
             <div class="mx-auto max-w-7xl">
-                <div class="mb-6 flex items-center justify-between">
-                    <div>
+                <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="min-w-0">
                         <Link href="/inventory/items" class="mb-2 inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
                             ← Kembali ke Inventory
                         </Link>
-                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ item.name }}</h1>
+                        <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">{{ item.name }}</h1>
                         <p class="mt-1 font-mono text-sm text-gray-500 dark:text-gray-400">{{ item.sku }}</p>
                         <p v-if="item.source_label" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             Sumber: {{ item.source_label }}
                         </p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex shrink-0 flex-wrap items-center gap-2">
                         <Link
                             :href="`/inventory/items/${item.id}/qrcode/print`"
-                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 sm:px-4 sm:py-2.5 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                         >
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -133,21 +138,21 @@ const productionUnit = () => {
                         </Link>
                         <Link
                             :href="`/inventory/items/${item.id}/adjustments`"
-                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 sm:px-4 sm:py-2.5 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                         >
                             <History class="h-4 w-4" />
                             Riwayat
                         </Link>
                         <button
                             @click="showAdjustModal = true"
-                            class="inline-flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition-all hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                            class="inline-flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 shadow-sm transition-all hover:bg-indigo-100 sm:px-4 sm:py-2.5 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
                         >
                             <RefreshCw class="h-4 w-4" />
                             Adjust Stock
                         </button>
                         <Link
                             :href="`/inventory/items/${item.id}/edit`"
-                            class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-500"
+                            class="inline-flex items-center rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-500 sm:px-4 sm:py-2.5"
                         >
                             Edit Item
                         </Link>
@@ -227,9 +232,9 @@ const productionUnit = () => {
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">SKU</dt>
                                         <dd class="mt-1 font-mono text-sm font-semibold text-gray-900 dark:text-white">{{ item.sku }}</dd>
                                     </div>
-                                    <div>
+                                    <div v-if="item.category">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Kategori</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 capitalize dark:text-white">{{ item.category }}</dd>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ item.category.name }}</dd>
                                     </div>
                                     <div v-if="item.inventory_location">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Lokasi Penyimpanan</dt>
@@ -237,7 +242,7 @@ const productionUnit = () => {
                                             {{ item.inventory_location.name }} ({{ item.inventory_location.code }})
                                         </dd>
                                     </div>
-                                    <div v-if="item.category === 'food' && item.expiry_date">
+                                    <div v-if="item.expiry_date">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Tanggal Kadaluarsa</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ formatDate(item.expiry_date) }}</dd>
                                     </div>

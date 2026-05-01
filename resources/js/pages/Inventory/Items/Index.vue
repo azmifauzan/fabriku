@@ -10,7 +10,10 @@ interface Item {
     id: number;
     sku: string;
     name: string;
-    category: string;
+    category?: {
+        id: number;
+        name: string;
+    };
     current_stock: number;
     reserved_stock: number;
     target_quantity?: number;
@@ -28,6 +31,11 @@ interface Item {
     expiry_date?: string;
 }
 
+interface Category {
+    id: number;
+    name: string;
+}
+
 interface PaginatedItems {
     data: Item[];
     current_page: number;
@@ -41,16 +49,17 @@ interface Props {
     filters: {
         search?: string;
         status?: string;
-        category?: string;
+        category_id?: number | string;
         location_id?: number;
     };
+    categories: Category[];
 }
 
 const props = defineProps<Props>();
 
 const search = ref(props.filters.search || '');
 const statusFilter = ref(props.filters.status || '');
-const categoryFilter = ref(props.filters.category || '');
+const categoryFilter = ref(props.filters.category_id || '');
 
 const applyFilters = () => {
     router.get(
@@ -58,7 +67,7 @@ const applyFilters = () => {
         {
             search: search.value || undefined,
             status: statusFilter.value || undefined,
-            category: categoryFilter.value || undefined,
+            category_id: categoryFilter.value || undefined,
         },
         {
             preserveState: true,
@@ -162,8 +171,9 @@ const isLowStock = (item: Item) => {
                                 class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
                                 <option value="">Semua Kategori</option>
-                                <option value="garment">Garment</option>
-                                <option value="food">Food</option>
+                                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                                    {{ cat.name }}
+                                </option>
                             </select>
                         </div>
 

@@ -32,9 +32,15 @@ interface ProductionOrder {
     preparation_order?: PreparationOrder;
 }
 
+interface Category {
+    id: number;
+    name: string;
+}
+
 interface Props {
     locations: Location[];
     productionOrders: ProductionOrder[];
+    categories: Category[];
     allowManualEntry?: boolean;
     sourceTypes?: Record<string, string>;
 }
@@ -50,7 +56,8 @@ defineProps<Props>();
             <div class="mx-auto max-w-4xl">
                 <ItemForm 
                     :locations="locations" 
-                    :production-orders="productionOrders" 
+                    :production-orders="productionOrders"
+                    :categories="categories"
                     :allow-manual-entry="allowManualEntry"
                     :source-types="sourceTypes"
                 />

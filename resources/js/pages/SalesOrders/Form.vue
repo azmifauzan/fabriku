@@ -139,7 +139,99 @@
                     {{ form.errors.items }}
                 </p>
 
-                <div class="overflow-x-auto">
+                <!-- Mobile: card layout -->
+                <div class="space-y-4 md:hidden">
+                    <div
+                        v-for="(item, index) in form.items"
+                        :key="index"
+                        class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900"
+                    >
+                        <div class="mb-3 flex items-center justify-between">
+                            <span class="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Item {{ index + 1 }}</span>
+                            <button
+                                type="button"
+                                @click="removeItem(index)"
+                                :disabled="form.items.length === 1"
+                                class="text-sm font-medium text-red-600 hover:text-red-800 disabled:cursor-not-allowed disabled:text-gray-400 dark:text-red-400"
+                            >
+                                Hapus
+                            </button>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Produk</label>
+                                <select
+                                    v-model="item.inventory_item_id"
+                                    @change="onInventoryItemChange(index)"
+                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    :class="{ 'border-red-500': form.errors[`items.${index}.inventory_item_id`] }"
+                                >
+                                    <option value="">Pilih Produk</option>
+                                    <option v-for="invItem in inventoryItems" :key="invItem.id" :value="invItem.id">
+                                        {{ invItem.product_name || invItem.pattern?.name || invItem.sku }} - {{ invItem.sku }} ({{ invItem.current_stock - invItem.reserved_stock }} available)
+                                    </option>
+                                </select>
+                                <p v-if="form.errors[`items.${index}.inventory_item_id`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
+                                    {{ form.errors[`items.${index}.inventory_item_id`] }}
+                                </p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Qty</label>
+                                    <input
+                                        v-model.number="item.quantity"
+                                        @input="calculateItemSubtotal(index)"
+                                        type="number"
+                                        min="1"
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-right text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                        :class="{ 'border-red-500': form.errors[`items.${index}.quantity`] }"
+                                    />
+                                    <p v-if="form.errors[`items.${index}.quantity`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
+                                        {{ form.errors[`items.${index}.quantity`] }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Harga</label>
+                                    <input
+                                        v-model.number="item.unit_price"
+                                        @input="calculateItemSubtotal(index)"
+                                        type="number"
+                                        min="0"
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-right text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                        :class="{ 'border-red-500': form.errors[`items.${index}.unit_price`] }"
+                                    />
+                                    <p v-if="form.errors[`items.${index}.unit_price`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
+                                        {{ form.errors[`items.${index}.unit_price`] }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Diskon</label>
+                                    <input
+                                        v-model.number="item.discount_amount"
+                                        @input="calculateItemSubtotal(index)"
+                                        type="number"
+                                        min="0"
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-right text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    />
+                                </div>
+                                <div class="flex flex-col justify-end">
+                                    <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Subtotal</label>
+                                    <p class="py-2.5 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                        Rp {{ Number(item.subtotal || 0).toLocaleString('id-ID') }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop: table layout -->
+                <div class="hidden overflow-x-auto md:block">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\InventoryItem;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StoreSalesOrderRequest extends FormRequest
 {
@@ -38,6 +40,34 @@ class StoreSalesOrderRequest extends FormRequest
             'items.*.discount_amount' => ['nullable', 'numeric', 'min:0'],
             'items.*.notes' => ['nullable', 'string'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $items = $this->input('items', []);
+
+            foreach ($items as $index => $item) {
+                if (empty($item['inventory_item_id']) || empty($item['quantity'])) {
+                    continue;
+                }
+
+                $inventoryItem = InventoryItem::find($item['inventory_item_id']);
+
+                if (! $inventoryItem) {
+                    continue;
+                }
+
+                $availableStock = $inventoryItem->available_stock;
+
+                if ((int) $item['quantity'] > $availableStock) {
+                    $validator->errors()->add(
+                        "items.{$index}.quantity",
+                        "Stok tersedia untuk {$inventoryItem->product_name} hanya {$availableStock}. Jumlah pesanan melebihi stok tersedia."
+                    );
+                }
+            }
+        });
     }
 
     protected function prepareForValidation(): void

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Scopes\TenantScope;
 use App\Models\Traits\HasAuditLogs;
+use Database\Factories\InventoryItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,13 +12,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class InventoryItem extends Model
 {
-    /** @use HasFactory<\Database\Factories\InventoryItemFactory> */
+    /** @use HasFactory<InventoryItemFactory> */
     use HasAuditLogs, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
         'sku',
         'production_order_id',
+        'category_id',
         'source_type',
         'location_id',
         'product_name',
@@ -90,6 +92,11 @@ class InventoryItem extends Model
     public function productionOrder(): BelongsTo
     {
         return $this->belongsTo(ProductionOrder::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(InventoryItemCategory::class, 'category_id');
     }
 
     public function inventoryLocation(): BelongsTo

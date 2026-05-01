@@ -37,19 +37,29 @@ interface Item {
     sku: string;
     name: string;
     production_order_id?: number;
+    category_id?: number;
     inventory_location_id: number;
     target_quantity: number;
     current_stock: number;
     unit_cost: string;
     selling_price: string;
+    source_type?: string;
     status: string;
     notes?: string;
+}
+
+interface Category {
+    id: number;
+    name: string;
 }
 
 interface Props {
     item: Item;
     locations: Location[];
     productionOrders: ProductionOrder[];
+    categories: Category[];
+    allowManualEntry?: boolean;
+    sourceTypes?: Record<string, string>;
 }
 
 defineProps<Props>();
@@ -61,7 +71,14 @@ defineProps<Props>();
 
         <div class="px-6 py-6">
             <div class="mx-auto max-w-4xl">
-                <ItemForm :item="item" :locations="locations" :production-orders="productionOrders" />
+                <ItemForm
+                    :item="item"
+                    :locations="locations"
+                    :production-orders="productionOrders"
+                    :categories="categories"
+                    :allow-manual-entry="allowManualEntry"
+                    :source-types="sourceTypes"
+                />
             </div>
         </div>
     </AppLayout>

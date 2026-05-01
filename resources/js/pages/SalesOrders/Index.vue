@@ -336,6 +336,14 @@
                                             >
                                                 <Printer :size="16" />
                                             </a>
+                                            <a
+                                                :href="`/sales-orders/${order.id}/delivery-order`"
+                                                target="_blank"
+                                                class="inline-flex items-center justify-center rounded-lg p-1.5 text-green-600 transition-colors hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/30"
+                                                title="Print Surat Jalan"
+                                            >
+                                                <Truck :size="16" />
+                                            </a>
                                             <Link
                                                 v-if="order.status === 'draft' || order.status === 'confirmed'"
                                                 :href="`/sales-orders/${order.id}/edit`"
@@ -411,7 +419,7 @@ import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Edit, Eye, Trash2, Printer } from 'lucide-vue-next';
+import { Edit, Eye, Trash2, Printer, Truck } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
 const props = defineProps({
