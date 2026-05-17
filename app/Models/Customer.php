@@ -37,6 +37,12 @@ class Customer extends Model
     protected static function booted(): void
     {
         static::addGlobalScope(new TenantScope);
+
+        static::creating(function (Customer $customer) {
+            if (auth()->check() && ! $customer->tenant_id) {
+                $customer->tenant_id = auth()->user()->tenant_id;
+            }
+        });
     }
 
     public function tenant(): BelongsTo

@@ -13,13 +13,13 @@ class StoreSalesOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user() !== null;
     }
 
     public function rules(): array
     {
         return [
-            'customer_id' => ['required', 'exists:customers,id'],
+            'customer_id' => ['required', \Illuminate\Validation\Rule::exists('customers', 'id')->where('tenant_id', $this->user()->tenant_id)],
             'order_date' => ['required', 'date'],
             'channel' => ['required', 'in:offline,online,reseller,marketplace'],
             'status' => ['nullable', 'in:draft,confirmed,processing,shipped,completed,cancelled'],
@@ -34,7 +34,7 @@ class StoreSalesOrderRequest extends FormRequest
             'invoice_number' => ['nullable', 'string', 'max:255'],
             'resi_number' => ['nullable', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.inventory_item_id' => ['required', 'exists:inventory_items,id'],
+            'items.*.inventory_item_id' => ['required', \Illuminate\Validation\Rule::exists('inventory_items', 'id')->where('tenant_id', $this->user()->tenant_id)],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
             'items.*.discount_amount' => ['nullable', 'numeric', 'min:0'],

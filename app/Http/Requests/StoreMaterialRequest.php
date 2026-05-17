@@ -9,15 +9,15 @@ class StoreMaterialRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user() !== null;
     }
 
     public function rules(): array
     {
-        $tenantId = auth()->user()->tenant_id;
+        $tenantId = $this->user()->tenant_id;
 
         return [
-            'material_type_id' => ['required', 'exists:material_types,id'],
+            'material_type_id' => ['required', \Illuminate\Validation\Rule::exists('material_types', 'id')->where('tenant_id', $tenantId)],
             'code' => ['required', 'string', 'max:50', Rule::unique('materials')->where('tenant_id', $tenantId)],
             'name' => ['required', 'string', 'max:255'],
             'supplier_name' => ['nullable', 'string', 'max:255'],

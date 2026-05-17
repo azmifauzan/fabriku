@@ -10,9 +10,11 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Schedule demo data reset every hour
-Schedule::command('demo:reset')
-    ->hourly()
-    ->withoutOverlapping();
+if (app()->environment(['local', 'staging'])) {
+    Schedule::command('demo:reset')
+        ->hourly()
+        ->withoutOverlapping();
+}
 
 // Send trial reminder emails daily at 9 AM
 Schedule::command('trial:send-reminders')

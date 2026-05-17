@@ -321,7 +321,7 @@ it('cannot access delivery order of another tenant', function () {
     $response->assertNotFound();
 });
 
-it('reserves stock when creating a sales order', function () {
+it('does not reserve stock when creating a draft sales order', function () {
     $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 0]);
 
     $orderData = [
@@ -340,6 +340,30 @@ it('reserves stock when creating a sales order', function () {
     ];
 
     $this->post(route('sales-orders.store'), $orderData);
+
+    // Draft creation does not reserve stock; observer handles reservation on status → confirmed
+    $this->assertDatabaseHas('inventory_items', [
+        'id' => $this->inventoryItem->id,
+        'reserved_quantity' => 0,
+    ]);
+});
+
+it('reserves stock when sales order status changes to confirmed', function () {
+    $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 0]);
+
+    $order = SalesOrder::factory()->draft()->create([
+        'tenant_id' => $this->tenant->id,
+        'customer_id' => $this->customer->id,
+    ]);
+    $order->items()->create([
+        'inventory_item_id' => $this->inventoryItem->id,
+        'quantity' => 10,
+        'unit_price' => 150000,
+        'discount_amount' => 0,
+        'subtotal' => 1500000,
+    ]);
+
+    $order->update(['status' => 'confirmed']);
 
     $this->assertDatabaseHas('inventory_items', [
         'id' => $this->inventoryItem->id,
@@ -386,7 +410,7 @@ it('allows order when quantity matches available stock exactly', function () {
         'items' => [
             [
                 'inventory_item_id' => $this->inventoryItem->id,
-                'quantity' => 40,
+                'quantity' => 40, // exactly available_stock (45 - 5 = 40)
                 'unit_price' => 150000,
                 'discount_amount' => 0,
             ],
@@ -396,16 +420,20 @@ it('allows order when quantity matches available stock exactly', function () {
     $response = $this->post(route('sales-orders.store'), $orderData);
 
     $response->assertRedirect();
+    // Draft creation does not reserve; reserved_quantity stays unchanged
     $this->assertDatabaseHas('inventory_items', [
         'id' => $this->inventoryItem->id,
-        'reserved_quantity' => 45,
+        'reserved_quantity' => 5,
     ]);
 });
 
-it('releases reserved stock when deleting a sales order', function () {
-    $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 10]);
+it('releases reserved stock when deleting a confirmed sales order', function () {
+    $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 0]);
 
-    $order = SalesOrder::factory()->draft()->create(['tenant_id' => $this->tenant->id]);
+    $order = SalesOrder::factory()->draft()->create([
+        'tenant_id' => $this->tenant->id,
+        'customer_id' => $this->customer->id,
+    ]);
     $order->items()->create([
         'inventory_item_id' => $this->inventoryItem->id,
         'quantity' => 10,
@@ -414,6 +442,12 @@ it('releases reserved stock when deleting a sales order', function () {
         'subtotal' => 1500000,
     ]);
 
+    // Confirm the order → observer reserves stock
+    $order->update(['status' => 'confirmed']);
+    $this->inventoryItem->refresh();
+    expect($this->inventoryItem->reserved_quantity)->toBe(10);
+
+    // Delete confirmed order → observer releases stock
     $this->delete(route('sales-orders.destroy', $order));
 
     $this->assertDatabaseHas('inventory_items', [
@@ -422,10 +456,13 @@ it('releases reserved stock when deleting a sales order', function () {
     ]);
 });
 
-it('adjusts reserved stock when updating a sales order', function () {
-    $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 10]);
+it('does not adjust reserved stock when updating a draft sales order items', function () {
+    $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 0]);
 
-    $order = SalesOrder::factory()->draft()->create(['tenant_id' => $this->tenant->id]);
+    $order = SalesOrder::factory()->draft()->create([
+        'tenant_id' => $this->tenant->id,
+        'customer_id' => $this->customer->id,
+    ]);
     $order->items()->create([
         'inventory_item_id' => $this->inventoryItem->id,
         'quantity' => 10,
@@ -451,9 +488,9 @@ it('adjusts reserved stock when updating a sales order', function () {
 
     $this->put(route('sales-orders.update', $order), $updateData);
 
-    // Old reservation (10) released, new reservation (5) added → net 10 - 10 + 5 = 5
+    // Draft order item updates do not affect reserved_quantity (observer handles via status transitions)
     $this->assertDatabaseHas('inventory_items', [
         'id' => $this->inventoryItem->id,
-        'reserved_quantity' => 5,
+        'reserved_quantity' => 0,
     ]);
 });

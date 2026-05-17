@@ -12,7 +12,7 @@ class StoreInventoryItemRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user() !== null;
     }
 
     /**
@@ -53,22 +53,23 @@ class StoreInventoryItemRequest extends FormRequest
     public function rules(): array
     {
         $isManualEntry = empty($this->input('production_order_id'));
+        $tenantId = $this->user()->tenant_id;
 
         return [
             // Source type for tracking
             'source_type' => 'nullable|in:production,opening_balance,purchase,return',
 
             // Production order is now optional (nullable for manual entry / opening balance)
-            'production_order_id' => 'nullable|exists:production_orders,id',
+            'production_order_id' => ['nullable', \Illuminate\Validation\Rule::exists('production_orders', 'id')->where('tenant_id', $tenantId)],
 
-            'sku' => 'nullable|string|max:100|unique:inventory_items,sku,NULL,id,tenant_id,'.auth()->user()->tenant_id,
+            'sku' => 'nullable|string|max:100|unique:inventory_items,sku,NULL,id,tenant_id,'.$tenantId,
 
             // Product name required for manual entry
             'product_name' => $isManualEntry ? 'required|string|max:255' : 'nullable|string|max:255',
             'name' => 'sometimes|string|max:255', // backwards compatibility
 
-            'location_id' => 'required|exists:inventory_locations,id',
-            'inventory_location_id' => 'sometimes|exists:inventory_locations,id', // backwards compatibility
+            'location_id' => ['required', \Illuminate\Validation\Rule::exists('inventory_locations', 'id')->where('tenant_id', $tenantId)],
+            'inventory_location_id' => ['sometimes', \Illuminate\Validation\Rule::exists('inventory_locations', 'id')->where('tenant_id', $tenantId)], // backwards compatibility
 
             // Quantities - required for manual entry
             'target_quantity' => $isManualEntry ? 'nullable|integer|min:0' : 'required|integer|min:0',
@@ -78,7 +79,7 @@ class StoreInventoryItemRequest extends FormRequest
             'minimum_stock' => 'integer|min:0',
 
             // Category
-            'category_id' => 'nullable|exists:inventory_item_categories,id',
+            'category_id' => ['nullable', \Illuminate\Validation\Rule::exists('inventory_item_categories', 'id')->where('tenant_id', $tenantId)],
 
             // Pricing - required for manual entry
             'unit_cost' => 'required|numeric|min:0',

@@ -79,7 +79,7 @@ class SalesOrderObserver
     {
         DB::transaction(function () use ($salesOrder) {
             foreach ($salesOrder->items()->get() as $item) {
-                $item->inventoryItem->increment('reserved_quantity', $item->quantity);
+                $item->inventoryItem->reserveStock($item->quantity);
             }
         });
     }
@@ -92,10 +92,10 @@ class SalesOrderObserver
                 $inventoryItem = $item->inventoryItem;
 
                 // Reduce reserved quantity (releasing the reservation)
-                $inventoryItem->decrement('reserved_quantity', $item->quantity);
+                $inventoryItem->releaseReservedStock($item->quantity);
 
                 // Reduce actual quantity (shipping the item)
-                $inventoryItem->decrement('current_quantity', $item->quantity);
+                $inventoryItem->deductStock($item->quantity);
             }
         });
     }
@@ -104,7 +104,7 @@ class SalesOrderObserver
     {
         DB::transaction(function () use ($salesOrder) {
             foreach ($salesOrder->items()->get() as $item) {
-                $item->inventoryItem->decrement('reserved_quantity', $item->quantity);
+                $item->inventoryItem->releaseReservedStock($item->quantity);
             }
         });
     }
