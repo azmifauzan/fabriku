@@ -111,9 +111,9 @@ class MaterialReceipt extends Model
             return null;
         }
 
-        return \Illuminate\Support\Facades\Storage::disk('fabriku_s3')->temporaryUrl(
+        return \Illuminate\Support\Facades\Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->temporaryUrl(
             $this->image_path,
-            now()->addMinutes(30)
+            now()->addMinutes(config('filesystems.url_ttl_minutes', 25))
         );
     }
 }

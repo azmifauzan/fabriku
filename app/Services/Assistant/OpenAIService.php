@@ -18,7 +18,7 @@ class OpenAIService
     {
         $this->baseUrl = config('services.openai.base_url', 'https://api.openai.com/v1');
         $this->apiKey = config('services.openai.api_key');
-        $this->model = config('services.openai.model', 'gpt-5-nano');
+        $this->model = config('services.openai.model', 'gpt-4o-mini');
     }
 
     /**
@@ -42,12 +42,15 @@ class OpenAIService
             ];
         }
 
-        $payload = [
-            'model' => $options['model'] ?? $this->model,
-            'messages' => $messages,
-            'temperature' => $options['temperature'] ?? 0.7,
-            'max_tokens' => $options['max_tokens'] ?? 1000,
-        ];
+        $modelId = $options['model'] ?? $this->model;
+        $isReasoningModel = preg_match('/^(o1|o3|o4|gpt-5)/i', $modelId);
+
+        $payload = ['model' => $modelId, 'messages' => $messages];
+
+        if (! $isReasoningModel) {
+            $payload['temperature'] = $options['temperature'] ?? 0.7;
+            $payload['max_tokens'] = $options['max_tokens'] ?? 1000;
+        }
 
         if (! empty($tools)) {
             $payload['tools'] = $tools;

@@ -21,11 +21,11 @@ class DashboardController extends Controller
         $stats = [
             'total_materials' => Material::query()->count(),
             'low_stock_materials' => Material::query()
-                ->whereRaw('stock_quantity <= min_stock')
+                ->whereColumn('stock_quantity', '<=', 'min_stock')
                 ->count(),
             'total_inventory' => InventoryItem::query()->sum('current_quantity'),
             'low_stock_inventory' => InventoryItem::query()
-                ->whereRaw('(current_quantity - reserved_quantity) <= minimum_stock')
+                ->whereColumn('current_quantity', '<=', 'minimum_stock')
                 ->count(),
             'total_sales_month' => SalesOrder::query()
                 ->whereMonth('order_date', now()->month)
@@ -117,31 +117,31 @@ class DashboardController extends Controller
 
         // Low Stock Alerts
         $lowStockMaterials = Material::query()
-            ->whereRaw('stock_quantity <= min_stock')
+            ->whereColumn('stock_quantity', '<=', 'min_stock')
             ->select('id', 'code', 'name', 'stock_quantity', 'unit', 'min_stock')
             ->limit(5)
             ->get();
 
         $lowStockInventory = InventoryItem::query()
-            ->whereRaw('(current_quantity - reserved_quantity) <= minimum_stock')
+            ->whereColumn('current_quantity', '<=', 'minimum_stock')
             ->select('id', 'sku', 'product_name', 'current_quantity', 'reserved_quantity', 'minimum_stock')
             ->limit(5)
             ->get();
 
-        // Material Stock Summary
-        $allMaterials = Material::query()
-            ->with('materialType:id,name')
-            ->select('id', 'code', 'name', 'stock_quantity', 'unit', 'price_per_unit', 'material_type_id', 'min_stock')
-            ->get();
-
+        // Material Stock Summary — aggregated at DB level
         $materialStockSummary = [
-            'total_items' => $allMaterials->count(),
-            'total_stock_value' => $allMaterials->sum(fn ($m) => $m->stock_quantity * $m->price_per_unit),
-            'low_stock_count' => $allMaterials->filter(fn ($m) => $m->stock_quantity <= $m->min_stock)->count(),
+            'total_items' => Material::query()->count(),
+            'total_stock_value' => Material::query()->sum(DB::raw('stock_quantity * price_per_unit')),
+            'low_stock_count' => Material::query()->whereColumn('stock_quantity', '<=', 'min_stock')->count(),
         ];
 
         // Top 5 materials by stock value
-        $topMaterialsByValue = $allMaterials
+        $topMaterialsByValue = Material::query()
+            ->with('materialType:id,name')
+            ->select('id', 'code', 'name', 'stock_quantity', 'unit', 'price_per_unit', 'material_type_id', 'min_stock')
+            ->orderByDesc(DB::raw('stock_quantity * price_per_unit'))
+            ->limit(5)
+            ->get()
             ->map(fn ($m) => [
                 'id' => $m->id,
                 'code' => $m->code,
@@ -152,10 +152,7 @@ class DashboardController extends Controller
                 'price_per_unit' => $m->price_per_unit,
                 'stock_value' => $m->stock_quantity * $m->price_per_unit,
                 'is_low_stock' => $m->stock_quantity <= $m->min_stock,
-            ])
-            ->sortByDesc('stock_value')
-            ->take(5)
-            ->values();
+            ]);
 
         // Inventory by Location Summary
         $inventoryByLocation = \App\Models\InventoryLocation::query()
@@ -184,22 +181,18 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Comprehensive Inventory Summary
-        $allInventoryItems = InventoryItem::query()
-            ->select('id', 'sku', 'product_name', 'current_quantity', 'reserved_quantity', 'minimum_stock', 'unit_cost')
-            ->get();
-
+        // Comprehensive Inventory Summary — aggregated at DB level
         $inventorySummary = [
-            'total_items' => $allInventoryItems->count(),
-            'total_quantity' => $allInventoryItems->sum('current_quantity'),
-            'total_reserved' => $allInventoryItems->sum('reserved_quantity'),
-            'total_available' => $allInventoryItems->sum(fn ($item) => max(0, $item->current_quantity - $item->reserved_quantity)),
-            'total_value' => $allInventoryItems->sum(fn ($item) => $item->current_quantity * $item->unit_cost),
-            'low_stock_count' => $allInventoryItems->filter(fn ($item) => ($item->current_quantity - $item->reserved_quantity) > 0 &&
-                ($item->current_quantity - $item->reserved_quantity) <= $item->minimum_stock
-            )->count(),
-            'out_of_stock_count' => $allInventoryItems->filter(fn ($item) => $item->current_quantity == 0
-            )->count(),
+            'total_items' => InventoryItem::query()->count(),
+            'total_quantity' => InventoryItem::query()->sum('current_quantity'),
+            'total_reserved' => InventoryItem::query()->sum('reserved_quantity'),
+            'total_available' => InventoryItem::query()->sum(DB::raw('CASE WHEN current_quantity > reserved_quantity THEN current_quantity - reserved_quantity ELSE 0 END')),
+            'total_value' => InventoryItem::query()->sum(DB::raw('current_quantity * unit_cost')),
+            'low_stock_count' => InventoryItem::query()
+                ->whereRaw('(current_quantity - reserved_quantity) > 0')
+                ->whereRaw('(current_quantity - reserved_quantity) <= minimum_stock')
+                ->count(),
+            'out_of_stock_count' => InventoryItem::query()->where('current_quantity', 0)->count(),
         ];
 
         return Inertia::render('Dashboard', [

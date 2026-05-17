@@ -70,19 +70,8 @@ class InventoryService
             throw new \Exception('Location does not have sufficient capacity.');
         }
 
-        $oldLocationId = $item->location_id;
-
         DB::transaction(function () use ($item, $newLocation) {
             $item->update(['location_id' => $newLocation->id]);
-
-            // Log the movement (implement StockMovement model later if needed)
-            // StockMovement::create([
-            //     'inventory_item_id' => $item->id,
-            //     'from_location_id' => $oldLocationId,
-            //     'to_location_id' => $newLocation->id,
-            //     'type' => 'movement',
-            //     'reason' => $reason,
-            // ]);
         });
 
         return true;

@@ -456,6 +456,65 @@ it('releases reserved stock when deleting a confirmed sales order', function () 
     ]);
 });
 
+it('releases reserved stock when force deleting a confirmed order not yet soft-deleted', function () {
+    $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 0]);
+
+    $order = SalesOrder::factory()->draft()->create([
+        'tenant_id' => $this->tenant->id,
+        'customer_id' => $this->customer->id,
+    ]);
+    $order->items()->create([
+        'inventory_item_id' => $this->inventoryItem->id,
+        'quantity' => 10,
+        'unit_price' => 150000,
+        'discount_amount' => 0,
+        'subtotal' => 1500000,
+    ]);
+
+    $order->update(['status' => 'confirmed']);
+    $this->inventoryItem->refresh();
+    expect($this->inventoryItem->reserved_quantity)->toBe(10);
+
+    // Force delete a non-trashed confirmed order → observer releases stock
+    $order->forceDelete();
+
+    $this->assertDatabaseHas('inventory_items', [
+        'id' => $this->inventoryItem->id,
+        'reserved_quantity' => 0,
+    ]);
+});
+
+it('does not double-release reserved stock when force deleting an already soft-deleted order', function () {
+    $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 0]);
+
+    $order = SalesOrder::factory()->draft()->create([
+        'tenant_id' => $this->tenant->id,
+        'customer_id' => $this->customer->id,
+    ]);
+    $order->items()->create([
+        'inventory_item_id' => $this->inventoryItem->id,
+        'quantity' => 10,
+        'unit_price' => 150000,
+        'discount_amount' => 0,
+        'subtotal' => 1500000,
+    ]);
+
+    $order->update(['status' => 'confirmed']);
+
+    // Soft delete releases stock via deleted observer
+    $order->delete();
+    $this->inventoryItem->refresh();
+    expect($this->inventoryItem->reserved_quantity)->toBe(0);
+
+    // Force delete a trashed order → must NOT release again (would go negative)
+    $order->forceDelete();
+
+    $this->assertDatabaseHas('inventory_items', [
+        'id' => $this->inventoryItem->id,
+        'reserved_quantity' => 0,
+    ]);
+});
+
 it('does not adjust reserved stock when updating a draft sales order items', function () {
     $this->inventoryItem->update(['current_quantity' => 50, 'reserved_quantity' => 0]);
 

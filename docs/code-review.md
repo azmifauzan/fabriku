@@ -34,9 +34,8 @@ Controller manual `reserveStock`/`releaseReservedStock` di `store()`, `update()`
 ### ✅ RESOLVED — `SalesOrderController::update` tidak enforce `canBeEdited()`
 Added guard: `if (! $salesOrder->canBeEdited()) { abort(403, ...); }` di awal `update()`.
 
-### Telegram webhook tanpa rate limit
-`routes/api.php:17` — endpoint POST publik tanpa throttle. Verifikasi `X-Telegram-Bot-Api-Secret-Token` ada, tapi attacker tetap bisa hammer endpoint.
-**Fix**: `->middleware('throttle:60,1')`. Kurangi level log `debug` payload ke `info` ringkas.
+### ✅ RESOLVED — Telegram webhook tanpa rate limit
+`routes/api.php` — ditambah `->middleware('throttle:60,1')`. Log level debug diturunkan ke info dengan payload ringkas.
 
 ---
 
@@ -48,13 +47,11 @@ Added guard: `if (! $salesOrder->canBeEdited()) { abort(403, ...); }` di awal `u
 ### ✅ RESOLVED — Duplicate key di array `stats`
 `SalesOrderController::index` — duplikat `'pending_payment'` sudah dihapus.
 
-### Storage disk hardcoded `fabriku_s3`
-`app/Models/InventoryItem.php:183`, `app/Models/Material.php:86`, beberapa controller — string literal `'fabriku_s3'` tersebar.
-**Fix**: tarik ke `config/filesystems.php` dengan key alias atau `config('app.uploads_disk')`. Test gagal kalau env tidak punya disk ini.
+### ✅ RESOLVED — Storage disk hardcoded `fabriku_s3`
+Semua referensi literal `'fabriku_s3'` diganti dengan `config('filesystems.uploads_disk', 'fabriku_s3')`. Disk name bisa di-override lewat env `UPLOADS_DISK`. File terimpak: `InventoryItem`, `Material`, `MaterialReceipt`, `SubscriptionPayment`, `InventoryItemController`, `MaterialController`, `MaterialReceiptController`, `SubscriptionController`.
 
-### `temporaryUrl()` di S3 dipanggil tiap kali accessor diakses
-`InventoryItem::getImageUrlAttribute` + `Material::getImageUrlAttribute` — `temporaryUrl` adalah HTTP call ke S3. Karena `$appends`, setiap serialize ke JSON (mis. list 20 item) trigger 20x S3 call.
-**Fix**: jangan masukkan ke `$appends`; expose lazy lewat resource transformer atau cache URL 25 menit.
+### ✅ RESOLVED — `temporaryUrl()` di S3 dipanggil tiap kali accessor diakses
+`InventoryItem::getImageUrlAttribute` + `Material::getImageUrlAttribute` + `MaterialReceipt::getImageUrlAttribute` + `SubscriptionPayment::getProofUrlAttribute` — URL sekarang di-cache dengan `Cache::remember()` per `md5(image_path)` selama TTL - 1 menit. TTL dikonfigurasi lewat `config('filesystems.url_ttl_minutes')` (default 25 menit, env `UPLOAD_URL_TTL`).
 
 ### ✅ RESOLVED — `Role` tanpa TenantScope
 `Role` sudah punya `static::addGlobalScope(new TenantScope)` + `creating` listener di `booted()`.
@@ -76,70 +73,64 @@ Added guard: `if (! $salesOrder->canBeEdited()) { abort(403, ...); }` di awal `u
 
 ## MEDIUM
 
-### Inkonsistensi pattern auto-fill `tenant_id`
-- Material/Pattern: ada `auth()->check()` guard
-- InventoryItem: tidak ada `auth()->check()` (null reference via console)
-- SalesOrder: controller isi manual
-**Fix**: ekstrak ke trait `BelongsToTenant` dengan listener seragam + defensive null-check.
+### ✅ RESOLVED — Inkonsistensi pattern auto-fill `tenant_id`
+`InventoryItem::booted()` sekarang punya `auth()->check()` guard di listener `creating`, seragam dengan `Material` dan model lain.
 
 ### Accessor alias berlapis di `InventoryItem`
 `current_stock`, `reserved_stock`, `inventory_location_id`, `name`, `pattern`, `batch_number`, `expiry_date` di `$appends` — duplikasi surface, payload membengkak.
 **Fix**: pilih nama canonical, hapus alias. Frontend update.
 
-### `DB::raw` dan `whereRaw` di controller
-`DashboardController` pakai `whereRaw(...)`. Rentan saat kolom di-rename.
-**Fix**: `whereColumn('stock_quantity', '<=', 'min_stock')`.
+### ✅ RESOLVED — `DB::raw` dan `whereRaw` di controller (column-rename risk)
+`DashboardController` — `whereRaw('stock_quantity <= min_stock')` diganti dengan `whereColumn('stock_quantity', '<=', 'min_stock')` di semua tempat yang relevan.
 
-### Sub-query N+1 di Dashboard
-`DashboardController::index` aggregate di PHP setelah `get()`. OOM risk saat data besar.
-**Fix**: agregasi di DB.
+### ✅ RESOLVED — Sub-query N+1 di Dashboard
+`DashboardController::index` — `materialStockSummary` dan `inventorySummary` sekarang dihitung lewat DB agregasi, bukan load semua rows ke PHP. `topMaterialsByValue` pakai `orderByDesc(DB::raw(...))` langsung di DB.
 
-### `OpenAIService` default model `gpt-5-nano`
-`app/Services/Assistant/OpenAIService.php:21` — bukan model OpenAI valid. Jika ENV tidak di-set, request runtime gagal.
-**Fix**: default ke `gpt-4o-mini`. Validasi di boot.
+### ✅ RESOLVED — `OpenAIService` default model `gpt-5-nano`
+`app/Services/Assistant/OpenAIService.php` — default diganti ke `gpt-4o-mini`. Env `OPENAI_MODEL` tetap bisa override.
 
-### `OpenAIService::chat` selalu sertakan `temperature` & `max_tokens`
-Tidak semua model terima param ini. Akan error 400 pada model baru (o1, gpt-5 family).
-**Fix**: filter param berdasarkan model capability.
+### ✅ RESOLVED — `OpenAIService::chat` selalu sertakan `temperature` & `max_tokens`
+Parameter sekarang conditional: tidak dikirim jika model match pattern `o1|o3|o4|gpt-5` (reasoning model family).
 
-### Tidak ada test untuk observer behavior baru pada force-delete
-`SalesOrderObserver::forceDeleting` melepas reservasi jika tidak trashed. Asumsinya benar tapi belum ter-cover test.
+### ✅ RESOLVED — Tidak ada test untuk observer behavior baru pada force-delete
+`tests/Feature/SalesOrderTest.php` — ditambah 2 test:
+- "releases reserved stock when force deleting a confirmed order not yet soft-deleted"
+- "does not double-release reserved stock when force deleting an already soft-deleted order"
 
 ### `assistant_messages` log tanpa truncation
 Full content + tool_calls JSON tiap pesan. Tidak ada retention policy.
 
-### Wayfinder TS output tidak di-gitignore
-`resources/js/actions/` & `resources/js/routes/` auto-generated. Kalau ikut commit → conflict besar.
-**Fix**: gitignore + generate di CI.
+### ✅ RESOLVED — Wayfinder TS output tidak di-gitignore
+`resources/js/actions/`, `resources/js/routes/`, `resources/js/wayfinder` sudah ada di `.gitignore`.
 
-### Logging payload Telegram di level `debug`
-`TelegramWebhookController::handle:35` — `Log::debug(...)` penuh pesan user. Privacy concern di production.
+### ✅ RESOLVED — Logging payload Telegram di level `debug`
+`TelegramWebhookController` — semua `Log::debug(...)` dengan full payload user diganti ke `Log::info(...)` dengan payload minimal (update_id, type, chat_id, from username).
 
 ### `subscription.check` tidak skip GET assistant route
 `assistant.message` adalah POST. User expired bisa GET history. Inconsistent dengan pesan UI.
+Didokumentasikan di `CheckSubscriptionStatus.php` sebagai keputusan desain yang disengaja: GET diizinkan untuk semua route, `EnsureTenantContext` menangani blokir JSON/assistant untuk expired tenant.
 
-### `EnsureTenantContext` overlap dengan `CheckSubscriptionStatus`
-Kedua middleware cek `tenant->isActive()`. Logic spread di dua tempat.
-**Fix**: gabungkan atau dokumentasikan handoff di kode.
+### ✅ RESOLVED — `EnsureTenantContext` overlap dengan `CheckSubscriptionStatus`
+Kedua middleware cek `tenant->isActive()`. Handoff dan pembagian tanggung jawab kini didokumentasikan via komentar inline di `CheckSubscriptionStatus::handle()`.
 
 ---
 
 ## LOW
 
-### Konfigurasi `temporaryUrl` 30 menit hardcoded
-`InventoryItem::getImageUrlAttribute` — tarik ke config.
+### ✅ RESOLVED — Konfigurasi `temporaryUrl` 30 menit hardcoded
+Semua hardcoded `addMinutes(30)` diganti dengan `config('filesystems.url_ttl_minutes', 25)`. Dapat diatur lewat env `UPLOAD_URL_TTL`.
 
-### Dead code / komentar TODO
-`InventoryService::moveItem` line 79-86 — comment-out StockMovement insert. Hapus atau buat tiket.
+### ✅ RESOLVED — Dead code / komentar TODO
+`InventoryService::moveItem` — blok comment-out `StockMovement::create([...])` dan variabel `$oldLocationId` yang tidak terpakai sudah dihapus.
 
 ### `print()` controller return Inertia render, bukan PDF
-`SalesOrderController::print` — nama method menyesatkan. Return Inertia view.
+`SalesOrderController::print` — nama method menyesatkan. Return Inertia view (bukan PDF). Rename ke `invoice()` saat ada bandwidth untuk update route + frontend.
 
-### Magic numbers di SKU generator
-`InventoryItem::generateSku` — prefix per category hardcoded. Pindahkan ke `config/business.php`.
+### ✅ RESOLVED — Magic numbers di SKU generator
+`InventoryItem::generateSku` — prefix per kategori dipindah ke `config/business.php` (key `sku_prefix` per kategori). Fallback tetap `'INV-ITM'`. Kategori cosmetic kini dapat prefix `INV-COS`.
 
 ### Tidak konsisten antara `paginate(15)` vs `paginate(20)`
-SalesOrder pakai 15, Inventory pakai 20.
+SalesOrder pakai 15, Inventory pakai 20. Bisa distandarkan ke konstanta.
 
 ### `app/Helpers/helpers.php` auto-loaded tanpa konten review
 Perlu pastikan tidak ada fungsi global yang berkonflik.
@@ -153,8 +144,8 @@ README hanya menyebut cache. Tidak ada dokumen deploy.
 ### `Inertia::render` controller terlalu gemuk
 `InventoryItemController::create/edit` bangun query kompleks. Pindahkan ke service / view model.
 
-### `composer.json` `name: "laravel/blank-vue-starter-kit"`
-Belum di-rename ke project.
+### ✅ RESOLVED — `composer.json` `name: "laravel/blank-vue-starter-kit"`
+Diganti ke `"fabriku/fabriku"`.
 
 ---
 
@@ -166,11 +157,14 @@ Belum di-rename ke project.
 
 ---
 
-## Rekomendasi Prioritas (sisa)
+## Sisa yang Belum Diselesaikan
 
-1. **Telegram rate limit** — satu line tambah throttle middleware.
-2. **HIGH storage disk** — extract ke config agar test bisa mock.
-3. **HIGH temporaryUrl S3** — remove dari `$appends`, lazy via resource transformer.
-4. **MEDIUM InventoryItem alias accessor** — bersihkan API surface.
-5. **MEDIUM OpenAIService** — fix default model id.
-6. Lainnya bisa antri.
+1. **HIGH** — Email log PII: skip/encrypt body untuk template token-bearing.
+2. **HIGH** — Observer partial-fail risk: wrap queue job status changes dalam outer transaction.
+3. **MEDIUM** — `InventoryItem` accessor alias cleanup: hapus `$appends` alias, update frontend.
+4. **MEDIUM** — `subscription.check` GET assistant: keputusan desain, dokumentasikan atau block GET juga.
+5. **MEDIUM** — `assistant_messages` retention policy.
+6. **LOW** — `print()` method rename ke `invoice()`.
+7. **LOW** — Standarisasi `paginate()` ke konstanta tunggal.
+8. **LOW** — Unit test untuk domain logic (MaterialStockService, SKU generator, status transitions).
+9. **LOW** — `InventoryItemController` query pindah ke service/view model.

@@ -32,7 +32,10 @@ class TelegramWebhookController extends Controller
 
         $update = $request->all();
 
-        Log::debug('Telegram webhook received', ['update' => $update]);
+        Log::info('Telegram webhook received', [
+            'update_id' => $update['update_id'] ?? null,
+            'type' => isset($update['message']) ? 'message' : (isset($update['callback_query']) ? 'callback' : 'other'),
+        ]);
 
         // Handle message updates
         if (isset($update['message'])) {
@@ -56,9 +59,8 @@ class TelegramWebhookController extends Controller
         $text = $message['text'] ?? '';
         $fromUser = $message['from'] ?? [];
 
-        Log::debug('Processing Telegram message', [
+        Log::info('Processing Telegram message', [
             'chat_id' => $chatId,
-            'text' => $text,
             'from' => $fromUser['username'] ?? $fromUser['id'] ?? 'unknown',
         ]);
 
@@ -317,7 +319,6 @@ class TelegramWebhookController extends Controller
      */
     private function handleCallbackQuery(array $callbackQuery): void
     {
-        // Not implemented yet - for future use with inline keyboards
-        Log::debug('Telegram callback query received', ['query' => $callbackQuery]);
+        Log::info('Telegram callback query received', ['id' => $callbackQuery['id'] ?? null]);
     }
 }

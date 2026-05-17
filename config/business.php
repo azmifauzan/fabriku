@@ -18,6 +18,7 @@ return [
             'label' => 'Garment & Konveksi',
             'description' => 'Produksi pakaian jadi (mukena, daster, gamis, dll)',
             'icon' => '🧵',
+            'sku_prefix' => 'INV-GRM',
 
             // Terminologi per kategori
             'terminology' => [
@@ -76,6 +77,7 @@ return [
             'label' => 'Makanan & Kue',
             'description' => 'Produksi makanan, kue, dan bakery',
             'icon' => '🍰',
+            'sku_prefix' => 'INV-FOOD',
 
             'terminology' => [
                 'material' => 'Bahan Mentah',
@@ -132,6 +134,7 @@ return [
             'description' => 'Produksi kerajinan tangan, souvenir, aksesoris',
             'icon' => '🎨',
             'enabled' => true,
+            'sku_prefix' => 'INV-CRFT',
 
             'terminology' => [
                 'material' => 'Bahan Baku',
@@ -182,6 +185,7 @@ return [
             'description' => 'Produksi kosmetik, skincare, produk kecantikan',
             'icon' => '💄',
             'enabled' => true,
+            'sku_prefix' => 'INV-COS',
 
             'terminology' => [
                 'material' => 'Bahan Baku',

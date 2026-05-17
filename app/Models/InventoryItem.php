@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class InventoryItem extends Model
 {
@@ -64,7 +66,7 @@ class InventoryItem extends Model
         static::addGlobalScope(new TenantScope);
 
         static::creating(function (InventoryItem $item) {
-            if (! $item->tenant_id) {
+            if (auth()->check() && ! $item->tenant_id) {
                 $item->tenant_id = auth()->user()->tenant_id;
             }
 
@@ -180,9 +182,15 @@ class InventoryItem extends Model
             return null;
         }
 
-        return \Storage::disk('fabriku_s3')->temporaryUrl(
-            $this->image_path,
-            now()->addMinutes(30)
+        $ttl = config('filesystems.url_ttl_minutes', 25);
+
+        return Cache::remember(
+            'img_url_'.md5($this->image_path),
+            ($ttl - 1) * 60,
+            fn () => Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->temporaryUrl(
+                $this->image_path,
+                now()->addMinutes($ttl)
+            )
         );
     }
 
@@ -303,12 +311,7 @@ class InventoryItem extends Model
         $category = $tenant?->business_category ?? 'OTHER';
 
         // Generate prefix based on category
-        $prefix = match (strtoupper($category)) {
-            'GARMENT' => 'INV-GRM',
-            'FOOD' => 'INV-FOOD',
-            'CRAFT' => 'INV-CRFT',
-            default => 'INV-ITM',
-        };
+        $prefix = config("business.categories.{$category}.sku_prefix", 'INV-ITM');
 
         // Find next sequential number for this tenant and prefix
         $lastItem = static::withoutGlobalScope(TenantScope::class)
