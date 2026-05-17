@@ -15,4 +15,5 @@ use Illuminate\Support\Facades\Route;
 
 // Telegram Webhook (no auth required - uses secret token verification)
 Route::post('/telegram/webhook', [\App\Http\Controllers\Api\TelegramWebhookController::class, 'handle'])
+    ->middleware('throttle:60,1')
     ->name('telegram.webhook');

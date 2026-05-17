@@ -15,6 +15,10 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    'uploads_disk' => env('UPLOADS_DISK', 'fabriku_s3'),
+
+    'url_ttl_minutes' => (int) env('UPLOAD_URL_TTL', 25),
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks

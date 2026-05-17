@@ -20,7 +20,9 @@ class CheckSubscriptionStatus
             return $next($request);
         }
 
-        // Allow read-only operations (GET, HEAD, OPTIONS)
+        // Allow read-only operations (GET, HEAD, OPTIONS).
+        // Note: this intentionally allows expired users to read data (e.g., assistant history).
+        // EnsureTenantContext handles tenant-is-active check for JSON/assistant routes.
         if ($request->isMethodSafe()) {
             return $next($request);
         }

@@ -42,7 +42,7 @@ class SubscriptionController extends Controller
         ]);
 
         $tenantId = auth()->user()->tenant_id;
-        $path = $request->file('proof')->store("tenants/{$tenantId}/payment-proofs", 'fabriku_s3');
+        $path = $request->file('proof')->store("tenants/{$tenantId}/payment-proofs", config('filesystems.uploads_disk', 'fabriku_s3'));
 
         $payment = SubscriptionPayment::create([
             'tenant_id' => $tenantId,

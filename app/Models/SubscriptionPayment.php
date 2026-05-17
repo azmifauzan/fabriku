@@ -39,9 +39,9 @@ class SubscriptionPayment extends Model
 
         // Check if it's stored in S3 (fabriku_s3)
         if (str_starts_with($this->proof_path, 'tenants/')) {
-            return Storage::disk('fabriku_s3')->temporaryUrl(
+            return Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->temporaryUrl(
                 $this->proof_path,
-                now()->addMinutes(30)
+                now()->addMinutes(config('filesystems.url_ttl_minutes', 25))
             );
         }
 

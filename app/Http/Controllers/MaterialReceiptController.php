@@ -69,7 +69,7 @@ class MaterialReceiptController extends Controller
 
         if ($request->hasFile('image')) {
             $tenantId = $request->user()->tenant_id;
-            $path = $request->file('image')->store("tenants/{$tenantId}/receipts", 'fabriku_s3');
+            $path = $request->file('image')->store("tenants/{$tenantId}/receipts", config('filesystems.uploads_disk', 'fabriku_s3'));
             $receipt->update(['image_path' => $path]);
         }
 
@@ -97,11 +97,11 @@ class MaterialReceiptController extends Controller
         if ($request->hasFile('image')) {
             // Delete old image if exists
             if ($materialReceipt->image_path) {
-                \Illuminate\Support\Facades\Storage::disk('fabriku_s3')->delete($materialReceipt->image_path);
+                \Illuminate\Support\Facades\Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->delete($materialReceipt->image_path);
             }
 
             $tenantId = $request->user()->tenant_id;
-            $path = $request->file('image')->storePublicly("tenants/{$tenantId}/receipts", 'fabriku_s3');
+            $path = $request->file('image')->storePublicly("tenants/{$tenantId}/receipts", config('filesystems.uploads_disk', 'fabriku_s3'));
             $data['image_path'] = $path;
         }
 

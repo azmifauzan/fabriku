@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Models\Scopes\TenantScope;
 use App\Models\Traits\HasAuditLogs;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -83,9 +85,15 @@ class Material extends Model
             return null;
         }
 
-        return \Illuminate\Support\Facades\Storage::disk('fabriku_s3')->temporaryUrl(
-            $this->image_path,
-            now()->addMinutes(30)
+        $ttl = config('filesystems.url_ttl_minutes', 25);
+
+        return Cache::remember(
+            'img_url_'.md5($this->image_path),
+            ($ttl - 1) * 60,
+            fn () => Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->temporaryUrl(
+                $this->image_path,
+                now()->addMinutes($ttl)
+            )
         );
     }
 }

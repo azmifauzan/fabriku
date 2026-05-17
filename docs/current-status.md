@@ -8,8 +8,8 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Mei 2026. Diturunkan d
 - Frontend type-safety: Laravel Wayfinder (`resources/js/actions/`, `resources/js/routes/`).
 - Multi-tenant: tenant isolation lewat `App\Models\Scopes\TenantScope` + auto-fill `tenant_id` di event `creating` model.
 - Dua guard auth terpisah: `web` (User tenant) dan `admin` (AdminUser platform).
-- Storage upload: hardcoded ke disk `fabriku_s3` (AWS SDK terpasang di composer).
-- AI: integrasi langsung ke OpenAI Chat Completions API (`gpt-5-nano` default) via `App\Services\Assistant\OpenAIService`.
+- Storage upload: disk dikonfigurasi via `config('filesystems.uploads_disk')` (env `UPLOADS_DISK`, default `fabriku_s3`). URL temporary di-cache 25 menit (env `UPLOAD_URL_TTL`).
+- AI: integrasi langsung ke OpenAI Chat Completions API (`gpt-4o-mini` default) via `App\Services\Assistant\OpenAIService`. Env `OPENAI_MODEL` bisa override.
 - Telegram: bot dua arah — webhook penerimaan + push notifikasi keluar.
 - Tests: 30+ feature test files (Pest 4), 1 browser test, 0 unit test meaningful.
 
