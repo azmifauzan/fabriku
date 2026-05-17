@@ -9,7 +9,7 @@ class StoreProductionOrderRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user() !== null;
     }
 
     protected function prepareForValidation(): void
@@ -21,10 +21,12 @@ class StoreProductionOrderRequest extends FormRequest
 
     public function rules(): array
     {
+        $tenantId = $this->user()->tenant_id;
+
         return [
-            'preparation_order_id' => ['required', 'exists:preparation_orders,id'],
+            'preparation_order_id' => ['required', \Illuminate\Validation\Rule::exists('preparation_orders', 'id')->where('tenant_id', $tenantId)],
             'type' => ['required', 'string', Rule::in(['internal', 'external'])],
-            'contractor_id' => ['nullable', 'exists:contractors,id', 'required_if:type,external'],
+            'contractor_id' => ['nullable', \Illuminate\Validation\Rule::exists('contractors', 'id')->where('tenant_id', $tenantId), 'required_if:type,external'],
             'estimated_completion_date' => ['nullable', 'date', 'after_or_equal:today'],
             'labor_cost' => ['nullable', 'numeric', 'min:0'],
             'priority' => ['required', 'string', Rule::in(['low', 'normal', 'high', 'urgent'])],

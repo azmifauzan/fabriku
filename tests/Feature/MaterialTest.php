@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Material;
+use App\Models\MaterialType;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,7 +17,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 
     // Create a material type for tests
-    $this->materialType = \App\Models\MaterialType::factory()->create([
+    $this->materialType = MaterialType::factory()->create([
         'tenant_id' => $this->tenant->id,
     ]);
 });
@@ -59,7 +60,7 @@ test('can search materials by name or code', function () {
 });
 
 test('can create new material', function () {
-    $materialType = \App\Models\MaterialType::factory()->create(['tenant_id' => $this->tenant->id]);
+    $materialType = MaterialType::factory()->create(['tenant_id' => $this->tenant->id]);
 
     $materialData = [
         'material_type_id' => $materialType->id,
@@ -121,10 +122,13 @@ test('code can be same across different tenants', function () {
 });
 
 test('can update material', function () {
-    $material = Material::factory()->create(['tenant_id' => $this->tenant->id]);
+    $material = Material::factory()->create([
+        'tenant_id' => $this->tenant->id,
+        'material_type_id' => $this->materialType->id,
+    ]);
 
     $updateData = [
-        'material_type_id' => $material->material_type_id,
+        'material_type_id' => $this->materialType->id,
         'code' => $material->code,
         'name' => 'Updated Material Name',
         'unit' => 'pcs',

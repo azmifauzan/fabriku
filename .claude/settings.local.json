@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -f 06-mvp-development-plan.md 07-frontend-ui-architecture.md 08-user-manual.md 09-workflow-summary.md 10-admin-panel.md 11-email-features.md 12-fabriku-assistant.md 13-testing-documentation.md DOCKER-ARCHITECTURE.md DOCKER-QUICKREF.md EMAIL-SETUP.md multi-category-architecture.md QR-CODE-FEATURES.md refactoring-preparation-simplification.md SCHEDULE-MONITORING.md README.md)",
+      "Read(//d/d/dev/fabriku/**)",
+      "Bash(vendor/bin/pint app/Http/Requests/UpdateMaterialRequest.php app/Http/Controllers/SalesOrderController.php --format=json)",
+      "Bash(php artisan *)",
+      "Bash(npm run *)",
+      "Bash(vendor/bin/pint *)"
+    ]
+  }
+}

@@ -64,7 +64,6 @@ class SalesOrderController extends Controller
                 'pending_orders' => SalesOrder::whereIn('status', ['confirmed', 'processing'])->count(),
                 'completed_orders' => SalesOrder::where('status', 'completed')->count(),
                 'pending_payment' => SalesOrder::where('payment_status', 'unpaid')->count(),
-                'pending_payment' => SalesOrder::where('payment_status', 'unpaid')->count(),
                 'realized_revenue' => SalesOrder::sum('paid_amount'),
                 'outstanding_revenue' => SalesOrder::where('payment_status', '!=', 'paid')->sum(DB::raw('total_amount - paid_amount')),
             ],
@@ -129,7 +128,7 @@ class SalesOrderController extends Controller
                 'customer_id' => $validated['customer_id'],
                 'order_date' => $validated['order_date'],
                 'channel' => $validated['channel'],
-                'status' => $validated['status'] ?? 'draft',
+                'status' => 'draft', // Force status to draft on creation
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,
                 'discount_percentage' => $validated['discount_percentage'] ?? 0,
@@ -144,13 +143,14 @@ class SalesOrderController extends Controller
                 'resi_number' => $validated['resi_number'] ?? null,
             ]);
 
-            // Create items and reserve stock
+            // Create items
             $salesOrder->items()->createMany($items);
 
-            foreach ($validated['items'] as $item) {
-                $inventoryItem = InventoryItem::lockForUpdate()->find($item['inventory_item_id']);
-                $inventoryItem?->reserveStock((int) $item['quantity']);
-            }
+            // Stock reservation is now handled by SalesOrderObserver
+            // foreach ($validated['items'] as $item) {
+            //     $inventoryItem = InventoryItem::lockForUpdate()->find($item['inventory_item_id']);
+            //     $inventoryItem?->reserveStock((int) $item['quantity']);
+            // }
 
             DB::commit();
 
@@ -191,6 +191,10 @@ class SalesOrderController extends Controller
 
     public function update(UpdateSalesOrderRequest $request, SalesOrder $salesOrder)
     {
+        if (! $salesOrder->canBeEdited()) {
+            abort(403, 'Sales order tidak dapat diedit dalam status '.$salesOrder->status);
+        }
+
         $validated = $request->validated();
 
         DB::beginTransaction();
@@ -241,22 +245,23 @@ class SalesOrderController extends Controller
                 'resi_number' => $validated['resi_number'] ?? null,
             ]);
 
+            // Stock release and reservation are now handled by SalesOrderObserver
             // Release reserved stock for old items
-            $salesOrder->load('items');
-            foreach ($salesOrder->items as $oldItem) {
-                $inventoryItem = InventoryItem::lockForUpdate()->find($oldItem->inventory_item_id);
-                $inventoryItem?->releaseReservedStock((int) $oldItem->quantity);
-            }
+            // $salesOrder->load('items');
+            // foreach ($salesOrder->items as $oldItem) {
+            //     $inventoryItem = InventoryItem::lockForUpdate()->find($oldItem->inventory_item_id);
+            //     $inventoryItem?->releaseReservedStock((int) $oldItem->quantity);
+            // }
 
             // Delete old items and create new ones
             $salesOrder->items()->delete();
             $salesOrder->items()->createMany($items);
 
             // Reserve stock for new items
-            foreach ($validated['items'] as $item) {
-                $inventoryItem = InventoryItem::lockForUpdate()->find($item['inventory_item_id']);
-                $inventoryItem?->reserveStock((int) $item['quantity']);
-            }
+            // foreach ($validated['items'] as $item) {
+            //     $inventoryItem = InventoryItem::lockForUpdate()->find($item['inventory_item_id']);
+            //     $inventoryItem?->reserveStock((int) $item['quantity']);
+            // }
 
             DB::commit();
 
@@ -279,13 +284,7 @@ class SalesOrderController extends Controller
 
         DB::beginTransaction();
         try {
-            $salesOrder->load('items');
-            foreach ($salesOrder->items as $item) {
-                $inventoryItem = InventoryItem::lockForUpdate()->find($item->inventory_item_id);
-                $inventoryItem?->releaseReservedStock((int) $item->quantity);
-            }
-
-            $salesOrder->delete();
+            $salesOrder->delete(); // Observer handles stock release
 
             DB::commit();
         } catch (\Exception $e) {

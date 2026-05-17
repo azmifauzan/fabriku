@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class InventoryItem extends Model
 {
@@ -198,35 +199,44 @@ class InventoryItem extends Model
 
     public function reserveStock(int $quantity): bool
     {
-        if ($this->available_stock < $quantity) {
-            return false;
-        }
+        return DB::transaction(function () use ($quantity) {
+            $item = self::lockForUpdate()->find($this->id);
+            if ($item->available_stock < $quantity) {
+                return false;
+            }
 
-        $this->increment('reserved_quantity', $quantity);
+            $item->increment('reserved_quantity', $quantity);
 
-        return true;
+            return true;
+        });
     }
 
     public function releaseReservedStock(int $quantity): bool
     {
-        if ($this->reserved_quantity < $quantity) {
-            return false;
-        }
+        return DB::transaction(function () use ($quantity) {
+            $item = self::lockForUpdate()->find($this->id);
+            if ($item->reserved_quantity < $quantity) {
+                return false;
+            }
 
-        $this->decrement('reserved_quantity', $quantity);
+            $item->decrement('reserved_quantity', $quantity);
 
-        return true;
+            return true;
+        });
     }
 
     public function deductStock(int $quantity): bool
     {
-        if ($this->current_quantity < $quantity) {
-            return false;
-        }
+        return DB::transaction(function () use ($quantity) {
+            $item = self::lockForUpdate()->find($this->id);
+            if ($item->current_quantity < $quantity) {
+                return false;
+            }
 
-        $this->decrement('current_quantity', $quantity);
+            $item->decrement('current_quantity', $quantity);
 
-        return true;
+            return true;
+        });
     }
 
     // Source type helpers

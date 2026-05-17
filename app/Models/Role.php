@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\Scopes\TenantScope;
 
 class Role extends Model
 {
@@ -24,6 +25,17 @@ class Role extends Model
         return [
             'is_system_role' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantScope);
+
+        static::creating(function (Role $role) {
+            if (auth()->check() && ! $role->tenant_id) {
+                $role->tenant_id = auth()->user()->tenant_id;
+            }
+        });
     }
 
     /**

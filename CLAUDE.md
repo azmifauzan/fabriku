@@ -1,0 +1,148 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+Fabriku — multi-tenant SaaS for Indonesian UMKM production & sales management. Category-agnostic platform: one codebase serves Garment, Food, Craft, and Cosmetic businesses via dynamic terminology and per-category rules in `config/business.php`.
+
+Stack: Laravel 12 + Inertia.js v2 + Vue 3.5 (`<script setup>`, Composition API) + Tailwind v4 + PostgreSQL/MySQL + Redis. Type-safe routes via Laravel Wayfinder (auto-generates TS in `resources/js/actions/` and `resources/js/routes/`).
+
+## Common Commands
+
+### Dev
+```bash
+composer dev                              # concurrent: serve + queue + vite
+php artisan serve                         # backend only (localhost:8000)
+npm run dev                               # vite only (127.0.0.1:5173, strictPort)
+php artisan queue:work                    # background jobs
+php artisan schedule:work                 # scheduler (demo reset + trial reminders)
+```
+
+### Test (Pest 4)
+```bash
+php artisan test --compact                                          # all
+php artisan test --compact tests/Feature/MaterialTest.php           # one file
+php artisan test --compact --filter=testName                        # by name
+php artisan test --parallel                                         # parallel
+php artisan test --filter=browser                                   # browser tests (Pest 4)
+```
+Feature tests auto-use `RefreshDatabase` via `tests/Pest.php`. Browser tests live in `tests/Browser/`.
+
+### Lint / Format
+```bash
+vendor/bin/pint --dirty --format agent    # PHP (run before finalizing)
+npm run lint                              # ESLint --fix
+npm run format                            # Prettier
+```
+
+### Build / Wayfinder
+```bash
+npm run build                             # prod assets
+npm run build:ssr                         # SSR bundle
+php artisan wayfinder:generate            # regen TS route bindings (Vite plugin does this on dev, run manually after route changes if needed)
+```
+
+### Domain commands
+```bash
+php artisan demo:reset                    # reset + reseed all demo tenants (also runs hourly via scheduler)
+php artisan demo:reset --tenant=1 --no-reseed
+php artisan material:recalculate-stock    # rebuild material stock from receipts
+php artisan trial:send-reminders          # trial expiry emails (daily 09:00 via scheduler)
+```
+
+## Architecture
+
+### Multi-tenancy (CRITICAL)
+- Tenant isolation enforced at model level via `App\Models\Scopes\TenantScope` global scope. Every tenant-owned model adds it in `booted()` and auto-fills `tenant_id` from `auth()->user()->tenant_id` on create.
+- `EnsureTenantContext` middleware (alias `tenant`) blocks users without `tenant_id`; for expired subscriptions, returns 403 JSON for API/assistant routes, allows web through in read-only mode (writes blocked by `subscription.check`).
+- Each tenant picks one `business_category` (garment/food/craft/cosmetic). `Tenant::getCategoryConfig()` / `getTerminology($key)` reads `config/business.php`.
+- Separate `admin` auth guard (`App\Models\AdminUser`) for platform-level admin panel at `/admin/*`. Tenant users use default `web` guard.
+
+### Authorization layers
+Tenant routes stack: `auth` → `verified` → `tenant` → `subscription.check` → `permission:<slug>`.
+- `permission:<slug>` (`CheckPermission` middleware) — RBAC via `User::hasPermission()` walking `roles → permissions`. Permission slugs follow `module.action` (e.g. `material.view`, `sales.edit`).
+- Admin routes: `auth:admin` + `AdminMiddleware`.
+
+### Audit logging
+Models include `HasAuditLogs` trait → boots `created/updated/deleted/restored` listeners writing polymorphic rows to `audit_logs`. Models override `getAuditableAttributes()` to control what's logged.
+
+### Bootstrap (Laravel 12 streamlined)
+All middleware aliases, exception handling, and route registration live in `bootstrap/app.php`. No `app/Http/Kernel.php`. Console commands in `app/Console/Commands/` are auto-discovered; scheduled tasks declared in `routes/console.php`.
+
+### Frontend
+- Inertia pages in `resources/js/pages/<Module>/` (Vue SFC, `<script setup>`).
+- Layouts: `AppLayout.vue` (tenant), `AdminLayout.vue` (admin panel).
+- Wayfinder: import controller actions from `@/actions/...` for type-safe `{ url, method }` objects; named imports only (tree-shaking).
+- Composables in `resources/js/composables/` (`useBusinessContext` reads tenant category, `useDarkMode`, `useSweetAlert`).
+- Dark mode supported app-wide via `dark:` classes — preserve when adding components.
+
+### Services
+Domain logic in `app/Services/`:
+- `MaterialStockService` — FIFO/FEFO stock movements
+- `InventoryService`, `ProductionService` — workflow state transitions
+- `Services/Assistant/` — OpenAI chat (`OpenAIService`), conversation persistence (`AssistantService`), business data queries (`AssistantDataService`)
+- `Services/Telegram/` — bot integration
+
+### Known Sharp Edges (see `docs/code-review.md` for full list)
+- **SalesOrder stock flow — observer is single source of truth**: `SalesOrderController` no longer calls `reserveStock`/`releaseReservedStock` manually. `SalesOrderObserver` handles all stock transitions on status changes (draft→confirmed=reserve, confirmed→completed=deduct, confirmed→cancelled=release). New code must not add manual stock calls in controller.
+- **`FormRequest::authorize()` returns `$this->user() !== null`** — relies on middleware for tenant/permission checks. If you add an action that bypasses the route middleware stack (e.g. an internal job), check tenancy yourself. Always use `Rule::exists('table','id')->where('tenant_id', auth()->user()->tenant_id)` for FK validation in new Form Requests.
+- **`Storage::disk('fabriku_s3')` is hardcoded** in `InventoryItem`, `Material`, and several controllers. Tests fail without this disk configured.
+- **`OpenAIService` default model is `gpt-5-nano`** (not a valid OpenAI ID). Set `OPENAI_MODEL` in `.env` or change the default in `config/services.php` before relying on AI features.
+- **`demo:reset` is guarded** by `app()->environment(['local', 'staging'])` in `routes/console.php` — safe to run scheduler in production.
+
+## Database Column Conventions (actual schema)
+
+Always check the actual migration file for the source of truth. `.github/COLUMN-NAMING-CONVENTIONS.md` has been deleted (was stale and misleading). Below is the actual schema:
+
+**`inventory_items`** (`2026_01_06_000001_create_inventory_tables.php`):
+- `sku`, `product_name`, `product_code`, `location_id` (FK), `production_order_id` (FK, nullable), `category_id` (FK)
+- `source_type` (enum-like string: `production` / `opening_balance` / `purchase` / `return`)
+- `current_quantity` (int), `reserved_quantity` (int), `target_quantity` (int), `minimum_stock` (int)
+- `unit_cost`, `selling_price`, `quality_grade`, `status` (enum: `available` / `reserved` / `damaged` / `expired`)
+- `expired_date` (nullable, food category)
+- Available stock = `current_quantity - reserved_quantity` (use `$item->available_stock` accessor).
+- Low stock = `(current_quantity - reserved_quantity) <= minimum_stock` (or `InventoryItem::lowStock()` scope which uses `current_quantity <= minimum_stock` — note the scope does NOT subtract reserved).
+
+**`inventory_locations`**: `code`, `name`, `capacity` (nullable=unlimited), `is_active` (boolean), `zone`, `rack`, `type`, `temperature_min`/`max`.
+
+**`sales_orders`** (`2026_01_07_000001_create_sales_tables.php`):
+- `order_number`, `invoice_number`, `resi_number`, `customer_id`, `order_date`, `delivery_date`
+- `channel` (enum: `offline` / `online` / `marketplace` / `reseller`)
+- `status` (enum: `draft` / `confirmed` / `processing` / `shipped` / `completed` / `cancelled`)
+- `subtotal`, `discount_amount`, `discount_percentage`, `tax_amount`, `shipping_cost`, `total_amount`, `paid_amount`
+- `payment_method`, `payment_status` (enum: `unpaid` / `pending` / `partial` / `paid` / `refunded`)
+- `payment_due_date`, `shipped_date`, `completed_date`, `shipping_address`
+
+**`inventory_items` model has confusing alias accessors** (`current_stock`, `reserved_stock`, `name`, `inventory_location_id`, `pattern`, `batch_number`, `expiry_date`) that proxy to the canonical columns. Prefer canonical names in new code; aliases exist for backwards compatibility only.
+
+**Per-tenant unique constraints**: `staff.code`, `contractors.code`, `sales_orders.order_number`, `inventory_items.sku`, `inventory_locations.code` are unique per `tenant_id` (fixed in `2026_04_30_*` and `2026_05_01_*` migrations) — do not write code assuming globally unique.
+
+## Conventions
+
+- **PHP**: explicit return types always; PHP 8 constructor property promotion; curly braces for all control structures; prefer PHPDoc over inline comments; casts via `casts()` method not `$casts` property.
+- **Eloquent**: prefer `Model::query()` over `DB::`; relationship methods with return type hints; eager load to avoid N+1; Form Requests for validation (not inline).
+- **Routes**: use named routes + `route()` helper. Frontend uses Wayfinder imports.
+- **Tests**: every change needs a test. Use factories with custom states. Use specific assertion methods (`assertForbidden`, `assertNotFound`) not `assertStatus(403)`.
+- **Vue**: single root element; `<Link>` / `router.visit()` not raw `<a>`; check existing components in `resources/js/components/` (especially `ui/`) before creating new.
+- **Tailwind v4**: CSS-first config via `@theme` (no `tailwind.config.js`); use `@import "tailwindcss"` not `@tailwind` directives; gap utilities for list spacing not margins.
+- **Localization**: default Bahasa Indonesia — UI strings, error messages, email templates are all Indonesian.
+- **Migrations**: when modifying a column, include ALL previously-defined attributes (Laravel 12 drops omitted ones).
+
+## Laravel Boost MCP
+
+This project has Laravel Boost (`laravel/boost`) installed. When available, prefer Boost MCP tools (`search-docs`, `tinker`, `database-query`, `browser-logs`, `list-artisan-commands`, `get-absolute-url`) over generic alternatives. `search-docs` returns version-pinned docs for installed packages — use it before guessing API shape.
+
+## Reference docs
+
+- `docs/01-business-requirements.md` through `docs/05-user-flows.md` — original business/architecture/schema/API/user-flow specs.
+- `docs/current-status.md` — actual state of every module, gaps, what is NOT shipped.
+- `docs/code-review.md` — severity-tagged findings (CRITICAL / HIGH / MEDIUM / LOW). Read before extending Sales, Inventory, or AI modules.
+- `docs/plan.md` — enhancement plan to add a "simple shop / retail" mode without touching existing category workflows.
+- `.github/copilot-instructions.md` — Laravel Boost guidelines (PHP/Eloquent/Inertia/Tailwind/Pest conventions). Authoritative for style.
+
+## Demo accounts (dev)
+
+Tenant users (`/login`): `admin@konveksi.com`, `admin@kuemama.com`, `admin@crafty.com`, `admin@glowbeauty.com` — all password `password`.
+Super admin (`/admin/login`): `admin@fabriku.com` / `password`.
+Demo data auto-resets hourly via scheduler.

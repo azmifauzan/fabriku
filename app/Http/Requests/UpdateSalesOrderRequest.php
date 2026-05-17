@@ -11,20 +11,15 @@ class UpdateSalesOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user() !== null;
     }
 
     public function rules(): array
     {
-        $salesOrder = $this->route('sales_order');
-
-        // Can only edit draft or confirmed orders
-        if ($salesOrder && ! $salesOrder->canBeEdited()) {
-            abort(403, 'Cannot edit sales order in '.$salesOrder->status.' status');
-        }
+        $tenantId = $this->user()->tenant_id;
 
         return [
-            'customer_id' => ['required', 'exists:customers,id'],
+            'customer_id' => ['required', \Illuminate\Validation\Rule::exists('customers', 'id')->where('tenant_id', $tenantId)],
             'order_date' => ['required', 'date'],
             'channel' => ['required', 'in:offline,online,reseller,marketplace'],
             'status' => ['nullable', 'in:draft,confirmed,processing,shipped,completed,cancelled'],
@@ -39,7 +34,7 @@ class UpdateSalesOrderRequest extends FormRequest
             'invoice_number' => ['nullable', 'string', 'max:255'],
             'resi_number' => ['nullable', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.inventory_item_id' => ['required', 'exists:inventory_items,id'],
+            'items.*.inventory_item_id' => ['required', \Illuminate\Validation\Rule::exists('inventory_items', 'id')->where('tenant_id', $tenantId)],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
             'items.*.discount_amount' => ['nullable', 'numeric', 'min:0'],
