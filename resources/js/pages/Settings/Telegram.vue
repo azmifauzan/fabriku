@@ -120,7 +120,7 @@ const formatExpiresAt = (dateStr: string | null) => {
             <div class="mb-6">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Hubungkan Telegram</h1>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    Hubungkan akun Telegram Anda untuk mengakses Fabriku Assistant langsung dari Telegram.
+                    Hubungkan akun Telegram Anda untuk menerima notifikasi bisnis langsung dari Telegram.
                 </p>
             </div>
 
@@ -170,7 +170,7 @@ const formatExpiresAt = (dateStr: string | null) => {
                             </li>
                             <li class="flex items-start gap-2">
                                 <span class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-medium text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">2</span>
-                                <span>Kirim pesan apapun untuk memulai percakapan dengan Fabriku Assistant</span>
+                                <span>Kirim perintah apapun untuk memulai percakapan dengan bot Fabriku</span>
                             </li>
                             <li class="flex items-start gap-2">
                                 <span class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-medium text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">3</span>
@@ -210,7 +210,7 @@ const formatExpiresAt = (dateStr: string | null) => {
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Telegram Belum Terhubung</h3>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Hubungkan akun Telegram Anda untuk menggunakan Fabriku Assistant via Telegram.
+                                Hubungkan akun Telegram Anda untuk menerima notifikasi bisnis via Telegram.
                             </p>
                         </div>
                     </div>
@@ -268,11 +268,11 @@ const formatExpiresAt = (dateStr: string | null) => {
                         <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                             <li class="flex items-center gap-2">
                                 <Check :size="16" class="text-green-500" />
-                                Akses Fabriku Assistant kapan saja dari Telegram
+                                Terima notifikasi bisnis kapan saja dari Telegram
                             </li>
                             <li class="flex items-center gap-2">
                                 <Check :size="16" class="text-green-500" />
-                                Tanya jawab tentang produksi, material, dan pesanan
+                                Cek status pesanan, material, dan laporan langsung dari Telegram
                             </li>
                             <li class="flex items-center gap-2">
                                 <Check :size="16" class="text-green-500" />

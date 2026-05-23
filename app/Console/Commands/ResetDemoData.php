@@ -41,6 +41,7 @@ class ResetDemoData extends Command
             'admin@kuemama.com',
             'admin@crafty.com',
             'admin@glowbeauty.com',
+            'admin@tokoserbaada.com',
         ];
 
         $tenantOption = $this->option('tenant');
@@ -164,6 +165,9 @@ class ResetDemoData extends Command
                 break;
             case 'cosmetic':
                 $this->reseedCosmeticTenant($tenant);
+                break;
+            case 'retail':
+                $this->reseedRetailTenant($tenant);
                 break;
             default:
                 $this->warn("  Unknown business category: {$tenant->business_category}");
@@ -636,5 +640,164 @@ class ResetDemoData extends Command
             'capacity' => 500,
             'is_active' => true,
         ]);
+    }
+
+    private function reseedRetailTenant(Tenant $tenant)
+    {
+        // 1. Inventory Location
+        $locationToko = InventoryLocation::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'code' => 'TOKO-UTAMA'],
+            [
+                'name' => 'Toko Utama',
+                'is_active' => true,
+            ]
+        );
+
+        // 2. Customer
+        $walkIn = Customer::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'code' => 'WALK-IN'],
+            [
+                'name' => 'Walk-in Customer',
+                'is_active' => true,
+            ]
+        );
+
+        // 3. Categories
+        \App\Models\InventoryItemCategory::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'name' => 'Umum'],
+            ['description' => 'Produk umum']
+        );
+        \App\Models\InventoryItemCategory::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'name' => 'Best Seller'],
+            ['description' => 'Produk terlaris']
+        );
+
+        // 4. Inventory Items
+        $itemIndomie = \App\Models\InventoryItem::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'sku' => 'INV-RTL-001'],
+            [
+                'product_name' => 'Indomie Goreng',
+                'product_code' => 'PROD-001',
+                'source_type' => 'purchase',
+                'location_id' => $locationToko->id,
+                'current_quantity' => 120,
+                'reserved_quantity' => 0,
+                'target_quantity' => 200,
+                'minimum_stock' => 20,
+                'unit_cost' => 2800,
+                'selling_price' => 3500,
+                'status' => 'available',
+            ]
+        );
+
+        $itemAquaGelas = \App\Models\InventoryItem::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'sku' => 'INV-RTL-002'],
+            [
+                'product_name' => 'Aqua Gelas 240ml',
+                'product_code' => 'PROD-002',
+                'source_type' => 'purchase',
+                'location_id' => $locationToko->id,
+                'current_quantity' => 60,
+                'reserved_quantity' => 0,
+                'target_quantity' => 100,
+                'minimum_stock' => 10,
+                'unit_cost' => 600,
+                'selling_price' => 800,
+                'status' => 'available',
+            ]
+        );
+
+        $itemSabunMandi = \App\Models\InventoryItem::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'sku' => 'INV-RTL-003'],
+            [
+                'product_name' => 'Sabun Mandi Lifebuoy 110g',
+                'product_code' => 'PROD-003',
+                'source_type' => 'purchase',
+                'location_id' => $locationToko->id,
+                'current_quantity' => 48,
+                'reserved_quantity' => 0,
+                'target_quantity' => 100,
+                'minimum_stock' => 10,
+                'unit_cost' => 5500,
+                'selling_price' => 7000,
+                'status' => 'available',
+            ]
+        );
+
+        $itemRokokSurya = \App\Models\InventoryItem::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'sku' => 'INV-RTL-004'],
+            [
+                'product_name' => 'Rokok Surya 16',
+                'product_code' => 'PROD-004',
+                'source_type' => 'purchase',
+                'location_id' => $locationToko->id,
+                'current_quantity' => 8,
+                'reserved_quantity' => 0,
+                'target_quantity' => 50,
+                'minimum_stock' => 10,
+                'unit_cost' => 26000,
+                'selling_price' => 28000,
+                'status' => 'available',
+            ]
+        );
+
+        // 5. Purchase batch (StockAdjustments)
+        $batchId = \Illuminate\Support\Str::uuid()->toString();
+        $adjustments = [
+            ['item' => $itemIndomie, 'qty' => 120, 'cost' => 2800],
+            ['item' => $itemAquaGelas, 'qty' => 60, 'cost' => 600],
+            ['item' => $itemSabunMandi, 'qty' => 48, 'cost' => 5500],
+            ['item' => $itemRokokSurya, 'qty' => 8, 'cost' => 26000],
+        ];
+
+        // Get retail admin user id
+        $adminUserId = \App\Models\User::where('tenant_id', $tenant->id)->where('role', 'admin')->value('id');
+
+        foreach ($adjustments as $adj) {
+            \App\Models\StockAdjustment::firstOrCreate(
+                ['batch_id' => $batchId, 'inventory_item_id' => $adj['item']->id],
+                [
+                    'tenant_id' => $tenant->id,
+                    'adjustment_type' => \App\Models\StockAdjustment::TYPE_PURCHASE,
+                    'quantity_before' => 0,
+                    'quantity_after' => $adj['qty'],
+                    'adjustment_quantity' => $adj['qty'],
+                    'reason' => 'Stock awal pembelian',
+                    'supplier_name' => 'Grosir Maju Jaya',
+                    'purchase_invoice' => 'INV/GM/2026/001',
+                    'unit_cost' => $adj['cost'],
+                    'adjusted_by' => $adminUserId,
+                ]
+            );
+        }
+
+        // 6. Demo sales orders
+        $salesRetail1 = \App\Models\SalesOrder::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'order_number' => 'SO-RTL-2026-001'],
+            [
+                'customer_id' => $walkIn->id,
+                'order_date' => now()->subHours(3),
+                'channel' => 'offline',
+                'status' => 'completed',
+                'subtotal' => 14300,
+                'discount_amount' => 0,
+                'tax_amount' => 0,
+                'shipping_cost' => 0,
+                'total_amount' => 14300,
+                'payment_method' => 'cash',
+                'payment_status' => 'paid',
+                'paid_amount' => 14300,
+                'completed_date' => now()->subHours(3),
+            ]
+        );
+
+        \App\Models\SalesOrderItem::firstOrCreate(
+            ['sales_order_id' => $salesRetail1->id, 'inventory_item_id' => $itemIndomie->id],
+            ['product_name' => $itemIndomie->product_name, 'sku' => $itemIndomie->sku, 'quantity' => 3, 'unit_price' => 3500, 'discount_amount' => 0, 'subtotal' => 10500]
+        );
+        \App\Models\SalesOrderItem::firstOrCreate(
+            ['sales_order_id' => $salesRetail1->id, 'inventory_item_id' => $itemAquaGelas->id],
+            ['product_name' => $itemAquaGelas->product_name, 'sku' => $itemAquaGelas->sku, 'quantity' => 4, 'unit_price' => 800, 'discount_amount' => 0, 'subtotal' => 3200]
+        );
     }
 }

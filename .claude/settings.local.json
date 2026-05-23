@@ -6,7 +6,11 @@
       "Bash(vendor/bin/pint app/Http/Requests/UpdateMaterialRequest.php app/Http/Controllers/SalesOrderController.php --format=json)",
       "Bash(php artisan *)",
       "Bash(npm run *)",
-      "Bash(vendor/bin/pint *)"
+      "Bash(vendor/bin/pint *)",
+      "Bash(not exist *)",
+      "PowerShell(php artisan migrate 2>&1)",
+      "PowerShell(npm run *)",
+      "PowerShell(vendor\\\\bin\\\\pint --dirty --format agent 2>&1)"
     ]
   }
 }

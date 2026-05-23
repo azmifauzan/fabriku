@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateInventoryItemRequest extends FormRequest
 {
@@ -60,16 +61,16 @@ class UpdateInventoryItemRequest extends FormRequest
             'source_type' => 'nullable|in:production,opening_balance,purchase,return',
 
             // Production order is now optional (nullable for manual entry / opening balance)
-            'production_order_id' => ['nullable', \Illuminate\Validation\Rule::exists('production_orders', 'id')->where('tenant_id', $tenantId)],
+            'production_order_id' => ['nullable', Rule::exists('production_orders', 'id')->where('tenant_id', $tenantId)],
 
-            'sku' => 'nullable|string|max:100|unique:inventory_items,sku,NULL,id,tenant_id,'.$tenantId,
+            'sku' => 'nullable|string|max:100|unique:inventory_items,sku,'.($this->route('item')?->id ?? 'NULL').',id,tenant_id,'.$tenantId,
 
             // Product name required for manual entry
             'product_name' => $isManualEntry ? 'required|string|max:255' : 'nullable|string|max:255',
             'name' => 'sometimes|string|max:255', // backwards compatibility
 
-            'location_id' => ['required', \Illuminate\Validation\Rule::exists('inventory_locations', 'id')->where('tenant_id', $tenantId)],
-            'inventory_location_id' => ['sometimes', \Illuminate\Validation\Rule::exists('inventory_locations', 'id')->where('tenant_id', $tenantId)], // backwards compatibility
+            'location_id' => ['required', Rule::exists('inventory_locations', 'id')->where('tenant_id', $tenantId)],
+            'inventory_location_id' => ['sometimes', Rule::exists('inventory_locations', 'id')->where('tenant_id', $tenantId)], // backwards compatibility
 
             // Quantities - required for manual entry
             'target_quantity' => $isManualEntry ? 'nullable|integer|min:0' : 'required|integer|min:0',
@@ -79,7 +80,7 @@ class UpdateInventoryItemRequest extends FormRequest
             'minimum_stock' => 'integer|min:0',
 
             // Category
-            'category_id' => ['nullable', \Illuminate\Validation\Rule::exists('inventory_item_categories', 'id')->where('tenant_id', $tenantId)],
+            'category_id' => ['nullable', Rule::exists('inventory_item_categories', 'id')->where('tenant_id', $tenantId)],
 
             'unit_cost' => 'required|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',

@@ -3,6 +3,20 @@ import { computed } from 'vue';
 
 type TerminologyKey = 'material' | 'pattern' | 'preparation' | 'preparation_order' | 'production' | 'production_order' | 'contractor';
 
+type CategoryRules = {
+    enable_production_flow?: boolean;
+    enable_material_module?: boolean;
+    enable_preparation_module?: boolean;
+    enable_pattern_module?: boolean;
+    enable_contractor_module?: boolean;
+    enable_inventory_module?: boolean;
+    enable_sales_module?: boolean;
+    enable_purchase_module?: boolean;
+    track_batch_number?: boolean;
+    track_expired_date?: boolean;
+    [key: string]: boolean | number | undefined;
+};
+
 type TenantProps = {
     business_category?: string | null;
     category_label?: string | null;
@@ -10,6 +24,8 @@ type TenantProps = {
     category_config?: {
         product_types?: Record<string, string>;
         sizes?: string[];
+        rules?: CategoryRules;
+        mode?: string;
     } | null;
 } | null;
 
@@ -34,6 +50,19 @@ export function useBusinessContext() {
         return categoryConfig.value?.sizes ?? [];
     });
 
+    const rules = computed<CategoryRules>(() => {
+        return categoryConfig.value?.rules ?? {};
+    });
+
+    const isRetailMode = computed<boolean>(() => {
+        return (categoryConfig.value?.mode ?? 'full') === 'simple';
+    });
+
+    const isModuleEnabled = (moduleKey: string): boolean => {
+        const rule = rules.value[`enable_${moduleKey}_module`];
+        return rule !== false;
+    };
+
     const term = (key: TerminologyKey, fallback: string): string => {
         return terminology.value[key] || fallback;
     };
@@ -48,6 +77,9 @@ export function useBusinessContext() {
         categoryConfig,
         productTypes,
         sizes,
+        rules,
+        isRetailMode,
+        isModuleEnabled,
         term,
         termLower,
     };

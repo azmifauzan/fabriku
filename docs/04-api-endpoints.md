@@ -151,18 +151,6 @@ Laravel validation errors are returned in the `props.errors` object for Inertia,
 
 ## Route Groups (Additional)
 
-### 4. AI Assistant
-Prefix: `/assistant`
-Middleware: `auth`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/assistant/message` | Send message to AI assistant |
-| GET | `/assistant/history` | Get conversation history |
-| POST | `/assistant/clear` | Clear conversation history |
-| GET | `/assistant/status` | Get assistant status |
-| GET | `/assistant/usage` | Get usage statistics |
-
 ### 5. Telegram Integration
 Prefix: `/telegram`, `/api/telegram`
 

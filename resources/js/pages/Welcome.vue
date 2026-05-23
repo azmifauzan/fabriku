@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import FAQ from '@/components/Landing/FAQ.vue';
-import { Check, X } from 'lucide-vue-next';
+import { Check, ChefHat, Palette, Scissors, Sparkles, Store, X } from 'lucide-vue-next';
 
 const props = defineProps({
     canLogin: {
@@ -34,7 +34,6 @@ const features = [
     { name: 'Penjualan & Sales Order', free: true, full: true },
     { name: 'Export Laporan (Excel/PDF)', free: true, full: true },
     { name: 'Laporan Lengkap & Analytics', free: true, full: true },
-    { name: 'Fabriku Assistant (AI Chat)', free: '50 pesan/hari', full: '200 pesan/hari' },
     { name: 'Masa Aktif Full Access', free: '30 Hari', full: 'Sesuai Paket' },
     { name: 'Setelah Expired', free: 'Read-Only', full: 'Perpanjang' },
 ];
@@ -88,27 +87,30 @@ const features = [
                     </div>
 
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900">
-                        Kelola Produksi Bisnis
+                        Kelola Bisnis UMKM
                         <span class="block text-indigo-600">Multi-Kategori, Satu Platform</span>
                     </h1>
 
                     <p class="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                        Platform SaaS untuk UMKM Indonesia dalam mengelola produksi berbagai kategori bisnis dari bahan baku hingga penjualan dalam satu sistem terintegrasi.
+                        Platform SaaS untuk UMKM Indonesia — dari toko sederhana yang butuh stok & kasir, hingga bisnis produksi lengkap dari bahan baku hingga penjualan.
                     </p>
 
                     <!-- Category Badges -->
-                    <div class="mt-8 flex flex-wrap justify-center gap-3">
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-100 text-indigo-700 text-sm font-medium">
-                            <span class="text-lg">🧵</span> Garment & Konveksi
+                    <div class="mt-8 flex flex-wrap justify-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium shadow-sm">
+                            <Store :size="14" class="text-gray-400" /> Toko / Retail
                         </span>
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pink-100 text-pink-700 text-sm font-medium">
-                            <span class="text-lg">🍰</span> Makanan & Kue
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium shadow-sm">
+                            <Scissors :size="14" class="text-gray-400" /> Garment
                         </span>
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
-                            <span class="text-lg">🎨</span> Kerajinan & Craft
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium shadow-sm">
+                            <ChefHat :size="14" class="text-gray-400" /> Makanan & Kue
                         </span>
-                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium">
-                            <span class="text-lg">💄</span> Kosmetik & Skincare
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium shadow-sm">
+                            <Palette :size="14" class="text-gray-400" /> Kerajinan & Craft
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium shadow-sm">
+                            <Sparkles :size="14" class="text-gray-400" /> Kosmetik
                         </span>
                     </div>
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useBusinessContext } from '@/composables/useBusinessContext';
 import { Link, usePage } from '@inertiajs/vue3';
 import {
     BarChart3,
@@ -11,6 +12,7 @@ import {
     Package,
     Settings,
     ShoppingCart,
+    ShoppingBag,
     Warehouse,
     X,
     CreditCard,
@@ -29,12 +31,13 @@ const emit = defineEmits<{
 }>();
 
 const page = usePage();
+const { terminology: terminologyComposable, isModuleEnabled, isRetailMode } = useBusinessContext();
 
 // Track expanded menu items
 const expandedMenus = ref<string[]>([]);
 
 const businessCategory = computed(() => (page.props.tenant as any)?.business_category as string | undefined);
-const terminology = computed(() => ((page.props.tenant as any)?.terminology ?? {}) as Record<string, string>);
+const terminology = computed(() => terminologyComposable.value as Record<string, string>);
 
 // Get user permissions from shared data
 const userPermissions = computed(() => {
@@ -60,70 +63,74 @@ const hasAnyPermission = (slugs: string[]): boolean => {
 };
 
 const allMenuItems = computed(() => {
+    const retail = isRetailMode.value;
+    const hasMaterial = isModuleEnabled('material');
+    const hasPreparation = isModuleEnabled('preparation');
+    const hasPattern = isModuleEnabled('pattern');
+    const hasContractor = isModuleEnabled('contractor');
+    const hasPurchase = isModuleEnabled('purchase');
+
+    const masterDataChildren = [
+        ...(!retail ? [{ name: 'Jenis Bahan', href: '/material-types', permission: 'material.view' }] : []),
+        { name: 'Staff', href: '/staff', permission: null, adminOnly: true },
+        { name: 'Lokasi Inventory', href: '/inventory/locations', permission: 'inventory.view' },
+        { name: 'Customer', href: '/customers', permission: 'sales.view' },
+        ...(!retail && hasPattern ? [{ name: terminology.value.pattern || 'Pattern', href: '/patterns', permission: 'pattern.view' }] : []),
+        ...(!retail && hasContractor ? [{ name: terminology.value.contractor || 'Kontraktor', href: '/contractors', permission: 'production.view' }] : []),
+    ];
+
+    const reportChildren = [
+        ...(hasMaterial ? [{ name: 'Material', href: '/reports/material', permission: 'report.view' }] : []),
+        { name: 'Inventory', href: '/reports/inventory', permission: 'report.view' },
+        { name: 'Penjualan', href: '/reports/sales', permission: 'report.view' },
+        ...(!retail ? [{ name: 'Produksi', href: '/reports/production', permission: 'report.view' }] : []),
+        ...(hasPurchase ? [{ name: 'Pembelian', href: '/reports/purchase', permission: 'report.view' }] : []),
+    ];
+
     return [
+        ...(retail ? [{
+            name: 'Penjualan',
+            href: '/sales-orders/quick-checkout',
+            icon: ShoppingCart,
+            permission: 'sales.create',
+        }] : []),
         {
             name: 'Dashboard',
-            href: '/dashboard',
+            href: retail ? '/dashboard?view=stats' : '/dashboard',
             icon: Home,
-            permission: null, // always visible
+            permission: null,
         },
         {
             name: 'Master Data',
             href: '/master-data',
             icon: Settings,
-            permission: null, // filtered by children
-            children: [
-                {
-                    name: 'Jenis Bahan',
-                    href: '/material-types',
-                    permission: 'material.view',
-                },
-                {
-                    name: 'Staff',
-                    href: '/staff',
-                    permission: null, // admin-only, handled separately
-                    adminOnly: true,
-                },
-                {
-                    name: 'Lokasi Inventory',
-                    href: '/inventory/locations',
-                    permission: 'inventory.view',
-                },
-                {
-                    name: 'Customer',
-                    href: '/customers',
-                    permission: 'sales.view',
-                },
-                {
-                    name: terminology.value.pattern || 'Pattern',
-                    href: '/patterns',
-                    permission: 'pattern.view',
-                },
-                {
-                    name: terminology.value.contractor || 'Kontraktor',
-                    href: '/contractors',
-                    permission: 'production.view',
-                },
-            ],
+            permission: null,
+            children: masterDataChildren,
         },
-        {
+        ...(hasMaterial ? [{
             name: terminology.value.material || 'Bahan Baku',
             href: '/materials',
             icon: Package,
             permission: 'material.view',
-        },
-        {
+        }] : []),
+        ...(hasPreparation ? [{
             name: 'Preparation',
             href: '/preparation-orders',
             icon: CheckCircle2,
             permission: 'preparation.view',
-        },
-        {
+        }] : []),
+        ...(!retail ? [{
             name: 'Production Order',
             href: '/production-orders',
             icon: Factory,
             permission: 'production.view',
-        },
+        }] : []),
+        ...(hasPurchase ? [{
+            name: 'Pembelian',
+            href: '/purchase-receipts',
+            icon: ShoppingBag,
+            permission: 'purchase.view',
+        }] : []),
         {
             name: 'Inventory',
             href: '/inventory',
@@ -143,13 +150,18 @@ const allMenuItems = computed(() => {
             ],
         },
         {
-            name: 'Sales Order',
+            name: retail ? 'Riwayat Penjualan' : 'Sales Order',
             href: '/sales-orders',
             icon: ShoppingCart,
             permission: 'sales.view',
             children: [
+                ...(!retail ? [{
+                    name: 'Quick Checkout',
+                    href: '/sales-orders/quick-checkout',
+                    permission: 'sales.create',
+                }] : []),
                 {
-                    name: 'List',
+                    name: retail ? 'Daftar' : 'List',
                     href: '/sales-orders',
                     permission: 'sales.view',
                 },
@@ -165,28 +177,7 @@ const allMenuItems = computed(() => {
             href: '/reports',
             icon: BarChart3,
             permission: 'report.view',
-            children: [
-                {
-                    name: 'Material',
-                    href: '/reports/material',
-                    permission: 'report.view',
-                },
-                {
-                    name: 'Inventory',
-                    href: '/reports/inventory',
-                    permission: 'report.view',
-                },
-                {
-                    name: 'Penjualan',
-                    href: '/reports/sales',
-                    permission: 'report.view',
-                },
-                {
-                    name: 'Produksi',
-                    href: '/reports/production',
-                    permission: 'report.view',
-                },
-            ],
+            children: reportChildren,
         },
     ];
 });
@@ -229,14 +220,53 @@ const isActive = (href: string) => {
     if (href === '/settings') {
         return props.currentRoute === '/settings';
     }
-    return props.currentRoute.startsWith(href);
+    // Strip query string from href when checking (e.g. /dashboard?view=stats → /dashboard)
+    const hrefPath = href.split('?')[0];
+    return props.currentRoute.startsWith(hrefPath);
+};
+
+const isChildActive = (childHref: string, children: any[]) => {
+    // If the current route is quick checkout, and this is NOT the quick checkout link, it should not be active
+    if (props.currentRoute.startsWith('/sales-orders/quick-checkout') && childHref !== '/sales-orders/quick-checkout') {
+        return false;
+    }
+
+    // If the current route exactly matches this child's href, it is active
+    if (props.currentRoute === childHref) {
+        return true;
+    }
+    
+    // Otherwise, check if this child has the longest matching href prefix
+    // among all children that match the current route
+    const matchingChildren = children.filter(child => props.currentRoute.startsWith(child.href));
+    if (matchingChildren.length === 0) {
+        return false;
+    }
+    
+    // Find the child with the longest href
+    const bestMatch = matchingChildren.reduce((longest, current) => {
+        return current.href.length > longest.href.length ? current : longest;
+    }, matchingChildren[0]);
+    
+    return bestMatch.href === childHref;
+};
+
+const isParentActive = (item: any) => {
+    if (item.children) {
+        // When on the quick checkout page, don't highlight "Riwayat Penjualan" (/sales-orders)
+        if (props.currentRoute.startsWith('/sales-orders/quick-checkout') && item.href === '/sales-orders') {
+            return false;
+        }
+        return item.children.some((child: any) => isChildActive(child.href, item.children));
+    }
+    return isActive(item.href);
 };
 
 // Auto-expand parent menu if child is active
 const checkAndExpandActiveMenu = () => {
     menuItems.value.forEach((item) => {
         if (item.children) {
-            const hasActiveChild = item.children.some((child: any) => isActive(child.href));
+            const hasActiveChild = item.children.some((child: any) => isChildActive(child.href, item.children));
             if (hasActiveChild && !expandedMenus.value.includes(item.href)) {
                 expandedMenus.value.push(item.href);
             }
@@ -340,7 +370,7 @@ const handleLinkClick = () => {
                         type="button"
                         :class="[
                             'flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700',
-                            isActive(item.href)
+                            isParentActive(item)
                                 ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400'
                                 : 'text-gray-700 dark:text-gray-300',
                         ]"
@@ -352,7 +382,7 @@ const handleLinkClick = () => {
                                 :size="20"
                                 :class="[
                                     'flex-shrink-0',
-                                    isActive(item.href) ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400',
+                                    isParentActive(item) ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400',
                                 ]"
                             />
                             <span v-if="isMobile || isOpen" class="text-sm font-medium whitespace-nowrap">
@@ -365,7 +395,7 @@ const handleLinkClick = () => {
                             :class="[
                                 'flex-shrink-0 transition-transform duration-200',
                                 isMenuExpanded(item.href) ? 'rotate-180' : '',
-                                isActive(item.href) ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500',
+                                isParentActive(item) ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500',
                             ]"
                         />
                     </button>
@@ -378,7 +408,7 @@ const handleLinkClick = () => {
                             :href="child.href"
                             :class="[
                                 'block rounded-lg px-3 py-2 text-sm transition-colors',
-                                isActive(child.href)
+                                isChildActive(child.href, item.children)
                                     ? 'bg-indigo-50 font-medium text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400'
                                     : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700',
                             ]"

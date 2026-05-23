@@ -70,6 +70,12 @@ class PermissionSeeder extends Seeder
             ['name' => 'Edit Sales', 'slug' => 'sales.edit', 'module' => 'sales', 'description' => 'Edit sales order'],
             ['name' => 'Delete Sales', 'slug' => 'sales.delete', 'module' => 'sales', 'description' => 'Delete sales order'],
 
+            // Purchase Management (Retail)
+            ['name' => 'View Purchases', 'slug' => 'purchase.view', 'module' => 'purchase', 'description' => 'View purchase receipts'],
+            ['name' => 'Create Purchase', 'slug' => 'purchase.create', 'module' => 'purchase', 'description' => 'Create purchase receipt'],
+            ['name' => 'Edit Purchase', 'slug' => 'purchase.edit', 'module' => 'purchase', 'description' => 'Edit purchase receipt'],
+            ['name' => 'Delete Purchase', 'slug' => 'purchase.delete', 'module' => 'purchase', 'description' => 'Delete purchase receipt'],
+
             // Reports
             ['name' => 'View Reports', 'slug' => 'report.view', 'module' => 'report', 'description' => 'View reports'],
             ['name' => 'Export Reports', 'slug' => 'report.export', 'module' => 'report', 'description' => 'Export reports'],

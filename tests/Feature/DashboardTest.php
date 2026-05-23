@@ -53,3 +53,27 @@ test('dashboard provides sales trend data', function () {
         ->has('recentActivities')
     );
 });
+
+test('retail category tenant is redirected to POS by default', function () {
+    $tenant = Tenant::factory()->create(['business_category' => 'retail']);
+    $user = User::factory()->create(['tenant_id' => $tenant->id, 'role' => 'admin']);
+
+    $response = $this->actingAs($user)->get('/dashboard');
+
+    $response->assertRedirect(route('sales-orders.quick-checkout'));
+});
+
+test('retail category tenant can access dashboard with view=stats query parameter', function () {
+    $tenant = Tenant::factory()->create(['business_category' => 'retail']);
+    $user = User::factory()->create(['tenant_id' => $tenant->id, 'role' => 'admin']);
+
+    $response = $this->actingAs($user)->get('/dashboard?view=stats');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('RetailDashboard')
+        ->has('stats')
+        ->has('stats.sales_today')
+        ->has('stats.sales_month')
+    );
+});

@@ -15,7 +15,6 @@ Fabriku adalah aplikasi SaaS (Software as a Service) yang dirancang untuk memban
 3. Memberikan visibilitas penuh terhadap inventory dan cash flow
 4. Menghasilkan laporan yang akurat untuk pengambilan keputusan bisnis
 5. Sistem yang fleksibel untuk mendukung berbagai kategori bisnis dengan proses produksi berbeda
-6. AI-powered assistant untuk mempermudah operasional
 
 ## Target Users
 - Pemilik UMKM (garment, makanan/kue, kerajinan, kosmetik)

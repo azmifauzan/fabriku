@@ -180,6 +180,51 @@ return [
             ],
         ],
 
+        'retail' => [
+            'label' => 'Toko / Retail',
+            'description' => 'Toko sederhana yang menjual barang jadi tanpa proses produksi',
+            'icon' => '🏪',
+            'mode' => 'simple',
+            'sku_prefix' => 'INV-RTL',
+
+            'terminology' => [
+                'material' => 'Pembelian',
+                'pattern' => 'N/A',
+                'preparation' => 'N/A',
+                'preparation_order' => 'N/A',
+                'production' => 'N/A',
+                'production_order' => 'N/A',
+                'contractor' => 'N/A',
+            ],
+
+            'product_types' => [
+                'umum' => 'Umum',
+                'makanan' => 'Makanan & Minuman',
+                'rumah_tangga' => 'Rumah Tangga',
+                'fashion' => 'Fashion',
+                'elektronik' => 'Elektronik',
+                'lainnya' => 'Lainnya',
+            ],
+
+            'sizes' => [],
+
+            'material_types' => [],
+            'material_attributes' => [],
+
+            'rules' => [
+                'enable_production_flow' => false,
+                'enable_material_module' => false,
+                'enable_preparation_module' => false,
+                'enable_pattern_module' => false,
+                'enable_contractor_module' => false,
+                'enable_inventory_module' => true,
+                'enable_sales_module' => true,
+                'enable_purchase_module' => true,
+                'track_batch_number' => false,
+                'track_expired_date' => true,
+            ],
+        ],
+
         'cosmetic' => [
             'label' => 'Kosmetik & Skincare',
             'description' => 'Produksi kosmetik, skincare, produk kecantikan',
@@ -255,5 +300,5 @@ return [
     | dengan mengubah 'enabled' => true di konfigurasi kategori di atas.
     |
     */
-    'enabled_categories' => ['garment', 'food', 'craft', 'cosmetic'],
+    'enabled_categories' => ['garment', 'food', 'craft', 'cosmetic', 'retail'],
 ];
