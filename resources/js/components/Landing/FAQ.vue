@@ -10,11 +10,7 @@ const faqs = [
   },
   {
     question: 'Berapa biaya berlangganan Fabriku?',
-    answer: 'Kami menawarkan Free Trial selama 30 hari dengan akses penuh. Setelah itu, Anda bisa berlangganan paket Full Member seharga Rp 25.000/bulan atau paket Pro Member seharga Rp 35.000/bulan dengan kuota AI Assistant lebih besar.'
-  },
-  {
-    question: 'Apa itu Fabriku Assistant?',
-    answer: 'Fabriku Assistant adalah fitur AI chatbot yang membantu Anda menganalisis data bisnis, mendapatkan insight produksi, dan menjawab pertanyaan seputar penggunaan aplikasi. Kuota pesan per hari berbeda di setiap paket: Trial (50), Full Member (200), dan Pro Member (500 pesan/hari).'
+    answer: 'Kami menawarkan Free Trial selama 30 hari dengan akses penuh. Setelah itu, Anda bisa berlangganan paket Full Member seharga Rp 25.000/bulan untuk akses tanpa batas waktu.'
   },
   {
     question: 'Apakah data saya aman?',

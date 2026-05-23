@@ -3,7 +3,7 @@ import { useSweetAlert } from '@/composables/useSweetAlert';
 import { Form, Link } from '@inertiajs/vue3';
 import { Head } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
-import { Eye, EyeOff } from 'lucide-vue-next';
+import { ChefHat, Eye, EyeOff, Palette, Scissors, Sparkles, Store } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 const form = {
@@ -165,77 +165,65 @@ watch(flash, (newFlash) => {
                             🔄 Data demo akan direset otomatis ke kondisi awal setiap 1 jam.
                         </div>
 
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="space-y-1.5">
+                            <!-- Retail Demo -->
+                            <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-default">
+                                <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white border border-gray-200 shrink-0">
+                                    <Store :size="14" class="text-gray-500" />
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold text-gray-800">Toko Serba Ada <span class="font-normal text-gray-400">· Retail</span></p>
+                                    <p class="font-mono text-[11px] text-indigo-600 truncate cursor-pointer" onclick="navigator.clipboard.writeText('admin@tokoserbaada.com')">admin@tokoserbaada.com</p>
+                                </div>
+                                <span class="text-[10px] text-gray-400 shrink-0">password</span>
+                            </div>
+
                             <!-- Garment Demo -->
-                            <div class="rounded-xl border border-indigo-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-lg">🧵</span>
-                                    <span class="text-sm font-semibold text-gray-900">Konveksi</span>
+                            <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-default">
+                                <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white border border-gray-200 shrink-0">
+                                    <Scissors :size="14" class="text-gray-500" />
                                 </div>
-                                <div class="space-y-1 text-xs text-gray-600">
-                                    <div class="flex justify-between">
-                                        <span>Email:</span>
-                                        <span class="font-mono text-indigo-600 font-medium cursor-pointer hover:bg-indigo-50 rounded px-1" onclick="navigator.clipboard.writeText('admin@konveksi.com')">admin@konveksi.com</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Pass:</span>
-                                        <span class="font-mono text-indigo-600 font-medium">password</span>
-                                    </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold text-gray-800">Konveksi Fabriku <span class="font-normal text-gray-400">· Garment</span></p>
+                                    <p class="font-mono text-[11px] text-indigo-600 truncate cursor-pointer" onclick="navigator.clipboard.writeText('admin@konveksi.com')">admin@konveksi.com</p>
                                 </div>
+                                <span class="text-[10px] text-gray-400 shrink-0">password</span>
                             </div>
 
                             <!-- Food Demo -->
-                            <div class="rounded-xl border border-pink-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-lg">🍰</span>
-                                    <span class="text-sm font-semibold text-gray-900">Kue Mama</span>
+                            <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-default">
+                                <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white border border-gray-200 shrink-0">
+                                    <ChefHat :size="14" class="text-gray-500" />
                                 </div>
-                                <div class="space-y-1 text-xs text-gray-600">
-                                    <div class="flex justify-between">
-                                        <span>Email:</span>
-                                        <span class="font-mono text-pink-600 font-medium cursor-pointer hover:bg-pink-50 rounded px-1" onclick="navigator.clipboard.writeText('admin@kuemama.com')">admin@kuemama.com</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Pass:</span>
-                                        <span class="font-mono text-pink-600 font-medium">password</span>
-                                    </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold text-gray-800">Kue Mama Homemade <span class="font-normal text-gray-400">· Makanan</span></p>
+                                    <p class="font-mono text-[11px] text-indigo-600 truncate cursor-pointer" onclick="navigator.clipboard.writeText('admin@kuemama.com')">admin@kuemama.com</p>
                                 </div>
+                                <span class="text-[10px] text-gray-400 shrink-0">password</span>
                             </div>
 
                             <!-- Craft Demo -->
-                            <div class="rounded-xl border border-purple-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-lg">🎨</span>
-                                    <span class="text-sm font-semibold text-gray-900">Crafty</span>
+                            <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-default">
+                                <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white border border-gray-200 shrink-0">
+                                    <Palette :size="14" class="text-gray-500" />
                                 </div>
-                                <div class="space-y-1 text-xs text-gray-600">
-                                    <div class="flex justify-between">
-                                        <span>Email:</span>
-                                        <span class="font-mono text-purple-600 font-medium cursor-pointer hover:bg-purple-50 rounded px-1" onclick="navigator.clipboard.writeText('admin@crafty.com')">admin@crafty.com</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Pass:</span>
-                                        <span class="font-mono text-purple-600 font-medium">password</span>
-                                    </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold text-gray-800">Crafty Handmade <span class="font-normal text-gray-400">· Craft</span></p>
+                                    <p class="font-mono text-[11px] text-indigo-600 truncate cursor-pointer" onclick="navigator.clipboard.writeText('admin@crafty.com')">admin@crafty.com</p>
                                 </div>
+                                <span class="text-[10px] text-gray-400 shrink-0">password</span>
                             </div>
 
                             <!-- Cosmetic Demo -->
-                            <div class="rounded-xl border border-green-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-lg">💄</span>
-                                    <span class="text-sm font-semibold text-gray-900">Glow Beauty</span>
+                            <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-default">
+                                <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white border border-gray-200 shrink-0">
+                                    <Sparkles :size="14" class="text-gray-500" />
                                 </div>
-                                <div class="space-y-1 text-xs text-gray-600">
-                                    <div class="flex justify-between">
-                                        <span>Email:</span>
-                                        <span class="font-mono text-green-600 font-medium cursor-pointer hover:bg-green-50 rounded px-1" onclick="navigator.clipboard.writeText('admin@glowbeauty.com')">admin@glowbeauty.com</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Pass:</span>
-                                        <span class="font-mono text-green-600 font-medium">password</span>
-                                    </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold text-gray-800">Glow Beauty Lab <span class="font-normal text-gray-400">· Kosmetik</span></p>
+                                    <p class="font-mono text-[11px] text-indigo-600 truncate cursor-pointer" onclick="navigator.clipboard.writeText('admin@glowbeauty.com')">admin@glowbeauty.com</p>
                                 </div>
+                                <span class="text-[10px] text-gray-400 shrink-0">password</span>
                             </div>
                         </div>
                         </div>

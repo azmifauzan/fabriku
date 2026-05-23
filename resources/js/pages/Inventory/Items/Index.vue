@@ -2,8 +2,9 @@
 import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import QrScanner from '@/components/QrScanner.vue';
+import AdjustStockModal from './AdjustStockModal.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Eye } from 'lucide-vue-next';
+import { Eye, Edit, History, RefreshCw } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface Item {
@@ -29,6 +30,7 @@ interface Item {
         order_number: string;
     };
     expiry_date?: string;
+    source_type?: string;
 }
 
 interface Category {
@@ -96,6 +98,23 @@ const statusBadgeClass = (status: string) => {
 
 const isLowStock = (item: Item) => {
     return item.current_stock <= 0;
+};
+
+const showAdjustModal = ref(false);
+const selectedItem = ref<Item | null>(null);
+
+const openAdjustModal = (item: Item) => {
+    selectedItem.value = item;
+    showAdjustModal.value = true;
+};
+
+const adjustmentTypes = {
+    opening_balance: 'Stock Awal',
+    correction: 'Koreksi',
+    damage: 'Rusak',
+    loss: 'Hilang',
+    found: 'Ditemukan',
+    return: 'Retur',
 };
 </script>
 
@@ -255,6 +274,28 @@ const isLowStock = (item: Item) => {
                                                 <Eye :size="18" />
                                             </Link>
                                             <Link
+                                                :href="`/inventory/items/${item.id}/edit`"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+                                                title="Edit Item"
+                                            >
+                                                <Edit :size="18" />
+                                            </Link>
+                                            <button
+                                                type="button"
+                                                @click="openAdjustModal(item)"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+                                                title="Adjust Stock"
+                                            >
+                                                <RefreshCw :size="18" />
+                                            </button>
+                                            <Link
+                                                :href="`/inventory/items/${item.id}/adjustments`"
+                                                class="inline-flex items-center justify-center rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700"
+                                                title="Riwayat"
+                                            >
+                                                <History :size="18" />
+                                            </Link>
+                                            <Link
                                                 :href="`/inventory/items/${item.id}/qrcode/print`"
                                                 class="inline-flex items-center justify-center rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700"
                                                 title="Print QR Code"
@@ -288,5 +329,14 @@ const isLowStock = (item: Item) => {
                 </div>
             </div>
         </div>
+
+        <!-- Adjust Stock Modal -->
+        <AdjustStockModal
+            v-if="selectedItem"
+            :show="showAdjustModal"
+            :item="selectedItem"
+            :adjustment-types="adjustmentTypes"
+            @close="showAdjustModal = false"
+        />
     </AppLayout>
 </template>

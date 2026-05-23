@@ -147,22 +147,11 @@ app/
 │   │   ├── Api/               # API controllers
 │   │   │   └── TelegramWebhookController.php
 │   │   ├── Auth/              # Authentication controllers
-│   │   ├── AssistantController.php    # AI Assistant
-│   │   ├── MaterialController.php
-│   │   ├── PreparationOrderController.php
-│   │   ├── ProductionOrderController.php
-│   │   ├── InventoryItemController.php
-│   │   ├── SalesOrderController.php
-│   │   ├── ReportController.php
 │   │   ├── TelegramController.php
 │   │   └── SubscriptionController.php
 │   ├── Requests/              # Form validation
 │   └── Middleware/            # Request filtering
 ├── Services/                  # Business logic
-│   ├── Assistant/             # AI Assistant services
-│   │   ├── AssistantService.php
-│   │   ├── ConversationManager.php
-│   │   └── OpenAIClient.php
 │   ├── Telegram/              # Telegram services
 │   │   └── TelegramNotificationService.php
 │   ├── InventoryService.php

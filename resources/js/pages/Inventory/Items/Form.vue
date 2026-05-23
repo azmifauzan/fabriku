@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { Link, useForm, router } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 import { computed, ref, watch } from 'vue';
 import { Camera, Upload, X, Package, Truck, RotateCcw, FileText, Plus, Tag } from 'lucide-vue-next';
 import CameraCaptureModal from '@/components/CameraCaptureModal.vue';
+import { useBusinessContext } from '@/composables/useBusinessContext';
 
 interface Location {
     id: number;
@@ -69,9 +70,14 @@ const props = defineProps<{
     sourceTypes?: Record<string, string>;
 }>();
 
+const { isRetailMode, tenant } = useBusinessContext();
+const isRetail = computed(() => isRetailMode.value || tenant.value?.business_category === 'retail');
+
 // Entry type: 'production' or 'manual'
 const entryType = ref<'production' | 'manual'>(
-    props.item?.production_order_id ? 'production' : (props.item?.id ? 'manual' : 'production')
+    isRetail.value
+        ? 'manual'
+        : (props.item?.production_order_id ? 'production' : (props.item?.id ? 'manual' : 'production'))
 );
 
 // Source type for manual entry
@@ -79,7 +85,7 @@ const selectedSourceType = ref<string>(props.item?.source_type || 'opening_balan
 
 const form = useForm({
     production_order_id: props.item?.production_order_id || null,
-    source_type: props.item?.source_type || 'production',
+    source_type: props.item?.source_type || (isRetail.value ? 'opening_balance' : 'production'),
     category_id: props.item?.category_id || null,
     sku: props.item?.sku || '',
     name: props.item?.name || '',
@@ -170,7 +176,7 @@ watch([() => form.production_order_id], () => {
 
 const submit = () => {
     if (props.item?.id) {
-        form.put(`/inventory/items/${props.item.id}`, {
+        form.post(`/inventory/items/${props.item.id}?_method=PUT`, {
             preserveScroll: true,
             forceFormData: true,
         });
@@ -284,7 +290,7 @@ const addCategory = async () => {
                         {{ isEditing ? 'Edit Item Inventory' : 'Tambah Item Inventory' }}
                     </h2>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        {{ isEditing ? 'Ubah informasi item' : 'Tambahkan item inventory baru dari hasil produksi' }}
+                        {{ isEditing ? 'Ubah informasi item' : (isRetail ? 'Tambahkan item inventory baru' : 'Tambahkan item inventory baru dari hasil produksi') }}
                     </p>
                 </div>
                 <Link href="/inventory/items" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">
@@ -294,7 +300,7 @@ const addCategory = async () => {
 
             <form @submit.prevent="submit" class="space-y-6">
                 <!-- Entry Type Selection -->
-                <div v-if="allowManualEntry">
+                <div v-if="allowManualEntry && !isRetail">
                     <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Sumber Inventory</h3>
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <!-- Production Order Option -->

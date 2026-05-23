@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Events\TenantRegistered;
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
+use App\Models\InventoryItemCategory;
+use App\Models\InventoryLocation;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -72,6 +75,11 @@ class RegisterController extends Controller
                 'role' => 'admin',
                 'is_active' => true,
             ]);
+
+            // Auto-create default data for retail category
+            if ($validated['business_category'] === 'retail') {
+                $this->seedRetailDefaults($tenant);
+            }
         });
 
         // Trigger verification email
@@ -84,5 +92,32 @@ class RegisterController extends Controller
         Auth::login($user);
 
         return redirect()->route('verification.notice');
+    }
+
+    private function seedRetailDefaults(Tenant $tenant): void
+    {
+        InventoryLocation::create([
+            'tenant_id' => $tenant->id,
+            'code' => 'TOKO-UTAMA',
+            'name' => 'Toko Utama',
+            'is_active' => true,
+        ]);
+
+        Customer::create([
+            'tenant_id' => $tenant->id,
+            'code' => 'WALK-IN',
+            'name' => 'Walk-in Customer',
+            'is_active' => true,
+        ]);
+
+        InventoryItemCategory::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'name' => 'Umum'],
+            ['description' => 'Produk umum']
+        );
+
+        InventoryItemCategory::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'name' => 'Best Seller'],
+            ['description' => 'Produk terlaris']
+        );
     }
 }

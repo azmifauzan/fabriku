@@ -3,19 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Models\InventoryItem;
+use App\Models\InventoryLocation;
 use App\Models\Material;
 use App\Models\PreparationOrder;
 use App\Models\ProductionOrder;
 use App\Models\SalesOrder;
+use App\Models\StockAdjustment;
+use App\Models\Tenant;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): Response
+    public function index(): Response|\Illuminate\Http\RedirectResponse
     {
         $tenantId = auth()->user()->tenant_id;
+
+        /** @var Tenant $tenant */
+        $tenant = auth()->user()->tenant;
+        $categoryConfig = $tenant?->getCategoryConfig() ?? [];
+        $enableProductionFlow = $categoryConfig['rules']['enable_production_flow'] ?? true;
+
+        if (! $enableProductionFlow) {
+            if (request()->query('view') !== 'stats') {
+                return redirect()->route('sales-orders.quick-checkout');
+            }
+            return $this->retailDashboard($tenantId);
+        }
 
         // KPI Cards
         $stats = [
@@ -155,7 +170,7 @@ class DashboardController extends Controller
             ]);
 
         // Inventory by Location Summary
-        $inventoryByLocation = \App\Models\InventoryLocation::query()
+        $inventoryByLocation = InventoryLocation::query()
             ->active()
             ->withCount('inventoryItems')
             ->withSum('inventoryItems', 'current_quantity')
@@ -206,6 +221,91 @@ class DashboardController extends Controller
             'topMaterialsByValue' => $topMaterialsByValue,
             'inventoryByLocation' => $inventoryByLocation,
             'inventorySummary' => $inventorySummary,
+        ]);
+    }
+
+    private function retailDashboard(int $tenantId): Response
+    {
+        $today = now()->toDateString();
+        $thisMonth = now()->month;
+        $thisYear = now()->year;
+
+        $stats = [
+            'sales_today' => SalesOrder::query()
+                ->whereDate('order_date', $today)
+                ->sum('total_amount'),
+            'sales_today_count' => SalesOrder::query()
+                ->whereDate('order_date', $today)
+                ->count(),
+            'sales_month' => SalesOrder::query()
+                ->whereMonth('order_date', $thisMonth)
+                ->whereYear('order_date', $thisYear)
+                ->sum('total_amount'),
+            'sales_month_count' => SalesOrder::query()
+                ->whereMonth('order_date', $thisMonth)
+                ->whereYear('order_date', $thisYear)
+                ->count(),
+            'total_inventory_items' => InventoryItem::query()->count(),
+            'low_stock_count' => InventoryItem::query()
+                ->whereRaw('(current_quantity - reserved_quantity) <= minimum_stock')
+                ->whereRaw('(current_quantity - reserved_quantity) >= 0')
+                ->count(),
+            'out_of_stock_count' => InventoryItem::query()->where('current_quantity', 0)->count(),
+            'inventory_value' => InventoryItem::query()->sum(DB::raw('current_quantity * unit_cost')),
+            'outstanding_receivables' => SalesOrder::query()
+                ->where('payment_status', '!=', 'paid')
+                ->sum(DB::raw('total_amount - paid_amount')),
+        ];
+
+        $salesTrend = SalesOrder::query()
+            ->select(
+                DB::raw('DATE(order_date) as date'),
+                DB::raw('SUM(total_amount) as total'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->where('order_date', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $topProducts = DB::table('sales_order_items')
+            ->join('sales_orders', 'sales_order_items.sales_order_id', '=', 'sales_orders.id')
+            ->join('inventory_items', 'sales_order_items.inventory_item_id', '=', 'inventory_items.id')
+            ->select(
+                'inventory_items.sku',
+                'inventory_items.product_name as name',
+                DB::raw('SUM(sales_order_items.quantity) as total_sold'),
+                DB::raw('SUM(sales_order_items.subtotal) as total_revenue')
+            )
+            ->where('sales_orders.tenant_id', $tenantId)
+            ->where('sales_orders.order_date', '>=', now()->subDays(30))
+            ->groupBy('inventory_items.id', 'inventory_items.sku', 'inventory_items.product_name')
+            ->orderByDesc('total_sold')
+            ->limit(5)
+            ->get();
+
+        $lowStockItems = InventoryItem::query()
+            ->whereRaw('(current_quantity - reserved_quantity) <= minimum_stock')
+            ->select('id', 'sku', 'product_name', 'current_quantity', 'reserved_quantity', 'minimum_stock')
+            ->limit(10)
+            ->get();
+
+        $recentPurchases = StockAdjustment::query()
+            ->where('adjustment_type', StockAdjustment::TYPE_PURCHASE)
+            ->whereNotNull('batch_id')
+            ->select('batch_id', 'supplier_name', 'created_at')
+            ->selectRaw('SUM(adjustment_quantity * unit_cost) as total_cost')
+            ->groupBy('batch_id', 'supplier_name', 'created_at')
+            ->latest('created_at')
+            ->limit(5)
+            ->get();
+
+        return Inertia::render('RetailDashboard', [
+            'stats' => $stats,
+            'salesTrend' => $salesTrend,
+            'topProducts' => $topProducts,
+            'lowStockItems' => $lowStockItems,
+            'recentPurchases' => $recentPurchases,
         ]);
     }
 }

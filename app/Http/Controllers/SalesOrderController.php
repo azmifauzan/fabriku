@@ -9,9 +9,11 @@ use App\Models\InventoryItem;
 use App\Models\SalesOrder;
 use App\Models\SystemSetting;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class SalesOrderController extends Controller
 {
@@ -295,6 +297,87 @@ class SalesOrderController extends Controller
         return redirect()
             ->route('sales-orders.index')
             ->with('success', 'Sales order berhasil dihapus.');
+    }
+
+    public function quickCheckout(): Response
+    {
+        $items = InventoryItem::query()
+            ->where('status', 'available')
+            ->whereColumn('current_quantity', '>', 'reserved_quantity')
+            ->select('id', 'sku', 'product_name', 'current_quantity', 'reserved_quantity', 'selling_price', 'unit_cost', 'image_path')
+            ->orderBy('product_name')
+            ->get();
+
+        return Inertia::render('SalesOrders/QuickCheckout', [
+            'inventoryItems' => $items,
+        ]);
+    }
+
+    public function quickCheckoutStore(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'payment_method' => ['required', 'string'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.inventory_item_id' => ['required', 'integer', 'exists:inventory_items,id'],
+            'items.*.quantity' => ['required', 'integer', 'min:1'],
+            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $tenantId = auth()->user()->tenant_id;
+
+        // Find or create Walk-in Customer for this tenant
+        $walkIn = Customer::firstOrCreate(
+            ['tenant_id' => $tenantId, 'code' => 'WALK-IN'],
+            [
+                'name' => 'Walk-in Customer',
+                'is_active' => true,
+            ]
+        );
+
+        DB::transaction(function () use ($validated, $walkIn, $tenantId) {
+            $subtotal = 0;
+            $items = [];
+
+            foreach ($validated['items'] as $line) {
+                $lineSubtotal = $line['quantity'] * $line['unit_price'];
+                $subtotal += $lineSubtotal;
+                $items[] = [
+                    'inventory_item_id' => $line['inventory_item_id'],
+                    'quantity' => $line['quantity'],
+                    'unit_price' => $line['unit_price'],
+                    'discount_amount' => 0,
+                    'subtotal' => $lineSubtotal,
+                ];
+            }
+
+            $salesOrder = SalesOrder::create([
+                'tenant_id' => $tenantId,
+                'customer_id' => $walkIn->id,
+                'order_date' => now(),
+                'channel' => 'offline',
+                'status' => 'completed',
+                'subtotal' => $subtotal,
+                'discount_amount' => 0,
+                'discount_percentage' => 0,
+                'tax_amount' => 0,
+                'total_amount' => $subtotal,
+                'payment_method' => $validated['payment_method'],
+                'payment_status' => 'paid',
+                'paid_amount' => $subtotal,
+                'completed_date' => now(),
+            ]);
+
+            $salesOrder->items()->createMany($items);
+
+            // Deduct stock directly — observer only handles updates, not creates
+            foreach ($validated['items'] as $line) {
+                $inventoryItem = InventoryItem::lockForUpdate()->find($line['inventory_item_id']);
+                $inventoryItem?->deductStock((int) $line['quantity']);
+            }
+        });
+
+        return redirect()->route('sales-orders.index')
+            ->with('success', 'Transaksi berhasil dicatat.');
     }
 
     public function print(SalesOrder $salesOrder)

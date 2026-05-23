@@ -183,16 +183,16 @@ class InventoryItemController extends Controller
             ->with('success', 'Inventory item berhasil dibuat.');
     }
 
-    public function edit(InventoryItem $inventoryItem)
+    public function edit(InventoryItem $item)
     {
         $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'capacity']);
         $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'output_quantity']);
         // Only show completed or sent production orders that don't have inventory items yet
         // Include current item's production order
         $productionOrders = ProductionOrder::whereIn('status', ['completed', 'sent'])
-            ->where(function ($query) use ($inventoryItem) {
+            ->where(function ($query) use ($item) {
                 $query->whereDoesntHave('inventoryItems')
-                    ->orWhere('id', $inventoryItem->production_order_id);
+                    ->orWhere('id', $item->production_order_id);
             })
             ->with(['preparationOrder' => function ($query) {
                 $query->select('id', 'pattern_id', 'output_quantity', 'output_unit')
@@ -210,7 +210,7 @@ class InventoryItemController extends Controller
             });
 
         return Inertia::render('Inventory/Items/Edit', [
-            'item' => $inventoryItem->load('productionOrder.preparationOrder.pattern', 'category'),
+            'item' => $item->load('productionOrder.preparationOrder.pattern', 'category'),
             'locations' => $locations,
             'patterns' => $patterns,
             'productionOrders' => $productionOrders,

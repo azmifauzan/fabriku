@@ -24,7 +24,7 @@ Workflow universal: **Bahan Baku → Pattern/Resep → Persiapan → Produksi �
 - **Database**: PostgreSQL 16 (recommended) atau MySQL 8
 - **Cache/Queue**: Redis 7
 - **Tests**: Pest 4 (feature + browser testing)
-- **AI**: OpenAI Chat Completions
+- **AI**: OpenAI Chat Completions *(tidak aktif di UI — tersedia di backend)*
 - **Notifikasi**: Telegram Bot SDK, email SMTP
 - **PDF/Excel**: DomPDF, Maatwebsite Excel
 - **Storage**: AWS S3 (via flysystem)
@@ -147,7 +147,7 @@ Detail lengkap konvensi: `CLAUDE.md` dan `.github/copilot-instructions.md`.
 
 ## Roadmap Singkat
 
-Modul lengkap (auth, RBAC, audit log, semua workflow produksi, sales, reports, dashboard, assistant AI, Telegram bot, email system) sudah aktif. Yang belum:
+Modul lengkap (auth, RBAC, audit log, semua workflow produksi, sales, reports, dashboard, Telegram bot, email system) sudah aktif. Yang belum:
 
 - Mode toko sederhana (POS / retail tanpa flow produksi) — plan di `docs/plan.md`.
 - Payment gateway terintegrasi (Midtrans/Xendit) — masih manual upload bukti.

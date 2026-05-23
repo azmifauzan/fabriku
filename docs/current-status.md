@@ -9,7 +9,7 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Mei 2026. Diturunkan d
 - Multi-tenant: tenant isolation lewat `App\Models\Scopes\TenantScope` + auto-fill `tenant_id` di event `creating` model.
 - Dua guard auth terpisah: `web` (User tenant) dan `admin` (AdminUser platform).
 - Storage upload: disk dikonfigurasi via `config('filesystems.uploads_disk')` (env `UPLOADS_DISK`, default `fabriku_s3`). URL temporary di-cache 25 menit (env `UPLOAD_URL_TTL`).
-- AI: integrasi langsung ke OpenAI Chat Completions API (`gpt-4o-mini` default) via `App\Services\Assistant\OpenAIService`. Env `OPENAI_MODEL` bisa override.
+- AI: integrasi ke OpenAI Chat Completions API tersedia di backend (`App\Services\Assistant\OpenAIService`) namun **tidak aktif di UI** (ChatWidget disembunyikan).
 - Telegram: bot dua arah — webhook penerimaan + push notifikasi keluar.
 - Tests: 30+ feature test files (Pest 4), 1 browser test, 0 unit test meaningful.
 
@@ -42,8 +42,8 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Mei 2026. Diturunkan d
 | Settings tenant | aktif | data perusahaan, alamat, logo |
 | Settings admin (system settings) | aktif | per-tenant overrides untuk `max_staff_per_tenant`, harga membership, dll |
 | Staff management | aktif | bikin akun User otomatis, kirim kredensial via email; cek `max_staff_per_tenant` |
-| Assistant (web chat) | aktif | OpenAI chat, history, usage tracking, pending action confirmation |
-| Telegram bot (webhook) | aktif | command `/start /help /status /disconnect`, connect via 8-char token, forward pesan biasa ke assistant |
+| Assistant (web chat) | **disembunyikan** | Backend tersedia, ChatWidget dan routes `/assistant/*` ada di kode tapi tidak ditampilkan ke user |
+| Telegram bot (webhook) | aktif | command `/start /help /status /disconnect`, connect via 8-char token; forward ke assistant dinonaktifkan di UI |
 | Telegram notifikasi keluar | aktif | new user registered, payment uploaded |
 | Email system | aktif | verifikasi email, reset password, welcome, trial reminder (7/3/1 hari) |
 | Demo data reset | aktif | scheduler `hourly` jalan `demo:reset` |
@@ -60,7 +60,7 @@ Permission slug yang terpakai di routes/web.php:
 - `sales.view`
 - `report.view`
 
-Modul tanpa permission middleware (open untuk semua user tenant ter-verifikasi): staff, customers (via sales.view), settings, subscription, assistant, telegram.
+Modul tanpa permission middleware (open untuk semua user tenant ter-verifikasi): staff, customers (via sales.view), settings, subscription, telegram.
 
 ## Database (37 tabel)
 
@@ -75,7 +75,7 @@ Migrasi tunggal per modul:
 - `admin_users`, `roles`, `permissions`, `role_permissions`, `user_roles`
 - `system_settings`, `audit_logs`, `subscription_payments`
 - `stock_adjustments`
-- `assistant_tables` (assistant_conversations, assistant_messages, assistant_usages, assistant_pending_actions)
+- `assistant_tables` (assistant_conversations, assistant_messages, assistant_usages, assistant_pending_actions) — *tabel tetap ada, fitur UI disembunyikan*
 - `email_logs`
 - `inventory_item_categories` + add `category_id` ke inventory_items
 - Patch migrations: tambah staff_user, tambah `shipped` status SO, fix unique constraints jadi per-tenant (staff.code, contractors.code, sales_orders.order_number, inventory_items.sku, inventory_locations.code), tambah kolom audit log

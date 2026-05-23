@@ -91,6 +91,8 @@ class HandleInertiaRequests extends Middleware
                 'category_config' => [
                     'product_types' => $categoryConfig['product_types'] ?? [],
                     'sizes' => $categoryConfig['sizes'] ?? [],
+                    'rules' => $categoryConfig['rules'] ?? [],
+                    'mode' => $categoryConfig['mode'] ?? 'full',
                 ],
                 'logo' => $tenantId ? SystemSetting::get('company_logo', null, $tenantId) : null,
                 'company_name' => $tenantId ? SystemSetting::get('company_name', null, $tenantId) : null,

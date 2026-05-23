@@ -25,15 +25,21 @@ class StockAdjustment extends Model
 
     public const TYPE_RETURN = 'return';
 
+    public const TYPE_PURCHASE = 'purchase';
+
     protected $fillable = [
         'tenant_id',
         'inventory_item_id',
         'adjustment_type',
+        'batch_id',
         'quantity_before',
         'quantity_after',
         'adjustment_quantity',
         'reason',
         'notes',
+        'supplier_name',
+        'purchase_invoice',
+        'unit_cost',
         'adjusted_by',
         'approved_by',
         'approved_at',
@@ -106,6 +112,7 @@ class StockAdjustment extends Model
             self::TYPE_LOSS => 'Hilang',
             self::TYPE_FOUND => 'Ditemukan',
             self::TYPE_RETURN => 'Retur',
+            self::TYPE_PURCHASE => 'Pembelian',
             default => ucfirst($this->adjustment_type),
         };
     }
@@ -119,6 +126,7 @@ class StockAdjustment extends Model
             self::TYPE_LOSS => 'Hilang',
             self::TYPE_FOUND => 'Ditemukan',
             self::TYPE_RETURN => 'Retur',
+            self::TYPE_PURCHASE => 'Pembelian',
         ];
     }
 }

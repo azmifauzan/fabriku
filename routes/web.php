@@ -27,6 +27,7 @@ use App\Http\Controllers\MaterialTypeController;
 use App\Http\Controllers\PatternController;
 use App\Http\Controllers\PreparationOrderController;
 use App\Http\Controllers\ProductionOrderController;
+use App\Http\Controllers\PurchaseReceiptController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SettingController;
@@ -203,9 +204,21 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
         Route::resource('items', InventoryItemController::class);
     });
 
+    // Purchase Receipt Management (Retail)
+    Route::resource('purchase-receipts', PurchaseReceiptController::class)
+        ->only(['index', 'create', 'store'])
+        ->middleware('permission:purchase.view');
+    Route::get('purchase-receipts/batch/{batch_id}', [PurchaseReceiptController::class, 'show'])
+        ->name('purchase-receipts.show')
+        ->middleware('permission:purchase.view');
+
     // Sales Management
     Route::resource('customers', CustomerController::class)
         ->middleware('permission:sales.view');
+    Route::get('sales-orders/quick-checkout', [SalesOrderController::class, 'quickCheckout'])->name('sales-orders.quick-checkout')
+        ->middleware('permission:sales.create');
+    Route::post('sales-orders/quick-checkout', [SalesOrderController::class, 'quickCheckoutStore'])->name('sales-orders.quick-checkout.store')
+        ->middleware('permission:sales.create');
     Route::get('sales-orders/{sales_order}/print', [SalesOrderController::class, 'print'])->name('sales-orders.print')
         ->middleware('permission:sales.view');
     Route::get('sales-orders/{sales_order}/delivery-order', [SalesOrderController::class, 'deliveryOrder'])->name('sales-orders.delivery-order')
