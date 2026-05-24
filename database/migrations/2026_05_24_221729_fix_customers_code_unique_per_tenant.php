@@ -13,7 +13,7 @@ return new class extends Migration
 
         if ($driver === 'pgsql') {
             // PostgreSQL: safe DDL that won't abort the transaction
-            DB::statement('DROP INDEX IF EXISTS customers_code_unique');
+            DB::statement('ALTER TABLE customers DROP CONSTRAINT IF EXISTS customers_code_unique');
             DB::statement('CREATE UNIQUE INDEX IF NOT EXISTS customers_tenant_code_unique ON customers (tenant_id, code)');
         } else {
             // MySQL: check before acting
