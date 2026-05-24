@@ -1,8 +1,10 @@
 # Enhancement Plans
 
+> **Status (Mei 2026)**: Plan A (Retail) dan Plan B (Homemade) keduanya **SELESAI PENUH**. Semua fitur aktif di production. Lihat `docs/current-status.md` untuk detail modul.
+
 ---
 
-## Plan A: Retail — SELESAI (Fase 1–8 sudah selesai, lihat `docs/current-status.md`)
+## Plan A: Retail — SELESAI ✅ (semua fase diimplementasikan)
 
 ### Fase 7: Purchase Report ✅ SELESAI
 

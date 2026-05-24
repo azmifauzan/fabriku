@@ -13,7 +13,7 @@ Platform SaaS multi-tenant untuk manajemen produksi dan penjualan UMKM Indonesia
 | Kerajinan | Desain → Persiapan → Pembuatan | Souvenir, aksesoris |
 | Kosmetik | Formula → Mixing → Produksi | Skincare, herbal |
 | **Toko / Retail** | Pembelian → Stock → Quick Checkout | Kelontong, dropship, reseller |
-| **Produksi Rumahan** *(coming)* | Bahan Baku → Catatan Produksi → Quick Checkout | Toko kue rumahan, frozen food |
+| **Produksi Rumahan** | Bahan Baku → Catatan Produksi → Quick Checkout | Toko kue rumahan, frozen food |
 
 Workflow penuh: **Bahan Baku → Pattern/Resep → Persiapan → Produksi → Inventory → Penjualan**. Terminologi UI menyesuaikan kategori tenant. Kategori `retail` dan `homemade` melewati production flow dan langsung ke inventory + quick checkout.
 
@@ -68,6 +68,7 @@ Tenant (URL `/login`):
 - `admin@crafty.com` (craft) / `password`
 - `admin@glowbeauty.com` (cosmetic) / `password`
 - `admin@tokoserbaada.com` (retail) / `password`
+- `admin@homemade.com` (homemade) / `password`
 
 Admin platform (URL `/admin/login`):
 - `admin@fabriku.com` / `password`
@@ -150,10 +151,8 @@ Detail lengkap konvensi: `CLAUDE.md` dan `.github/copilot-instructions.md`.
 
 ## Roadmap Singkat
 
-Modul lengkap (auth, RBAC, audit log, semua workflow produksi, sales, reports, dashboard, mode retail, Telegram bot, email system) sudah aktif. Yang belum:
+Semua modul aktif (auth, RBAC, audit log, semua workflow produksi, sales, reports, dashboard, mode retail, mode homemade, Purchase Report, Quick Checkout POS, Telegram bot, email system). Yang belum:
 
-- Purchase Report untuk retail + test `RetailWorkflowTest.php` — lihat `docs/plan.md`.
-- Kategori `homemade` (UMKM produksi rumahan: bahan baku + catatan produksi sederhana + quick checkout) — plan di `docs/plan.md`.
 - Payment gateway terintegrasi (Midtrans/Xendit) — masih manual upload bukti.
 - Mobile app native.
 - Shipping API (JNE/JNT/SiCepat).

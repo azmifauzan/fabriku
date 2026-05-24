@@ -463,6 +463,99 @@ Dokumen ini menjelaskan alur kerja pengguna (user flows) untuk berbagai proses b
 
 ---
 
+---
+
+### Flow 8: Retail — Purchase Receipt (Beli Produk Jadi)
+
+**Applicable**: kategori `retail` saja. Modul `purchase.view/edit`.
+
+**Actor**: Admin / Manager
+
+**Precondition**: Inventory item sudah terdaftar (atau dibuat inline)
+
+**Steps**:
+1. Navigate to "Pembelian" → "Catat Pembelian"
+2. User input data pembelian:
+   - Tanggal pembelian
+   - Nama supplier
+   - Nomor invoice pembelian (opsional)
+   - Catatan (opsional)
+3. User tambah item:
+   - Pilih inventory item
+   - Qty dibeli
+   - Harga beli per unit
+4. User click "Simpan"
+5. System:
+   - Generate `batch_id` (UUID) untuk grup transaksi
+   - Create `StockAdjustment` type `purchase` per item (current_quantity bertambah)
+   - Simpan `supplier_name` + `purchase_invoice` di kolom nullable
+
+**Postcondition**: Stok inventory bertambah, Purchase Report mencatat batch ini
+
+---
+
+### Flow 9: Quick Checkout / POS (Retail & Homemade)
+
+**Applicable**: kategori `retail` dan `homemade`. Muncul di sidebar top-level "Penjualan".
+
+**Actor**: Sales Staff / Kasir
+
+**Precondition**: Inventory item tersedia (available_stock > 0)
+
+**Steps**:
+1. Navigate to "Penjualan" (Quick Checkout)
+2. System tampilkan grid produk dengan stok available
+3. User click produk → masuk cart (quantity default 1, bisa +/-)
+4. User dapat pilih customer (default: Walk-in Customer)
+5. User review cart:
+   - Total otomatis dihitung
+   - Dapat beri diskon (opsional)
+6. User click "Proses Transaksi"
+7. System:
+   - Create Sales Order (status langsung `completed`)
+   - Deduct stok inventory (`current_quantity - qty`)
+   - Record payment (status `paid`)
+8. System tampilkan konfirmasi transaksi
+
+**Postcondition**: Transaksi selesai, stok berkurang, SO `completed`
+
+---
+
+### Flow 10: Homemade — Simple Production (Catatan Produksi)
+
+**Applicable**: kategori `homemade` saja. Permission `simple_production.view/create`.
+
+**Actor**: Admin / Pemilik UMKM
+
+**Precondition**: Bahan baku sudah dicatat (material receipts), stok bahan > 0
+
+**Steps**:
+1. Navigate to "Catatan Produksi" → "Catat Produksi Baru"
+2. User input:
+   - Tanggal produksi
+   - Pilih atau buat produk jadi (inventory item) — bisa input nama baru
+   - Qty yang dihasilkan
+   - Catatan / nomor batch produksi (opsional)
+   - Pilih resep sebagai referensi (opsional)
+3. User tambah bahan baku yang dipakai:
+   - Pilih material dari dropdown (shows stok saat ini)
+   - Input qty yang dipakai
+   - Repeat untuk setiap bahan
+4. System validasi stok bahan cukup
+5. User click "Simpan Produksi"
+6. System (dalam DB transaction):
+   - Generate `batch_id` untuk grup
+   - Deduct stok per bahan baku via `PreparationOrder` (reuse FIFO logic)
+   - Add produk jadi ke inventory: `StockAdjustment` type `production_entry` + tambah `current_quantity`
+7. System redirect ke halaman riwayat produksi
+
+**Postcondition**: Stok bahan baku berkurang, produk jadi masuk inventory
+
+**Error Cases**:
+- Stok bahan tidak cukup → validasi error sebelum simpan, tidak ada deduction parsial
+
+---
+
 ## User Journey Examples
 
 ### Journey 1: Complete Production Cycle (Happy Path)
@@ -518,7 +611,56 @@ Dokumen ini menjelaskan alur kerja pengguna (user flows) untuk berbagai proses b
 
 ---
 
-### Journey 2: Handle Production Defect
+---
+
+### Journey 2 (Retail): Toko Simple — Dari Beli ke Jual
+
+1. **Catat Pembelian** (Admin)
+   - Pembelian → Catat Pembelian
+   - Input: 50 pcs Kaos Polos dari Supplier X @ 30.000
+   - System: Stok inventory +50, StockAdjustment type `purchase` tercreate
+
+2. **Quick Checkout** (Kasir)
+   - Penjualan (Quick Checkout)
+   - Click Kaos Polos → qty 3 → cart
+   - Proses Transaksi
+   - System: SO completed, stok -3
+
+3. **Lihat Laporan Pembelian** (Manager)
+   - Laporan → Laporan Pembelian
+   - Filter bulan ini
+   - Export Excel: rekap pembelian per supplier + batch
+
+**Result**: Siklus toko retail — beli → stok → jual → laporan
+
+---
+
+### Journey 3 (Homemade): UMKM Kue Rumahan
+
+1. **Beli Bahan Baku** (Pemilik)
+   - Bahan Baku → Penerimaan Baru
+   - Input: 5 kg Tepung Terigu, 2 kg Gula Pasir dari warung
+   - System: Stok bahan baku bertambah
+
+2. **Catat Produksi** (Pemilik)
+   - Catatan Produksi → Catat Produksi Baru
+   - Produk: Brownies Coklat, qty: 10 loyang
+   - Bahan: Tepung 1 kg + Gula 0.5 kg + Coklat 0.3 kg
+   - System: Bahan berkurang, 10 loyang masuk inventory
+
+3. **Jual via Quick Checkout** (Pemilik)
+   - Penjualan → Quick Checkout
+   - Klik Brownies Coklat → qty 3 → Proses Transaksi
+   - System: SO completed, stok -3
+
+4. **Cek Dashboard** (Pemilik)
+   - Dashboard: Omzet hari ini, produksi hari ini, stok bahan baku rendah (jika ada)
+
+**Result**: Siklus UMKM rumahan — beli bahan → produksi sederhana → jual → pantau stok
+
+---
+
+### Journey 4: Handle Production Defect (Garment)
 
 1. Production order returns with defects
 2. QC inputs: 15 good, 5 defect
@@ -530,7 +672,7 @@ Dokumen ini menjelaskan alur kerja pengguna (user flows) untuk berbagai proses b
 
 ---
 
-### Journey 3: Low Stock Alert
+### Journey 5: Low Stock Alert
 
 1. System detects inventory < reorder point
 2. System generates alert notification
