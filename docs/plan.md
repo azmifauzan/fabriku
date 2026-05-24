@@ -2,27 +2,33 @@
 
 ---
 
-## Plan A: Retail — Sisa (Fase 1–6 + 8 sudah selesai, lihat `docs/current-status.md`)
+## Plan A: Retail — SELESAI (Fase 1–8 sudah selesai, lihat `docs/current-status.md`)
 
-### Fase 7: Purchase Report
+### Fase 7: Purchase Report ✅ SELESAI
 
-`ReportController` existing sudah modular. Tambah:
-- Endpoint `GET /reports/purchase` di `ReportController`
-- Query: `StockAdjustment` where `adjustment_type = 'purchase'`, group per `batch_id`, join ke `inventory_items` untuk nama produk
-- View: tabel per transaksi (tanggal, supplier, total item, total nilai) + drill-down per batch
-- Export Excel/PDF (ikuti pola modul `material` / `sales`)
-- Hide menu "Laporan Material" dan "Laporan Produksi" di sidebar untuk tenant retail
+Diimplementasikan:
+- `GET /reports/purchase` (`reports.purchase`) + `GET /reports/purchase/export` (`reports.purchase.export`) di `ReportController`
+- Query: `StockAdjustment` where `adjustment_type = 'purchase'`, group per `batch_id`, join `inventoryItem` + `adjustedBy`
+- Vue page: `resources/js/pages/Reports/PurchaseReport.vue` — tabel per transaksi + drill-down per batch (collapsible)
+- Export Excel via `app/Exports/PurchaseReportExport.php` + view `resources/views/exports/purchase-report.blade.php`
+- Export PDF via `resources/views/pdf/purchase-report.blade.php`
+- Wayfinder: `purchase` + `exportPurchase` ter-generate di `resources/js/actions/App/Http/Controllers/ReportController.ts`
+- Sidebar: menu "Pembelian" muncul di Laporan kalau `isModuleEnabled('purchase')` (retail only); Material + Produksi laporan sudah hidden untuk retail
 
-### Test Integrasi
+### Test Integrasi ✅ SELESAI
 
-File belum ada: `tests/Feature/Integration/RetailWorkflowTest.php`
+File: `tests/Feature/Integration/RetailWorkflowTest.php`
 
-Cover:
-1. Register tenant `retail` → sidebar tidak punya modul material/produksi
-2. Tambah inventory item
-3. Catat purchase receipt → stok bertambah
-4. Quick checkout → stok berkurang, SO `completed`, payment `paid`
-5. Cek laporan pembelian (setelah Fase 7 selesai)
+Cover yang diimplementasikan:
+1. Login tenant retail → dashboard accessible
+2. Buat inventory item
+3. Catat purchase receipt → stok bertambah (20 unit), `StockAdjustment` TYPE_PURCHASE tercreate
+4. Cek laporan pembelian → 1 batch, total_cost 240000
+5. Export purchase Excel + PDF → HTTP 200
+6. Quick checkout → stok berkurang (20 → 15)
+
+Tidak di-cover (low priority):
+- Sidebar module visibility assertions (material/produksi tidak muncul)
 
 ---
 

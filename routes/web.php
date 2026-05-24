@@ -240,6 +240,8 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
         Route::get('sales-recap/export', [ReportController::class, 'exportSalesRecap'])->name('sales-recap.export');
         Route::get('production', [ReportController::class, 'production'])->name('production');
         Route::get('production/export', [ReportController::class, 'exportProduction'])->name('production.export');
+        Route::get('purchase', [ReportController::class, 'purchase'])->name('purchase');
+        Route::get('purchase/export', [ReportController::class, 'exportPurchase'])->name('purchase.export');
     });
 
     // Settings

@@ -51,6 +51,7 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Mei 2026. Diturunkan d
 | Purchase receipts (retail) | aktif | `PurchaseReceiptController`; reuse `stock_adjustments` dengan `batch_id`, `supplier_name`, `purchase_invoice`; permission `purchase.view/edit` |
 | Quick Checkout / POS (retail) | aktif | `QuickCheckout.vue` — grid produk + cart, default Walk-in Customer, SO langsung `completed` |
 | Dashboard retail | aktif | `RetailDashboard.vue`; `DashboardController` fork ke `retailDashboard()` bila `!enable_production_flow` |
+| **Purchase Report (retail)** | aktif | `ReportController::purchase()`; query `StockAdjustment` type purchase, group per `batch_id`; tabel + drill-down per batch; export Excel + PDF; route `reports.purchase` + `reports.purchase.export` |
 
 ## Struktur Routing Tenant
 
@@ -63,7 +64,7 @@ Permission slug yang terpakai di routes/web.php:
 - `inventory.view`
 - `sales.view`
 - `purchase.view`, `purchase.edit` (retail only)
-- `report.view`
+- `report.view` (mencakup semua laporan termasuk `reports.purchase` untuk retail)
 
 Modul tanpa permission middleware (open untuk semua user tenant ter-verifikasi): staff, customers (via sales.view), settings, subscription, telegram.
 
@@ -92,7 +93,7 @@ Migrasi tunggal per modul:
 ## Test Coverage
 
 - `tests/Feature/`: 30+ file, dominan happy-path CRUD + observer test untuk SalesOrder.
-- `tests/Feature/Integration/`: 6 file user-journey end-to-end per modul + multi-kategori.
+- `tests/Feature/Integration/`: 7 file user-journey end-to-end per modul + multi-kategori; termasuk `RetailWorkflowTest.php` (purchase receipt → purchase report → quick checkout).
 - `tests/Browser/ApplicationFlowTest.php`: 1 file browser test (Pest 4).
 - `tests/Unit/`: hanya `ExampleTest.php` (kosong) — tidak ada unit test domain.
 - Setup: `RefreshDatabase` otomatis untuk Feature via `tests/Pest.php`.
@@ -118,9 +119,7 @@ Admin platform: `admin@fabriku.com`. Semua password `password`. Data reset tiap 
 
 ## Yang BELUM Ada
 
-- **Purchase Report** untuk retail — `ReportController` belum punya endpoint laporan pembelian (dari `stock_adjustments` type purchase). Lihat `docs/plan.md` Fase 7.
-- **`RetailWorkflowTest.php`** — test integrasi retail belum ada. Lihat `docs/plan.md`.
-- **Kategori `homemade`** (UMKM produksi sederhana: catat bahan baku + input produk jadi langsung tanpa production order). Lihat `docs/plan.md`.
+- **Kategori `homemade`** (UMKM produksi sederhana: catat bahan baku + input produk jadi langsung tanpa production order). Lihat `docs/plan.md` Plan B.
 - Barcode scanning untuk material (hanya inventory yang punya QR).
 - Multi-warehouse (hanya `inventory_locations` per tenant tunggal).
 - Payment gateway terintegrasi (Midtrans/Xendit). Subscription payment masih manual upload bukti.

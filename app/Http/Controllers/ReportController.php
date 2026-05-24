@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Exports\InventoryReportExport;
 use App\Exports\MaterialReportExport;
 use App\Exports\ProductionReportExport;
+use App\Exports\PurchaseReportExport;
 use App\Exports\SalesRecapExport;
 use App\Exports\SalesReportExport;
 use App\Models\InventoryItem;
 use App\Models\Material;
 use App\Models\ProductionOrder;
 use App\Models\SalesOrder;
+use App\Models\StockAdjustment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -274,7 +276,6 @@ class ReportController extends Controller
         return Inertia::render('Reports/SalesReport', [
             'orders' => $orders,
             'summary' => $summary,
-            'summary' => $summary,
             // 'revenueByType' => $revenueByType,
             'filters' => $request->only(['status', 'search', 'start_date', 'end_date']),
             'defaultDates' => [
@@ -320,7 +321,6 @@ class ReportController extends Controller
                 'category' => $pattern?->category ?? '-',
                 'type' => $order->type,
                 'contractor_name' => $order->contractor?->name ?? 'Internal',
-                'output_quantity' => $outputQuantity,
                 'output_quantity' => $outputQuantity,
                 'labor_cost' => $order->labor_cost ?? 0,
                 'material_cost' => $order->preparationOrder?->materialUsages->sum(fn ($u) => $u->quantity * ($u->materialReceipt->price_per_unit ?? 0)) ?? 0,
@@ -878,6 +878,124 @@ class ReportController extends Controller
             'orders' => $orders,
             'summary' => $summary,
             'filters' => $request->only(['status', 'production_type', 'start_date', 'end_date']),
+        ];
+    }
+
+    /**
+     * Purchase report
+     */
+    public function purchase(Request $request): InertiaResponse
+    {
+        $data = $this->getPurchaseReportData($request);
+
+        return Inertia::render('Reports/PurchaseReport', [
+            'batches' => $data['batches'],
+            'summary' => $data['summary'],
+            'filters' => $data['filters'],
+            'defaultDates' => [
+                'start_date' => $data['filters']['start_date'],
+                'end_date' => $data['filters']['end_date'],
+            ],
+        ]);
+    }
+
+    /**
+     * Export Purchase Report
+     */
+    public function exportPurchase(Request $request): Response|BinaryFileResponse
+    {
+        $data = $this->getPurchaseReportData($request);
+
+        if ($request->format === 'pdf') {
+            $pdf = Pdf::loadView('pdf.purchase-report', $data)
+                ->setPaper('a4', 'landscape');
+
+            return $pdf->download('laporan-pembelian-'.now()->format('Y-m-d').'.pdf');
+        }
+
+        return Excel::download(
+            new PurchaseReportExport(
+                collect($data['batches']),
+                $data['summary'],
+                $data['filters']
+            ),
+            'laporan-pembelian-'.now()->format('Y-m-d').'.xlsx'
+        );
+    }
+
+    /**
+     * Get Purchase Report Data
+     */
+    private function getPurchaseReportData(Request $request): array
+    {
+        $query = StockAdjustment::query()
+            ->where('adjustment_type', StockAdjustment::TYPE_PURCHASE)
+            ->whereNotNull('batch_id')
+            ->with(['inventoryItem:id,sku,product_name', 'adjustedBy:id,name']);
+
+        // Date filter
+        $startDate = $request->filled('start_date')
+            ? $request->start_date
+            : now()->startOfMonth()->format('Y-m-d');
+
+        $endDate = $request->filled('end_date')
+            ? $request->end_date
+            : now()->endOfMonth()->format('Y-m-d');
+
+        $query->whereBetween('created_at', [
+            \Carbon\Carbon::parse($startDate)->startOfDay(),
+            \Carbon\Carbon::parse($endDate)->endOfDay()
+        ]);
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('supplier_name', 'ilike', "%{$request->search}%")
+                  ->orWhere('purchase_invoice', 'ilike', "%{$request->search}%")
+                  ->orWhereHas('inventoryItem', function ($q2) use ($request) {
+                      $q2->where('product_name', 'ilike', "%{$request->search}%")
+                         ->orWhere('sku', 'ilike', "%{$request->search}%");
+                  });
+            });
+        }
+
+        $adjustments = $query->latest('created_at')->get();
+
+        // Group by batch_id
+        $batches = $adjustments->groupBy('batch_id')->map(function ($group) {
+            $first = $group->first();
+            return [
+                'batch_id' => $first->batch_id,
+                'date' => $first->created_at->format('Y-m-d'),
+                'supplier_name' => $first->supplier_name,
+                'purchase_invoice' => $first->purchase_invoice,
+                'notes' => $first->notes,
+                'adjusted_by' => $first->adjustedBy?->name ?? 'System',
+                'item_count' => $group->count(),
+                'total_qty' => $group->sum('adjustment_quantity'),
+                'total_cost' => $group->sum(fn ($item) => $item->adjustment_quantity * $item->unit_cost),
+                'items' => $group->map(fn ($item) => [
+                    'sku' => $item->inventoryItem?->sku ?? '-',
+                    'name' => $item->inventoryItem?->product_name ?? '-',
+                    'quantity' => $item->adjustment_quantity,
+                    'unit_cost' => $item->unit_cost,
+                    'total_cost' => $item->adjustment_quantity * $item->unit_cost,
+                ]),
+            ];
+        })->values();
+
+        $summary = [
+            'total_transactions' => $batches->count(),
+            'total_items_purchased' => $batches->sum('total_qty'),
+            'total_spend' => $batches->sum('total_cost'),
+        ];
+
+        return [
+            'batches' => $batches,
+            'summary' => $summary,
+            'filters' => array_merge(
+                $request->only(['search']),
+                ['start_date' => $startDate, 'end_date' => $endDate]
+            ),
         ];
     }
 }
