@@ -3,13 +3,18 @@ import { useSweetAlert } from '@/composables/useSweetAlert';
 import { Form, Link } from '@inertiajs/vue3';
 import { Head } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
-import { ChefHat, Eye, EyeOff, Palette, Scissors, Sparkles, Store } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { ChefHat, Eye, EyeOff, Palette, Scissors, Sparkles, Store, Home } from 'lucide-vue-next';
+import { computed, ref, watch, reactive } from 'vue';
 
-const form = {
+const form = reactive({
     email: '',
     password: '',
     remember: false,
+});
+
+const fillCredentials = (email: string) => {
+    form.email = email;
+    form.password = 'password';
 };
 
 const showPassword = ref(false);
@@ -167,61 +172,91 @@ watch(flash, (newFlash) => {
 
                         <div class="space-y-1.5">
                             <!-- Retail Demo -->
-                            <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-default">
+                            <div 
+                                @click="fillCredentials('admin@tokoserbaada.com')"
+                                class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-pointer select-none"
+                            >
                                 <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white border border-gray-200 shrink-0">
                                     <Store :size="14" class="text-gray-500" />
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-xs font-semibold text-gray-800">Toko Serba Ada <span class="font-normal text-gray-400">· Retail</span></p>
-                                    <p class="font-mono text-[11px] text-indigo-600 truncate cursor-pointer" onclick="navigator.clipboard.writeText('admin@tokoserbaada.com')">admin@tokoserbaada.com</p>
+                                    <p class="font-mono text-[11px] text-indigo-600 truncate">admin@tokoserbaada.com</p>
                                 </div>
                                 <span class="text-[10px] text-gray-400 shrink-0">password</span>
                             </div>
 
                             <!-- Garment Demo -->
-                            <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-default">
+                            <div 
+                                @click="fillCredentials('admin@konveksi.com')"
+                                class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-pointer select-none"
+                            >
                                 <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white border border-gray-200 shrink-0">
                                     <Scissors :size="14" class="text-gray-500" />
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-xs font-semibold text-gray-800">Konveksi Fabriku <span class="font-normal text-gray-400">· Garment</span></p>
-                                    <p class="font-mono text-[11px] text-indigo-600 truncate cursor-pointer" onclick="navigator.clipboard.writeText('admin@konveksi.com')">admin@konveksi.com</p>
+                                    <p class="font-mono text-[11px] text-indigo-600 truncate">admin@konveksi.com</p>
                                 </div>
                                 <span class="text-[10px] text-gray-400 shrink-0">password</span>
                             </div>
 
                             <!-- Food Demo -->
-                            <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-default">
+                            <div 
+                                @click="fillCredentials('admin@kuemama.com')"
+                                class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-pointer select-none"
+                            >
                                 <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white border border-gray-200 shrink-0">
                                     <ChefHat :size="14" class="text-gray-500" />
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-xs font-semibold text-gray-800">Kue Mama Homemade <span class="font-normal text-gray-400">· Makanan</span></p>
-                                    <p class="font-mono text-[11px] text-indigo-600 truncate cursor-pointer" onclick="navigator.clipboard.writeText('admin@kuemama.com')">admin@kuemama.com</p>
+                                    <p class="font-mono text-[11px] text-indigo-600 truncate">admin@kuemama.com</p>
                                 </div>
                                 <span class="text-[10px] text-gray-400 shrink-0">password</span>
                             </div>
 
                             <!-- Craft Demo -->
-                            <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-default">
+                            <div 
+                                @click="fillCredentials('admin@crafty.com')"
+                                class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-pointer select-none"
+                            >
                                 <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white border border-gray-200 shrink-0">
                                     <Palette :size="14" class="text-gray-500" />
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-xs font-semibold text-gray-800">Crafty Handmade <span class="font-normal text-gray-400">· Craft</span></p>
-                                    <p class="font-mono text-[11px] text-indigo-600 truncate cursor-pointer" onclick="navigator.clipboard.writeText('admin@crafty.com')">admin@crafty.com</p>
+                                    <p class="font-mono text-[11px] text-indigo-600 truncate">admin@crafty.com</p>
                                 </div>
                                 <span class="text-[10px] text-gray-400 shrink-0">password</span>
                             </div>
 
                             <!-- Cosmetic Demo -->
-                            <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-default">
+                            <div 
+                                @click="fillCredentials('admin@glowbeauty.com')"
+                                class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-pointer select-none"
+                            >
                                 <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white border border-gray-200 shrink-0">
                                     <Sparkles :size="14" class="text-gray-500" />
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-xs font-semibold text-gray-800">Glow Beauty Lab <span class="font-normal text-gray-400">· Kosmetik</span></p>
-                                    <p class="font-mono text-[11px] text-indigo-600 truncate cursor-pointer" onclick="navigator.clipboard.writeText('admin@glowbeauty.com')">admin@glowbeauty.com</p>
+                                    <p class="font-mono text-[11px] text-indigo-600 truncate">admin@glowbeauty.com</p>
+                                </div>
+                                <span class="text-[10px] text-gray-400 shrink-0">password</span>
+                            </div>
+
+                            <!-- Homemade Demo -->
+                            <div 
+                                @click="fillCredentials('admin@homemade.com')"
+                                class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-colors cursor-pointer select-none"
+                            >
+                                <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white border border-gray-200 shrink-0">
+                                    <Home :size="14" class="text-gray-500" />
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold text-gray-800">Dapur Coklat Rumahan <span class="font-normal text-gray-400">· Produksi Rumahan</span></p>
+                                    <p class="font-mono text-[11px] text-indigo-600 truncate">admin@homemade.com</p>
                                 </div>
                                 <span class="text-[10px] text-gray-400 shrink-0">password</span>
                             </div>

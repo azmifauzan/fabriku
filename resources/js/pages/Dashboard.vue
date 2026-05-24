@@ -176,7 +176,7 @@ const getStatusBadgeClass = (status: string) => {
                 </div>
 
                 <!-- Stats Grid -->
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <!-- Total Materials -->
                     <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
                         <div class="p-6">
@@ -299,7 +299,7 @@ const getStatusBadgeClass = (status: string) => {
                                 <TrendingUp :size="20" class="text-indigo-500" />
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Produk Terlaris (30 Hari Terakhir)</h3>
                             </div>
-                            <div class="space-y-3">
+                            <div class="max-h-[400px] overflow-y-auto space-y-3">
                                 <div
                                     v-for="product in topProducts"
                                     :key="product.sku"
@@ -329,7 +329,7 @@ const getStatusBadgeClass = (status: string) => {
                                 <ClipboardList :size="20" class="text-indigo-500" />
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Aktivitas Terkini</h3>
                             </div>
-                            <div class="space-y-3">
+                            <div class="max-h-[400px] overflow-y-auto space-y-3">
                                 <div
                                     v-for="(activity, idx) in recentActivities"
                                     :key="idx"

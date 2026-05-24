@@ -9,6 +9,7 @@ type CategoryRules = {
     enable_preparation_module?: boolean;
     enable_pattern_module?: boolean;
     enable_contractor_module?: boolean;
+    enable_simple_production?: boolean;
     enable_inventory_module?: boolean;
     enable_sales_module?: boolean;
     enable_purchase_module?: boolean;

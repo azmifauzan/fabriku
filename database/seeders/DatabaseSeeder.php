@@ -1037,5 +1037,210 @@ class DatabaseSeeder extends Seeder
         echo "   🏪 Email: admin@tokoserbaada.com\n";
         echo "   🔐 Password: password\n";
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+
+        // ==========================================
+        // TENANT 6: DAPUR COKLAT RUMAHAN (HOMEMADE)
+        // ==========================================
+        $tenantHomemade = Tenant::firstOrCreate(
+            ['name' => 'Dapur Coklat Rumahan'],
+            [
+                'business_category' => 'homemade',
+                'subscription_plan' => 'trial',
+                'subscription_expires_at' => now()->addDays(30),
+                'is_active' => true,
+            ]
+        );
+
+        // Users for Homemade
+        User::firstOrCreate(
+            ['email' => 'admin@homemade.com'],
+            [
+                'tenant_id' => $tenantHomemade->id,
+                'name' => 'Admin Dapur Coklat',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // Default data for Homemade
+        $locationDapur = InventoryLocation::firstOrCreate(
+            ['tenant_id' => $tenantHomemade->id, 'code' => 'DAPUR-UTAMA'],
+            [
+                'name' => 'Dapur Utama',
+                'is_active' => true,
+            ]
+        );
+
+        $customerWalkIn = Customer::firstOrCreate(
+            ['tenant_id' => $tenantHomemade->id, 'code' => 'WALK-IN'],
+            [
+                'name' => 'Walk-in Customer',
+                'is_active' => true,
+            ]
+        );
+
+        InventoryItemCategory::firstOrCreate(
+            ['tenant_id' => $tenantHomemade->id, 'name' => 'Coklat'],
+            ['description' => 'Produk coklat praline dan bar']
+        );
+
+        // Material Types for Homemade
+        $materialTypeBaku = MaterialType::create([
+            'tenant_id' => $tenantHomemade->id,
+            'name' => 'Bahan Baku',
+            'code' => 'MAT-H-BAKU',
+            'unit' => 'kg',
+            'description' => 'Bahan baku utama produksi',
+        ]);
+
+        $materialTypeKemasan = MaterialType::create([
+            'tenant_id' => $tenantHomemade->id,
+            'name' => 'Kemasan',
+            'code' => 'MAT-H-KEMASAN',
+            'unit' => 'pcs',
+            'description' => 'Kotak dan kemasan kemas',
+        ]);
+
+        // Materials for Homemade
+        $materialCoklat = Material::create([
+            'tenant_id' => $tenantHomemade->id,
+            'material_type_id' => $materialTypeBaku->id,
+            'code' => 'CKL-001',
+            'name' => 'Coklat Batang Dark',
+            'supplier_name' => 'Distributor Bahan Coklat',
+            'price_per_unit' => 45000,
+            'stock_quantity' => 0,
+            'min_stock' => 5,
+            'unit' => 'kg',
+            'description' => 'Coklat batang dark premium',
+        ]);
+
+        $materialGulaHalus = Material::create([
+            'tenant_id' => $tenantHomemade->id,
+            'material_type_id' => $materialTypeBaku->id,
+            'code' => 'GULH-001',
+            'name' => 'Gula Halus Tepung',
+            'supplier_name' => 'Distributor Bahan Coklat',
+            'price_per_unit' => 18000,
+            'stock_quantity' => 0,
+            'min_stock' => 2,
+            'unit' => 'kg',
+            'description' => 'Gula halus tepung berkualitas',
+        ]);
+
+        $materialKotak = Material::create([
+            'tenant_id' => $tenantHomemade->id,
+            'material_type_id' => $materialTypeKemasan->id,
+            'code' => 'BOX-001',
+            'name' => 'Kotak Praline Isi 12',
+            'supplier_name' => 'Percetakan Kemasan Utama',
+            'price_per_unit' => 3000,
+            'stock_quantity' => 0,
+            'min_stock' => 20,
+            'unit' => 'pcs',
+            'description' => 'Kotak praline isi 12 eksklusif',
+        ]);
+
+        // Material Receipts for Homemade
+        MaterialReceipt::create([
+            'tenant_id' => $tenantHomemade->id,
+            'material_id' => $materialCoklat->id,
+            'receipt_number' => 'RCV-H-2026-001',
+            'supplier_name' => 'Distributor Bahan Coklat',
+            'quantity' => 15,
+            'remaining_quantity' => 15,
+            'status' => 'active',
+            'unit' => 'kg',
+            'price_per_unit' => 45000,
+            'total_cost' => 675000,
+            'receipt_date' => now()->subDays(5),
+            'batch_number' => 'BCH-CKL-001',
+        ]);
+
+        MaterialReceipt::create([
+            'tenant_id' => $tenantHomemade->id,
+            'material_id' => $materialGulaHalus->id,
+            'receipt_number' => 'RCV-H-2026-002',
+            'supplier_name' => 'Distributor Bahan Coklat',
+            'quantity' => 10,
+            'remaining_quantity' => 10,
+            'status' => 'active',
+            'unit' => 'kg',
+            'price_per_unit' => 18000,
+            'total_cost' => 180000,
+            'receipt_date' => now()->subDays(5),
+            'batch_number' => 'BCH-GUL-001',
+        ]);
+
+        MaterialReceipt::create([
+            'tenant_id' => $tenantHomemade->id,
+            'material_id' => $materialKotak->id,
+            'receipt_number' => 'RCV-H-2026-003',
+            'supplier_name' => 'Percetakan Kemasan Utama',
+            'quantity' => 100,
+            'remaining_quantity' => 100,
+            'status' => 'active',
+            'unit' => 'pcs',
+            'price_per_unit' => 3000,
+            'total_cost' => 300000,
+            'receipt_date' => now()->subDays(4),
+            'batch_number' => 'BCH-BOX-001',
+        ]);
+
+        // Patterns (Recipes) for Homemade
+        $recipePraline = Pattern::create([
+            'tenant_id' => $tenantHomemade->id,
+            'code' => 'RCP-PRALINE',
+            'name' => 'Coklat Praline Klasik',
+            'output_quantity' => 1,
+            'description' => 'Coklat praline klasik dengan isian cream',
+            'estimated_labor_cost' => 5000,
+            'instructions' => 'Lelehkan coklat dark, tuangkan ke cetakan, dinginkan',
+            'is_active' => true,
+        ]);
+
+        // Inventory Items (Finished Goods) for Homemade
+        $itemPralineBox = InventoryItem::create([
+            'tenant_id' => $tenantHomemade->id,
+            'sku' => 'INV-HMD-001',
+            'product_name' => 'Coklat Praline Isi 12 Box',
+            'product_code' => 'PROD-HMD-01',
+            'source_type' => 'production',
+            'location_id' => $locationDapur->id,
+            'current_quantity' => 20,
+            'reserved_quantity' => 0,
+            'target_quantity' => 50,
+            'minimum_stock' => 5,
+            'unit_cost' => 8000,
+            'selling_price' => 25000,
+            'status' => 'available',
+        ]);
+
+        // Log opening balance adjustment for finished goods
+        StockAdjustment::create([
+            'tenant_id' => $tenantHomemade->id,
+            'inventory_item_id' => $itemPralineBox->id,
+            'adjustment_type' => StockAdjustment::TYPE_OPENING_BALANCE,
+            'quantity_before' => 0,
+            'quantity_after' => 20,
+            'adjustment_quantity' => 20,
+            'reason' => 'Stock awal pembukaan',
+            'notes' => 'Saldo awal produk jadi',
+            'unit_cost' => 8000,
+            'adjusted_by' => User::where('email', 'admin@homemade.com')->value('id'),
+        ]);
+
+        echo "📊 HOMEMADE Demo - Dapur Coklat Rumahan:\n";
+        echo "   • Tenant: {$tenantHomemade->name}\n";
+        echo "   • Users: 1 (Admin)\n";
+        echo "   • Materials: 3 bahan (Coklat Batang, Gula Halus, Kotak)\n";
+        echo "   • Recipes: 1 (Coklat Praline Klasik)\n";
+        echo "   • Inventory: 20 box Coklat Praline\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        echo "🔑 HOMEMADE Login:\n";
+        echo "   🏠 Email: admin@homemade.com\n";
+        echo "   🔐 Password: password\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
     }
 }

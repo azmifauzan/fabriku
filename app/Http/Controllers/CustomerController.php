@@ -66,6 +66,31 @@ class CustomerController extends Controller
         return Inertia::render('Customers/Create');
     }
 
+    public function quickStore(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+        ]);
+
+        $tenantId = auth()->user()->tenant_id;
+        $code = 'CUST-' . strtoupper(\Illuminate\Support\Str::random(6));
+
+        $customer = Customer::create([
+            'tenant_id' => $tenantId,
+            'code' => $code,
+            'name' => $validated['name'],
+            'phone' => $validated['phone'] ?? null,
+            'is_active' => true,
+        ]);
+
+        return response()->json([
+            'id' => $customer->id,
+            'name' => $customer->name,
+            'code' => $customer->code,
+        ], 201);
+    }
+
     public function store(StoreCustomerRequest $request)
     {
         $customer = Customer::create(array_merge($request->validated(), [

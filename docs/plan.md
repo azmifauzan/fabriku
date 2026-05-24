@@ -32,7 +32,7 @@ Tidak di-cover (low priority):
 
 ---
 
-## Plan B: Kategori `homemade` (Produksi Sederhana tanpa Production Order)
+## Plan B: Kategori `homemade` — SELESAI (semua fase diimplementasikan)
 
 ### Latar Belakang & Keputusan Desain
 
@@ -70,7 +70,7 @@ Alasan:
 
 ### Roadmap Implementasi
 
-#### Fase 1: Config Kategori `homemade`
+#### Fase 1: Config Kategori `homemade` ✅ SELESAI
 
 **File**: `config/business.php`
 
@@ -108,7 +108,7 @@ Alasan:
 
 Tambah `'homemade'` ke `enabled_categories`. Tidak perlu migrasi.
 
-#### Fase 2: Sidebar Filtering
+#### Fase 2: Sidebar Filtering ✅ SELESAI
 
 `Sidebar.vue` sudah pakai `isModuleEnabled` — extend:
 - Sembunyikan "Kontraktor" kalau `!enable_contractor_module`
@@ -122,7 +122,7 @@ const isSimpleProductionMode = computed<boolean>(() =>
 )
 ```
 
-#### Fase 3: "Catatan Produksi" (Simple Production Entry)
+#### Fase 3: "Catatan Produksi" (Simple Production Entry) ✅ SELESAI
 
 Ini satu-satunya fitur baru yang membutuhkan controller + halaman baru. **Tidak pakai tabel baru** — reuse `stock_adjustments` + `material_receipts`.
 
@@ -145,7 +145,7 @@ Ini satu-satunya fitur baru yang membutuhkan controller + halaman baru. **Tidak 
 
 **Migrasi**: tidak perlu — `adjustment_type = 'production_entry'` adalah nilai string baru di kolom existing.
 
-#### Fase 4: Permission Seeder
+#### Fase 4: Permission Seeder ✅ SELESAI
 
 Role `homemade_admin`, `homemade_staff`:
 - `material.view`, `material.edit`
@@ -156,7 +156,7 @@ Role `homemade_admin`, `homemade_staff`:
 - Permission baru: `simple_production.view`, `simple_production.edit`
 - TIDAK ada `production.view`, `production.edit`, `purchase.view`
 
-#### Fase 5: Dashboard `homemade`
+#### Fase 5: Dashboard `homemade` ✅ SELESAI
 
 Fork `DashboardController`: kalau `enable_simple_production && !enable_production_flow`, return dashboard yang tampilkan:
 - Stok bahan baku rendah (peringatan)
@@ -167,11 +167,11 @@ Fork `DashboardController`: kalau `enable_simple_production && !enable_productio
 
 Bisa reuse sebagian besar `RetailDashboard.vue` — tambah section "Stok Bahan Baku".
 
-#### Fase 6: Quick Checkout untuk `homemade`
+#### Fase 6: Quick Checkout untuk `homemade` ✅ SELESAI
 
 Reuse `QuickCheckout.vue` existing — sudah tidak terikat kategori `retail` secara hardcode. Verifikasi bahwa `isRetailMode` sudah generalized ke `!enable_production_flow || enable_simple_production`, atau tambah computed terpisah `useQuickCheckout`.
 
-#### Fase 7: Onboarding Default Data
+#### Fase 7: Onboarding Default Data ✅ SELESAI
 
 Pas register kategori `homemade`:
 1. Auto-create `MaterialType` default ("Bahan Baku", "Kemasan")
@@ -179,7 +179,7 @@ Pas register kategori `homemade`:
 3. Auto-create `Customer` default ("Walk-in Customer")
 4. Auto-create `InventoryItemCategory` contoh ("Kue Kering", "Minuman", "Kemasan")
 
-#### Fase 8: Test Integrasi
+#### Fase 8: Test Integrasi ✅ SELESAI
 
 File: `tests/Feature/Integration/HomemadeWorkflowTest.php`
 
@@ -226,3 +226,16 @@ Cover:
 - Waste/scrap tracking dari produksi.
 - Multi-batch produksi paralel.
 - Perencanaan produksi (MRP lite).
+
+### Catatan Post-Implementasi (Review Mei 2026)
+
+**Bug yang ditemukan dan diperbaiki saat review:**
+1. `Sidebar.vue:34` — `rules` tidak di-destructure dari `useBusinessContext()` → runtime error saat akses `rules.value.enable_simple_production`. Fix: tambah `rules` ke destructure.
+2. `Sidebar.vue` — Quick Checkout muncul dua kali untuk homemade (top-level "Penjualan" + child di Sales Order section). Fix: kondisi child berubah ke `!retail && !hasSimpleProduction`; nama section Sales jadi "Riwayat Penjualan" untuk homemade.
+
+**Deviasi dari plan (intentional):**
+- Role RBAC `homemade_admin`/`homemade_staff` tidak dibuat di PermissionSeeder. Konsisten dengan retail yang juga tidak punya role terpisah — sistem pakai `users.role = 'admin'/'manager'/'staff'` untuk simple role check.
+- `SimpleProductionController::store()` deduct bahan baku via `PreparationOrder` (reuse FIFO logic dari service), bukan langsung `StockAdjustment`. Ini lebih konsisten dengan alur existing tapi menambah `preparation_orders` record tersembunyi.
+- `show()` match PrepOrder via `notes LIKE` — fragile kalau ada banyak produksi di hari sama. Low priority tapi perlu refactor ke simpan `preparation_order_id` di `StockAdjustment` atau metadata.
+- `customers.code` per-tenant unique diperbaiki langsung di migration original (bukan via alter migration terpisah) — konsisten dengan fresh install, tidak backward compatible untuk DB yang sudah running.
+- Demo tenant homemade pakai `subscription_plan: 'trial'` (bukan PRO).

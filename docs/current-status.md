@@ -49,9 +49,12 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Mei 2026. Diturunkan d
 | Demo data reset | aktif | scheduler `hourly` jalan `demo:reset` |
 | **Mode Retail (kategori `retail`)** | aktif | sidebar di-filter via `isRetailMode`; modul material/produksi disembunyikan untuk tenant retail |
 | Purchase receipts (retail) | aktif | `PurchaseReceiptController`; reuse `stock_adjustments` dengan `batch_id`, `supplier_name`, `purchase_invoice`; permission `purchase.view/edit` |
-| Quick Checkout / POS (retail) | aktif | `QuickCheckout.vue` — grid produk + cart, default Walk-in Customer, SO langsung `completed` |
+| Quick Checkout / POS (retail + homemade) | aktif | `QuickCheckout.vue` — grid produk + cart, default Walk-in Customer, SO langsung `completed`; muncul di sidebar bila `isRetailMode || enable_simple_production` |
 | Dashboard retail | aktif | `RetailDashboard.vue`; `DashboardController` fork ke `retailDashboard()` bila `!enable_production_flow` |
 | **Purchase Report (retail)** | aktif | `ReportController::purchase()`; query `StockAdjustment` type purchase, group per `batch_id`; tabel + drill-down per batch; export Excel + PDF; route `reports.purchase` + `reports.purchase.export` |
+| **Kategori `homemade` (Produksi Rumahan)** | aktif | UMKM produksi sederhana — pakai material + input produk jadi langsung tanpa Production Order |
+| Simple Production (Catatan Produksi) | aktif | `SimpleProductionController` — form produksi sederhana; deduct bahan baku via `PreparationOrder`; add produk jadi ke inventory via `StockAdjustment TYPE_PRODUCTION_ENTRY`; semua adjustment di-group `batch_id`; route: `simple-production.*` permission `simple_production.view/create` |
+| Dashboard homemade | aktif | `HomemadeDashboard.vue`; `DashboardController` fork ke `homemadeDashboard()` bila `enable_simple_production` |
 
 ## Struktur Routing Tenant
 
@@ -64,6 +67,7 @@ Permission slug yang terpakai di routes/web.php:
 - `inventory.view`
 - `sales.view`
 - `purchase.view`, `purchase.edit` (retail only)
+- `simple_production.view`, `simple_production.create` (homemade only)
 - `report.view` (mencakup semua laporan termasuk `reports.purchase` untuk retail)
 
 Modul tanpa permission middleware (open untuk semua user tenant ter-verifikasi): staff, customers (via sales.view), settings, subscription, telegram.
@@ -88,12 +92,16 @@ Migrasi tunggal per modul:
 
 ## Konfigurasi Kategori Bisnis
 
-`config/business.php` — 5 kategori aktif: `garment`, `food`, `craft`, `cosmetic`, `retail`. Default: `garment`. Setiap tenant memilih satu kategori saat register. Terminologi UI (Pattern/Resep, Cutting/Mixing, dll) di-resolve dari `Tenant::getTerminology($key)`. Kategori `retail` punya flag `mode = 'simple'` dan `rules.enable_production_flow = false` yang di-read sidebar + DashboardController untuk UI gating.
+`config/business.php` — 6 kategori aktif: `garment`, `food`, `craft`, `cosmetic`, `retail`, `homemade`. Default: `garment`. Setiap tenant memilih satu kategori saat register. Terminologi UI (Pattern/Resep, Cutting/Mixing, dll) di-resolve dari `Tenant::getTerminology($key)`.
+
+Gating rules yang dibaca sidebar + DashboardController:
+- `retail`: `mode = 'simple'`, `rules.enable_production_flow = false` → sembunyikan produksi, tampilkan Quick Checkout top-level
+- `homemade`: `mode = 'homemade'`, `rules.enable_simple_production = true`, `rules.enable_contractor_module = false`, `rules.enable_purchase_module = false` → tampilkan "Catatan Produksi" sederhana, Quick Checkout top-level, sembunyikan Production Order + Kontraktor + Pembelian Produk Jadi
 
 ## Test Coverage
 
 - `tests/Feature/`: 30+ file, dominan happy-path CRUD + observer test untuk SalesOrder.
-- `tests/Feature/Integration/`: 7 file user-journey end-to-end per modul + multi-kategori; termasuk `RetailWorkflowTest.php` (purchase receipt → purchase report → quick checkout).
+- `tests/Feature/Integration/`: 8 file user-journey end-to-end per modul + multi-kategori; termasuk `RetailWorkflowTest.php` (purchase receipt → purchase report → quick checkout) dan `HomemadeWorkflowTest.php` (material receipt → simple production → quick checkout).
 - `tests/Browser/ApplicationFlowTest.php`: 1 file browser test (Pest 4).
 - `tests/Unit/`: hanya `ExampleTest.php` (kosong) — tidak ada unit test domain.
 - Setup: `RefreshDatabase` otomatis untuk Feature via `tests/Pest.php`.
@@ -108,18 +116,18 @@ Migrasi tunggal per modul:
 
 ## Lingkungan Demo
 
-5 tenant demo:
+6 tenant demo:
 - `admin@konveksi.com` (garment)
 - `admin@kuemama.com` (food)
 - `admin@crafty.com` (craft)
 - `admin@glowbeauty.com` (cosmetic)
 - `admin@tokoserbaada.com` (retail)
+- `admin@homemade.com` (homemade — Dapur Coklat Rumahan, trial plan)
 
 Admin platform: `admin@fabriku.com`. Semua password `password`. Data reset tiap jam.
 
 ## Yang BELUM Ada
 
-- **Kategori `homemade`** (UMKM produksi sederhana: catat bahan baku + input produk jadi langsung tanpa production order). Lihat `docs/plan.md` Plan B.
 - Barcode scanning untuk material (hanya inventory yang punya QR).
 - Multi-warehouse (hanya `inventory_locations` per tenant tunggal).
 - Payment gateway terintegrasi (Midtrans/Xendit). Subscription payment masih manual upload bukti.

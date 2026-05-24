@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { Minus, Plus, ShoppingCart, Trash2, X } from 'lucide-vue-next';
+import { Minus, Plus, ShoppingCart, UserPlus, X } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface InventoryItem {
@@ -25,14 +25,76 @@ interface CartItem {
     image_url?: string | null;
 }
 
+interface Customer {
+    id: number;
+    name: string;
+    code: string;
+}
+
 const props = defineProps<{
     inventoryItems: InventoryItem[];
+    customers: Customer[];
 }>();
 
 const cart = ref<CartItem[]>([]);
+const customerList = ref<Customer[]>([...props.customers]);
 const search = ref('');
 const paymentMethod = ref('cash');
+const customerId = ref<number | null>(null);
 const submitting = ref(false);
+
+// New customer modal
+const showNewCustomerModal = ref(false);
+const newCustomerName = ref('');
+const newCustomerPhone = ref('');
+const newCustomerError = ref('');
+const savingCustomer = ref(false);
+
+const openNewCustomerModal = () => {
+    newCustomerName.value = '';
+    newCustomerPhone.value = '';
+    newCustomerError.value = '';
+    showNewCustomerModal.value = true;
+};
+
+const saveNewCustomer = async () => {
+    if (!newCustomerName.value.trim()) {
+        newCustomerError.value = 'Nama customer wajib diisi.';
+        return;
+    }
+    savingCustomer.value = true;
+    newCustomerError.value = '';
+
+    try {
+        const res = await fetch('/customers/quick-store', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                name: newCustomerName.value.trim(),
+                phone: newCustomerPhone.value.trim() || null,
+            }),
+        });
+
+        if (!res.ok) {
+            const data = await res.json();
+            newCustomerError.value = data.message ?? 'Gagal menyimpan customer.';
+            return;
+        }
+
+        const newCustomer: Customer = await res.json();
+        customerList.value.push(newCustomer);
+        customerId.value = newCustomer.id;
+        showNewCustomerModal.value = false;
+    } catch {
+        newCustomerError.value = 'Terjadi kesalahan. Coba lagi.';
+    } finally {
+        savingCustomer.value = false;
+    }
+};
 
 const filteredItems = computed(() => {
     if (!search.value) return props.inventoryItems;
@@ -95,6 +157,7 @@ const checkout = () => {
         '/sales-orders/quick-checkout',
         {
             payment_method: paymentMethod.value,
+            customer_id: customerId.value || null,
             items: cart.value.map((c) => ({
                 inventory_item_id: c.inventory_item_id,
                 quantity: c.quantity,
@@ -113,9 +176,9 @@ const checkout = () => {
     <AppLayout>
         <Head title="Quick Checkout" />
 
-        <div class="flex h-[calc(100vh-4rem)] gap-0 overflow-hidden">
+        <div class="flex h-[calc(100vh-4rem)] flex-col overflow-hidden md:flex-row">
             <!-- Left: Product Grid -->
-            <div class="flex flex-1 flex-col overflow-hidden bg-gray-100 dark:bg-gray-900">
+            <div class="flex min-h-0 flex-1 flex-col overflow-hidden bg-gray-100 dark:bg-gray-900">
                 <div class="border-b border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
                     <h1 class="mb-2 text-lg font-bold text-gray-900 dark:text-gray-100">Quick Checkout</h1>
                     <input
@@ -172,7 +235,7 @@ const checkout = () => {
             </div>
 
             <!-- Right: Cart -->
-            <div class="flex w-80 flex-col border-l border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+            <div class="flex h-[45vh] flex-col border-t border-gray-200 bg-white md:h-auto md:w-80 md:border-t-0 md:border-l dark:border-gray-700 dark:bg-gray-800">
                 <!-- Cart Header -->
                 <div class="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
                     <div class="flex items-center gap-2">
@@ -258,6 +321,30 @@ const checkout = () => {
                         <span class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ formatRupiah(totalAmount) }}</span>
                     </div>
 
+                    <!-- Customer (optional) -->
+                    <div class="mb-3">
+                        <div class="mb-1 flex items-center justify-between">
+                            <label class="text-xs font-medium text-gray-600 dark:text-gray-400">
+                                Customer <span class="font-normal text-gray-400">(opsional)</span>
+                            </label>
+                            <button
+                                type="button"
+                                @click="openNewCustomerModal"
+                                class="flex cursor-pointer items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                            >
+                                <UserPlus :size="12" />
+                                Baru
+                            </button>
+                        </div>
+                        <select
+                            v-model="customerId"
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                        >
+                            <option :value="null">Walk-in Customer</option>
+                            <option v-for="c in customerList" :key="c.id" :value="c.id">{{ c.name }}</option>
+                        </select>
+                    </div>
+
                     <!-- Payment method -->
                     <div class="mb-3">
                         <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Metode Pembayaran</label>
@@ -283,5 +370,65 @@ const checkout = () => {
                 </div>
             </div>
         </div>
+        <!-- New Customer Modal -->
+        <Teleport to="body">
+            <div
+                v-if="showNewCustomerModal"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                @click.self="showNewCustomerModal = false"
+            >
+                <div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">Customer Baru</h3>
+                        <button @click="showNewCustomerModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <X :size="18" />
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nama <span class="text-red-500">*</span></label>
+                            <input
+                                v-model="newCustomerName"
+                                type="text"
+                                placeholder="Nama customer"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                @keyup.enter="saveNewCustomer"
+                                autofocus
+                            />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">No. HP <span class="text-gray-400 font-normal">(opsional)</span></label>
+                            <input
+                                v-model="newCustomerPhone"
+                                type="tel"
+                                placeholder="08xx..."
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                @keyup.enter="saveNewCustomer"
+                            />
+                        </div>
+                        <p v-if="newCustomerError" class="text-sm text-red-500">{{ newCustomerError }}</p>
+                    </div>
+
+                    <div class="mt-4 flex gap-2">
+                        <button
+                            type="button"
+                            @click="showNewCustomerModal = false"
+                            class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="button"
+                            @click="saveNewCustomer"
+                            :disabled="savingCustomer"
+                            class="flex-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                        >
+                            {{ savingCustomer ? 'Menyimpan...' : 'Simpan' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
     </AppLayout>
 </template>
