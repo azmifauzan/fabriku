@@ -47,6 +47,10 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Mei 2026. Diturunkan d
 | Telegram notifikasi keluar | aktif | new user registered, payment uploaded |
 | Email system | aktif | verifikasi email, reset password, welcome, trial reminder (7/3/1 hari) |
 | Demo data reset | aktif | scheduler `hourly` jalan `demo:reset` |
+| **Mode Retail (kategori `retail`)** | aktif | sidebar di-filter via `isRetailMode`; modul material/produksi disembunyikan untuk tenant retail |
+| Purchase receipts (retail) | aktif | `PurchaseReceiptController`; reuse `stock_adjustments` dengan `batch_id`, `supplier_name`, `purchase_invoice`; permission `purchase.view/edit` |
+| Quick Checkout / POS (retail) | aktif | `QuickCheckout.vue` — grid produk + cart, default Walk-in Customer, SO langsung `completed` |
+| Dashboard retail | aktif | `RetailDashboard.vue`; `DashboardController` fork ke `retailDashboard()` bila `!enable_production_flow` |
 
 ## Struktur Routing Tenant
 
@@ -58,6 +62,7 @@ Permission slug yang terpakai di routes/web.php:
 - `production.view`, `production.edit`
 - `inventory.view`
 - `sales.view`
+- `purchase.view`, `purchase.edit` (retail only)
 - `report.view`
 
 Modul tanpa permission middleware (open untuk semua user tenant ter-verifikasi): staff, customers (via sales.view), settings, subscription, telegram.
@@ -74,7 +79,7 @@ Migrasi tunggal per modul:
 - `sales_tables` (sales_orders, sales_order_items)
 - `admin_users`, `roles`, `permissions`, `role_permissions`, `user_roles`
 - `system_settings`, `audit_logs`, `subscription_payments`
-- `stock_adjustments`
+- `stock_adjustments` + patch `2026_05_23_*` tambah `batch_id`, `supplier_name`, `purchase_invoice` (nullable, additive)
 - `assistant_tables` (assistant_conversations, assistant_messages, assistant_usages, assistant_pending_actions) — *tabel tetap ada, fitur UI disembunyikan*
 - `email_logs`
 - `inventory_item_categories` + add `category_id` ke inventory_items
@@ -82,7 +87,7 @@ Migrasi tunggal per modul:
 
 ## Konfigurasi Kategori Bisnis
 
-`config/business.php` — 4 kategori aktif: `garment`, `food`, `craft`, `cosmetic`. Default: `garment`. Setiap tenant memilih satu kategori saat register. Terminologi UI (Pattern/Resep, Cutting/Mixing, dll) di-resolve dari `Tenant::getTerminology($key)`.
+`config/business.php` — 5 kategori aktif: `garment`, `food`, `craft`, `cosmetic`, `retail`. Default: `garment`. Setiap tenant memilih satu kategori saat register. Terminologi UI (Pattern/Resep, Cutting/Mixing, dll) di-resolve dari `Tenant::getTerminology($key)`. Kategori `retail` punya flag `mode = 'simple'` dan `rules.enable_production_flow = false` yang di-read sidebar + DashboardController untuk UI gating.
 
 ## Test Coverage
 
@@ -102,17 +107,20 @@ Migrasi tunggal per modul:
 
 ## Lingkungan Demo
 
-4 tenant demo:
+5 tenant demo:
 - `admin@konveksi.com` (garment)
 - `admin@kuemama.com` (food)
 - `admin@crafty.com` (craft)
 - `admin@glowbeauty.com` (cosmetic)
+- `admin@tokoserbaada.com` (retail)
 
 Admin platform: `admin@fabriku.com`. Semua password `password`. Data reset tiap jam.
 
 ## Yang BELUM Ada
 
-- Mode toko sederhana (POS / stock + jual-beli langsung tanpa flow produksi). Lihat `docs/plan.md`.
+- **Purchase Report** untuk retail — `ReportController` belum punya endpoint laporan pembelian (dari `stock_adjustments` type purchase). Lihat `docs/plan.md` Fase 7.
+- **`RetailWorkflowTest.php`** — test integrasi retail belum ada. Lihat `docs/plan.md`.
+- **Kategori `homemade`** (UMKM produksi sederhana: catat bahan baku + input produk jadi langsung tanpa production order). Lihat `docs/plan.md`.
 - Barcode scanning untuk material (hanya inventory yang punya QR).
 - Multi-warehouse (hanya `inventory_locations` per tenant tunggal).
 - Payment gateway terintegrasi (Midtrans/Xendit). Subscription payment masih manual upload bukti.

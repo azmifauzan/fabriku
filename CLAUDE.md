@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Fabriku — multi-tenant SaaS for Indonesian UMKM production & sales management. Category-agnostic platform: one codebase serves Garment, Food, Craft, and Cosmetic businesses via dynamic terminology and per-category rules in `config/business.php`.
+Fabriku — multi-tenant SaaS for Indonesian UMKM production & sales management. Category-agnostic platform: one codebase serves Garment, Food, Craft, Cosmetic, and Retail businesses via dynamic terminology and per-category rules in `config/business.php`.
 
 Stack: Laravel 12 + Inertia.js v2 + Vue 3.5 (`<script setup>`, Composition API) + Tailwind v4 + PostgreSQL/MySQL + Redis. Type-safe routes via Laravel Wayfinder (auto-generates TS in `resources/js/actions/` and `resources/js/routes/`).
 
@@ -56,7 +56,7 @@ php artisan trial:send-reminders          # trial expiry emails (daily 09:00 via
 ### Multi-tenancy (CRITICAL)
 - Tenant isolation enforced at model level via `App\Models\Scopes\TenantScope` global scope. Every tenant-owned model adds it in `booted()` and auto-fills `tenant_id` from `auth()->user()->tenant_id` on create.
 - `EnsureTenantContext` middleware (alias `tenant`) blocks users without `tenant_id`; for expired subscriptions, returns 403 JSON for API/assistant routes, allows web through in read-only mode (writes blocked by `subscription.check`).
-- Each tenant picks one `business_category` (garment/food/craft/cosmetic). `Tenant::getCategoryConfig()` / `getTerminology($key)` reads `config/business.php`.
+- Each tenant picks one `business_category` (garment/food/craft/cosmetic/retail). `Tenant::getCategoryConfig()` / `getTerminology($key)` reads `config/business.php`. Kategori `retail` punya `rules.enable_production_flow = false` — dibaca sidebar (`isRetailMode`) dan `DashboardController` untuk UI gating tanpa mengubah tabel.
 - Separate `admin` auth guard (`App\Models\AdminUser`) for platform-level admin panel at `/admin/*`. Tenant users use default `web` guard.
 
 ### Authorization layers
@@ -118,6 +118,8 @@ Always check the actual migration file for the source of truth. `.github/COLUMN-
 
 **Per-tenant unique constraints**: `staff.code`, `contractors.code`, `sales_orders.order_number`, `inventory_items.sku`, `inventory_locations.code` are unique per `tenant_id` (fixed in `2026_04_30_*` and `2026_05_01_*` migrations) — do not write code assuming globally unique.
 
+**`stock_adjustments`** has three nullable columns added in `2026_05_23_*`: `batch_id` (uuid, groups multiple items in one purchase transaction), `supplier_name` (string), `purchase_invoice` (string). These are only populated for `adjustment_type = 'purchase'` rows created by `PurchaseReceiptController`.
+
 ## Conventions
 
 - **PHP**: explicit return types always; PHP 8 constructor property promotion; curly braces for all control structures; prefer PHPDoc over inline comments; casts via `casts()` method not `$casts` property.
@@ -138,11 +140,11 @@ This project has Laravel Boost (`laravel/boost`) installed. When available, pref
 - `docs/01-business-requirements.md` through `docs/05-user-flows.md` — original business/architecture/schema/API/user-flow specs.
 - `docs/current-status.md` — actual state of every module, gaps, what is NOT shipped.
 - `docs/code-review.md` — severity-tagged findings (CRITICAL / HIGH / MEDIUM / LOW). Read before extending Sales, Inventory, or AI modules.
-- `docs/plan.md` — enhancement plan to add a "simple shop / retail" mode without touching existing category workflows.
+- `docs/plan.md` — enhancement plans: retail sisa (Purchase Report + `RetailWorkflowTest`) + kategori `homemade` baru (UMKM produksi rumahan tanpa production order).
 - `.github/copilot-instructions.md` — Laravel Boost guidelines (PHP/Eloquent/Inertia/Tailwind/Pest conventions). Authoritative for style.
 
 ## Demo accounts (dev)
 
-Tenant users (`/login`): `admin@konveksi.com`, `admin@kuemama.com`, `admin@crafty.com`, `admin@glowbeauty.com` — all password `password`.
+Tenant users (`/login`): `admin@konveksi.com`, `admin@kuemama.com`, `admin@crafty.com`, `admin@glowbeauty.com`, `admin@tokoserbaada.com` (retail) — all password `password`.
 Super admin (`/admin/login`): `admin@fabriku.com` / `password`.
 Demo data auto-resets hourly via scheduler.

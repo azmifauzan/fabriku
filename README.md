@@ -12,8 +12,10 @@ Platform SaaS multi-tenant untuk manajemen produksi dan penjualan UMKM Indonesia
 | Makanan & Kue | Resep → Mixing → Baking | Cake, brownies, cookies |
 | Kerajinan | Desain → Persiapan → Pembuatan | Souvenir, aksesoris |
 | Kosmetik | Formula → Mixing → Produksi | Skincare, herbal |
+| **Toko / Retail** | Pembelian → Stock → Quick Checkout | Kelontong, dropship, reseller |
+| **Produksi Rumahan** *(coming)* | Bahan Baku → Catatan Produksi → Quick Checkout | Toko kue rumahan, frozen food |
 
-Workflow universal: **Bahan Baku → Pattern/Resep → Persiapan → Produksi → Inventory → Penjualan**. Terminologi UI menyesuaikan kategori tenant.
+Workflow penuh: **Bahan Baku → Pattern/Resep → Persiapan → Produksi → Inventory → Penjualan**. Terminologi UI menyesuaikan kategori tenant. Kategori `retail` dan `homemade` melewati production flow dan langsung ke inventory + quick checkout.
 
 ## Stack
 
@@ -65,6 +67,7 @@ Tenant (URL `/login`):
 - `admin@kuemama.com` (food) / `password`
 - `admin@crafty.com` (craft) / `password`
 - `admin@glowbeauty.com` (cosmetic) / `password`
+- `admin@tokoserbaada.com` (retail) / `password`
 
 Admin platform (URL `/admin/login`):
 - `admin@fabriku.com` / `password`
@@ -131,7 +134,7 @@ php artisan trial:send-reminders            # email trial expiry (daily 09:00 vi
 | [`docs/05-user-flows.md`](docs/05-user-flows.md) | Alur user per kategori |
 | [`docs/current-status.md`](docs/current-status.md) | **Status aktual modul, dependency, gap** |
 | [`docs/code-review.md`](docs/code-review.md) | **Code review findings — severity-tagged** |
-| [`docs/plan.md`](docs/plan.md) | **Enhancement plan: mode Toko Sederhana** |
+| [`docs/plan.md`](docs/plan.md) | **Enhancement plans: retail (sisa) + kategori homemade** |
 | `CLAUDE.md` | Pedoman kerja untuk Claude Code |
 
 ## Konvensi Singkat
@@ -147,9 +150,10 @@ Detail lengkap konvensi: `CLAUDE.md` dan `.github/copilot-instructions.md`.
 
 ## Roadmap Singkat
 
-Modul lengkap (auth, RBAC, audit log, semua workflow produksi, sales, reports, dashboard, Telegram bot, email system) sudah aktif. Yang belum:
+Modul lengkap (auth, RBAC, audit log, semua workflow produksi, sales, reports, dashboard, mode retail, Telegram bot, email system) sudah aktif. Yang belum:
 
-- Mode toko sederhana (POS / retail tanpa flow produksi) — plan di `docs/plan.md`.
+- Purchase Report untuk retail + test `RetailWorkflowTest.php` — lihat `docs/plan.md`.
+- Kategori `homemade` (UMKM produksi rumahan: bahan baku + catatan produksi sederhana + quick checkout) — plan di `docs/plan.md`.
 - Payment gateway terintegrasi (Midtrans/Xendit) — masih manual upload bukti.
 - Mobile app native.
 - Shipping API (JNE/JNT/SiCepat).
