@@ -8,6 +8,7 @@ use App\Exports\ProductionReportExport;
 use App\Exports\PurchaseReportExport;
 use App\Exports\SalesRecapExport;
 use App\Exports\SalesReportExport;
+use App\Models\Customer;
 use App\Models\InventoryItem;
 use App\Models\Material;
 use App\Models\ProductionOrder;
@@ -224,6 +225,10 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('customer_id')) {
+            $query->where('customer_id', $request->customer_id);
+        }
+
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('order_number', 'ilike', "%{$request->search}%")
@@ -238,8 +243,7 @@ class ReportController extends Controller
                 'id' => $order->id,
                 'order_number' => $order->order_number,
                 'order_date' => $order->order_date->format('Y-m-d'),
-                'customer_name' => $order->customer->name,
-                // 'customer_type' => $order->customer->type,
+                'customer_name' => $order->customer?->name ?? '-',
                 'total_items' => $order->items->sum('quantity'),
                 'subtotal' => $order->subtotal,
                 'discount' => $order->discount,
@@ -266,18 +270,29 @@ class ReportController extends Controller
             'pending_orders' => $orders->where('status', 'pending')->count(),
         ];
 
-        // Revenue by customer type
-        // $revenueByType = $orders->groupBy('customer_type')
-        //     ->map(fn ($group) => [
-        //         'count' => $group->count(),
-        //         'total' => $group->sum('total_amount'),
-        //     ]);
+        // Per-customer stats from the filtered orders
+        $customerStats = $orders
+            ->groupBy('customer_name')
+            ->map(fn ($group, $name) => [
+                'customer_name' => $name,
+                'transaction_count' => $group->count(),
+                'total_items' => $group->sum('total_items'),
+                'total_amount' => $group->sum('total_amount'),
+            ])
+            ->values()
+            ->sortByDesc('transaction_count')
+            ->values();
+
+        $customers = Customer::query()
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
         return Inertia::render('Reports/SalesReport', [
             'orders' => $orders,
             'summary' => $summary,
-            // 'revenueByType' => $revenueByType,
-            'filters' => $request->only(['status', 'search', 'start_date', 'end_date']),
+            'customerStats' => $customerStats,
+            'customers' => $customers,
+            'filters' => $request->only(['status', 'search', 'start_date', 'end_date', 'customer_id']),
             'defaultDates' => [
                 'start_date' => $startDate,
                 'end_date' => $endDate,

@@ -42,6 +42,7 @@ class ResetDemoData extends Command
             'admin@crafty.com',
             'admin@glowbeauty.com',
             'admin@tokoserbaada.com',
+            'admin@homemade.com',
         ];
 
         $tenantOption = $this->option('tenant');
@@ -168,6 +169,9 @@ class ResetDemoData extends Command
                 break;
             case 'retail':
                 $this->reseedRetailTenant($tenant);
+                break;
+            case 'homemade':
+                $this->reseedHomemadeTenant($tenant);
                 break;
             default:
                 $this->warn("  Unknown business category: {$tenant->business_category}");
@@ -799,5 +803,179 @@ class ResetDemoData extends Command
             ['sales_order_id' => $salesRetail1->id, 'inventory_item_id' => $itemAquaGelas->id],
             ['product_name' => $itemAquaGelas->product_name, 'sku' => $itemAquaGelas->sku, 'quantity' => 4, 'unit_price' => 800, 'discount_amount' => 0, 'subtotal' => 3200]
         );
+    }
+
+    private function reseedHomemadeTenant(Tenant $tenant)
+    {
+        // 1. Inventory Location
+        $locationDapur = InventoryLocation::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'code' => 'DAPUR-UTAMA'],
+            [
+                'name' => 'Dapur Utama',
+                'is_active' => true,
+            ]
+        );
+
+        // 2. Customer
+        $walkIn = Customer::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'code' => 'WALK-IN'],
+            [
+                'name' => 'Walk-in Customer',
+                'is_active' => true,
+            ]
+        );
+
+        // 3. Category
+        \App\Models\InventoryItemCategory::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'name' => 'Coklat'],
+            ['description' => 'Produk coklat praline dan bar']
+        );
+
+        // 4. Material Types
+        $materialTypeBaku = MaterialType::create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Bahan Baku',
+            'code' => 'MAT-H-BAKU',
+            'unit' => 'kg',
+            'description' => 'Bahan baku utama produksi',
+        ]);
+
+        $materialTypeKemasan = MaterialType::create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Kemasan',
+            'code' => 'MAT-H-KEMASAN',
+            'unit' => 'pcs',
+            'description' => 'Kotak dan kemasan kemas',
+        ]);
+
+        // 5. Materials
+        $materialCoklat = Material::create([
+            'tenant_id' => $tenant->id,
+            'material_type_id' => $materialTypeBaku->id,
+            'code' => 'CKL-001',
+            'name' => 'Coklat Batang Dark',
+            'supplier_name' => 'Distributor Bahan Coklat',
+            'price_per_unit' => 45000,
+            'stock_quantity' => 0,
+            'min_stock' => 5,
+            'unit' => 'kg',
+            'description' => 'Coklat batang dark premium',
+        ]);
+
+        $materialGulaHalus = Material::create([
+            'tenant_id' => $tenant->id,
+            'material_type_id' => $materialTypeBaku->id,
+            'code' => 'GULH-001',
+            'name' => 'Gula Halus Tepung',
+            'supplier_name' => 'Distributor Bahan Coklat',
+            'price_per_unit' => 18000,
+            'stock_quantity' => 0,
+            'min_stock' => 2,
+            'unit' => 'kg',
+            'description' => 'Gula halus tepung berkualitas',
+        ]);
+
+        $materialKotak = Material::create([
+            'tenant_id' => $tenant->id,
+            'material_type_id' => $materialTypeKemasan->id,
+            'code' => 'BOX-001',
+            'name' => 'Kotak Praline Isi 12',
+            'supplier_name' => 'Percetakan Kemasan Utama',
+            'price_per_unit' => 3000,
+            'stock_quantity' => 0,
+            'min_stock' => 20,
+            'unit' => 'pcs',
+            'description' => 'Kotak praline isi 12 eksklusif',
+        ]);
+
+        // 6. Receipts
+        MaterialReceipt::create([
+            'tenant_id' => $tenant->id,
+            'material_id' => $materialCoklat->id,
+            'receipt_number' => 'RCV-H-2026-001',
+            'supplier_name' => 'Distributor Bahan Coklat',
+            'quantity' => 15,
+            'remaining_quantity' => 15,
+            'status' => 'active',
+            'unit' => 'kg',
+            'price_per_unit' => 45000,
+            'total_cost' => 675000,
+            'receipt_date' => now()->subDays(5),
+            'batch_number' => 'BCH-CKL-001',
+        ]);
+
+        MaterialReceipt::create([
+            'tenant_id' => $tenant->id,
+            'material_id' => $materialGulaHalus->id,
+            'receipt_number' => 'RCV-H-2026-002',
+            'supplier_name' => 'Distributor Bahan Coklat',
+            'quantity' => 10,
+            'remaining_quantity' => 10,
+            'status' => 'active',
+            'unit' => 'kg',
+            'price_per_unit' => 18000,
+            'total_cost' => 180000,
+            'receipt_date' => now()->subDays(5),
+            'batch_number' => 'BCH-GUL-001',
+        ]);
+
+        MaterialReceipt::create([
+            'tenant_id' => $tenant->id,
+            'material_id' => $materialKotak->id,
+            'receipt_number' => 'RCV-H-2026-003',
+            'supplier_name' => 'Percetakan Kemasan Utama',
+            'quantity' => 100,
+            'remaining_quantity' => 100,
+            'status' => 'active',
+            'unit' => 'pcs',
+            'price_per_unit' => 3000,
+            'total_cost' => 300000,
+            'receipt_date' => now()->subDays(4),
+            'batch_number' => 'BCH-BOX-001',
+        ]);
+
+        // 7. Patterns (Recipes)
+        $recipePraline = Pattern::create([
+            'tenant_id' => $tenant->id,
+            'code' => 'RCP-PRALINE',
+            'name' => 'Coklat Praline Klasik',
+            'output_quantity' => 1,
+            'description' => 'Coklat praline klasik dengan isian cream',
+            'estimated_labor_cost' => 5000,
+            'instructions' => 'Lelehkan coklat dark, tuangkan ke cetakan, dinginkan',
+            'is_active' => true,
+        ]);
+
+        // 8. Inventory Items
+        $itemPralineBox = InventoryItem::create([
+            'tenant_id' => $tenant->id,
+            'sku' => 'INV-HMD-001',
+            'product_name' => 'Coklat Praline Isi 12 Box',
+            'product_code' => 'PROD-HMD-01',
+            'source_type' => 'production',
+            'location_id' => $locationDapur->id,
+            'current_quantity' => 20,
+            'reserved_quantity' => 0,
+            'target_quantity' => 50,
+            'minimum_stock' => 5,
+            'unit_cost' => 8000,
+            'selling_price' => 25000,
+            'status' => 'available',
+        ]);
+
+        // Log opening balance adjustment
+        $adminUserId = \App\Models\User::where('tenant_id', $tenant->id)->where('role', 'admin')->value('id');
+        \App\Models\StockAdjustment::create([
+            'tenant_id' => $tenant->id,
+            'inventory_item_id' => $itemPralineBox->id,
+            'adjustment_type' => \App\Models\StockAdjustment::TYPE_OPENING_BALANCE,
+            'quantity_before' => 0,
+            'quantity_after' => 20,
+            'adjustment_quantity' => 20,
+            'reason' => 'Stock awal pembukaan',
+            'notes' => 'Saldo awal produk jadi',
+            'unit_cost' => 8000,
+            'adjusted_by' => $adminUserId,
+        ]);
     }
 }

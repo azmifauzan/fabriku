@@ -56,7 +56,7 @@ php artisan trial:send-reminders          # trial expiry emails (daily 09:00 via
 ### Multi-tenancy (CRITICAL)
 - Tenant isolation enforced at model level via `App\Models\Scopes\TenantScope` global scope. Every tenant-owned model adds it in `booted()` and auto-fills `tenant_id` from `auth()->user()->tenant_id` on create.
 - `EnsureTenantContext` middleware (alias `tenant`) blocks users without `tenant_id`; for expired subscriptions, returns 403 JSON for API/assistant routes, allows web through in read-only mode (writes blocked by `subscription.check`).
-- Each tenant picks one `business_category` (garment/food/craft/cosmetic/retail). `Tenant::getCategoryConfig()` / `getTerminology($key)` reads `config/business.php`. Kategori `retail` punya `rules.enable_production_flow = false` — dibaca sidebar (`isRetailMode`) dan `DashboardController` untuk UI gating tanpa mengubah tabel.
+- Each tenant picks one `business_category` (garment/food/craft/cosmetic/retail/homemade). `Tenant::getCategoryConfig()` / `getTerminology($key)` reads `config/business.php`. Kategori `retail` punya `rules.enable_production_flow = false`; kategori `homemade` punya `rules.enable_simple_production = true` + `enable_contractor_module = false` — dibaca `Sidebar.vue` (via `rules` dari `useBusinessContext()`) dan `DashboardController` untuk UI gating tanpa mengubah tabel.
 - Separate `admin` auth guard (`App\Models\AdminUser`) for platform-level admin panel at `/admin/*`. Tenant users use default `web` guard.
 
 ### Authorization layers
@@ -145,6 +145,6 @@ This project has Laravel Boost (`laravel/boost`) installed. When available, pref
 
 ## Demo accounts (dev)
 
-Tenant users (`/login`): `admin@konveksi.com`, `admin@kuemama.com`, `admin@crafty.com`, `admin@glowbeauty.com`, `admin@tokoserbaada.com` (retail) — all password `password`.
+Tenant users (`/login`): `admin@konveksi.com`, `admin@kuemama.com`, `admin@crafty.com`, `admin@glowbeauty.com`, `admin@tokoserbaada.com` (retail), `admin@homemade.com` (homemade/produksi rumahan) — all password `password`.
 Super admin (`/admin/login`): `admin@fabriku.com` / `password`.
 Demo data auto-resets hourly via scheduler.

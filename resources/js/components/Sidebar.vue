@@ -31,7 +31,7 @@ const emit = defineEmits<{
 }>();
 
 const page = usePage();
-const { terminology: terminologyComposable, isModuleEnabled, isRetailMode } = useBusinessContext();
+const { terminology: terminologyComposable, isModuleEnabled, isRetailMode, rules } = useBusinessContext();
 
 // Track expanded menu items
 const expandedMenus = ref<string[]>([]);
@@ -69,26 +69,28 @@ const allMenuItems = computed(() => {
     const hasPattern = isModuleEnabled('pattern');
     const hasContractor = isModuleEnabled('contractor');
     const hasPurchase = isModuleEnabled('purchase');
+    const hasSimpleProduction = rules.value.enable_simple_production === true;
+    const hasProductionFlow = rules.value.enable_production_flow !== false;
 
     const masterDataChildren = [
-        ...(!retail ? [{ name: 'Jenis Bahan', href: '/material-types', permission: 'material.view' }] : []),
+        ...(hasMaterial ? [{ name: 'Jenis Bahan', href: '/material-types', permission: 'material.view' }] : []),
         { name: 'Staff', href: '/staff', permission: null, adminOnly: true },
         { name: 'Lokasi Inventory', href: '/inventory/locations', permission: 'inventory.view' },
         { name: 'Customer', href: '/customers', permission: 'sales.view' },
-        ...(!retail && hasPattern ? [{ name: terminology.value.pattern || 'Pattern', href: '/patterns', permission: 'pattern.view' }] : []),
-        ...(!retail && hasContractor ? [{ name: terminology.value.contractor || 'Kontraktor', href: '/contractors', permission: 'production.view' }] : []),
+        ...(hasPattern ? [{ name: terminology.value.pattern || 'Pattern', href: '/patterns', permission: 'pattern.view' }] : []),
+        ...(hasContractor ? [{ name: terminology.value.contractor || 'Kontraktor', href: '/contractors', permission: 'production.view' }] : []),
     ];
 
     const reportChildren = [
         ...(hasMaterial ? [{ name: 'Material', href: '/reports/material', permission: 'report.view' }] : []),
         { name: 'Inventory', href: '/reports/inventory', permission: 'report.view' },
         { name: 'Penjualan', href: '/reports/sales', permission: 'report.view' },
-        ...(!retail ? [{ name: 'Produksi', href: '/reports/production', permission: 'report.view' }] : []),
+        ...(hasProductionFlow ? [{ name: 'Produksi', href: '/reports/production', permission: 'report.view' }] : []),
         ...(hasPurchase ? [{ name: 'Pembelian', href: '/reports/purchase', permission: 'report.view' }] : []),
     ];
 
     return [
-        ...(retail ? [{
+        ...(retail || hasSimpleProduction ? [{
             name: 'Penjualan',
             href: '/sales-orders/quick-checkout',
             icon: ShoppingCart,
@@ -96,7 +98,7 @@ const allMenuItems = computed(() => {
         }] : []),
         {
             name: 'Dashboard',
-            href: retail ? '/dashboard?view=stats' : '/dashboard',
+            href: (retail || hasSimpleProduction) ? '/dashboard?view=stats' : '/dashboard',
             icon: Home,
             permission: null,
         },
@@ -113,13 +115,19 @@ const allMenuItems = computed(() => {
             icon: Package,
             permission: 'material.view',
         }] : []),
-        ...(hasPreparation ? [{
+        ...(hasPreparation && !hasSimpleProduction ? [{
             name: 'Preparation',
             href: '/preparation-orders',
             icon: CheckCircle2,
             permission: 'preparation.view',
         }] : []),
-        ...(!retail ? [{
+        ...(hasSimpleProduction ? [{
+            name: terminology.value.production || 'Catatan Produksi',
+            href: '/simple-production',
+            icon: Factory,
+            permission: 'simple_production.view',
+        }] : []),
+        ...(hasProductionFlow ? [{
             name: 'Production Order',
             href: '/production-orders',
             icon: Factory,
@@ -150,18 +158,18 @@ const allMenuItems = computed(() => {
             ],
         },
         {
-            name: retail ? 'Riwayat Penjualan' : 'Sales Order',
+            name: (retail || hasSimpleProduction) ? 'Riwayat Penjualan' : 'Sales Order',
             href: '/sales-orders',
             icon: ShoppingCart,
             permission: 'sales.view',
             children: [
-                ...(!retail ? [{
+                ...(!retail && !hasSimpleProduction ? [{
                     name: 'Quick Checkout',
                     href: '/sales-orders/quick-checkout',
                     permission: 'sales.create',
                 }] : []),
                 {
-                    name: retail ? 'Daftar' : 'List',
+                    name: (retail || hasSimpleProduction) ? 'Daftar' : 'List',
                     href: '/sales-orders',
                     permission: 'sales.view',
                 },
@@ -311,7 +319,7 @@ const handleLinkClick = () => {
         :class="[
             'fixed top-16 z-40 h-[calc(100vh-4rem)] flex flex-col border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-700 dark:bg-gray-800',
             // Mobile: slide from left, Desktop: always visible
-            isMobile ? ['left-0 w-64', isOpen ? 'translate-x-0' : '-translate-x-full'] : ['left-0', isOpen ? 'w-64' : 'w-16'],
+            isMobile ? ['left-0 w-64 max-w-[90vw]', isOpen ? 'translate-x-0' : '-translate-x-full'] : ['left-0', isOpen ? 'w-64' : 'w-16'],
         ]"
     >
         <!-- Mobile Close Button -->

@@ -60,7 +60,7 @@ class AdminTenantController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'business_category' => ['required', 'string', 'in:garment,food,craft,cosmetic,other'],
+            'business_category' => ['required', 'string', 'in:garment,food,craft,cosmetic,retail,homemade'],
             'subscription_plan' => ['required', 'string', 'in:trial,basic,premium,enterprise'],
             'subscription_days' => ['required', 'integer', 'min:1'],
             'admin_name' => ['required', 'string', 'max:255'],
@@ -141,7 +141,7 @@ class AdminTenantController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'business_category' => ['required', 'string', 'in:garment,food,craft,cosmetic,other'],
+            'business_category' => ['required', 'string', 'in:garment,food,craft,cosmetic,retail,homemade'],
             'subscription_plan' => ['required', 'string', 'in:trial,full,basic,premium,enterprise'],
             'subscription_expires_at' => ['required', 'date'],
             'is_active' => ['required', 'boolean'],

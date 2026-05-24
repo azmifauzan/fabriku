@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { Download, FileBarChart, FileSpreadsheet, Filter, Search, TrendingUp } from 'lucide-vue-next';
+import { Download, FileBarChart, FileSpreadsheet, Filter, Search, Users } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface Order {
@@ -26,13 +26,24 @@ interface Summary {
     pending_orders: number;
 }
 
+interface CustomerStat {
+    customer_name: string;
+    transaction_count: number;
+    total_items: number;
+    total_amount: number;
+}
 
+interface Customer {
+    id: number;
+    name: string;
+}
 
 interface Filters {
     status?: string;
     search?: string;
     start_date?: string;
     end_date?: string;
+    customer_id?: string;
 }
 
 interface DefaultDates {
@@ -43,13 +54,15 @@ interface DefaultDates {
 const props = defineProps<{
     orders: Order[];
     summary: Summary;
-    // revenueByType: RevenueByType;
+    customerStats: CustomerStat[];
+    customers: Customer[];
     filters: Filters;
     defaultDates: DefaultDates;
 }>();
 
 const search = ref(props.filters.search || '');
 const status = ref(props.filters.status || '');
+const customerId = ref(props.filters.customer_id || '');
 const startDate = ref(props.filters.start_date || props.defaultDates.start_date);
 const endDate = ref(props.filters.end_date || props.defaultDates.end_date);
 const showExportMenu = ref(false);
@@ -68,6 +81,7 @@ const applyFilter = () => {
         {
             search: search.value,
             status: status.value,
+            customer_id: customerId.value,
             start_date: startDate.value,
             end_date: endDate.value,
         },
@@ -81,6 +95,7 @@ const applyFilter = () => {
 const resetFilter = () => {
     search.value = '';
     status.value = '';
+    customerId.value = '';
     startDate.value = props.defaultDates.start_date;
     endDate.value = props.defaultDates.end_date;
     applyFilter();
@@ -224,7 +239,7 @@ const exportReport = (format: 'pdf' | 'excel') => {
                             <Filter :size="20" class="text-gray-500" />
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Filter</h3>
                         </div>
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
                             <div>
                                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"> Pencarian </label>
                                 <div class="relative">
@@ -239,6 +254,16 @@ const exportReport = (format: 'pdf' | 'excel') => {
                                         @keyup.enter="applyFilter"
                                     />
                                 </div>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"> Customer </label>
+                                <select
+                                    v-model="customerId"
+                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                >
+                                    <option value="">Semua Customer</option>
+                                    <option v-for="c in customers" :key="c.id" :value="c.id">{{ c.name }}</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"> Status </label>
@@ -284,6 +309,40 @@ const exportReport = (format: 'pdf' | 'excel') => {
                                     Reset
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Stats -->
+                <div v-if="customerStats.length > 0" class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                    <div class="p-6">
+                        <div class="mb-4 flex items-center gap-2">
+                            <Users :size="20" class="text-indigo-500" />
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ringkasan per Customer</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-900">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Customer</th>
+                                        <th class="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Jumlah Transaksi</th>
+                                        <th class="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Total Item</th>
+                                        <th class="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Total Belanja</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                                    <tr v-for="stat in customerStats" :key="stat.customer_name" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{{ stat.customer_name }}</td>
+                                        <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white">
+                                            <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                                                {{ stat.transaction_count }}x
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white">{{ stat.total_items }}</td>
+                                        <td class="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-white">{{ formatCurrency(stat.total_amount) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

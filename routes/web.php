@@ -33,6 +33,7 @@ use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SimpleProductionController;
 use App\Http\Controllers\TelegramController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Models\SystemSetting;
@@ -204,6 +205,11 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
         Route::resource('items', InventoryItemController::class);
     });
 
+    // Simple Production Management (Homemade)
+    Route::resource('simple-production', SimpleProductionController::class)
+        ->only(['index', 'create', 'store', 'show'])
+        ->middleware('permission:simple_production.view');
+
     // Purchase Receipt Management (Retail)
     Route::resource('purchase-receipts', PurchaseReceiptController::class)
         ->only(['index', 'create', 'store'])
@@ -213,6 +219,9 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
         ->middleware('permission:purchase.view');
 
     // Sales Management
+    Route::post('customers/quick-store', [CustomerController::class, 'quickStore'])
+        ->name('customers.quick-store')
+        ->middleware('permission:sales.create');
     Route::resource('customers', CustomerController::class)
         ->middleware('permission:sales.view');
     Route::get('sales-orders/quick-checkout', [SalesOrderController::class, 'quickCheckout'])->name('sales-orders.quick-checkout')

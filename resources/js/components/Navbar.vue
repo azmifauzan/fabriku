@@ -72,11 +72,11 @@ const companyInitials = computed(() => {
 
                 <!-- Logo -->
                 <div class="flex items-center gap-2">
-                    <div v-if="companyLogo" class="flex h-8 w-8 flex-shrink-0 overflow-hidden rounded-lg">
+                    <div v-if="companyLogo" class="flex h-6 w-6 flex-shrink-0 overflow-hidden rounded-lg sm:h-8 sm:w-8">
                         <img :src="companyLogo" :alt="companyName" class="h-full w-full object-contain" />
                     </div>
-                    <div v-else class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-600">
-                        <span class="text-sm font-bold text-white">{{ companyInitials }}</span>
+                    <div v-else class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-600 sm:h-8 sm:w-8">
+                        <span class="text-xs font-bold text-white sm:text-sm">{{ companyInitials }}</span>
                     </div>
                     <div class="flex flex-col">
                         <h1 class="text-lg font-bold text-indigo-600 sm:text-xl dark:text-indigo-400 leading-tight">{{ companyName }}</h1>
@@ -143,7 +143,7 @@ const companyInitials = computed(() => {
                 <!-- Theme Toggle -->
                 <button
                     @click="toggleDark()"
-                    class="rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+                    class="rounded-lg p-2.5 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
                     aria-label="Toggle theme"
                 >
                     <Sun v-if="isDark" :size="20" class="text-gray-600 dark:text-gray-300" />
@@ -201,9 +201,9 @@ const companyInitials = computed(() => {
 
                 <!-- User Info - Mobile (Icon Only) -->
                 <div v-if="user" class="relative flex items-center gap-2 sm:hidden">
-                    <button 
+                    <button
                         @click="userMenuOpen = !userMenuOpen"
-                        class="rounded-lg bg-gray-50 p-2 dark:bg-gray-700" 
+                        class="rounded-lg bg-gray-50 p-2.5 dark:bg-gray-700"
                         aria-label="User menu"
                     >
                         <User :size="18" class="text-gray-600 dark:text-gray-300" />

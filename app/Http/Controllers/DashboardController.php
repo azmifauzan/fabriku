@@ -24,8 +24,15 @@ class DashboardController extends Controller
         $tenant = auth()->user()->tenant;
         $categoryConfig = $tenant?->getCategoryConfig() ?? [];
         $enableProductionFlow = $categoryConfig['rules']['enable_production_flow'] ?? true;
+        $enableSimpleProduction = $categoryConfig['rules']['enable_simple_production'] ?? false;
 
         if (! $enableProductionFlow) {
+            if ($enableSimpleProduction) {
+                if (request()->query('view') !== 'stats') {
+                    return redirect()->route('sales-orders.quick-checkout');
+                }
+                return $this->homemadeDashboard($tenantId);
+            }
             if (request()->query('view') !== 'stats') {
                 return redirect()->route('sales-orders.quick-checkout');
             }
@@ -306,6 +313,103 @@ class DashboardController extends Controller
             'topProducts' => $topProducts,
             'lowStockItems' => $lowStockItems,
             'recentPurchases' => $recentPurchases,
+        ]);
+    }
+
+    private function homemadeDashboard(int $tenantId): Response
+    {
+        $today = now()->toDateString();
+        $thisMonth = now()->month;
+        $thisYear = now()->year;
+
+        $stats = [
+            'sales_today' => SalesOrder::query()
+                ->whereDate('order_date', $today)
+                ->sum('total_amount'),
+            'sales_today_count' => SalesOrder::query()
+                ->whereDate('order_date', $today)
+                ->count(),
+            'sales_month' => SalesOrder::query()
+                ->whereMonth('order_date', $thisMonth)
+                ->whereYear('order_date', $thisYear)
+                ->sum('total_amount'),
+            'sales_month_count' => SalesOrder::query()
+                ->whereMonth('order_date', $thisMonth)
+                ->whereYear('order_date', $thisYear)
+                ->count(),
+            'total_inventory_items' => InventoryItem::query()->count(),
+            'low_stock_count' => InventoryItem::query()
+                ->whereRaw('(current_quantity - reserved_quantity) <= minimum_stock')
+                ->whereRaw('(current_quantity - reserved_quantity) >= 0')
+                ->count(),
+            'out_of_stock_count' => InventoryItem::query()->where('current_quantity', 0)->count(),
+            'inventory_value' => InventoryItem::query()->sum(DB::raw('current_quantity * unit_cost')),
+            'production_today' => (int) StockAdjustment::query()
+                ->where('adjustment_type', StockAdjustment::TYPE_PRODUCTION_ENTRY)
+                ->whereDate('created_at', $today)
+                ->sum('adjustment_quantity'),
+            'low_stock_materials_count' => Material::query()
+                ->whereColumn('stock_quantity', '<=', 'min_stock')
+                ->count(),
+        ];
+
+        $salesTrend = SalesOrder::query()
+            ->select(
+                DB::raw('DATE(order_date) as date'),
+                DB::raw('SUM(total_amount) as total'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->where('order_date', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $topProducts = DB::table('sales_order_items')
+            ->join('sales_orders', 'sales_order_items.sales_order_id', '=', 'sales_orders.id')
+            ->join('inventory_items', 'sales_order_items.inventory_item_id', '=', 'inventory_items.id')
+            ->select(
+                'inventory_items.sku',
+                'inventory_items.product_name as name',
+                DB::raw('SUM(sales_order_items.quantity) as total_sold'),
+                DB::raw('SUM(sales_order_items.subtotal) as total_revenue')
+            )
+            ->where('sales_orders.tenant_id', $tenantId)
+            ->where('sales_orders.order_date', '>=', now()->subDays(30))
+            ->groupBy('inventory_items.id', 'inventory_items.sku', 'inventory_items.product_name')
+            ->orderByDesc('total_sold')
+            ->limit(5)
+            ->get();
+
+        $lowStockItems = InventoryItem::query()
+            ->whereRaw('(current_quantity - reserved_quantity) <= minimum_stock')
+            ->select('id', 'sku', 'product_name', 'current_quantity', 'reserved_quantity', 'minimum_stock')
+            ->limit(5)
+            ->get();
+
+        $lowStockMaterials = Material::query()
+            ->whereColumn('stock_quantity', '<=', 'min_stock')
+            ->select('id', 'code', 'name', 'stock_quantity', 'unit', 'min_stock')
+            ->limit(5)
+            ->get();
+
+        $recentProductions = StockAdjustment::query()
+            ->where('adjustment_type', StockAdjustment::TYPE_PRODUCTION_ENTRY)
+            ->whereNotNull('batch_id')
+            ->with('inventoryItem:id,product_name')
+            ->select('batch_id', 'inventory_item_id', 'created_at')
+            ->selectRaw('SUM(adjustment_quantity) as total_qty')
+            ->groupBy('batch_id', 'inventory_item_id', 'created_at')
+            ->latest('created_at')
+            ->limit(5)
+            ->get();
+
+        return Inertia::render('HomemadeDashboard', [
+            'stats' => $stats,
+            'salesTrend' => $salesTrend,
+            'topProducts' => $topProducts,
+            'lowStockItems' => $lowStockItems,
+            'lowStockMaterials' => $lowStockMaterials,
+            'recentProductions' => $recentProductions,
         ]);
     }
 }

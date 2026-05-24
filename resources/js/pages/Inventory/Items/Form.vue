@@ -70,8 +70,8 @@ const props = defineProps<{
     sourceTypes?: Record<string, string>;
 }>();
 
-const { isRetailMode, tenant } = useBusinessContext();
-const isRetail = computed(() => isRetailMode.value || tenant.value?.business_category === 'retail');
+const { isRetailMode, rules } = useBusinessContext();
+const isRetail = computed(() => isRetailMode.value || rules.value.enable_production_flow === false);
 
 // Entry type: 'production' or 'manual'
 const entryType = ref<'production' | 'manual'>(

@@ -27,6 +27,8 @@ class StockAdjustment extends Model
 
     public const TYPE_PURCHASE = 'purchase';
 
+    public const TYPE_PRODUCTION_ENTRY = 'production_entry';
+
     protected $fillable = [
         'tenant_id',
         'inventory_item_id',
@@ -113,6 +115,7 @@ class StockAdjustment extends Model
             self::TYPE_FOUND => 'Ditemukan',
             self::TYPE_RETURN => 'Retur',
             self::TYPE_PURCHASE => 'Pembelian',
+            self::TYPE_PRODUCTION_ENTRY => 'Hasil Produksi',
             default => ucfirst($this->adjustment_type),
         };
     }
@@ -127,6 +130,7 @@ class StockAdjustment extends Model
             self::TYPE_FOUND => 'Ditemukan',
             self::TYPE_RETURN => 'Retur',
             self::TYPE_PURCHASE => 'Pembelian',
+            self::TYPE_PRODUCTION_ENTRY => 'Hasil Produksi',
         ];
     }
 }

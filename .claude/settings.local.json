@@ -10,7 +10,10 @@
       "Bash(not exist *)",
       "PowerShell(php artisan migrate 2>&1)",
       "PowerShell(npm run *)",
-      "PowerShell(vendor\\\\bin\\\\pint --dirty --format agent 2>&1)"
+      "PowerShell(vendor\\\\bin\\\\pint --dirty --format agent 2>&1)",
+      "Bash(grep -n \"fillable\\\\|protected \\\\$\" D:/dev/fabriku/app/Models/Customer.php)",
+      "Bash(php *)",
+      "Bash(xargs grep -l \"isRetailMode\\\\|isModuleEnabled\")"
     ]
   }
 }

@@ -48,7 +48,7 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
-            $table->string('code')->unique();
+            $table->string('code');
             $table->string('name');
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
@@ -60,6 +60,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
+            $table->unique(['tenant_id', 'code'], 'customers_tenant_code_unique');
             $table->index(['tenant_id', 'name']);
         });
     }

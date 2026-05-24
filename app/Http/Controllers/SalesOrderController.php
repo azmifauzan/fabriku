@@ -308,8 +308,14 @@ class SalesOrderController extends Controller
             ->orderBy('product_name')
             ->get();
 
+        $customers = Customer::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'code']);
+
         return Inertia::render('SalesOrders/QuickCheckout', [
             'inventoryItems' => $items,
+            'customers' => $customers,
         ]);
     }
 
@@ -317,6 +323,7 @@ class SalesOrderController extends Controller
     {
         $validated = $request->validate([
             'payment_method' => ['required', 'string'],
+            'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.inventory_item_id' => ['required', 'integer', 'exists:inventory_items,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
@@ -325,16 +332,19 @@ class SalesOrderController extends Controller
 
         $tenantId = auth()->user()->tenant_id;
 
-        // Find or create Walk-in Customer for this tenant
-        $walkIn = Customer::firstOrCreate(
-            ['tenant_id' => $tenantId, 'code' => 'WALK-IN'],
-            [
-                'name' => 'Walk-in Customer',
-                'is_active' => true,
-            ]
-        );
+        if (!empty($validated['customer_id'])) {
+            $customer = Customer::findOrFail($validated['customer_id']);
+        } else {
+            $customer = Customer::firstOrCreate(
+                ['tenant_id' => $tenantId, 'code' => 'WALK-IN'],
+                [
+                    'name' => 'Walk-in Customer',
+                    'is_active' => true,
+                ]
+            );
+        }
 
-        DB::transaction(function () use ($validated, $walkIn, $tenantId) {
+        DB::transaction(function () use ($validated, $customer, $tenantId) {
             $subtotal = 0;
             $items = [];
 
@@ -352,7 +362,7 @@ class SalesOrderController extends Controller
 
             $salesOrder = SalesOrder::create([
                 'tenant_id' => $tenantId,
-                'customer_id' => $walkIn->id,
+                'customer_id' => $customer->id,
                 'order_date' => now(),
                 'channel' => 'offline',
                 'status' => 'completed',

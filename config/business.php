@@ -70,6 +70,7 @@ return [
                 'track_batch_number' => true,
                 'track_expired_date' => false,
                 'require_storage_temp' => false,
+                'enable_purchase_module' => false,
             ],
         ],
 
@@ -126,6 +127,7 @@ return [
                 'track_expired_date' => true, // CRITICAL untuk food!
                 'require_storage_temp' => true,
                 'shelf_life_alert_days' => 7, // Alert 7 hari sebelum expired
+                'enable_purchase_module' => false,
             ],
         ],
 
@@ -177,6 +179,7 @@ return [
                 'track_batch_number' => true,
                 'track_expired_date' => false,
                 'require_storage_temp' => false,
+                'enable_purchase_module' => false,
             ],
         ],
 
@@ -277,6 +280,57 @@ return [
                 'require_storage_temp' => true,
                 'shelf_life_alert_days' => 30,
                 'require_bpom' => true, // Khusus Indonesia
+                'enable_purchase_module' => false,
+            ],
+        ],
+
+        'homemade' => [
+            'label' => 'Produksi Rumahan',
+            'description' => 'UMKM yang membuat produk sendiri dari bahan baku, tanpa alur produksi formal',
+            'icon' => '🏠',
+            'mode' => 'homemade',
+            'sku_prefix' => 'INV-HMD',
+
+            'terminology' => [
+                'material' => 'Bahan Baku',
+                'pattern' => 'Resep',
+                'preparation' => 'Resep',
+                'preparation_order' => 'Catatan Produksi',
+                'production' => 'Catatan Produksi',
+                'production_order' => 'Catatan Produksi',
+                'contractor' => 'N/A',
+            ],
+
+            'product_types' => [
+                'makanan' => 'Makanan & Cemilan',
+                'kerajinan' => 'Kerajinan Tangan',
+                'fashion' => 'Fashion Rumahan',
+                'lainnya' => 'Lainnya',
+            ],
+
+            'sizes' => ['Small', 'Medium', 'Large', 'custom'],
+
+            'material_types' => [
+                'bahan_baku' => 'Bahan Baku',
+                'kemasan' => 'Kemasan',
+                'bahan_tambahan' => 'Bahan Tambahan',
+                'lainnya' => 'Lainnya',
+            ],
+
+            'material_attributes' => [],
+
+            'rules' => [
+                'enable_production_flow' => false,
+                'enable_material_module' => true,
+                'enable_preparation_module' => true,
+                'enable_pattern_module' => true,
+                'enable_contractor_module' => false,
+                'enable_simple_production' => true,
+                'enable_inventory_module' => true,
+                'enable_sales_module' => true,
+                'enable_purchase_module' => false,
+                'track_batch_number' => true,
+                'track_expired_date' => true,
             ],
         ],
     ],
@@ -300,5 +354,5 @@ return [
     | dengan mengubah 'enabled' => true di konfigurasi kategori di atas.
     |
     */
-    'enabled_categories' => ['garment', 'food', 'craft', 'cosmetic', 'retail'],
+    'enabled_categories' => ['garment', 'food', 'craft', 'cosmetic', 'retail', 'homemade'],
 ];
