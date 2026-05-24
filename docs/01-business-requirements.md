@@ -1,13 +1,15 @@
 # Business Requirements - Fabriku
 
-> **Last Updated**: February 3, 2026
+> **Last Updated**: May 24, 2026
 
 ## Overview
-Fabriku adalah aplikasi SaaS (Software as a Service) yang dirancang untuk membantu UMKM dalam mengelola proses produksi dan penjualan mereka secara efisien dan terintegrasi. Aplikasi ini mendukung **multi-kategori bisnis**:
+Fabriku adalah aplikasi SaaS (Software as a Service) yang dirancang untuk membantu UMKM dalam mengelola proses produksi dan penjualan mereka secara efisien dan terintegrasi. Aplikasi ini mendukung **6 kategori bisnis aktif**:
 1. **Garment** - Produksi pakaian jadi (mukena, daster, gamis, dll)
-2. **Kue Rumahan** - Produksi makanan/kue untuk dijual
+2. **Makanan & Kue** - Produksi makanan/kue untuk dijual
 3. **Kerajinan** - Craft & handmade products
 4. **Kosmetik** - Skincare & beauty products
+5. **Toko / Retail** - Toko sederhana: beli produk jadi → stok → kasir (Quick Checkout)
+6. **Produksi Rumahan** - UMKM skala rumahan: beli bahan baku → catat produksi sederhana → kasir
 
 ## Business Goals
 1. Menyediakan solusi manajemen produksi yang mudah digunakan untuk berbagai jenis UMKM
@@ -17,10 +19,10 @@ Fabriku adalah aplikasi SaaS (Software as a Service) yang dirancang untuk memban
 5. Sistem yang fleksibel untuk mendukung berbagai kategori bisnis dengan proses produksi berbeda
 
 ## Target Users
-- Pemilik UMKM (garment, makanan/kue, kerajinan, kosmetik)
+- Pemilik UMKM (garment, makanan/kue, kerajinan, kosmetik, toko retail, produksi rumahan)
 - Staff produksi
 - Staff gudang/inventory
-- Staff penjualan
+- Staff penjualan / kasir
 - Mitra produksi eksternal (penjahit outsourcing, dapur sharing, dll)
 - Super Admin (platform management)
 
@@ -128,15 +130,46 @@ Fabriku adalah aplikasi SaaS (Software as a Service) yang dirancang untuk memban
 - Waste percentage untuk cutting process (standar 3-10%)
 - Quality grades: Grade A, Grade B, Reject
 - Proses: Cutting → Sewing → Quality Check → Packaging
+- Kontraktor/outsourcing penjahit tersedia
 
 ### Makanan/Kue-Specific Rules
 - Material tracking: batch number, expired date, storage temp
 - Recipe dengan serving size atau jumlah output (loyang, pieces)
 - Storage temperature requirements (frozen, chilled, room temp)
-- Shelf life tracking dan expired date alert (critical!)
+- Shelf life tracking dan expired date alert (7 hari sebelum expired)
 - Food safety compliance notes
 - Proses: Preparation/Mixing → Baking/Cooking → Quality Check → Packaging
 - Export to PDF/Excel
+
+### Kerajinan-Specific Rules
+- Material tracking: batch number, warna, ukuran
+- Design/template library
+- Quality grades: Premium, Standar, Ekonomi
+- Waste percentage 5-15%
+- Proses: Desain → Persiapan → Pembuatan → Packaging
+
+### Kosmetik-Specific Rules
+- Material tracking: batch number, expired date, nomor BPOM, storage temp
+- Formula/resep produk
+- Shelf life alert 30 hari sebelum expired
+- Compliance BPOM wajib
+- Proses: Formulasi/Mixing → Produksi → Quality Check → Packaging
+- Maklon/contract manufacturing tersedia
+
+### Retail-Specific Rules
+- **Tidak ada** modul material/produksi (langsung beli produk jadi)
+- Purchase Receipt: catat pembelian dari supplier → stok bertambah
+- Quick Checkout POS: grid produk + cart, transaksi langsung completed
+- Purchase Report: laporan pembelian per batch/supplier
+- Modul yang aktif: Inventory, Penjualan (Quick Checkout), Laporan Pembelian + Penjualan
+
+### Produksi Rumahan (Homemade)-Specific Rules
+- Beli bahan baku dari supplier → stok material bertambah
+- **Simple Production (Catatan Produksi)**: pilih bahan baku → input produk jadi → stok bahan berkurang + produk masuk inventory
+- Tidak ada Production Order, tidak ada Kontraktor, tidak ada Purchase Receipt produk jadi
+- Quick Checkout POS untuk penjualan cepat
+- Track expired date dan batch number (berguna untuk produk makanan rumahan)
+- Modul yang aktif: Bahan Baku, Resep (opsional), Catatan Produksi, Inventory, Penjualan (Quick Checkout), Laporan
 
 ## Non-Functional Requirements
 
@@ -170,11 +203,20 @@ Fabriku adalah aplikasi SaaS (Software as a Service) yang dirancang untuk memban
 4. User satisfaction score > 4.0/5.0
 5. System uptime > 99.5%
 
+## Fitur yang Sudah Aktif (Sebelumnya Direncanakan)
+
+- Kategori `retail` (Toko/Simple Shop) — Purchase Receipt, Quick Checkout POS, Purchase Report ✅
+- Kategori `homemade` (Produksi Rumahan) — Simple Production, Quick Checkout POS ✅
+- Telegram bot (webhook + push notifikasi) ✅
+- Email system (verifikasi, reset, trial reminder) ✅
+
 ## Future Enhancements (Phase 2)
 - Mobile app untuk operator lapangan
-- Barcode/QR code scanning
-- Integration dengan e-commerce platforms
-- Automated reorder points
-- Predictive analytics untuk demand forecasting
+- Barcode scanning untuk material receipt (inventory sudah punya QR code)
+- Integration dengan e-commerce platforms (Tokopedia, Shopee)
+- Payment gateway terintegrasi (Midtrans/Xendit) — saat ini manual upload bukti
+- Automated reorder points (alert low stock sudah ada, auto-order belum)
 - Multi-warehouse management
 - Integration dengan accounting software
+- Shipping API (JNE/JNT/SiCepat)
+- Multi-bahasa (saat ini hardcoded Bahasa Indonesia)

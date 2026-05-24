@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import FAQ from '@/components/Landing/FAQ.vue';
-import { Check, ChefHat, Palette, Scissors, Sparkles, Store, X } from 'lucide-vue-next';
+import { Check, ChefHat, Home, Palette, Scissors, Sparkles, Store, X } from 'lucide-vue-next';
 
 const props = defineProps({
     canLogin: {
@@ -111,6 +111,9 @@ const features = [
                         </span>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium shadow-sm">
                             <Sparkles :size="14" class="text-gray-400" /> Kosmetik
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium shadow-sm">
+                            <Home :size="14" class="text-gray-400" /> Produksi Rumahan
                         </span>
                     </div>
 
