@@ -1,6 +1,6 @@
 # Database Schema - Fabriku
 
-> **Last Updated**: February 3, 2026
+> **Last Updated**: June 10, 2026
 
 ## Overview
 Database schema untuk Fabriku menggunakan PostgreSQL 16 dengan multi-tenancy architecture. Setiap tenant memiliki data yang terisolasi dengan tenant_id.
@@ -468,12 +468,15 @@ CREATE TABLE stock_adjustments (
     id BIGSERIAL PRIMARY KEY,
     tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     inventory_item_id BIGINT NOT NULL REFERENCES inventory_items(id) ON DELETE CASCADE,
-    adjustment_type VARCHAR(50) NOT NULL, -- opening_balance, correction, damage, loss, found, return
+    adjustment_type VARCHAR(50) NOT NULL, -- opening_balance, correction, damage, loss, found, return, purchase, production_entry
     quantity_before INTEGER NOT NULL,
     quantity_after INTEGER NOT NULL,
     adjustment_quantity INTEGER NOT NULL, -- positive or negative
     reason VARCHAR(255) NOT NULL,
     notes TEXT,
+    batch_id UUID,                  -- group multi-item dalam satu transaksi (purchase / production_entry), patch 2026_05_23
+    supplier_name VARCHAR(255),     -- hanya untuk adjustment_type = 'purchase'
+    purchase_invoice VARCHAR(255),  -- hanya untuk adjustment_type = 'purchase'
     adjusted_by BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     approved_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
     approved_at TIMESTAMP,

@@ -1,7 +1,5 @@
 # User Flows - Fabriku
 
-> **Note**: Dokumen ini menjelaskan alur teknis. Untuk panduan penggunaan aplikasi, lihat **[User Manual](08-user-manual.md)**.
-
 ## Overview
 Dokumen ini menjelaskan alur kerja pengguna (user flows) untuk berbagai proses bisnis di aplikasi Fabriku setelah **Preparation Simplification** (removal of BOM & cutting_results).
 

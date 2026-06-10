@@ -1,6 +1,6 @@
 # Status Saat Ini
 
-Dokumen ini merangkum kondisi aktual codebase Fabriku per Mei 2026. Diturunkan dari pembacaan langsung kode, migrasi, dan routing — bukan dari roadmap atau rencana.
+Dokumen ini merangkum kondisi aktual codebase Fabriku per Juni 2026. Diturunkan dari pembacaan langsung kode, migrasi, dan routing — bukan dari roadmap atau rencana.
 
 ## Ringkasan Eksekusi
 
@@ -97,6 +97,16 @@ Migrasi tunggal per modul:
 Gating rules yang dibaca sidebar + DashboardController:
 - `retail`: `mode = 'simple'`, `rules.enable_production_flow = false` → sembunyikan produksi, tampilkan Quick Checkout top-level
 - `homemade`: `mode = 'homemade'`, `rules.enable_simple_production = true`, `rules.enable_contractor_module = false`, `rules.enable_purchase_module = false` → tampilkan "Catatan Produksi" sederhana, Quick Checkout top-level, sembunyikan Production Order + Kontraktor + Pembelian Produk Jadi
+
+## Catatan Implementasi Retail & Homemade (dipindah dari plan.md, selesai Mei 2026)
+
+Plan A (Retail: Purchase Receipt, Quick Checkout, Dashboard Retail, Purchase Report) dan Plan B (kategori `homemade`: Simple Production, Dashboard Homemade, onboarding default) selesai penuh. Deviasi dari plan yang disengaja dan catatan teknis yang masih relevan:
+
+- Role RBAC `homemade_admin`/`homemade_staff` tidak dibuat di PermissionSeeder — konsisten dengan retail; sistem pakai `users.role = 'admin'/'manager'/'staff'` untuk simple role check.
+- `SimpleProductionController::store()` deduct bahan baku via `PreparationOrder` (reuse FIFO logic dari service), bukan langsung `StockAdjustment` — menambah record `preparation_orders` tersembunyikan per catatan produksi.
+- **Known issue**: `SimpleProductionController::show()` mencocokkan PreparationOrder via `notes LIKE` — fragile bila ada banyak produksi di hari sama. Refactor yang disarankan: simpan `preparation_order_id` di `StockAdjustment` atau metadata.
+- `customers.code` unique per-tenant diperbaiki langsung di migration original + alter migration untuk DB berjalan (`2026_05_*` drop `customers_code_unique` global).
+- Demo tenant homemade pakai `subscription_plan: 'trial'` (bukan PRO).
 
 ## Test Coverage
 
