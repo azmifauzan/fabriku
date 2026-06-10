@@ -14,8 +14,9 @@ Platform SaaS multi-tenant untuk manajemen produksi dan penjualan UMKM Indonesia
 | Kosmetik | Formula → Mixing → Produksi | Skincare, herbal |
 | **Toko / Retail** | Pembelian → Stock → Quick Checkout | Kelontong, dropship, reseller |
 | **Produksi Rumahan** | Bahan Baku → Catatan Produksi → Quick Checkout | Toko kue rumahan, frozen food |
+| **Jasa & Layanan** | Katalog Layanan (+ Sparepart) → Quick Checkout | Bengkel, salon, barbershop, laundry |
 
-Workflow penuh: **Bahan Baku → Pattern/Resep → Persiapan → Produksi → Inventory → Penjualan**. Terminologi UI menyesuaikan kategori tenant. Kategori `retail` dan `homemade` melewati production flow dan langsung ke inventory + quick checkout.
+Workflow penuh: **Bahan Baku → Pattern/Resep → Persiapan → Produksi → Inventory → Penjualan**. Terminologi UI menyesuaikan kategori tenant. Kategori `retail`, `homemade`, dan `service` melewati production flow dan langsung ke inventory + quick checkout; kategori `service` menambah katalog layanan yang bisa dijual campur dengan produk fisik dalam satu transaksi.
 
 ## Stack
 
@@ -69,6 +70,7 @@ Tenant (URL `/login`):
 - `admin@glowbeauty.com` (cosmetic) / `password`
 - `admin@tokoserbaada.com` (retail) / `password`
 - `admin@homemade.com` (homemade) / `password`
+- `admin@bengkel.com` (service/jasa) / `password`
 
 Admin platform (URL `/admin/login`):
 - `admin@fabriku.com` / `password`
@@ -135,7 +137,7 @@ php artisan trial:send-reminders            # email trial expiry (daily 09:00 vi
 | [`docs/05-user-flows.md`](docs/05-user-flows.md) | Alur user per kategori |
 | [`docs/current-status.md`](docs/current-status.md) | **Status aktual modul, dependency, gap** |
 | [`docs/code-review.md`](docs/code-review.md) | **Code review findings — severity-tagged** |
-| [`docs/plan.md`](docs/plan.md) | **Enhancement plan: kategori `service` (jasa — bengkel, salon, barbershop)** |
+| [`docs/plan.md`](docs/plan.md) | **Backlog: payment gateway, shipping API, multi-warehouse, multi-bahasa** |
 | `CLAUDE.md` | Pedoman kerja untuk Claude Code |
 
 ## Konvensi Singkat
@@ -151,9 +153,8 @@ Detail lengkap konvensi: `CLAUDE.md` dan `.github/copilot-instructions.md`.
 
 ## Roadmap Singkat
 
-Semua modul aktif (auth, RBAC, audit log, semua workflow produksi, sales, reports, dashboard, mode retail, mode homemade, Purchase Report, Quick Checkout POS, Telegram bot, email system). Yang belum:
+Semua modul aktif (auth, RBAC, audit log, semua workflow produksi, sales, reports, dashboard, mode retail, mode homemade, mode service/jasa, Purchase Report, Quick Checkout POS, Telegram bot, email system). Yang belum:
 
-- **Kategori `service` (jasa: bengkel, salon, barbershop)** — planned, lihat [`docs/plan.md`](docs/plan.md).
 - Payment gateway terintegrasi (Midtrans/Xendit) — masih manual upload bukti.
 - Mobile app native.
 - Shipping API (JNE/JNT/SiCepat).

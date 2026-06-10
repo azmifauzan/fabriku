@@ -11,9 +11,9 @@ class MaterialTypeSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(Tenant $tenant = null): void
+    public function run(?Tenant $tenant = null): void
     {
-        if (!$tenant) {
+        if (! $tenant) {
             $tenant = Tenant::where('slug', 'demo')->first();
         }
 

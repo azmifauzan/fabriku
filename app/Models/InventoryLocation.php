@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Scopes\TenantScope;
+use Database\Factories\InventoryLocationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class InventoryLocation extends Model
 {
-    /** @use HasFactory<\Database\Factories\InventoryLocationFactory> */
+    /** @use HasFactory<InventoryLocationFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [

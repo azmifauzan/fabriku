@@ -161,7 +161,7 @@ const exportReport = (format: 'pdf' | 'excel') => {
                                 </button>
                                 <div
                                     v-if="showExportMenu"
-                                    class="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800"
+                                    class="ring-opacity-5 absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black dark:bg-gray-800"
                                 >
                                     <button
                                         type="button"
@@ -324,22 +324,40 @@ const exportReport = (format: 'pdf' | 'excel') => {
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-900">
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Customer</th>
-                                        <th class="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Jumlah Transaksi</th>
-                                        <th class="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Total Item</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Total Belanja</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                                            Customer
+                                        </th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                        >
+                                            Jumlah Transaksi
+                                        </th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                        >
+                                            Total Item
+                                        </th>
+                                        <th
+                                            class="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                        >
+                                            Total Belanja
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                                     <tr v-for="stat in customerStats" :key="stat.customer_name" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{{ stat.customer_name }}</td>
                                         <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white">
-                                            <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                                            <span
+                                                class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
+                                            >
                                                 {{ stat.transaction_count }}x
                                             </span>
                                         </td>
                                         <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white">{{ stat.total_items }}</td>
-                                        <td class="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-white">{{ formatCurrency(stat.total_amount) }}</td>
+                                        <td class="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-white">
+                                            {{ formatCurrency(stat.total_amount) }}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

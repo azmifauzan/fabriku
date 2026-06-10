@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { Plus, Trash2 } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 
 interface InventoryItem {
     id: number;
@@ -51,12 +51,9 @@ const onItemSelect = (index: number) => {
     }
 };
 
-const totalCost = computed(() =>
-    form.value.items.reduce((sum, l) => sum + l.quantity * l.unit_cost, 0)
-);
+const totalCost = computed(() => form.value.items.reduce((sum, l) => sum + l.quantity * l.unit_cost, 0));
 
-const formatRupiah = (value: number) =>
-    'Rp ' + Number(value).toLocaleString('id-ID', { maximumFractionDigits: 0 });
+const formatRupiah = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { maximumFractionDigits: 0 });
 
 const submit = () => {
     submitting.value = true;
@@ -96,7 +93,7 @@ const submit = () => {
                                 <input
                                     v-model="form.supplier_name"
                                     type="text"
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                                     placeholder="Nama toko / supplier"
                                 />
                                 <p v-if="errors['supplier_name']" class="mt-1 text-xs text-red-500">{{ errors['supplier_name'] }}</p>
@@ -106,7 +103,7 @@ const submit = () => {
                                 <input
                                     v-model="form.purchase_invoice"
                                     type="text"
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                                     placeholder="Opsional"
                                 />
                             </div>
@@ -117,7 +114,7 @@ const submit = () => {
                                 <input
                                     v-model="form.purchase_date"
                                     type="date"
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                                 />
                                 <p v-if="errors['purchase_date']" class="mt-1 text-xs text-red-500">{{ errors['purchase_date'] }}</p>
                             </div>
@@ -126,7 +123,7 @@ const submit = () => {
                                 <input
                                     v-model="form.notes"
                                     type="text"
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                                     placeholder="Opsional"
                                 />
                             </div>
@@ -154,10 +151,10 @@ const submit = () => {
                                 <thead class="text-xs font-medium text-gray-500 dark:text-gray-400">
                                     <tr class="border-b border-gray-200 dark:border-gray-700">
                                         <th class="pb-2 text-left">Produk</th>
-                                        <th class="pb-2 px-2 text-right w-24">Qty</th>
-                                        <th class="pb-2 px-2 text-right w-36">Harga Modal</th>
-                                        <th class="pb-2 px-2 text-right w-32">Subtotal</th>
-                                        <th class="pb-2 w-8"></th>
+                                        <th class="w-24 px-2 pb-2 text-right">Qty</th>
+                                        <th class="w-36 px-2 pb-2 text-right">Harga Modal</th>
+                                        <th class="w-32 px-2 pb-2 text-right">Subtotal</th>
+                                        <th class="w-8 pb-2"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -166,7 +163,7 @@ const submit = () => {
                                             <select
                                                 v-model="line.inventory_item_id"
                                                 @change="onItemSelect(idx)"
-                                                class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                                class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                                             >
                                                 <option :value="null" disabled>Pilih produk...</option>
                                                 <option v-for="item in inventoryItems" :key="item.id" :value="item.id">
@@ -177,23 +174,23 @@ const submit = () => {
                                                 {{ errors[`items.${idx}.inventory_item_id`] }}
                                             </p>
                                         </td>
-                                        <td class="py-2 px-2">
+                                        <td class="px-2 py-2">
                                             <input
                                                 v-model.number="line.quantity"
                                                 type="number"
                                                 min="1"
-                                                class="w-full rounded border border-gray-300 px-2 py-1.5 text-right text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                                class="w-full rounded border border-gray-300 px-2 py-1.5 text-right text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                                             />
                                         </td>
-                                        <td class="py-2 px-2">
+                                        <td class="px-2 py-2">
                                             <input
                                                 v-model.number="line.unit_cost"
                                                 type="number"
                                                 min="0"
-                                                class="w-full rounded border border-gray-300 px-2 py-1.5 text-right text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                                class="w-full rounded border border-gray-300 px-2 py-1.5 text-right text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                                             />
                                         </td>
-                                        <td class="py-2 px-2 text-right text-gray-700 dark:text-gray-300">
+                                        <td class="px-2 py-2 text-right text-gray-700 dark:text-gray-300">
                                             {{ formatRupiah(line.quantity * line.unit_cost) }}
                                         </td>
                                         <td class="py-2 text-center">
@@ -211,7 +208,7 @@ const submit = () => {
                                 <tfoot>
                                     <tr class="border-t-2 border-gray-200 dark:border-gray-600">
                                         <td colspan="3" class="pt-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300">Total</td>
-                                        <td class="pt-3 px-2 text-right text-sm font-bold text-gray-900 dark:text-gray-100">
+                                        <td class="px-2 pt-3 text-right text-sm font-bold text-gray-900 dark:text-gray-100">
                                             {{ formatRupiah(totalCost) }}
                                         </td>
                                         <td></td>
@@ -223,7 +220,10 @@ const submit = () => {
 
                     <!-- Actions -->
                     <div class="flex justify-end gap-3">
-                        <a href="/purchase-receipts" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                        <a
+                            href="/purchase-receipts"
+                            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                        >
                             Batal
                         </a>
                         <button

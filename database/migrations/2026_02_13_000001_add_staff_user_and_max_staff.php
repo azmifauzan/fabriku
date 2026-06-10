@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\SystemSetting;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,7 +18,7 @@ return new class extends Migration
         });
 
         // Add max_staff_per_tenant system setting
-        \App\Models\SystemSetting::set('max_staff_per_tenant', 5, 'number');
+        SystemSetting::set('max_staff_per_tenant', 5, 'number');
     }
 
     /**

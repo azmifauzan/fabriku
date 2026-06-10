@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\MaterialType;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -13,7 +14,7 @@ class MaterialFactory extends Factory
 
         return [
             'tenant_id' => Tenant::factory(),
-            'material_type_id' => \App\Models\MaterialType::factory(),
+            'material_type_id' => MaterialType::factory(),
             'code' => strtoupper(fake()->unique()->lexify('MAT-???-###')),
             'name' => fake()->words(3, true),
             'supplier_name' => fake()->optional()->company(),

@@ -2,11 +2,14 @@
 
 namespace Database\Factories;
 
+use App\Models\Pattern;
+use App\Models\PreparationOrder;
+use App\Models\Staff;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PreparationOrder>
+ * @extends Factory<PreparationOrder>
  */
 class PreparationOrderFactory extends Factory
 {
@@ -22,10 +25,10 @@ class PreparationOrderFactory extends Factory
 
         return [
             'tenant_id' => Tenant::factory(),
-            'pattern_id' => \App\Models\Pattern::factory(),
+            'pattern_id' => Pattern::factory(),
             'preparation_date' => fake()->dateTimeBetween('-30 days', 'now'),
             'status' => fake()->randomElement($statuses),
-            'prepared_by' => \App\Models\Staff::factory(),
+            'prepared_by' => Staff::factory(),
             'output_quantity' => fake()->numberBetween(10, 200),
             'material_usage' => [
                 [

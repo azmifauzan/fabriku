@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\SystemSetting;
 use Illuminate\Database\Seeder;
 
 class SystemSettingsSeeder extends Seeder
@@ -11,10 +12,10 @@ class SystemSettingsSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\SystemSetting::set('bank_name', 'BCA');
-        \App\Models\SystemSetting::set('account_number', '1234567890');
-        \App\Models\SystemSetting::set('account_holder', 'Fabriku Admin');
-        \App\Models\SystemSetting::set('membership_price_monthly', 25000, 'number');
-        \App\Models\SystemSetting::set('membership_price_yearly', 250000, 'number');
+        SystemSetting::set('bank_name', 'BCA');
+        SystemSetting::set('account_number', '1234567890');
+        SystemSetting::set('account_holder', 'Fabriku Admin');
+        SystemSetting::set('membership_price_monthly', 25000, 'number');
+        SystemSetting::set('membership_price_yearly', 250000, 'number');
     }
 }

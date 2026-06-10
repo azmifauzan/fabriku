@@ -54,8 +54,8 @@ defineProps<Props>();
 
         <div class="px-6 py-6">
             <div class="mx-auto max-w-4xl">
-                <ItemForm 
-                    :locations="locations" 
+                <ItemForm
+                    :locations="locations"
                     :production-orders="productionOrders"
                     :categories="categories"
                     :allow-manual-entry="allowManualEntry"

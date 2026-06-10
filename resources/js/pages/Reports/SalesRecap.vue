@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { Download, FileBarChart, FileSpreadsheet, Filter, Search, TrendingUp, Users } from 'lucide-vue-next';
+import { Download, FileSpreadsheet, Filter, Search, Users } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface RecapItem {
@@ -111,7 +111,7 @@ const exportReport = (format: 'pdf' | 'excel') => {
                                 </button>
                                 <div
                                     v-if="showExportMenu"
-                                    class="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800"
+                                    class="ring-opacity-5 absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black dark:bg-gray-800"
                                 >
                                     <button
                                         type="button"

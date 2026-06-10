@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
-type TerminologyKey = 'material' | 'pattern' | 'preparation' | 'preparation_order' | 'production' | 'production_order' | 'contractor';
+type TerminologyKey = 'material' | 'pattern' | 'preparation' | 'preparation_order' | 'production' | 'production_order' | 'contractor' | 'service';
 
 type CategoryRules = {
     enable_production_flow?: boolean;
@@ -59,6 +59,10 @@ export function useBusinessContext() {
         return (categoryConfig.value?.mode ?? 'full') === 'simple';
     });
 
+    const isServiceMode = computed<boolean>(() => {
+        return (categoryConfig.value?.mode ?? 'full') === 'service';
+    });
+
     const isModuleEnabled = (moduleKey: string): boolean => {
         const rule = rules.value[`enable_${moduleKey}_module`];
         return rule !== false;
@@ -80,6 +84,7 @@ export function useBusinessContext() {
         sizes,
         rules,
         isRetailMode,
+        isServiceMode,
         isModuleEnabled,
         term,
         termLower,

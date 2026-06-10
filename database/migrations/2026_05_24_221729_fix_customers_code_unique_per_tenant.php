@@ -16,16 +16,11 @@ return new class extends Migration
             DB::statement('ALTER TABLE customers DROP CONSTRAINT IF EXISTS customers_code_unique');
             DB::statement('CREATE UNIQUE INDEX IF NOT EXISTS customers_tenant_code_unique ON customers (tenant_id, code)');
         } else {
-            // MySQL: check before acting
-            $hasGlobal = DB::selectOne(
-                "SELECT 1 FROM information_schema.statistics
-                 WHERE table_schema = DATABASE() AND table_name = 'customers' AND index_name = 'customers_code_unique'"
-            );
+            // MySQL/SQLite: inspect indexes via schema builder (driver-agnostic)
+            $indexNames = collect(Schema::getIndexes('customers'))->pluck('name');
 
-            $hasTenant = DB::selectOne(
-                "SELECT 1 FROM information_schema.statistics
-                 WHERE table_schema = DATABASE() AND table_name = 'customers' AND index_name = 'customers_tenant_code_unique'"
-            );
+            $hasGlobal = $indexNames->contains('customers_code_unique');
+            $hasTenant = $indexNames->contains('customers_tenant_code_unique');
 
             Schema::table('customers', function (Blueprint $table) use ($hasGlobal, $hasTenant) {
                 if ($hasGlobal) {

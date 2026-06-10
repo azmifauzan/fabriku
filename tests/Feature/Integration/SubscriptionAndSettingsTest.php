@@ -5,6 +5,8 @@ use App\Models\SubscriptionPayment;
 use App\Models\SystemSetting;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 describe('Subscription Management Integration', function () {
     beforeEach(function () {
@@ -52,73 +54,53 @@ describe('Subscription Management Integration', function () {
             ->assertSee('Subscription');
     });
 
-    it('handles subscription upgrade from trial to membership monthly', function () {
-        // Submit subscription request
+    it('handles monthly subscription payment submission with proof', function () {
+        Storage::fake(config('filesystems.uploads_disk', 'fabriku_s3'));
+
         $response = $this->actingAs($this->user)
             ->post(route('subscription.store'), [
-                'plan' => 'MEMBERSHIP',
-                'billing_cycle' => 'MONTHLY',
-                'payment_method' => 'TRANSFER',
+                'plan_type' => 'monthly',
                 'amount' => 25000,
+                'proof' => UploadedFile::fake()->image('bukti-transfer.jpg'),
             ]);
 
         $response->assertRedirect();
 
-        // Verify payment record created
-        $payment = SubscriptionPayment::where('tenant_id', $this->tenant->id)
-            ->where('plan', 'MEMBERSHIP')
-            ->first();
+        $payment = SubscriptionPayment::where('tenant_id', $this->tenant->id)->first();
 
         expect($payment)->not->toBeNull();
-        expect($payment->amount)->toBe(25000);
-        expect($payment->status)->toBe('PENDING');
-        expect($payment->billing_cycle)->toBe('MONTHLY');
+        expect((float) $payment->amount)->toBe(25000.0);
+        expect($payment->status)->toBe('pending');
+        expect($payment->plan_type)->toBe('monthly');
+        expect($payment->duration_months)->toBe(1);
+        expect($payment->proof_path)->not->toBeNull();
     });
 
-    it('handles subscription upgrade to pro yearly', function () {
+    it('handles yearly subscription payment submission', function () {
+        Storage::fake(config('filesystems.uploads_disk', 'fabriku_s3'));
+
         $response = $this->actingAs($this->user)
             ->post(route('subscription.store'), [
-                'plan' => 'PRO',
-                'billing_cycle' => 'YEARLY',
-                'payment_method' => 'TRANSFER',
+                'plan_type' => 'yearly',
                 'amount' => 350000,
+                'proof' => UploadedFile::fake()->image('bukti-transfer.jpg'),
             ]);
 
         $response->assertRedirect();
 
-        $payment = SubscriptionPayment::where('tenant_id', $this->tenant->id)
-            ->where('plan', 'PRO')
-            ->first();
+        $payment = SubscriptionPayment::where('tenant_id', $this->tenant->id)->first();
 
         expect($payment)->not->toBeNull();
-        expect($payment->amount)->toBe(350000);
-        expect($payment->billing_cycle)->toBe('YEARLY');
+        expect((float) $payment->amount)->toBe(350000.0);
+        expect($payment->plan_type)->toBe('yearly');
+        expect($payment->duration_months)->toBe(12);
     });
 
-    it('validates subscription payment amount', function () {
-        // Wrong amount for membership monthly
+    it('validates subscription payment required fields', function () {
         $response = $this->actingAs($this->user)
-            ->post(route('subscription.store'), [
-                'plan' => 'MEMBERSHIP',
-                'billing_cycle' => 'MONTHLY',
-                'payment_method' => 'TRANSFER',
-                'amount' => 10000, // Should be 25000
-            ]);
+            ->post(route('subscription.store'), []);
 
-        $response->assertSessionHasErrors('amount');
-    });
-
-    it('allows uploading payment proof', function () {
-        $payment = SubscriptionPayment::factory()->create([
-            'tenant_id' => $this->tenant->id,
-            'plan' => 'MEMBERSHIP',
-            'amount' => 25000,
-            'status' => 'PENDING',
-        ]);
-
-        // In real scenario, would upload file
-        // For now just verify payment exists
-        expect($payment->status)->toBe('PENDING');
+        $response->assertSessionHasErrors(['plan_type', 'proof', 'amount']);
     });
 
     it('allows viewing pages in read-only mode when expired', function () {
@@ -221,7 +203,7 @@ describe('Multi-User Tenant Access', function () {
     });
 
     it('allows different roles to access appropriate features', function () {
-        // Admin can access everything
+        // Admin bypass CheckPermission — bisa akses semuanya
         $this->actingAs($this->admin)
             ->get(route('materials.index'))
             ->assertSuccessful();
@@ -230,14 +212,18 @@ describe('Multi-User Tenant Access', function () {
             ->get(route('settings.index'))
             ->assertSuccessful();
 
-        // Manager can access most features
+        // Manager/staff tanpa role RBAC ter-assign: route ber-permission ditolak
         $this->actingAs($this->manager)
             ->get(route('materials.index'))
-            ->assertSuccessful();
+            ->assertForbidden();
 
-        // Staff has limited access
         $this->actingAs($this->staff)
             ->get(route('materials.index'))
+            ->assertForbidden();
+
+        // Route tanpa permission middleware tetap bisa diakses staff
+        $this->actingAs($this->staff)
+            ->get(route('settings.index'))
             ->assertSuccessful();
     });
 });

@@ -8,15 +8,20 @@ use App\Exports\ProductionReportExport;
 use App\Exports\PurchaseReportExport;
 use App\Exports\SalesRecapExport;
 use App\Exports\SalesReportExport;
+use App\Exports\ServiceReportExport;
 use App\Models\Customer;
 use App\Models\InventoryItem;
 use App\Models\Material;
+use App\Models\PreparationOrder;
 use App\Models\ProductionOrder;
 use App\Models\SalesOrder;
+use App\Models\SalesOrderItem;
 use App\Models\StockAdjustment;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Maatwebsite\Excel\Facades\Excel;
@@ -51,7 +56,7 @@ class ReportController extends Controller
         }
 
         // Get completed preparation orders within date range to calculate usage
-        $prepOrderQuery = \App\Models\PreparationOrder::query()
+        $prepOrderQuery = PreparationOrder::query()
             ->where('status', 'completed');
 
         if ($request->filled('start_date')) {
@@ -208,7 +213,7 @@ class ReportController extends Controller
     public function sales(Request $request): InertiaResponse
     {
         $query = SalesOrder::query()
-            ->with(['customer:id,name', 'items.inventoryItem:id,sku,product_name']);
+            ->with(['customer:id,name', 'items.inventoryItem:id,sku,product_name', 'items.service:id,code,name']);
 
         // Date filter
         $startDate = $request->filled('start_date')
@@ -251,8 +256,8 @@ class ReportController extends Controller
                 'payment_status' => $order->payment_status,
                 'status' => $order->status,
                 'items' => $order->items->map(fn ($item) => [
-                    'sku' => $item->inventoryItem->sku,
-                    'name' => $item->inventoryItem->name,
+                    'sku' => $item->inventoryItem?->sku ?? $item->service?->code ?? '-',
+                    'name' => $item->inventoryItem?->name ?? $item->service?->name ?? '-',
                     'quantity' => $item->quantity,
                     'unit_price' => $item->unit_price,
                     'subtotal' => $item->subtotal,
@@ -371,7 +376,7 @@ class ReportController extends Controller
     public function salesRecap(Request $request): InertiaResponse
     {
         $query = SalesOrder::query()
-            ->select('customer_id', \Illuminate\Support\Facades\DB::raw('count(*) as total_orders'), \Illuminate\Support\Facades\DB::raw('sum(total_amount) as total_revenue'), \Illuminate\Support\Facades\DB::raw('sum(paid_amount) as total_paid'))
+            ->select('customer_id', DB::raw('count(*) as total_orders'), DB::raw('sum(total_amount) as total_revenue'), DB::raw('sum(paid_amount) as total_paid'))
             ->with('customer:id,name')
             ->groupBy('customer_id');
 
@@ -566,7 +571,7 @@ class ReportController extends Controller
             });
         }
 
-        $prepOrderQuery = \App\Models\PreparationOrder::query()
+        $prepOrderQuery = PreparationOrder::query()
             ->where('status', 'completed');
 
         if ($request->filled('start_date')) {
@@ -720,7 +725,7 @@ class ReportController extends Controller
     private function getSalesReportData(Request $request): array
     {
         $query = SalesOrder::query()
-            ->with(['customer:id,name', 'items.inventoryItem:id,sku,product_name']);
+            ->with(['customer:id,name', 'items.inventoryItem:id,sku,product_name', 'items.service:id,code,name']);
 
         $startDate = $request->filled('start_date')
             ? $request->start_date
@@ -785,7 +790,7 @@ class ReportController extends Controller
     private function getSalesRecapData(Request $request): array
     {
         $query = SalesOrder::query()
-            ->select('customer_id', \Illuminate\Support\Facades\DB::raw('count(*) as total_orders'), \Illuminate\Support\Facades\DB::raw('sum(total_amount) as total_revenue'), \Illuminate\Support\Facades\DB::raw('sum(paid_amount) as total_paid'))
+            ->select('customer_id', DB::raw('count(*) as total_orders'), DB::raw('sum(total_amount) as total_revenue'), DB::raw('sum(paid_amount) as total_paid'))
             ->with('customer:id,name')
             ->groupBy('customer_id');
 
@@ -939,6 +944,110 @@ class ReportController extends Controller
     }
 
     /**
+     * Service report (kategori jasa)
+     */
+    public function service(Request $request): InertiaResponse
+    {
+        $data = $this->getServiceReportData($request);
+
+        return Inertia::render('Reports/ServiceReport', [
+            'services' => $data['services'],
+            'staffRecap' => $data['staffRecap'],
+            'summary' => $data['summary'],
+            'filters' => $data['filters'],
+            'defaultDates' => [
+                'start_date' => $data['filters']['start_date'],
+                'end_date' => $data['filters']['end_date'],
+            ],
+        ]);
+    }
+
+    /**
+     * Export Service Report
+     */
+    public function exportService(Request $request): Response|BinaryFileResponse
+    {
+        $data = $this->getServiceReportData($request);
+
+        if ($request->format === 'pdf') {
+            $pdf = Pdf::loadView('pdf.service-report', $data)
+                ->setPaper('a4', 'landscape');
+
+            return $pdf->download('laporan-layanan-'.now()->format('Y-m-d').'.pdf');
+        }
+
+        return Excel::download(
+            new ServiceReportExport(
+                collect($data['services']),
+                collect($data['staffRecap']),
+                $data['summary'],
+                $data['filters']
+            ),
+            'laporan-layanan-'.now()->format('Y-m-d').'.xlsx'
+        );
+    }
+
+    /**
+     * Get Service Report Data
+     */
+    private function getServiceReportData(Request $request): array
+    {
+        $startDate = $request->filled('start_date')
+            ? $request->start_date
+            : now()->startOfMonth()->format('Y-m-d');
+
+        $endDate = $request->filled('end_date')
+            ? $request->end_date
+            : now()->endOfMonth()->format('Y-m-d');
+
+        $lines = SalesOrderItem::query()
+            ->whereNotNull('service_id')
+            ->whereHas('salesOrder', function ($q) use ($startDate, $endDate) {
+                $q->where('tenant_id', auth()->user()->tenant_id)
+                    ->where('status', '!=', 'cancelled')
+                    ->whereBetween('order_date', [$startDate, $endDate]);
+            })
+            ->with(['service:id,code,name,category', 'servedBy:id,name'])
+            ->get();
+
+        $services = $lines->groupBy('service_id')->map(function ($group) {
+            $service = $group->first()->service;
+
+            return [
+                'code' => $service?->code ?? '-',
+                'name' => $service?->name ?? '-',
+                'category' => $service?->category,
+                'total_sold' => $group->sum('quantity'),
+                'total_revenue' => (float) $group->sum('subtotal'),
+            ];
+        })->sortByDesc('total_revenue')->values();
+
+        $staffRecap = $lines->whereNotNull('served_by')->groupBy('served_by')->map(function ($group) {
+            return [
+                'staff_name' => $group->first()->servedBy?->name ?? '-',
+                'total_services' => $group->sum('quantity'),
+                'total_revenue' => (float) $group->sum('subtotal'),
+            ];
+        })->sortByDesc('total_revenue')->values();
+
+        $summary = [
+            'total_service_types' => $services->count(),
+            'total_services_sold' => $lines->sum('quantity'),
+            'total_revenue' => (float) $lines->sum('subtotal'),
+        ];
+
+        return [
+            'services' => $services,
+            'staffRecap' => $staffRecap,
+            'summary' => $summary,
+            'filters' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ],
+        ];
+    }
+
+    /**
      * Get Purchase Report Data
      */
     private function getPurchaseReportData(Request $request): array
@@ -958,18 +1067,18 @@ class ReportController extends Controller
             : now()->endOfMonth()->format('Y-m-d');
 
         $query->whereBetween('created_at', [
-            \Carbon\Carbon::parse($startDate)->startOfDay(),
-            \Carbon\Carbon::parse($endDate)->endOfDay()
+            Carbon::parse($startDate)->startOfDay(),
+            Carbon::parse($endDate)->endOfDay(),
         ]);
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('supplier_name', 'ilike', "%{$request->search}%")
-                  ->orWhere('purchase_invoice', 'ilike', "%{$request->search}%")
-                  ->orWhereHas('inventoryItem', function ($q2) use ($request) {
-                      $q2->where('product_name', 'ilike', "%{$request->search}%")
-                         ->orWhere('sku', 'ilike', "%{$request->search}%");
-                  });
+                    ->orWhere('purchase_invoice', 'ilike', "%{$request->search}%")
+                    ->orWhereHas('inventoryItem', function ($q2) use ($request) {
+                        $q2->where('product_name', 'ilike', "%{$request->search}%")
+                            ->orWhere('sku', 'ilike', "%{$request->search}%");
+                    });
             });
         }
 
@@ -978,6 +1087,7 @@ class ReportController extends Controller
         // Group by batch_id
         $batches = $adjustments->groupBy('batch_id')->map(function ($group) {
             $first = $group->first();
+
             return [
                 'batch_id' => $first->batch_id,
                 'date' => $first->created_at->format('Y-m-d'),

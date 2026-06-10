@@ -111,18 +111,18 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                     <!-- Sales Trend -->
                     <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                         <h2 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Penjualan 7 Hari Terakhir</h2>
-                        <div v-if="salesTrend.length === 0" class="py-8 text-center text-sm text-gray-400">
-                            Belum ada data penjualan
-                        </div>
+                        <div v-if="salesTrend.length === 0" class="py-8 text-center text-sm text-gray-400">Belum ada data penjualan</div>
                         <div v-else class="space-y-2">
                             <div v-for="day in salesTrend" :key="day.date" class="flex items-center gap-3">
                                 <span class="w-20 text-xs text-gray-500 dark:text-gray-400">
                                     {{ new Date(day.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) }}
                                 </span>
-                                <div class="flex-1 rounded-full bg-gray-100 dark:bg-gray-700" style="height:6px">
+                                <div class="flex-1 rounded-full bg-gray-100 dark:bg-gray-700" style="height: 6px">
                                     <div
                                         class="h-full rounded-full bg-indigo-500"
-                                        :style="{ width: `${Math.min(100, (day.total / (Math.max(...salesTrend.map(d => d.total)) || 1)) * 100)}%` }"
+                                        :style="{
+                                            width: `${Math.min(100, (day.total / (Math.max(...salesTrend.map((d) => d.total)) || 1)) * 100)}%`,
+                                        }"
                                     ></div>
                                 </div>
                                 <span class="w-24 text-right text-xs font-medium text-gray-700 dark:text-gray-300">{{ fmt(day.total) }}</span>
@@ -134,15 +134,15 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                     <!-- Top Products -->
                     <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                         <h2 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Produk Terlaris (30 Hari)</h2>
-                        <div v-if="topProducts.length === 0" class="py-8 text-center text-sm text-gray-400">
-                            Belum ada data penjualan
-                        </div>
+                        <div v-if="topProducts.length === 0" class="py-8 text-center text-sm text-gray-400">Belum ada data penjualan</div>
                         <div v-else class="space-y-3">
                             <div v-for="(prod, idx) in topProducts" :key="prod.sku" class="flex items-center gap-3">
-                                <span class="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                <span
+                                    class="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+                                >
                                     {{ idx + 1 }}
                                 </span>
-                                <div class="flex-1 min-w-0">
+                                <div class="min-w-0 flex-1">
                                     <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{{ prod.name }}</p>
                                     <p class="text-xs text-gray-400">{{ prod.sku }}</p>
                                 </div>
@@ -160,17 +160,21 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                             <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Stok Hampir Habis</h2>
                             <Link href="/inventory/items" class="text-xs text-indigo-600 hover:underline dark:text-indigo-400">Lihat semua</Link>
                         </div>
-                        <div v-if="lowStockItems.length === 0" class="py-8 text-center text-sm text-gray-400">
-                            Semua stok aman
-                        </div>
+                        <div v-if="lowStockItems.length === 0" class="py-8 text-center text-sm text-gray-400">Semua stok aman</div>
                         <div v-else class="space-y-2">
-                            <div v-for="item in lowStockItems" :key="item.id" class="flex items-center justify-between gap-2 rounded-lg bg-orange-50 px-3 py-2 dark:bg-orange-900/10">
+                            <div
+                                v-for="item in lowStockItems"
+                                :key="item.id"
+                                class="flex items-center justify-between gap-2 rounded-lg bg-orange-50 px-3 py-2 dark:bg-orange-900/10"
+                            >
                                 <div class="min-w-0">
                                     <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.product_name }}</p>
                                     <p class="text-xs text-gray-400">{{ item.sku }}</p>
                                 </div>
-                                <div class="text-right shrink-0">
-                                    <p class="text-sm font-bold text-orange-600 dark:text-orange-400">{{ item.current_quantity - item.reserved_quantity }}</p>
+                                <div class="shrink-0 text-right">
+                                    <p class="text-sm font-bold text-orange-600 dark:text-orange-400">
+                                        {{ item.current_quantity - item.reserved_quantity }}
+                                    </p>
                                     <p class="text-xs text-gray-400">min. {{ item.minimum_stock }}</p>
                                 </div>
                             </div>
@@ -208,7 +212,13 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                                 <div class="min-w-0">
                                     <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{{ purchase.supplier_name }}</p>
                                     <p class="text-xs text-gray-400">
-                                        {{ new Date(purchase.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) }}
+                                        {{
+                                            new Date(purchase.created_at).toLocaleDateString('id-ID', {
+                                                day: '2-digit',
+                                                month: 'short',
+                                                year: 'numeric',
+                                            })
+                                        }}
                                     </p>
                                 </div>
                                 <p class="shrink-0 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ fmt(purchase.total_cost) }}</p>

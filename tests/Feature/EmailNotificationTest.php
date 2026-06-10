@@ -2,6 +2,7 @@
 
 use App\Mail\ResetPasswordEmail;
 use App\Models\User;
+use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Support\Facades\Notification;
 
@@ -39,7 +40,7 @@ test('user receives custom password reset notification', function () {
 
     $user->sendPasswordResetNotification('fake-token-123');
 
-    Notification::assertSentTo($user, \App\Notifications\ResetPasswordNotification::class);
+    Notification::assertSentTo($user, ResetPasswordNotification::class);
 });
 
 test('reset password email has correct indonesian content and branding', function () {

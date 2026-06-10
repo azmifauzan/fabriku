@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
-    $this->materialType = MaterialType::factory()->create();
+    $this->materialType = MaterialType::factory()->create(['tenant_id' => $this->user->tenant_id]);
     Storage::fake('fabriku_s3');
 });
 

@@ -13,6 +13,8 @@ class SalesOrderItem extends Model
     protected $fillable = [
         'sales_order_id',
         'inventory_item_id',
+        'service_id',
+        'served_by',
         'quantity',
         'unit_price',
         'discount_amount',
@@ -38,5 +40,15 @@ class SalesOrderItem extends Model
     public function inventoryItem(): BelongsTo
     {
         return $this->belongsTo(InventoryItem::class);
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
+    }
+
+    public function servedBy(): BelongsTo
+    {
+        return $this->belongsTo(Staff::class, 'served_by');
     }
 }

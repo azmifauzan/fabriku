@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Staff;
+use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Staff>
+ * @extends Factory<Staff>
  */
 class StaffFactory extends Factory
 {
@@ -17,7 +19,7 @@ class StaffFactory extends Factory
     public function definition(): array
     {
         return [
-            'tenant_id' => \App\Models\Tenant::factory(),
+            'tenant_id' => Tenant::factory(),
             'code' => fake()->unique()->numerify('STF-###'),
             'name' => fake()->name(),
             'position' => fake()->randomElement(['production', 'quality_control', 'packaging', 'warehouse', 'supervisor']),

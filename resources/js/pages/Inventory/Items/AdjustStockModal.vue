@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
-import { X, Plus, Minus, RefreshCw } from 'lucide-vue-next';
+import { Minus, Plus, RefreshCw, X } from 'lucide-vue-next';
+import { computed, watch } from 'vue';
 
 interface AdjustmentTypes {
     [key: string]: string;
@@ -54,13 +54,16 @@ const stockDifference = computed(() => {
 });
 
 // Reset form when modal opens
-watch(() => props.show, (newValue) => {
-    if (newValue) {
-        form.reset();
-        form.quantity = props.item.current_stock;
-        form.type = 'set';
-    }
-});
+watch(
+    () => props.show,
+    (newValue) => {
+        if (newValue) {
+            form.reset();
+            form.quantity = props.item.current_stock;
+            form.type = 'set';
+        }
+    },
+);
 
 const submit = () => {
     form.post(`/inventory/items/${props.item.id}/adjust`, {
@@ -115,12 +118,8 @@ const availableAdjustmentTypes = computed(() => {
                             <!-- Header -->
                             <div class="mb-6 flex items-center justify-between">
                                 <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                        Adjust Stock
-                                    </h3>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                        {{ item.name }} ({{ item.sku }})
-                                    </p>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Adjust Stock</h3>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ item.name }} ({{ item.sku }})</p>
                                 </div>
                                 <button
                                     type="button"
@@ -142,15 +141,15 @@ const availableAdjustmentTypes = computed(() => {
 
                                 <!-- Adjustment Type Selection -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Tipe Operasi
-                                    </label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"> Tipe Operasi </label>
                                     <div class="mt-2 grid grid-cols-3 gap-2">
                                         <label
                                             class="flex cursor-pointer flex-col items-center rounded-lg border p-3 transition-all"
-                                            :class="form.type === 'add' 
-                                                ? 'border-green-500 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
-                                                : 'border-gray-200 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'"
+                                            :class="
+                                                form.type === 'add'
+                                                    ? 'border-green-500 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                                                    : 'border-gray-200 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'
+                                            "
                                         >
                                             <input type="radio" v-model="form.type" value="add" class="sr-only" />
                                             <Plus class="h-5 w-5" />
@@ -158,9 +157,11 @@ const availableAdjustmentTypes = computed(() => {
                                         </label>
                                         <label
                                             class="flex cursor-pointer flex-col items-center rounded-lg border p-3 transition-all"
-                                            :class="form.type === 'subtract' 
-                                                ? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400' 
-                                                : 'border-gray-200 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'"
+                                            :class="
+                                                form.type === 'subtract'
+                                                    ? 'border-red-500 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                                    : 'border-gray-200 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'
+                                            "
                                         >
                                             <input type="radio" v-model="form.type" value="subtract" class="sr-only" />
                                             <Minus class="h-5 w-5" />
@@ -168,9 +169,11 @@ const availableAdjustmentTypes = computed(() => {
                                         </label>
                                         <label
                                             class="flex cursor-pointer flex-col items-center rounded-lg border p-3 transition-all"
-                                            :class="form.type === 'set' 
-                                                ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' 
-                                                : 'border-gray-200 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'"
+                                            :class="
+                                                form.type === 'set'
+                                                    ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                                                    : 'border-gray-200 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'
+                                            "
                                         >
                                             <input type="radio" v-model="form.type" value="set" class="sr-only" />
                                             <RefreshCw class="h-5 w-5" />
@@ -199,32 +202,47 @@ const availableAdjustmentTypes = computed(() => {
                                 </div>
 
                                 <!-- Preview -->
-                                <div class="rounded-lg border-2 p-4" 
-                                     :class="stockDifference > 0 
-                                        ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' 
-                                        : stockDifference < 0 
-                                            ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
-                                            : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-700/50'">
+                                <div
+                                    class="rounded-lg border-2 p-4"
+                                    :class="
+                                        stockDifference > 0
+                                            ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
+                                            : stockDifference < 0
+                                              ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
+                                              : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-700/50'
+                                    "
+                                >
                                     <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium" 
-                                              :class="stockDifference > 0 
-                                                ? 'text-green-700 dark:text-green-400' 
-                                                : stockDifference < 0 
-                                                    ? 'text-red-700 dark:text-red-400'
-                                                    : 'text-gray-700 dark:text-gray-300'">
+                                        <span
+                                            class="text-sm font-medium"
+                                            :class="
+                                                stockDifference > 0
+                                                    ? 'text-green-700 dark:text-green-400'
+                                                    : stockDifference < 0
+                                                      ? 'text-red-700 dark:text-red-400'
+                                                      : 'text-gray-700 dark:text-gray-300'
+                                            "
+                                        >
                                             Stock Baru
                                         </span>
                                         <div class="text-right">
-                                            <span class="text-2xl font-bold"
-                                                  :class="stockDifference > 0 
-                                                    ? 'text-green-700 dark:text-green-400' 
-                                                    : stockDifference < 0 
-                                                        ? 'text-red-700 dark:text-red-400'
-                                                        : 'text-gray-900 dark:text-white'">
+                                            <span
+                                                class="text-2xl font-bold"
+                                                :class="
+                                                    stockDifference > 0
+                                                        ? 'text-green-700 dark:text-green-400'
+                                                        : stockDifference < 0
+                                                          ? 'text-red-700 dark:text-red-400'
+                                                          : 'text-gray-900 dark:text-white'
+                                                "
+                                            >
                                                 {{ previewStock }}
                                             </span>
-                                            <p v-if="stockDifference !== 0" class="text-xs"
-                                               :class="stockDifference > 0 ? 'text-green-600' : 'text-red-600'">
+                                            <p
+                                                v-if="stockDifference !== 0"
+                                                class="text-xs"
+                                                :class="stockDifference > 0 ? 'text-green-600' : 'text-red-600'"
+                                            >
                                                 {{ stockDifference > 0 ? '+' : '' }}{{ stockDifference }}
                                             </p>
                                         </div>
@@ -273,9 +291,7 @@ const availableAdjustmentTypes = computed(() => {
 
                                 <!-- Notes -->
                                 <div>
-                                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Catatan Tambahan
-                                    </label>
+                                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300"> Catatan Tambahan </label>
                                     <textarea
                                         id="notes"
                                         v-model="form.notes"

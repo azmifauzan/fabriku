@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Link, useForm } from '@inertiajs/vue3';
-import axios from 'axios';
-import { computed, ref, watch } from 'vue';
-import { Camera, Upload, X, Package, Truck, RotateCcw, FileText, Plus, Tag } from 'lucide-vue-next';
 import CameraCaptureModal from '@/components/CameraCaptureModal.vue';
 import { useBusinessContext } from '@/composables/useBusinessContext';
+import { Link, useForm } from '@inertiajs/vue3';
+import axios from 'axios';
+import { Camera, FileText, Package, Plus, RotateCcw, Tag, Truck, Upload, X } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
 
 interface Location {
     id: number;
@@ -75,9 +75,7 @@ const isRetail = computed(() => isRetailMode.value || rules.value.enable_product
 
 // Entry type: 'production' or 'manual'
 const entryType = ref<'production' | 'manual'>(
-    isRetail.value
-        ? 'manual'
-        : (props.item?.production_order_id ? 'production' : (props.item?.id ? 'manual' : 'production'))
+    isRetail.value ? 'manual' : props.item?.production_order_id ? 'production' : props.item?.id ? 'manual' : 'production',
 );
 
 // Source type for manual entry
@@ -124,10 +122,10 @@ const selectedProductionOrder = computed(() => {
 const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleDateString('id-ID', { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
+    return date.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
     });
 };
 
@@ -150,7 +148,7 @@ watch(
                 const pattern = po.preparation_order.pattern;
                 form.name = `${pattern.name}`;
             }
-            
+
             // Auto-populate target_quantity from preparation order output_quantity
             if (po.preparation_order?.output_quantity) {
                 form.target_quantity = po.preparation_order.output_quantity;
@@ -207,7 +205,7 @@ const handleCameraCapture = (file: File) => {
 
 const processFile = (file: File) => {
     form.image = file;
-    
+
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -290,7 +288,13 @@ const addCategory = async () => {
                         {{ isEditing ? 'Edit Item Inventory' : 'Tambah Item Inventory' }}
                     </h2>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        {{ isEditing ? 'Ubah informasi item' : (isRetail ? 'Tambahkan item inventory baru' : 'Tambahkan item inventory baru dari hasil produksi') }}
+                        {{
+                            isEditing
+                                ? 'Ubah informasi item'
+                                : isRetail
+                                  ? 'Tambahkan item inventory baru'
+                                  : 'Tambahkan item inventory baru dari hasil produksi'
+                        }}
                     </p>
                 </div>
                 <Link href="/inventory/items" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">
@@ -304,21 +308,24 @@ const addCategory = async () => {
                     <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Sumber Inventory</h3>
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <!-- Production Order Option -->
-                        <label 
+                        <label
                             class="relative flex cursor-pointer rounded-lg border p-4 transition-all"
-                            :class="entryType === 'production' 
-                                ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500 dark:bg-indigo-900/20' 
-                                : 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'"
+                            :class="
+                                entryType === 'production'
+                                    ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500 dark:bg-indigo-900/20'
+                                    : 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'
+                            "
                         >
-                            <input 
-                                type="radio" 
-                                v-model="entryType" 
-                                value="production"
-                                class="sr-only" 
-                            />
+                            <input type="radio" v-model="entryType" value="production" class="sr-only" />
                             <div class="flex items-center gap-3">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-full" 
-                                     :class="entryType === 'production' ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'">
+                                <div
+                                    class="flex h-10 w-10 items-center justify-center rounded-full"
+                                    :class="
+                                        entryType === 'production'
+                                            ? 'bg-indigo-500 text-white'
+                                            : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
+                                    "
+                                >
                                     <Package class="h-5 w-5" />
                                 </div>
                                 <div>
@@ -329,21 +336,24 @@ const addCategory = async () => {
                         </label>
 
                         <!-- Manual Entry Option -->
-                        <label 
+                        <label
                             class="relative flex cursor-pointer rounded-lg border p-4 transition-all"
-                            :class="entryType === 'manual' 
-                                ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500 dark:bg-indigo-900/20' 
-                                : 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'"
+                            :class="
+                                entryType === 'manual'
+                                    ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500 dark:bg-indigo-900/20'
+                                    : 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'
+                            "
                         >
-                            <input 
-                                type="radio" 
-                                v-model="entryType" 
-                                value="manual"
-                                class="sr-only" 
-                            />
+                            <input type="radio" v-model="entryType" value="manual" class="sr-only" />
                             <div class="flex items-center gap-3">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-full" 
-                                     :class="entryType === 'manual' ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'">
+                                <div
+                                    class="flex h-10 w-10 items-center justify-center rounded-full"
+                                    :class="
+                                        entryType === 'manual'
+                                            ? 'bg-indigo-500 text-white'
+                                            : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
+                                    "
+                                >
                                     <FileText class="h-5 w-5" />
                                 </div>
                                 <div>
@@ -356,24 +366,24 @@ const addCategory = async () => {
                 </div>
 
                 <!-- Source Type Selection (for Manual Entry) -->
-                <div v-if="isManualEntry && sourceTypes" class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+                <div
+                    v-if="isManualEntry && sourceTypes"
+                    class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20"
+                >
                     <h4 class="mb-3 font-medium text-blue-900 dark:text-blue-300">Tipe Sumber</h4>
                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                        <label 
-                            v-for="(label, type) in sourceTypes" 
+                        <label
+                            v-for="(label, type) in sourceTypes"
                             :key="type"
                             v-show="type !== 'production'"
                             class="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-all"
-                            :class="selectedSourceType === type 
-                                ? 'border-blue-500 bg-blue-100 dark:bg-blue-800/30' 
-                                : 'border-blue-200 bg-white hover:bg-blue-50 dark:border-blue-700 dark:bg-blue-900/10 dark:hover:bg-blue-900/20'"
+                            :class="
+                                selectedSourceType === type
+                                    ? 'border-blue-500 bg-blue-100 dark:bg-blue-800/30'
+                                    : 'border-blue-200 bg-white hover:bg-blue-50 dark:border-blue-700 dark:bg-blue-900/10 dark:hover:bg-blue-900/20'
+                            "
                         >
-                            <input 
-                                type="radio" 
-                                v-model="selectedSourceType" 
-                                :value="type"
-                                class="text-blue-600 focus:ring-blue-500" 
-                            />
+                            <input type="radio" v-model="selectedSourceType" :value="type" class="text-blue-600 focus:ring-blue-500" />
                             <component :is="getSourceTypeIcon(type)" class="h-4 w-4 text-blue-600 dark:text-blue-400" />
                             <span class="text-sm text-blue-900 dark:text-blue-200">{{ label }}</span>
                         </label>
@@ -420,7 +430,10 @@ const addCategory = async () => {
                 </div>
 
                 <!-- Production Order Info Box -->
-                <div v-if="!isManualEntry && selectedProductionOrder" class="rounded-lg border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20">
+                <div
+                    v-if="!isManualEntry && selectedProductionOrder"
+                    class="rounded-lg border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20"
+                >
                     <h3 class="mb-3 text-sm font-semibold text-indigo-900 dark:text-indigo-300">Informasi Production Order</h3>
                     <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                         <div>
@@ -435,8 +448,14 @@ const addCategory = async () => {
                         </div>
                         <div>
                             <p class="text-xs text-indigo-700 dark:text-indigo-400">Status</p>
-                            <span class="mt-1 inline-flex rounded-full px-2 py-1 text-xs font-semibold" 
-                                  :class="selectedProductionOrder.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'">
+                            <span
+                                class="mt-1 inline-flex rounded-full px-2 py-1 text-xs font-semibold"
+                                :class="
+                                    selectedProductionOrder.status === 'completed'
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                "
+                            >
                                 {{ selectedProductionOrder.status === 'completed' ? 'Selesai' : 'Terkirim' }}
                             </span>
                         </div>
@@ -485,9 +504,7 @@ const addCategory = async () => {
 
                         <!-- Category -->
                         <div>
-                            <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Kategori
-                            </label>
+                            <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300"> Kategori </label>
                             <div class="flex gap-2">
                                 <select
                                     id="category_id"
@@ -534,10 +551,10 @@ const addCategory = async () => {
                                     required
                                     min="0"
                                     readonly
-                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-16 text-sm shadow-sm transition-all bg-gray-50 dark:bg-gray-800 dark:text-gray-400"
+                                    class="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 pr-16 text-sm shadow-sm transition-all dark:bg-gray-800 dark:text-gray-400"
                                     :class="{ 'border-red-300': form.errors.target_quantity }"
                                 />
-                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
+                                <span class="absolute top-1/2 right-3 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
                                     {{ productionUnit }}
                                 </span>
                             </div>
@@ -561,7 +578,7 @@ const addCategory = async () => {
                                     class="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-16 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     :class="{ 'border-red-300': form.errors.current_stock }"
                                 />
-                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
+                                <span class="absolute top-1/2 right-3 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
                                     {{ productionUnit }}
                                 </span>
                             </div>
@@ -584,7 +601,7 @@ const addCategory = async () => {
                                 Harga Modal (COGS) <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">Rp</span>
+                                <span class="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">Rp</span>
                                 <input
                                     id="unit_cost"
                                     v-model="form.unit_cost"
@@ -593,10 +610,12 @@ const addCategory = async () => {
                                     required
                                     min="0"
                                     :readonly="!isManualEntry"
-                                    class="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm shadow-sm transition-all"
+                                    class="w-full rounded-lg border border-gray-300 py-2.5 pr-4 pl-10 text-sm shadow-sm transition-all"
                                     :class="[
                                         { 'border-red-300': form.errors.unit_cost },
-                                        !isManualEntry ? 'bg-gray-50 dark:bg-gray-800 dark:text-gray-400' : 'focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
+                                        !isManualEntry
+                                            ? 'bg-gray-50 dark:bg-gray-800 dark:text-gray-400'
+                                            : 'focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white',
                                     ]"
                                 />
                             </div>
@@ -613,7 +632,7 @@ const addCategory = async () => {
                                 Harga Jual <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">Rp</span>
+                                <span class="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">Rp</span>
                                 <input
                                     id="selling_price"
                                     v-model="form.selling_price"
@@ -621,7 +640,7 @@ const addCategory = async () => {
                                     step="0.01"
                                     required
                                     min="0"
-                                    class="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    class="w-full rounded-lg border border-gray-300 py-2.5 pr-4 pl-10 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     :class="{ 'border-red-300': form.errors.selling_price }"
                                 />
                             </div>
@@ -675,12 +694,15 @@ const addCategory = async () => {
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Foto Produk</label>
                             <div class="mt-2 flex items-center gap-6">
-                                <div v-if="previewImage || item?.image_url" class="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-lg border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700">
+                                <div
+                                    v-if="previewImage || item?.image_url"
+                                    class="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-lg border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700"
+                                >
                                     <img :src="previewImage || item?.image_url" alt="Preview" class="h-full w-full object-cover" />
                                     <!-- Clear Image Button -->
-                                    <button 
+                                    <button
                                         v-if="form.image || previewImage"
-                                        type="button" 
+                                        type="button"
                                         @click="clearImage"
                                         class="absolute top-1 right-1 rounded-full bg-red-600 p-1 text-white shadow-sm hover:bg-red-700"
                                     >
@@ -690,20 +712,16 @@ const addCategory = async () => {
                                 <div class="flex-1 space-y-3">
                                     <div class="flex flex-wrap gap-3">
                                         <!-- File Upload Button -->
-                                        <label class="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                                        <label
+                                            class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                                        >
                                             <Upload class="h-4 w-4" />
                                             <span>Upload File</span>
-                                            <input
-                                                ref="fileInput"
-                                                type="file"
-                                                accept="image/*"
-                                                @change="handleFileChange"
-                                                class="hidden"
-                                            />
+                                            <input ref="fileInput" type="file" accept="image/*" @change="handleFileChange" class="hidden" />
                                         </label>
 
                                         <!-- Camera Button -->
-                                        <button 
+                                        <button
                                             type="button"
                                             @click="showCameraModal = true"
                                             class="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-all hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
@@ -713,9 +731,7 @@ const addCategory = async () => {
                                         </button>
                                     </div>
 
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                                        Format: JPG, JPEG, PNG, WEBP. Maksimal 2MB
-                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Format: JPG, JPEG, PNG, WEBP. Maksimal 2MB</p>
                                     <p v-if="form.image" class="text-sm text-gray-900 dark:text-gray-100">
                                         File terpilih: <span class="font-medium">{{ form.image.name }}</span>
                                     </p>
@@ -748,13 +764,9 @@ const addCategory = async () => {
                 </div>
             </form>
         </div>
-        
+
         <!-- Camera Capture Modal -->
-        <CameraCaptureModal 
-            :show="showCameraModal"
-            @close="showCameraModal = false"
-            @capture="handleCameraCapture"
-        />
+        <CameraCaptureModal :show="showCameraModal" @close="showCameraModal = false" @capture="handleCameraCapture" />
 
         <!-- Add Category Modal -->
         <Teleport to="body">
@@ -767,7 +779,10 @@ const addCategory = async () => {
                         </div>
                         <button
                             type="button"
-                            @click="showAddCategoryModal = false; resetAddCategoryForm();"
+                            @click="
+                                showAddCategoryModal = false;
+                                resetAddCategoryForm();
+                            "
                             class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                         >
                             <X class="h-5 w-5" />
@@ -795,7 +810,7 @@ const addCategory = async () => {
 
                         <div>
                             <label for="new_category_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Deskripsi <span class="text-gray-400 text-xs font-normal">(opsional)</span>
+                                Deskripsi <span class="text-xs font-normal text-gray-400">(opsional)</span>
                             </label>
                             <input
                                 id="new_category_description"
@@ -810,7 +825,10 @@ const addCategory = async () => {
                     <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
                         <button
                             type="button"
-                            @click="showAddCategoryModal = false; resetAddCategoryForm();"
+                            @click="
+                                showAddCategoryModal = false;
+                                resetAddCategoryForm();
+                            "
                             class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                         >
                             Batal

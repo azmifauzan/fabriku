@@ -127,7 +127,7 @@ const exportReport = (format: 'pdf' | 'excel') => {
                                 </button>
                                 <div
                                     v-if="showExportMenu"
-                                    class="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800"
+                                    class="ring-opacity-5 absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black dark:bg-gray-800"
                                 >
                                     <button
                                         type="button"

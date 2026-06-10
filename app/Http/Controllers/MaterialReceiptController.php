@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateMaterialReceiptRequest;
 use App\Models\Material;
 use App\Models\MaterialReceipt;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class MaterialReceiptController extends Controller
 {
@@ -48,7 +51,7 @@ class MaterialReceiptController extends Controller
         $count = MaterialReceipt::whereYear('created_at', $year)->count() + 1;
         $receiptNumber = sprintf('REC-%d-%04d', $year, $count);
 
-        \Illuminate\Support\Facades\Log::info('Creating receipt', ['validated' => $validated]);
+        Log::info('Creating receipt', ['validated' => $validated]);
 
         $receipt = MaterialReceipt::create([
             'tenant_id' => $request->user()->tenant_id,
@@ -65,7 +68,7 @@ class MaterialReceiptController extends Controller
             'received_by' => $request->user()->id,
         ]);
 
-        \Illuminate\Support\Facades\Log::info('Receipt created', ['id' => $receipt->id]);
+        Log::info('Receipt created', ['id' => $receipt->id]);
 
         if ($request->hasFile('image')) {
             $tenantId = $request->user()->tenant_id;
@@ -79,7 +82,7 @@ class MaterialReceiptController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateMaterialReceiptRequest $request, MaterialReceipt $materialReceipt): \Illuminate\Http\RedirectResponse
+    public function update(UpdateMaterialReceiptRequest $request, MaterialReceipt $materialReceipt): RedirectResponse
     {
         $data = $request->safe()->except(['image']);
 
@@ -97,7 +100,7 @@ class MaterialReceiptController extends Controller
         if ($request->hasFile('image')) {
             // Delete old image if exists
             if ($materialReceipt->image_path) {
-                \Illuminate\Support\Facades\Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->delete($materialReceipt->image_path);
+                Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->delete($materialReceipt->image_path);
             }
 
             $tenantId = $request->user()->tenant_id;

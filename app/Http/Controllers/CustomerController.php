@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class CustomerController extends Controller
@@ -66,7 +68,7 @@ class CustomerController extends Controller
         return Inertia::render('Customers/Create');
     }
 
-    public function quickStore(Request $request): \Illuminate\Http\JsonResponse
+    public function quickStore(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -74,7 +76,7 @@ class CustomerController extends Controller
         ]);
 
         $tenantId = auth()->user()->tenant_id;
-        $code = 'CUST-' . strtoupper(\Illuminate\Support\Str::random(6));
+        $code = 'CUST-'.strtoupper(Str::random(6));
 
         $customer = Customer::create([
             'tenant_id' => $tenantId,

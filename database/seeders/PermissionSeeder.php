@@ -80,6 +80,12 @@ class PermissionSeeder extends Seeder
             ['name' => 'View Simple Production', 'slug' => 'simple_production.view', 'module' => 'simple_production', 'description' => 'View simple production entries'],
             ['name' => 'Create Simple Production', 'slug' => 'simple_production.create', 'module' => 'simple_production', 'description' => 'Create simple production entry'],
 
+            // Service Management
+            ['name' => 'View Services', 'slug' => 'service.view', 'module' => 'service', 'description' => 'View service list'],
+            ['name' => 'Create Service', 'slug' => 'service.create', 'module' => 'service', 'description' => 'Create new service'],
+            ['name' => 'Edit Service', 'slug' => 'service.edit', 'module' => 'service', 'description' => 'Edit service information'],
+            ['name' => 'Delete Service', 'slug' => 'service.delete', 'module' => 'service', 'description' => 'Delete service'],
+
             // Reports
             ['name' => 'View Reports', 'slug' => 'report.view', 'module' => 'report', 'description' => 'View reports'],
             ['name' => 'Export Reports', 'slug' => 'report.export', 'module' => 'report', 'description' => 'Export reports'],

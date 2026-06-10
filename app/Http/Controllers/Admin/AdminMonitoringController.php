@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EmailLog;
 use App\Models\ScheduleLog;
+use App\Services\Telegram\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AdminMonitoringController extends Controller
@@ -148,7 +150,7 @@ class AdminMonitoringController extends Controller
                     'queue' => $job->queue,
                     'job_name' => $payload['displayName'] ?? 'Unknown',
                     'failed_at' => $job->failed_at,
-                    'exception' => \Illuminate\Support\Str::limit($job->exception, 500),
+                    'exception' => Str::limit($job->exception, 500),
                 ];
             });
 
@@ -309,7 +311,7 @@ class AdminMonitoringController extends Controller
      */
     public function testTelegram()
     {
-        $telegram = app(\App\Services\Telegram\TelegramService::class);
+        $telegram = app(TelegramService::class);
 
         if (! $telegram->isConfigured()) {
             return back()->with('error', 'Telegram is not configured');

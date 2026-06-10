@@ -3,7 +3,7 @@ import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { AlertTriangle, Archive, Box, ChevronDown, ChevronUp, LayoutGrid, Package } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 
 interface InventoryItem {
     id: number;
@@ -68,14 +68,11 @@ const getProgressBarColor = (percentage: number) => {
 
         <div class="px-6 py-6">
             <div class="mx-auto max-w-7xl space-y-6">
-                <PageHeader
-                    title="Visualisasi Inventory"
-                    description="Gambaran visual lokasi inventory dan penempatan barang"
-                >
+                <PageHeader title="Visualisasi Inventory" description="Gambaran visual lokasi inventory dan penempatan barang">
                     <template #actions>
                         <Link
                             href="/inventory/locations"
-                            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
                         >
                             Kelola Lokasi
                         </Link>
@@ -130,15 +127,16 @@ const getProgressBarColor = (percentage: number) => {
                         <div
                             class="flex items-start justify-between border-b border-gray-100 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50"
                         >
-                            <Link
-                                :href="`/inventory/locations/${location.id}`"
-                                class="group flex-1"
-                            >
+                            <Link :href="`/inventory/locations/${location.id}`" class="group flex-1">
                                 <div class="flex items-center gap-2">
-                                    <h3 class="font-semibold text-gray-900 transition-colors group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">
+                                    <h3
+                                        class="font-semibold text-gray-900 transition-colors group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400"
+                                    >
                                         {{ location.name }}
                                     </h3>
-                                    <span class="rounded bg-gray-200 px-1.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                    <span
+                                        class="rounded bg-gray-200 px-1.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                                    >
                                         {{ location.code }}
                                     </span>
                                 </div>
@@ -200,7 +198,9 @@ const getProgressBarColor = (percentage: number) => {
 
                                     <div class="min-w-0 flex-1">
                                         <div class="flex items-center gap-2">
-                                            <p class="truncate text-sm font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                                            <p
+                                                class="truncate text-sm font-medium text-gray-900 group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400"
+                                            >
                                                 {{ item.name }}
                                             </p>
                                             <AlertTriangle v-if="item.is_low_stock" :size="14" class="text-red-500" title="Low Stock" />
@@ -209,9 +209,7 @@ const getProgressBarColor = (percentage: number) => {
                                     </div>
                                     <div class="shrink-0 text-right text-sm">
                                         <p class="font-medium text-gray-900 dark:text-white">{{ item.quantity }}</p>
-                                        <p v-if="item.reserved > 0" class="text-xs text-yellow-600 dark:text-yellow-400">
-                                            {{ item.reserved }} resv
-                                        </p>
+                                        <p v-if="item.reserved > 0" class="text-xs text-yellow-600 dark:text-yellow-400">{{ item.reserved }} resv</p>
                                     </div>
                                 </Link>
                             </div>

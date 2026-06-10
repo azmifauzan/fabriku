@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
 import Modal from '@/components/Modal.vue';
-import { Camera, X, RefreshCw } from 'lucide-vue-next';
+import { RefreshCw, X } from 'lucide-vue-next';
+import { onBeforeUnmount, ref } from 'vue';
 
 const props = defineProps<{
     show: boolean;
@@ -23,11 +23,11 @@ const startCamera = async () => {
         }
 
         stream.value = await navigator.mediaDevices.getUserMedia({
-            video: { 
+            video: {
                 facingMode: facingMode.value,
                 width: { ideal: 1280 },
-                height: { ideal: 720 }
-            }
+                height: { ideal: 720 },
+            },
         });
 
         if (videoEl.value) {
@@ -41,7 +41,7 @@ const startCamera = async () => {
 
 const stopCamera = () => {
     if (stream.value) {
-        stream.value.getTracks().forEach(track => track.stop());
+        stream.value.getTracks().forEach((track) => track.stop());
         stream.value = null;
     }
 };
@@ -65,13 +65,17 @@ const capture = () => {
     context.drawImage(videoEl.value, 0, 0, canvasEl.value.width, canvasEl.value.height);
 
     // Convert to file
-    canvasEl.value.toBlob((blob) => {
-        if (blob) {
-            const file = new File([blob], `camera_${Date.now()}.jpg`, { type: 'image/jpeg' });
-            emit('capture', file);
-            close();
-        }
-    }, 'image/jpeg', 0.8);
+    canvasEl.value.toBlob(
+        (blob) => {
+            if (blob) {
+                const file = new File([blob], `camera_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                emit('capture', file);
+                close();
+            }
+        },
+        'image/jpeg',
+        0.8,
+    );
 };
 
 const close = () => {
@@ -80,19 +84,23 @@ const close = () => {
 };
 
 // Start camera when modal is shown
-const onShow = () => { // logic handled by parent or watch if needed, simple approach:
+const onShow = () => {
+    // logic handled by parent or watch if needed, simple approach:
     startCamera();
 };
 
 // Watch prop to start/stop
-// Using Modal's slots or life cycle might be tricky if Modal doesn't emit 'show'. 
-// We will just expose a method or rely on the parent mounting this component only when shown 
+// Using Modal's slots or life cycle might be tricky if Modal doesn't emit 'show'.
+// We will just expose a method or rely on the parent mounting this component only when shown
 // or use a watcher.
 import { watch } from 'vue';
-watch(() => props.show, (newVal) => {
-    if (newVal) startCamera();
-    else stopCamera();
-});
+watch(
+    () => props.show,
+    (newVal) => {
+        if (newVal) startCamera();
+        else stopCamera();
+    },
+);
 
 onBeforeUnmount(() => {
     stopCamera();
@@ -101,37 +109,39 @@ onBeforeUnmount(() => {
 
 <template>
     <Modal :show="show" maxWidth="lg" @close="close">
-        <div class="relative overflow-hidden bg-black rounded-lg">
+        <div class="relative overflow-hidden rounded-lg bg-black">
             <!-- Header -->
-            <div class="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gradient-to-b from-black/50 to-transparent">
-                <h3 class="text-white font-medium">Ambil Foto</h3>
+            <div class="absolute top-0 right-0 left-0 z-10 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent p-4">
+                <h3 class="font-medium text-white">Ambil Foto</h3>
                 <button @click="close" class="text-white hover:text-gray-300">
                     <X class="h-6 w-6" />
                 </button>
             </div>
 
             <!-- Video Preview -->
-            <div class="relative aspect-[3/4] sm:aspect-[4/3] bg-black">
-                <video 
-                    ref="videoEl" 
-                    autoplay 
-                    playsinline 
-                    muted 
+            <div class="relative aspect-[3/4] bg-black sm:aspect-[4/3]">
+                <video
+                    ref="videoEl"
+                    autoplay
+                    playsinline
+                    muted
                     class="h-full w-full object-cover"
-                    :class="{ 'scale-x-[-1]': facingMode === 'user' }" 
+                    :class="{ 'scale-x-[-1]': facingMode === 'user' }"
                 ></video>
-                
+
                 <div v-if="error" class="absolute inset-0 flex items-center justify-center p-4 text-center">
-                    <p class="text-red-400 mb-2">{{ error }}</p>
+                    <p class="mb-2 text-red-400">{{ error }}</p>
                 </div>
             </div>
 
             <!-- Controls -->
-            <div class="absolute bottom-0 left-0 right-0 z-10 p-6 flex items-center justify-center gap-8 bg-gradient-to-t from-black/80 to-transparent">
+            <div
+                class="absolute right-0 bottom-0 left-0 z-10 flex items-center justify-center gap-8 bg-gradient-to-t from-black/80 to-transparent p-6"
+            >
                 <!-- Switch Camera (only visible if not error) -->
-                <button 
+                <button
                     v-if="!error"
-                    @click="switchCamera" 
+                    @click="switchCamera"
                     class="rounded-full bg-white/20 p-3 text-white backdrop-blur-sm transition hover:bg-white/30"
                     title="Ganti Kamera"
                 >
@@ -139,7 +149,7 @@ onBeforeUnmount(() => {
                 </button>
 
                 <!-- Capture Button -->
-                <button 
+                <button
                     v-if="!error"
                     @click="capture"
                     class="group relative flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-transparent transition hover:bg-white/20 active:scale-95"
@@ -148,7 +158,7 @@ onBeforeUnmount(() => {
                 </button>
 
                 <!-- Spacer to center capture button -->
-                <div class="w-12"></div> 
+                <div class="w-12"></div>
             </div>
 
             <canvas ref="canvasEl" class="hidden"></canvas>

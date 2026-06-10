@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Pattern;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Pattern>
+ * @extends Factory<Pattern>
  */
 class PatternFactory extends Factory
 {

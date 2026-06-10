@@ -76,9 +76,13 @@ class RegisterController extends Controller
                 'is_active' => true,
             ]);
 
-            // Auto-create default data for retail category
+            // Auto-create default data for POS-first categories
             if ($validated['business_category'] === 'retail') {
                 $this->seedRetailDefaults($tenant);
+            }
+
+            if ($validated['business_category'] === 'service') {
+                $this->seedServiceDefaults($tenant);
             }
         });
 
@@ -118,6 +122,28 @@ class RegisterController extends Controller
         InventoryItemCategory::firstOrCreate(
             ['tenant_id' => $tenant->id, 'name' => 'Best Seller'],
             ['description' => 'Produk terlaris']
+        );
+    }
+
+    private function seedServiceDefaults(Tenant $tenant): void
+    {
+        InventoryLocation::create([
+            'tenant_id' => $tenant->id,
+            'code' => 'TEMPAT-USAHA',
+            'name' => 'Tempat Usaha',
+            'is_active' => true,
+        ]);
+
+        Customer::create([
+            'tenant_id' => $tenant->id,
+            'code' => 'WALK-IN',
+            'name' => 'Walk-in Customer',
+            'is_active' => true,
+        ]);
+
+        InventoryItemCategory::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'name' => 'Produk & Sparepart'],
+            ['description' => 'Produk fisik pendamping layanan']
         );
     }
 }

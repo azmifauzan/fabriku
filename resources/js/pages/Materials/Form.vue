@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import CameraCaptureModal from '@/components/CameraCaptureModal.vue';
 import FormField from '@/components/FormField.vue';
 import FormSection from '@/components/FormSection.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
 import { Camera, Upload, X } from 'lucide-vue-next';
-import CameraCaptureModal from '@/components/CameraCaptureModal.vue';
+import { ref } from 'vue';
 
 interface MaterialAttribute {
     id?: number;
@@ -44,7 +44,7 @@ const previewImage = ref<string | null>(null);
 const form = useForm({
     code: props.material?.code || '',
     name: props.material?.name || '',
-    material_type_id: props.material?.material_type_id || (props.materialTypes[0]?.id || ''),
+    material_type_id: props.material?.material_type_id || props.materialTypes[0]?.id || '',
     stock_quantity: props.material?.stock_quantity || '0',
     unit: props.material?.unit || 'meter',
     price_per_unit: props.material?.price_per_unit || '0',
@@ -83,10 +83,6 @@ const submit = () => {
     }
 };
 
-
-
-
-
 const isEditing = !!props.material?.id;
 
 const showCameraModal = ref(false);
@@ -105,7 +101,7 @@ const handleCameraCapture = (file: File) => {
 
 const processFile = (file: File) => {
     form.image = file;
-    
+
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -197,12 +193,15 @@ const clearImage = () => {
                         <div class="mt-6">
                             <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">Gambar Material</label>
                             <div class="flex items-center gap-6">
-                                <div v-if="previewImage || material?.image_url" class="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-lg border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700">
+                                <div
+                                    v-if="previewImage || material?.image_url"
+                                    class="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-lg border border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700"
+                                >
                                     <img :src="previewImage || material?.image_url" alt="Preview" class="h-full w-full object-cover" />
                                     <!-- Clear Image Button -->
-                                    <button 
+                                    <button
                                         v-if="form.image || previewImage"
-                                        type="button" 
+                                        type="button"
                                         @click="clearImage"
                                         class="absolute top-1 right-1 rounded-full bg-red-600 p-1 text-white shadow-sm hover:bg-red-700"
                                     >
@@ -212,20 +211,16 @@ const clearImage = () => {
                                 <div class="flex-1 space-y-3">
                                     <div class="flex flex-wrap gap-3">
                                         <!-- File Upload Button -->
-                                        <label class="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                                        <label
+                                            class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                                        >
                                             <Upload class="h-4 w-4" />
                                             <span>Upload File</span>
-                                            <input
-                                                ref="fileInput"
-                                                type="file"
-                                                accept="image/*"
-                                                @change="handleFileChange"
-                                                class="hidden"
-                                            />
+                                            <input ref="fileInput" type="file" accept="image/*" @change="handleFileChange" class="hidden" />
                                         </label>
 
                                         <!-- Camera Button -->
-                                        <button 
+                                        <button
                                             type="button"
                                             @click="showCameraModal = true"
                                             class="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-all hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
@@ -235,9 +230,7 @@ const clearImage = () => {
                                         </button>
                                     </div>
 
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                                        Format: JPG, PNG, GIF. Max: 2MB.
-                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Format: JPG, PNG, GIF. Max: 2MB.</p>
                                     <p v-if="form.image" class="text-sm text-gray-900 dark:text-gray-100">
                                         File terpilih: <span class="font-medium">{{ form.image.name }}</span>
                                     </p>
@@ -250,7 +243,11 @@ const clearImage = () => {
                     </FormSection>
 
                     <!-- Stock and Pricing - Only show for new materials -->
-                    <FormSection v-if="!isEditing" title="Stok dan Harga Awal" description="Informasi stok awal saat membuat material baru. Setelah dibuat, stok dan harga dikelola per batch.">
+                    <FormSection
+                        v-if="!isEditing"
+                        title="Stok dan Harga Awal"
+                        description="Informasi stok awal saat membuat material baru. Setelah dibuat, stok dan harga dikelola per batch."
+                    >
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <FormField
                                 v-model="form.stock_quantity"
@@ -302,7 +299,8 @@ const clearImage = () => {
                             />
                         </div>
                         <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                            <span class="font-semibold">Catatan:</span> Stok, harga, dan supplier dikelola per batch melalui halaman detail material. Gunakan fitur "Restock Barang" untuk menambah stok baru.
+                            <span class="font-semibold">Catatan:</span> Stok, harga, dan supplier dikelola per batch melalui halaman detail material.
+                            Gunakan fitur "Restock Barang" untuk menambah stok baru.
                         </p>
                     </FormSection>
 
@@ -407,10 +405,6 @@ const clearImage = () => {
             </div>
         </div>
 
-        <CameraCaptureModal
-            :show="showCameraModal"
-            @close="showCameraModal = false"
-            @capture="handleCameraCapture"
-        />
+        <CameraCaptureModal :show="showCameraModal" @close="showCameraModal = false" @capture="handleCameraCapture" />
     </AppLayout>
 </template>

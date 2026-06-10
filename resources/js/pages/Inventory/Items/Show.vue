@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
 import { History, RefreshCw } from 'lucide-vue-next';
+import { ref } from 'vue';
 import AdjustStockModal from './AdjustStockModal.vue';
 
 interface Pattern {
@@ -97,10 +97,10 @@ const availableStock = () => {
 const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleDateString('id-ID', { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
+    return date.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
     });
 };
 
@@ -117,14 +117,15 @@ const productionUnit = () => {
             <div class="mx-auto max-w-7xl">
                 <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div class="min-w-0">
-                        <Link href="/inventory/items" class="mb-2 inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
+                        <Link
+                            href="/inventory/items"
+                            class="mb-2 inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
                             ← Kembali ke Inventory
                         </Link>
                         <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">{{ item.name }}</h1>
                         <p class="mt-1 font-mono text-sm text-gray-500 dark:text-gray-400">{{ item.sku }}</p>
-                        <p v-if="item.source_label" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Sumber: {{ item.source_label }}
-                        </p>
+                        <p v-if="item.source_label" class="mt-1 text-sm text-gray-500 dark:text-gray-400">Sumber: {{ item.source_label }}</p>
                     </div>
                     <div class="flex shrink-0 flex-wrap items-center gap-2">
                         <Link
@@ -132,7 +133,12 @@ const productionUnit = () => {
                             class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 sm:px-4 sm:py-2.5 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                         >
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                                />
                             </svg>
                             Print QR Code
                         </Link>
@@ -163,7 +169,10 @@ const productionUnit = () => {
                     <!-- Item Details -->
                     <div class="space-y-6 lg:col-span-2">
                         <!-- Production Order Info -->
-                        <div v-if="item.production_order" class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        <div
+                            v-if="item.production_order"
+                            class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                        >
                             <div class="border-b border-gray-200 bg-indigo-50 px-6 py-4 dark:border-gray-700 dark:bg-indigo-900/20">
                                 <h3 class="text-lg font-semibold text-indigo-900 dark:text-indigo-300">Informasi Production Order</h3>
                             </div>
@@ -171,7 +180,9 @@ const productionUnit = () => {
                                 <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                                     <div>
                                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Nomor Order</p>
-                                        <p class="mt-1 font-mono text-sm font-semibold text-gray-900 dark:text-white">{{ item.production_order.order_number }}</p>
+                                        <p class="mt-1 font-mono text-sm font-semibold text-gray-900 dark:text-white">
+                                            {{ item.production_order.order_number }}
+                                        </p>
                                     </div>
                                     <div>
                                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Produk</p>
@@ -181,8 +192,14 @@ const productionUnit = () => {
                                     </div>
                                     <div>
                                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Status</p>
-                                        <span class="mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" 
-                                              :class="item.production_order.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'">
+                                        <span
+                                            class="mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                                            :class="
+                                                item.production_order.status === 'completed'
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                            "
+                                        >
                                             {{ item.production_order.status === 'completed' ? 'Selesai' : 'Terkirim' }}
                                         </span>
                                     </div>
@@ -224,10 +241,14 @@ const productionUnit = () => {
                                     <div v-if="item.image_url" class="sm:col-span-2">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Foto Produk</dt>
                                         <dd class="mt-2">
-                                            <img :src="item.image_url" :alt="item.name" class="h-48 w-full rounded-lg border border-gray-200 object-cover shadow-sm dark:border-gray-700" />
+                                            <img
+                                                :src="item.image_url"
+                                                :alt="item.name"
+                                                class="h-48 w-full rounded-lg border border-gray-200 object-cover shadow-sm dark:border-gray-700"
+                                            />
                                         </dd>
                                     </div>
-                                    
+
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">SKU</dt>
                                         <dd class="mt-1 font-mono text-sm font-semibold text-gray-900 dark:text-white">{{ item.sku }}</dd>
@@ -248,11 +269,15 @@ const productionUnit = () => {
                                     </div>
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Harga Modal</dt>
-                                        <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">Rp {{ item.unit_cost.toLocaleString('id-ID') }}</dd>
+                                        <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+                                            Rp {{ item.unit_cost.toLocaleString('id-ID') }}
+                                        </dd>
                                     </div>
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Harga Jual</dt>
-                                        <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">Rp {{ item.selling_price.toLocaleString('id-ID') }}</dd>
+                                        <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+                                            Rp {{ item.selling_price.toLocaleString('id-ID') }}
+                                        </dd>
                                     </div>
                                     <div v-if="item.description" class="sm:col-span-2">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Deskripsi</dt>
@@ -305,11 +330,6 @@ const productionUnit = () => {
         </div>
 
         <!-- Adjust Stock Modal -->
-        <AdjustStockModal
-            :show="showAdjustModal"
-            :item="item"
-            :adjustment-types="adjustmentTypes"
-            @close="showAdjustModal = false"
-        />
+        <AdjustStockModal :show="showAdjustModal" :item="item" :adjustment-types="adjustmentTypes" @close="showAdjustModal = false" />
     </AppLayout>
 </template>

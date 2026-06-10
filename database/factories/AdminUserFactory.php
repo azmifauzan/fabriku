@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\AdminUser;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\AdminUser>
+ * @extends Factory<AdminUser>
  */
 class AdminUserFactory extends Factory
 {

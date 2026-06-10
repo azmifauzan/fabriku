@@ -104,11 +104,10 @@ const isAtLimit = computed(() => {
                 >
                     <Info :size="20" class="mt-0.5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
                     <div>
-                        <p class="text-sm font-medium text-blue-800 dark:text-blue-300">
-                            Akun otomatis akan dibuat
-                        </p>
+                        <p class="text-sm font-medium text-blue-800 dark:text-blue-300">Akun otomatis akan dibuat</p>
                         <p class="mt-1 text-sm text-blue-700 dark:text-blue-400">
-                            Saat menambah staff baru, sistem akan otomatis membuat akun login dan mengirim email dengan detail login (email &amp; password) ke staff tersebut.
+                            Saat menambah staff baru, sistem akan otomatis membuat akun login dan mengirim email dengan detail login (email &amp;
+                            password) ke staff tersebut.
                         </p>
                     </div>
                 </div>
@@ -129,16 +128,10 @@ const isAtLimit = computed(() => {
                         :class="isAtLimit ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'"
                     />
                     <div>
-                        <p
-                            class="text-sm font-medium"
-                            :class="isAtLimit ? 'text-red-800 dark:text-red-300' : 'text-amber-800 dark:text-amber-300'"
-                        >
+                        <p class="text-sm font-medium" :class="isAtLimit ? 'text-red-800 dark:text-red-300' : 'text-amber-800 dark:text-amber-300'">
                             Kuota Staff: {{ currentStaffCount }} / {{ maxStaff }}
                         </p>
-                        <p
-                            v-if="isAtLimit"
-                            class="mt-1 text-sm text-red-700 dark:text-red-400"
-                        >
+                        <p v-if="isAtLimit" class="mt-1 text-sm text-red-700 dark:text-red-400">
                             Batas maksimal staff tercapai. Hubungi admin platform untuk menambah kuota.
                         </p>
                     </div>
@@ -184,10 +177,7 @@ const isAtLimit = computed(() => {
                                         </option>
                                     </template>
                                 </FormField>
-                                <p
-                                    v-if="selectedRoleDescription"
-                                    class="mt-2 flex items-start gap-1.5 text-sm text-indigo-600 dark:text-indigo-400"
-                                >
+                                <p v-if="selectedRoleDescription" class="mt-2 flex items-start gap-1.5 text-sm text-indigo-600 dark:text-indigo-400">
                                     <Info :size="14" class="mt-0.5 flex-shrink-0" />
                                     {{ selectedRoleDescription }}
                                 </p>

@@ -55,6 +55,14 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Juni 2026. Diturunkan 
 | **Kategori `homemade` (Produksi Rumahan)** | aktif | UMKM produksi sederhana — pakai material + input produk jadi langsung tanpa Production Order |
 | Simple Production (Catatan Produksi) | aktif | `SimpleProductionController` — form produksi sederhana; deduct bahan baku via `PreparationOrder`; add produk jadi ke inventory via `StockAdjustment TYPE_PRODUCTION_ENTRY`; semua adjustment di-group `batch_id`; route: `simple-production.*` permission `simple_production.view/create` |
 | Dashboard homemade | aktif | `HomemadeDashboard.vue`; `DashboardController` fork ke `homemadeDashboard()` bila `enable_simple_production` |
+| **Kategori `service` (Jasa & Layanan)** | aktif | UMKM jasa (bengkel, salon, barbershop, laundry) — katalog layanan + jual produk/sparepart seperti retail |
+| Katalog Layanan (Services) | aktif | `ServiceController` (resource tanpa `show`) — CRUD `services` (code unique per tenant); destroy diblokir bila layanan sudah dipakai transaksi (FK `RESTRICT`); permission `service.view/*` |
+| Service line di Sales Order | aktif | `sales_order_items.inventory_item_id` jadi nullable + kolom `service_id` (FK restrict); validasi "tepat satu dari produk/layanan" per baris; `SalesOrderObserver` + `SalesOrderItemObserver` skip semua stock transition untuk line layanan |
+| Quick Checkout campur jasa + produk | aktif | `QuickCheckout.vue` — grid gabungan produk + layanan (badge JASA, stok unlimited); satu cart bisa campur; snapshot harga di line item; selector staff (`served_by`) per baris layanan |
+| Dashboard service | aktif | `ServiceDashboard.vue`; `DashboardController` fork ke `serviceDashboard()` bila `enable_service_module`; KPI omzet + layanan terlaris 30 hari |
+| Laporan Layanan | aktif | `ReportController::service()` + `exportService()`; query `sales_order_items` where `service_id`; rekap per layanan + per staff (`served_by`); export Excel (`ServiceReportExport`) + PDF; route `reports.service` + `reports.service.export` |
+| Staff Assignment per Layanan | aktif | kolom `sales_order_items.served_by` (FK `staff`, nullOnDelete); diisi via Quick Checkout; dipakai laporan omzet per staff (dasar komisi) |
+| Consumable Auto-Deduct | aktif | tabel `service_consumables` (mapping `service` → `inventory_item` + qty); saat layanan terjual via Quick Checkout, stok bahan pendukung auto-deduct; stok divalidasi sebelum transaksi; mapping diatur di form layanan (`ServiceController::syncConsumables`) |
 
 ## Struktur Routing Tenant
 
@@ -66,13 +74,14 @@ Permission slug yang terpakai di routes/web.php:
 - `production.view`, `production.edit`
 - `inventory.view`
 - `sales.view`
-- `purchase.view`, `purchase.edit` (retail only)
+- `purchase.view`, `purchase.edit` (retail/service)
 - `simple_production.view`, `simple_production.create` (homemade only)
+- `service.view` (service only — seluruh resource `services` digate satu slug ini)
 - `report.view` (mencakup semua laporan termasuk `reports.purchase` untuk retail)
 
 Modul tanpa permission middleware (open untuk semua user tenant ter-verifikasi): staff, customers (via sales.view), settings, subscription, telegram.
 
-## Database (37 tabel)
+## Database (39 tabel)
 
 Migrasi tunggal per modul:
 - `tenants`, `users`, `cache`, `jobs`
@@ -89,14 +98,30 @@ Migrasi tunggal per modul:
 - `email_logs`
 - `inventory_item_categories` + add `category_id` ke inventory_items
 - Patch migrations: tambah staff_user, tambah `shipped` status SO, fix unique constraints jadi per-tenant (staff.code, contractors.code, sales_orders.order_number, inventory_items.sku, inventory_locations.code), tambah kolom audit log
+- `2026_06_10_*`: tabel `services` (code unique per tenant) + alter `sales_order_items` (`inventory_item_id` → nullable, tambah `service_id` FK `RESTRICT`); tabel `service_consumables` (mapping service→inventory item, unique `service_id`+`inventory_item_id`) + kolom `sales_order_items.served_by` (FK `staff`, nullOnDelete)
 
 ## Konfigurasi Kategori Bisnis
 
-`config/business.php` — 6 kategori aktif: `garment`, `food`, `craft`, `cosmetic`, `retail`, `homemade`. Default: `garment`. Setiap tenant memilih satu kategori saat register. Terminologi UI (Pattern/Resep, Cutting/Mixing, dll) di-resolve dari `Tenant::getTerminology($key)`.
+`config/business.php` — 7 kategori aktif: `garment`, `food`, `craft`, `cosmetic`, `retail`, `homemade`, `service`. Default: `garment`. Setiap tenant memilih satu kategori saat register. Terminologi UI (Pattern/Resep, Cutting/Mixing, dll) di-resolve dari `Tenant::getTerminology($key)`.
 
 Gating rules yang dibaca sidebar + DashboardController:
 - `retail`: `mode = 'simple'`, `rules.enable_production_flow = false` → sembunyikan produksi, tampilkan Quick Checkout top-level
 - `homemade`: `mode = 'homemade'`, `rules.enable_simple_production = true`, `rules.enable_contractor_module = false`, `rules.enable_purchase_module = false` → tampilkan "Catatan Produksi" sederhana, Quick Checkout top-level, sembunyikan Production Order + Kontraktor + Pembelian Produk Jadi
+- `service`: `mode = 'service'`, `rules.enable_service_module = true`, `enable_material_module = false`, `enable_purchase_module = true` → tampilkan menu Layanan + Pembelian + Quick Checkout; sembunyikan seluruh alur material/produksi. **Penting**: semua kategori lain punya `enable_service_module = false` eksplisit karena `isModuleEnabled()` di frontend men-default `true` bila key tidak ada.
+
+## Catatan Implementasi Service/Jasa (dipindah dari plan.md, selesai Juni 2026)
+
+Plan C (kategori `service`) selesai penuh: config kategori, tabel `services` + `service_consumables`, CRUD katalog layanan (dengan mapping consumable), service line di sales order + quick checkout, staff assignment (`served_by`), consumable auto-deduct, dashboard service, laporan layanan, onboarding register, demo tenant `admin@bengkel.com`, test `ServiceWorkflowTest.php` (9 test) + `ServiceEnhancementsTest.php` (7 test).
+
+Catatan teknis yang masih relevan:
+
+- **Observer skip layanan**: `SalesOrderObserver::reserveStock/deductStock/releaseReservedStock` dan `SalesOrderItemObserver` hanya menyentuh stok bila `inventory_item_id` terisi. Line layanan (`service_id`) tidak punya efek stok sama sekali. Jangan tambah stock call untuk layanan.
+- **Consumable auto-deduct ≠ observer**: deduct bahan pendukung layanan dilakukan eksplisit di `SalesOrderController::quickCheckoutStore` (dalam DB transaction, `lockForUpdate`), bukan di observer. Validasi stok consumable di-akumulasi per inventory item di `after`-hook validator sebelum transaksi. Sales order manual (non-quick-checkout) belum trigger consumable deduct.
+- **Validasi line item**: tepat satu dari `inventory_item_id`/`service_id` per baris — enforce di `StoreSalesOrderRequest`/`UpdateSalesOrderRequest::withValidator()` dan validator inline `quickCheckoutStore` (bukan DB check constraint). Semua FK validation tenant-scoped (`Rule::exists()->where('tenant_id', ...)`), termasuk `served_by` → `staff`.
+- **Destroy layanan**: FK `service_id` di `sales_order_items` adalah `RESTRICT`. `ServiceController::destroy` cek pemakaian dulu dan redirect dengan flash `error` (sarankan nonaktifkan) — tidak pernah lempar QueryException. `service_consumables.service_id` cascade saat layanan dihapus.
+- **UI penjualan**: `Show.vue` menampilkan nama layanan + staff (`served_by.name`); `Print.vue`, `DeliveryOrder.vue` fallback ke `item.service?.name`/`code` bila `inventory_item` null. Halaman Create/Edit SO manual belum support pilih layanan — layanan dijual lewat Quick Checkout (keputusan MVP).
+- **Laporan layanan**: `reports.service` (rekap per layanan + per staff), export Excel/PDF. Laporan sales umum juga sudah menampilkan line layanan.
+- Demo tenant service: `admin@bengkel.com` (Bengkel Motor Maju Jaya, trial) — `ServiceTenantSeeder` seed 3 layanan + 3 sparepart + 2 staff montir + 1 consumable mapping (Ganti Oli → 1 Oli). Terdaftar di `demo:reset`; reset hapus `services` (cascade ke `service_consumables`) + `staff` per tenant.
 
 ## Catatan Implementasi Retail & Homemade (dipindah dari plan.md, selesai Mei 2026)
 
@@ -111,7 +136,8 @@ Plan A (Retail: Purchase Receipt, Quick Checkout, Dashboard Retail, Purchase Rep
 ## Test Coverage
 
 - `tests/Feature/`: 30+ file, dominan happy-path CRUD + observer test untuk SalesOrder.
-- `tests/Feature/Integration/`: 8 file user-journey end-to-end per modul + multi-kategori; termasuk `RetailWorkflowTest.php` (purchase receipt → purchase report → quick checkout) dan `HomemadeWorkflowTest.php` (material receipt → simple production → quick checkout).
+- `tests/Feature/Integration/`: 9 file user-journey end-to-end per modul + multi-kategori; termasuk `RetailWorkflowTest.php` (purchase receipt → purchase report → quick checkout), `HomemadeWorkflowTest.php` (material receipt → simple production → quick checkout), dan `ServiceWorkflowTest.php` (CRUD layanan → quick checkout campur jasa+produk → cross-tenant guard → delete guard → onboarding register). `ServiceEnhancementsTest.php` cover laporan layanan, staff assignment (`served_by`), dan consumable auto-deduct.
+- **Suite hijau penuh**: 340 passed, 6 skipped (Juni 2026). ±100 test feature lama yang sempat gagal di sqlite sudah diperbaiki (test rot, bukan bug produk): default factory `UserFactory` jadi `role=admin` (route ber-permission), `MaterialTypeFactory` di-scope tenant, migration `customers_code_unique` pakai `Schema::getIndexes()` (driver-agnostik, bukan `information_schema`), payload integration test diselaraskan ke kontrak API/observer terkini, atribut master data usang (`category`/`product_type`/`planned_quantity`) dibuang. Dua bug produk ikut diperbaiki saat proses ini: tenant suspended (`is_active=false`) kini diblokir di `EnsureTenantContext`; double-reservation stok di `SalesOrderController::update` (bulk delete item lewati observer) → ganti `->get()->each->delete()` + reorder agar observer fire sekali.
 - `tests/Browser/ApplicationFlowTest.php`: 1 file browser test (Pest 4).
 - `tests/Unit/`: hanya `ExampleTest.php` (kosong) — tidak ada unit test domain.
 - Setup: `RefreshDatabase` otomatis untuk Feature via `tests/Pest.php`.
@@ -126,13 +152,14 @@ Plan A (Retail: Purchase Receipt, Quick Checkout, Dashboard Retail, Purchase Rep
 
 ## Lingkungan Demo
 
-6 tenant demo:
+7 tenant demo:
 - `admin@konveksi.com` (garment)
 - `admin@kuemama.com` (food)
 - `admin@crafty.com` (craft)
 - `admin@glowbeauty.com` (cosmetic)
 - `admin@tokoserbaada.com` (retail)
 - `admin@homemade.com` (homemade — Dapur Coklat Rumahan, trial plan)
+- `admin@bengkel.com` (service — Bengkel Motor Maju Jaya, trial plan)
 
 Admin platform: `admin@fabriku.com`. Semua password `password`. Data reset tiap jam.
 

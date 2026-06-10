@@ -40,10 +40,7 @@ const maxWidthClass = {
             leave-from-class="opacity-100"
             leave-to-class="opacity-0"
         >
-            <div
-                v-if="show"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-            >
+            <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
                 <!-- Backdrop click handler -->
                 <div class="fixed inset-0" @click="close"></div>
 
@@ -55,22 +52,14 @@ const maxWidthClass = {
                     leave-from-class="opacity-100 scale-100"
                     leave-to-class="opacity-0 scale-95"
                 >
-                    <div
-                        v-if="show"
-                        class="relative w-full overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-gray-800"
-                        :class="maxWidthClass"
-                    >
+                    <div v-if="show" class="relative w-full overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-gray-800" :class="maxWidthClass">
                         <!-- Close button -->
                         <div v-if="closeable" class="absolute top-4 right-4 z-10">
-                            <button
-                                type="button"
-                                @click="close"
-                                class="text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
-                            >
+                            <button type="button" @click="close" class="text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200">
                                 <X :size="20" />
                             </button>
                         </div>
-                        
+
                         <slot />
                     </div>
                 </Transition>

@@ -2,10 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\InventoryItem;
+use App\Models\SalesOrder;
+use App\Models\SalesOrderItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SalesOrderItem>
+ * @extends Factory<SalesOrderItem>
  */
 class SalesOrderItemFactory extends Factory
 {
@@ -22,8 +25,8 @@ class SalesOrderItemFactory extends Factory
         $subtotal = ($quantity * $unitPrice) - $discountAmount;
 
         return [
-            'sales_order_id' => \App\Models\SalesOrder::factory(),
-            'inventory_item_id' => \App\Models\InventoryItem::factory(),
+            'sales_order_id' => SalesOrder::factory(),
+            'inventory_item_id' => InventoryItem::factory(),
             'product_name' => fake()->words(3, true),
             'sku' => strtoupper(fake()->bothify('SKU-####-???')),
             'quantity' => $quantity,

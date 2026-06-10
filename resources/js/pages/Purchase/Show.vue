@@ -34,8 +34,7 @@ defineProps<{
     lines: Line[];
 }>();
 
-const formatRupiah = (value: number) =>
-    'Rp ' + Number(value).toLocaleString('id-ID', { maximumFractionDigits: 0 });
+const formatRupiah = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { maximumFractionDigits: 0 });
 </script>
 
 <template>
@@ -45,7 +44,10 @@ const formatRupiah = (value: number) =>
         <div class="px-6 py-6">
             <div class="mx-auto max-w-4xl">
                 <div class="mb-4">
-                    <Link href="/purchase-receipts" class="inline-flex items-center gap-1 text-sm text-indigo-600 hover:underline dark:text-indigo-400">
+                    <Link
+                        href="/purchase-receipts"
+                        class="inline-flex items-center gap-1 text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+                    >
                         <ArrowLeft :size="14" />
                         Kembali ke Daftar Pembelian
                     </Link>
@@ -97,7 +99,7 @@ const formatRupiah = (value: number) =>
                 <!-- Lines table -->
                 <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <table class="w-full text-sm">
-                        <thead class="bg-gray-50 text-xs font-medium uppercase text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                        <thead class="bg-gray-50 text-xs font-medium text-gray-500 uppercase dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th class="px-4 py-3 text-left">Produk</th>
                                 <th class="px-4 py-3 text-right">Stok Sebelum</th>

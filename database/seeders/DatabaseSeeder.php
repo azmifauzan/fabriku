@@ -1242,5 +1242,43 @@ class DatabaseSeeder extends Seeder
         echo "   🏠 Email: admin@homemade.com\n";
         echo "   🔐 Password: password\n";
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+
+        // ==========================================
+        // TENANT 5: BENGKEL MOTOR (SERVICE)
+        // ==========================================
+        $tenantService = Tenant::firstOrCreate(
+            ['name' => 'Bengkel Motor Maju Jaya'],
+            [
+                'business_category' => 'service',
+                'subscription_plan' => 'trial',
+                'subscription_expires_at' => now()->addDays(30),
+                'is_active' => true,
+            ]
+        );
+
+        // Users for Service
+        User::firstOrCreate(
+            ['email' => 'admin@bengkel.com'],
+            [
+                'tenant_id' => $tenantService->id,
+                'name' => 'Admin Bengkel',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // Run Service Seeder
+        (new ServiceTenantSeeder)->run($tenantService);
+
+        echo "📊 SERVICE Demo - Bengkel Motor Maju Jaya:\n";
+        echo "   • Tenant: {$tenantService->name}\n";
+        echo "   • Users: 1 user\n";
+        echo "   • Services: 3 types (Cuci, Servis Ringan, Ganti Oli)\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        echo "🔑 SERVICE Login:\n";
+        echo "   🔧 Email: admin@bengkel.com\n";
+        echo "   🔐 Password: password\n";
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
     }
 }

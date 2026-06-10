@@ -180,7 +180,12 @@ const markComplete = async () => {
                                 >
                                     Edit
                                 </Link>
-                                <Link href="/production-orders" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold tracking-widest text-gray-700 uppercase hover:bg-gray-50"> ← Kembali </Link>
+                                <Link
+                                    href="/production-orders"
+                                    class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold tracking-widest text-gray-700 uppercase hover:bg-gray-50"
+                                >
+                                    ← Kembali
+                                </Link>
                             </div>
                         </div>
 
@@ -188,7 +193,7 @@ const markComplete = async () => {
                             <div class="rounded-lg bg-gray-50 p-4">
                                 <p class="text-xs text-gray-500">{{ patternLabel }}</p>
                                 <p class="text-sm font-medium text-gray-900">{{ order.preparation_order.pattern?.name || '-' }}</p>
-                                <p class="text-xs text-gray-500 mt-1">{{ order.preparation_order.pattern?.code || '' }}</p>
+                                <p class="mt-1 text-xs text-gray-500">{{ order.preparation_order.pattern?.code || '' }}</p>
                             </div>
                             <div class="rounded-lg bg-gray-50 p-4">
                                 <p class="text-xs text-gray-500">Quantity</p>
@@ -205,7 +210,15 @@ const markComplete = async () => {
                             <div class="rounded-lg bg-gray-50 p-4">
                                 <p class="text-xs text-gray-500">Prioritas</p>
                                 <p class="text-sm font-medium text-gray-900">
-                                    {{ order.priority === 'urgent' ? 'Urgent' : order.priority === 'high' ? 'Tinggi' : order.priority === 'low' ? 'Rendah' : 'Normal' }}
+                                    {{
+                                        order.priority === 'urgent'
+                                            ? 'Urgent'
+                                            : order.priority === 'high'
+                                              ? 'Tinggi'
+                                              : order.priority === 'low'
+                                                ? 'Rendah'
+                                                : 'Normal'
+                                    }}
                                 </p>
                             </div>
                             <div class="rounded-lg bg-gray-50 p-4">
@@ -219,9 +232,7 @@ const markComplete = async () => {
                                 <p class="text-xs text-gray-600">Tanggal Estimasi Selesai</p>
                                 <p class="text-sm font-medium text-gray-900">
                                     {{
-                                        order.estimated_completion_date
-                                            ? new Date(order.estimated_completion_date).toLocaleDateString('id-ID')
-                                            : '-'
+                                        order.estimated_completion_date ? new Date(order.estimated_completion_date).toLocaleDateString('id-ID') : '-'
                                     }}
                                 </p>
                             </div>
@@ -240,8 +251,8 @@ const markComplete = async () => {
                         </div>
 
                         <div v-if="order.notes" class="mt-4 rounded-lg bg-yellow-50 p-4">
-                            <p class="text-xs text-gray-600 font-medium">Catatan</p>
-                            <p class="text-sm text-gray-900 mt-1">{{ order.notes }}</p>
+                            <p class="text-xs font-medium text-gray-600">Catatan</p>
+                            <p class="mt-1 text-sm text-gray-900">{{ order.notes }}</p>
                         </div>
                     </div>
                 </div>

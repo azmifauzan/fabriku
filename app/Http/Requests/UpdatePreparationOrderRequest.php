@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdatePreparationOrderRequest extends FormRequest
 {
@@ -33,13 +34,13 @@ class UpdatePreparationOrderRequest extends FormRequest
         $tenantId = $this->user()->tenant_id;
 
         return [
-            'pattern_id' => ['required', \Illuminate\Validation\Rule::exists('patterns', 'id')->where('tenant_id', $tenantId)],
+            'pattern_id' => ['required', Rule::exists('patterns', 'id')->where('tenant_id', $tenantId)],
             'order_date' => 'required|date',
-            'prepared_by' => ['nullable', \Illuminate\Validation\Rule::exists('staff', 'id')->where('tenant_id', $tenantId)],
+            'prepared_by' => ['nullable', Rule::exists('staff', 'id')->where('tenant_id', $tenantId)],
             'output_quantity' => 'required|numeric|min:0.01',
             'output_unit' => 'required|string|max:20',
             'materials_used' => 'required|array|min:1',
-            'materials_used.*.material_id' => ['required', \Illuminate\Validation\Rule::exists('materials', 'id')->where('tenant_id', $tenantId)],
+            'materials_used.*.material_id' => ['required', Rule::exists('materials', 'id')->where('tenant_id', $tenantId)],
             'materials_used.*.material_name' => 'required|string',
             'materials_used.*.quantity' => 'required|numeric|min:0.01',
             'materials_used.*.unit' => 'required|string',

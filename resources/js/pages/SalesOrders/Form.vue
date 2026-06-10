@@ -23,7 +23,7 @@
                             </select>
                             <button
                                 type="button"
-                                @click="showQuickCustomerModal = true"
+                                @click="openQuickCustomerModal"
                                 class="inline-flex items-center justify-center rounded-lg border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
                                 title="Tambah Customer Baru"
                             >
@@ -73,9 +73,7 @@
                     </div>
 
                     <div>
-                        <label for="invoice_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            No. Invoice
-                        </label>
+                        <label for="invoice_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300"> No. Invoice </label>
                         <input
                             id="invoice_number"
                             v-model="form.invoice_number"
@@ -83,15 +81,13 @@
                             placeholder="e.g. INV/2026/001"
                             class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
-                         <p v-if="form.errors.invoice_number" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        <p v-if="form.errors.invoice_number" class="mt-2 text-sm text-red-600 dark:text-red-400">
                             {{ form.errors.invoice_number }}
                         </p>
                     </div>
 
                     <div>
-                        <label for="resi_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            No. Resi
-                        </label>
+                        <label for="resi_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300"> No. Resi </label>
                         <input
                             id="resi_number"
                             v-model="form.resi_number"
@@ -99,7 +95,7 @@
                             placeholder="e.g. JNE12345678"
                             class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
-                         <p v-if="form.errors.resi_number" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        <p v-if="form.errors.resi_number" class="mt-2 text-sm text-red-600 dark:text-red-400">
                             {{ form.errors.resi_number }}
                         </p>
                     </div>
@@ -169,7 +165,10 @@
                                 >
                                     <option value="">Pilih Produk</option>
                                     <option v-for="invItem in inventoryItems" :key="invItem.id" :value="invItem.id">
-                                        {{ invItem.product_name || invItem.pattern?.name || invItem.sku }} - {{ invItem.sku }} ({{ invItem.current_stock - invItem.reserved_stock }} available)
+                                        {{ invItem.product_name || invItem.pattern?.name || invItem.sku }} - {{ invItem.sku }} ({{
+                                            invItem.current_stock - invItem.reserved_stock
+                                        }}
+                                        available)
                                     </option>
                                 </select>
                                 <p v-if="form.errors[`items.${index}.inventory_item_id`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
@@ -284,7 +283,9 @@
                                     >
                                         <option value="">Pilih Produk</option>
                                         <option v-for="invItem in inventoryItems" :key="invItem.id" :value="invItem.id">
-                                            {{ invItem.product_name || invItem.pattern?.name || invItem.sku }} - {{ invItem.sku }} ({{ invItem.current_stock - invItem.reserved_stock }}
+                                            {{ invItem.product_name || invItem.pattern?.name || invItem.sku }} - {{ invItem.sku }} ({{
+                                                invItem.current_stock - invItem.reserved_stock
+                                            }}
                                             available)
                                         </option>
                                     </select>
@@ -518,17 +519,20 @@ const customerList = ref([...props.customers]);
 const showQuickCustomerModal = ref(false);
 
 // Watch for prop updates to sync customer list if parent updates it (mostly initial load)
-watch(() => props.customers, (newVal) => {
-    // Only update if we haven't added local items, or just merge?
-    // Simplest is to just re-initalize, but preserving selection is handled by v-model
-    // For now, let's just ensure we have the prop data.
-    // However, if we added a new customer locally, we don't want to lose it if props update.
-    // Given the context, props likely won't update during the form session unless full reload.
-    if (newVal.length > customerList.value.length) {
-         // This logic might be flawed if we have local additions.
-         // But for this task, just initializing is enough.
-    }
-});
+watch(
+    () => props.customers,
+    (newVal) => {
+        // Only update if we haven't added local items, or just merge?
+        // Simplest is to just re-initalize, but preserving selection is handled by v-model
+        // For now, let's just ensure we have the prop data.
+        // However, if we added a new customer locally, we don't want to lose it if props update.
+        // Given the context, props likely won't update during the form session unless full reload.
+        if (newVal.length > customerList.value.length) {
+            // This logic might be flawed if we have local additions.
+            // But for this task, just initializing is enough.
+        }
+    },
+);
 
 // Get today's date in YYYY-MM-DD format
 const today = new Date().toISOString().split('T')[0];

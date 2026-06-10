@@ -15,15 +15,19 @@ const wasAutoClosedForMobile = ref(false);
 const { showSuccess, showError, showWarning } = useSweetAlert();
 const flash = computed(() => page.props.flash as { success?: string; error?: string; warning?: string } | null);
 
-watch(flash, (newFlash) => {
-    if (newFlash?.success) {
-        showSuccess('Berhasil!', newFlash.success);
-    } else if (newFlash?.error) {
-        showError('Gagal', newFlash.error);
-    } else if (newFlash?.warning) {
-        showWarning('Perhatian', newFlash.warning);
-    }
-}, { immediate: true, deep: true });
+watch(
+    flash,
+    (newFlash) => {
+        if (newFlash?.success) {
+            showSuccess('Berhasil!', newFlash.success);
+        } else if (newFlash?.error) {
+            showError('Gagal', newFlash.error);
+        } else if (newFlash?.warning) {
+            showWarning('Perhatian', newFlash.warning);
+        }
+    },
+    { immediate: true, deep: true },
+);
 
 const checkMobile = () => {
     const nextIsMobile = window.innerWidth < 768;
@@ -104,7 +108,5 @@ const currentRoute = computed(() => page.url);
             <!-- Footer -->
             <Footer />
         </main>
-
-
     </div>
 </template>

@@ -4,10 +4,7 @@
 
         <div class="px-6 py-6">
             <div class="mx-auto max-w-7xl">
-                <PageHeader
-                    title="Pengaturan"
-                    description="Kelola pengaturan aplikasi"
-                />
+                <PageHeader title="Pengaturan" description="Kelola pengaturan aplikasi" />
 
                 <div class="mt-6 rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
@@ -17,19 +14,26 @@
 
                     <form @submit.prevent="submit" class="p-6">
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                             <!-- Logo Upload -->
-                             <div class="col-span-2">
+                            <!-- Logo Upload -->
+                            <div class="col-span-2">
                                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Logo Perusahaan</label>
                                 <div class="flex items-center gap-6">
-                                    <div v-if="previewUrl || form.settings.company_logo" class="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                                        <img :src="previewUrl || form.settings.company_logo" alt="Logo Preview" class="h-full w-full object-contain p-2" />
+                                    <div
+                                        v-if="previewUrl || form.settings.company_logo"
+                                        class="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+                                    >
+                                        <img
+                                            :src="previewUrl || form.settings.company_logo"
+                                            alt="Logo Preview"
+                                            class="h-full w-full object-contain p-2"
+                                        />
                                     </div>
                                     <div class="flex-1">
                                         <input
                                             type="file"
                                             @change="handleFileChange"
                                             accept="image/*"
-                                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:text-gray-400 dark:file:bg-indigo-900/20 dark:file:text-indigo-400"
+                                            class="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 dark:text-gray-400 dark:file:bg-indigo-900/20 dark:file:text-indigo-400"
                                         />
                                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 2MB</p>
                                     </div>
@@ -38,7 +42,9 @@
 
                             <!-- Company Name -->
                             <div class="col-span-2 md:col-span-1">
-                                <label for="company_name" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Perusahaan</label>
+                                <label for="company_name" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                                    >Nama Perusahaan</label
+                                >
                                 <input
                                     id="company_name"
                                     v-model="form.settings.company_name"
@@ -48,9 +54,11 @@
                                 />
                             </div>
 
-                             <!-- Company Email -->
-                             <div class="col-span-2 md:col-span-1">
-                                <label for="company_email" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Email Perusahaan</label>
+                            <!-- Company Email -->
+                            <div class="col-span-2 md:col-span-1">
+                                <label for="company_email" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                                    >Email Perusahaan</label
+                                >
                                 <input
                                     id="company_email"
                                     v-model="form.settings.company_email"
@@ -62,7 +70,9 @@
 
                             <!-- Company Address -->
                             <div class="col-span-2">
-                                <label for="company_address" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Alamat Perusahaan</label>
+                                <label for="company_address" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                                    >Alamat Perusahaan</label
+                                >
                                 <textarea
                                     id="company_address"
                                     v-model="form.settings.company_address"
@@ -74,7 +84,9 @@
 
                             <!-- Company Phone -->
                             <div class="col-span-2 md:col-span-1">
-                                <label for="company_phone" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Telepon Perusahaan</label>
+                                <label for="company_phone" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                                    >Telepon Perusahaan</label
+                                >
                                 <input
                                     id="company_phone"
                                     v-model="form.settings.company_phone"
@@ -86,7 +98,9 @@
 
                             <!-- Invoice Footer Text -->
                             <div class="col-span-2">
-                                <label for="invoice_footer_text" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan Kaki Invoice (Footer)</label>
+                                <label for="invoice_footer_text" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                                    >Catatan Kaki Invoice (Footer)</label
+                                >
                                 <textarea
                                     id="invoice_footer_text"
                                     v-model="form.settings.invoice_footer_text"
@@ -115,9 +129,9 @@
 
 <script setup lang="ts">
 import PageHeader from '@/components/PageHeader.vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, usePage, useForm, router } from '@inertiajs/vue3';
 import { useSweetAlert } from '@/composables/useSweetAlert';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -144,7 +158,7 @@ function handleFileChange(event: Event) {
     const target = event.target as HTMLInputElement;
     if (target.files && target.files[0]) {
         form.company_logo = target.files[0];
-        
+
         // Create preview
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -159,8 +173,8 @@ function submit() {
         preserveScroll: true,
         forceFormData: true,
         onSuccess: () => {
-             showSuccess('Berhasil!', 'Pengaturan berhasil disimpan.');
-             // Clear file input needed? handled by Inertia normally
+            showSuccess('Berhasil!', 'Pengaturan berhasil disimpan.');
+            // Clear file input needed? handled by Inertia normally
         },
     });
 }

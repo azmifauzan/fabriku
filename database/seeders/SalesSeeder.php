@@ -2,6 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customer;
+use App\Models\InventoryItem;
+use App\Models\SalesOrder;
+use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 
 class SalesSeeder extends Seeder
@@ -11,14 +15,14 @@ class SalesSeeder extends Seeder
      */
     public function run(): void
     {
-        $tenant = \App\Models\Tenant::first();
+        $tenant = Tenant::first();
 
         // Create 10 customers
-        $customers = \App\Models\Customer::factory(10)
+        $customers = Customer::factory(10)
             ->create(['tenant_id' => $tenant->id]);
 
         // Get existing inventory items
-        $inventoryItems = \App\Models\InventoryItem::where('tenant_id', $tenant->id)
+        $inventoryItems = InventoryItem::where('tenant_id', $tenant->id)
             ->where('status', 'available')
             ->get();
 
@@ -65,7 +69,7 @@ class SalesSeeder extends Seeder
                 $paymentStatus = $status === 'completed' ? 'paid' : collect(['unpaid', 'partial'])->random();
                 $paidAmount = $paymentStatus === 'paid' ? $totalAmount : ($paymentStatus === 'partial' ? $totalAmount / 2 : 0);
 
-                $order = \App\Models\SalesOrder::create([
+                $order = SalesOrder::create([
                     'tenant_id' => $tenant->id,
                     'customer_id' => $customer->id,
                     'order_date' => now()->subDays(rand(0, 90)),

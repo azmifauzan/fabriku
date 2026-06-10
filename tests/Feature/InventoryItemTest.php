@@ -100,7 +100,7 @@ it('validates required fields when creating item', function () {
     // product_name is required when no production_order_id is provided
     $response->assertSessionHasErrors([
         'product_name',
-        'location_id', 'target_quantity', 'current_quantity', 'unit_cost',
+        'location_id', 'current_quantity', 'unit_cost',
     ]);
 });
 

@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\Customer;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -20,7 +22,7 @@ describe('User Registration and Authentication Flow', function () {
         // Step 2: Submit registration form
         $userData = [
             'business_name' => 'Konveksi Sejahtera',
-            'business_category' => 'GARMENT',
+            'business_category' => 'garment',
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'phone' => '081234567890',
@@ -32,12 +34,11 @@ describe('User Registration and Authentication Flow', function () {
         $response->assertRedirect(route('verification.notice'));
 
         // Step 3: Verify tenant created
-        $tenant = Tenant::where('email', 'john@example.com')->first();
+        $tenant = Tenant::where('name', 'Konveksi Sejahtera')->first();
         expect($tenant)->not->toBeNull();
-        expect($tenant->name)->toBe('Konveksi Sejahtera');
-        expect($tenant->business_category)->toBe('GARMENT');
+        expect($tenant->business_category)->toBe('garment');
         expect($tenant->is_active)->toBeTrue();
-        expect($tenant->subscription_plan)->toBe('TRIAL');
+        expect($tenant->subscription_plan)->toBe('trial');
         expect($tenant->subscription_expires_at)->not->toBeNull();
 
         // Step 4: Verify user created
@@ -64,25 +65,25 @@ describe('User Registration and Authentication Flow', function () {
             ['id' => $user->id, 'hash' => sha1($user->email)]
         );
 
+        // Verifikasi sukses → render halaman EmailVerified + logout otomatis
         $this->actingAs($user)
             ->get($verificationUrl)
-            ->assertRedirect(route('dashboard'));
+            ->assertSuccessful();
 
         // Step 8: Check email verified
         $user->refresh();
         expect($user->email_verified_at)->not->toBeNull();
 
-        // Step 9: Access dashboard successfully
-        $this->actingAs($user)
+        // Step 9: Login ulang → dashboard accessible
+        $this->actingAs($user->fresh())
             ->get(route('dashboard'))
-            ->assertSuccessful()
-            ->assertSee('Dashboard');
+            ->assertSuccessful();
     });
 
     it('handles login flow correctly', function () {
         // Create verified user
         $tenant = Tenant::factory()->create([
-            'business_category' => 'FOOD',
+            'business_category' => 'food',
         ]);
 
         $user = User::factory()->create([
@@ -117,7 +118,7 @@ describe('User Registration and Authentication Flow', function () {
 
         // Step 6: Logout
         $this->post(route('logout'))
-            ->assertRedirect(route('home'));
+            ->assertRedirect(route('login'));
 
         // Step 7: Verify logged out
         $this->assertGuest();
@@ -139,10 +140,10 @@ describe('User Registration and Authentication Flow', function () {
         // Step 2: Submit email
         $this->post(route('password.email'), [
             'email' => 'reset@example.com',
-        ])->assertSessionHas('status');
+        ])->assertSessionHas('success');
 
         // Step 3: Verify reset link sent
-        Notification::assertSentTo($user, \App\Notifications\ResetPasswordNotification::class);
+        Notification::assertSentTo($user, ResetPasswordNotification::class);
     });
 
     it('enforces subscription check', function () {
@@ -158,10 +159,21 @@ describe('User Registration and Authentication Flow', function () {
             'email_verified_at' => now(),
         ]);
 
-        // Try to access dashboard
+        // GET tetap boleh (mode read-only by design)
         $this->actingAs($user)
             ->get(route('dashboard'))
-            ->assertRedirect(route('subscription.index'));
+            ->assertSuccessful();
+
+        // Write diblokir oleh subscription.check
+        $this->actingAs($user)
+            ->post(route('customers.store'), [
+                'code' => 'CUST-X',
+                'name' => 'Blocked Customer',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('warning');
+
+        expect(Customer::withoutGlobalScopes()->where('tenant_id', $tenant->id)->count())->toBe(0);
     });
 
     it('prevents suspended tenant access', function () {
@@ -196,7 +208,7 @@ describe('User Registration and Authentication Flow', function () {
         // Test invalid email
         $this->post(route('register'), [
             'business_name' => 'Test Business',
-            'business_category' => 'GARMENT',
+            'business_category' => 'garment',
             'name' => 'Test User',
             'email' => 'invalid-email',
             'password' => 'password123',
@@ -206,7 +218,7 @@ describe('User Registration and Authentication Flow', function () {
         // Test weak password
         $this->post(route('register'), [
             'business_name' => 'Test Business',
-            'business_category' => 'GARMENT',
+            'business_category' => 'garment',
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => '123',
@@ -216,7 +228,7 @@ describe('User Registration and Authentication Flow', function () {
         // Test password mismatch
         $this->post(route('register'), [
             'business_name' => 'Test Business',
-            'business_category' => 'GARMENT',
+            'business_category' => 'garment',
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password123',
@@ -233,7 +245,7 @@ describe('User Registration and Authentication Flow', function () {
 
         $this->actingAs($user)
             ->post(route('verification.send'))
-            ->assertSessionHas('status');
+            ->assertSessionHas('success');
 
         Notification::assertSentTo($user, VerifyEmailNotification::class);
     });

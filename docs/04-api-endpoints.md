@@ -51,6 +51,17 @@ Prefix: `/inventory`
 | POST | `/inventory/items/{id}/adjust` | Adjust stock (Correction, Damage, etc) |
 | GET | `/inventory/items/{id}/adjustments` | View adjustment history |
 
+#### Services / Katalog Layanan (kategori `service` saja)
+Permission: `service.view`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/services` | List layanan (search, filter status) |
+| POST | `/services` | Buat layanan baru (code unique per tenant) |
+| GET | `/services/create` | Form buat layanan |
+| GET | `/services/{id}/edit` | Form edit layanan |
+| PUT | `/services/{id}` | Update layanan |
+| DELETE | `/services/{id}` | Hapus layanan (ditolak bila sudah dipakai transaksi) |
+
 #### Purchase Receipts (kategori `retail` saja)
 Permission: `purchase.view` / `purchase.edit`
 | Method | Endpoint | Description |
@@ -90,8 +101,8 @@ Permission: `simple_production.view` / `simple_production.create`
 |--------|----------|-------------|
 | GET | `/sales-orders` | List sales orders |
 | POST | `/sales-orders` | Create sales order |
-| GET | `/sales-orders/quick-checkout` | Halaman POS Quick Checkout (retail + homemade) |
-| POST | `/sales-orders/quick-checkout` | Submit transaksi kasir (SO langsung `completed`) |
+| GET | `/sales-orders/quick-checkout` | Halaman POS Quick Checkout (retail + homemade + service) |
+| POST | `/sales-orders/quick-checkout` | Submit transaksi kasir (SO langsung `completed`); kategori service bisa campur layanan + produk |
 | GET | `/sales-orders/{id}/print` | Print invoice/DO |
 | GET | `/sales-orders/{id}/export` | Export to PDF/Excel |
 | GET | `/customers` | List customers |
@@ -108,6 +119,8 @@ Prefix: `/reports`
 | GET | `/reports/production` | Efficiency & defects report |
 | GET | `/reports/purchase` | Laporan pembelian per batch (retail) |
 | GET | `/reports/purchase/export` | Export laporan pembelian (Excel/PDF) |
+| GET | `/reports/service` | Laporan layanan: rekap per layanan + per staff (service) |
+| GET | `/reports/service/export` | Export laporan layanan (Excel/PDF) |
 
 ### 3. Admin Panel (Super Admin)
 Prefix: `/admin`

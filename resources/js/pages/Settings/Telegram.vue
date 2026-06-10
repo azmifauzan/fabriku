@@ -20,72 +20,84 @@ const messageType = ref<'success' | 'error'>('success');
 const generateToken = async () => {
     loading.value = true;
     message.value = '';
-    
-    router.post('/telegram/generate-token', {}, {
-        preserveScroll: true,
-        onSuccess: () => {
-            message.value = 'Token berhasil dibuat! Gunakan token di bawah untuk menghubungkan Telegram.';
-            messageType.value = 'success';
+
+    router.post(
+        '/telegram/generate-token',
+        {},
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                message.value = 'Token berhasil dibuat! Gunakan token di bawah untuk menghubungkan Telegram.';
+                messageType.value = 'success';
+            },
+            onError: () => {
+                message.value = 'Gagal membuat token. Silakan coba lagi.';
+                messageType.value = 'error';
+            },
+            onFinish: () => {
+                loading.value = false;
+            },
         },
-        onError: () => {
-            message.value = 'Gagal membuat token. Silakan coba lagi.';
-            messageType.value = 'error';
-        },
-        onFinish: () => {
-            loading.value = false;
-        }
-    });
+    );
 };
 
 const disconnect = async () => {
     if (!confirm('Apakah Anda yakin ingin memutuskan koneksi Telegram?')) return;
-    
+
     loading.value = true;
     message.value = '';
-    
-    router.post('/telegram/disconnect', {}, {
-        preserveScroll: true,
-        onSuccess: () => {
-            message.value = 'Telegram berhasil diputuskan.';
-            messageType.value = 'success';
+
+    router.post(
+        '/telegram/disconnect',
+        {},
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                message.value = 'Telegram berhasil diputuskan.';
+                messageType.value = 'success';
+            },
+            onError: () => {
+                message.value = 'Gagal memutuskan Telegram. Silakan coba lagi.';
+                messageType.value = 'error';
+            },
+            onFinish: () => {
+                loading.value = false;
+            },
         },
-        onError: () => {
-            message.value = 'Gagal memutuskan Telegram. Silakan coba lagi.';
-            messageType.value = 'error';
-        },
-        onFinish: () => {
-            loading.value = false;
-        }
-    });
+    );
 };
 
 const sendTest = async () => {
     testLoading.value = true;
     message.value = '';
-    
-    router.post('/telegram/test', {}, {
-        preserveScroll: true,
-        onSuccess: () => {
-            message.value = 'Pesan test berhasil dikirim ke Telegram Anda!';
-            messageType.value = 'success';
+
+    router.post(
+        '/telegram/test',
+        {},
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                message.value = 'Pesan test berhasil dikirim ke Telegram Anda!';
+                messageType.value = 'success';
+            },
+            onError: () => {
+                message.value = 'Gagal mengirim pesan test. Pastikan Telegram Anda sudah terhubung.';
+                messageType.value = 'error';
+            },
+            onFinish: () => {
+                testLoading.value = false;
+            },
         },
-        onError: () => {
-            message.value = 'Gagal mengirim pesan test. Pastikan Telegram Anda sudah terhubung.';
-            messageType.value = 'error';
-        },
-        onFinish: () => {
-            testLoading.value = false;
-        }
-    });
+    );
 };
 
 const copyToken = async () => {
     if (!props.connectToken) return;
-    
+
     try {
         await navigator.clipboard.writeText(`CONNECT ${props.connectToken}`);
         copied.value = true;
-        setTimeout(() => copied.value = false, 2000);
+        setTimeout(() => (copied.value = false), 2000);
     } catch {
         // Fallback for older browsers
         const textArea = document.createElement('textarea');
@@ -95,19 +107,19 @@ const copyToken = async () => {
         document.execCommand('copy');
         document.body.removeChild(textArea);
         copied.value = true;
-        setTimeout(() => copied.value = false, 2000);
+        setTimeout(() => (copied.value = false), 2000);
     }
 };
 
 const formatExpiresAt = (dateStr: string | null) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
-    return date.toLocaleString('id-ID', { 
+    return date.toLocaleString('id-ID', {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
     });
 };
 </script>
@@ -115,7 +127,7 @@ const formatExpiresAt = (dateStr: string | null) => {
 <template>
     <AppLayout>
         <Head title="Hubungkan Telegram" />
-        
+
         <div class="mx-auto max-w-2xl px-4 py-6">
             <div class="mb-6">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Hubungkan Telegram</h1>
@@ -125,13 +137,13 @@ const formatExpiresAt = (dateStr: string | null) => {
             </div>
 
             <!-- Alert Message -->
-            <div 
-                v-if="message" 
+            <div
+                v-if="message"
                 :class="[
                     'mb-6 flex items-center gap-3 rounded-lg p-4',
-                    messageType === 'success' 
-                        ? 'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300' 
-                        : 'bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                    messageType === 'success'
+                        ? 'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                        : 'bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300',
                 ]"
             >
                 <CheckCircle v-if="messageType === 'success'" :size="20" />
@@ -154,7 +166,9 @@ const formatExpiresAt = (dateStr: string | null) => {
                             </p>
                         </div>
                         <div class="ml-auto">
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                            <span
+                                class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                            >
                                 <Check :size="14" />
                                 Aktif
                             </span>
@@ -165,16 +179,34 @@ const formatExpiresAt = (dateStr: string | null) => {
                         <h4 class="mb-2 font-medium text-gray-900 dark:text-white">Cara Menggunakan</h4>
                         <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                             <li class="flex items-start gap-2">
-                                <span class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-medium text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">1</span>
-                                <span>Buka <a href="https://t.me/FabrikuBot" target="_blank" class="text-indigo-600 hover:underline dark:text-indigo-400">@FabrikuBot</a> di Telegram</span>
+                                <span
+                                    class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-medium text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+                                    >1</span
+                                >
+                                <span
+                                    >Buka
+                                    <a href="https://t.me/FabrikuBot" target="_blank" class="text-indigo-600 hover:underline dark:text-indigo-400"
+                                        >@FabrikuBot</a
+                                    >
+                                    di Telegram</span
+                                >
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-medium text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">2</span>
+                                <span
+                                    class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-medium text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+                                    >2</span
+                                >
                                 <span>Kirim perintah apapun untuk memulai percakapan dengan bot Fabriku</span>
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-medium text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">3</span>
-                                <span>Ketik <code class="rounded bg-gray-200 px-1.5 py-0.5 text-xs dark:bg-gray-700">/help</code> untuk melihat daftar perintah</span>
+                                <span
+                                    class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-medium text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+                                    >3</span
+                                >
+                                <span
+                                    >Ketik <code class="rounded bg-gray-200 px-1.5 py-0.5 text-xs dark:bg-gray-700">/help</code> untuk melihat daftar
+                                    perintah</span
+                                >
                             </li>
                         </ul>
                     </div>
@@ -216,22 +248,36 @@ const formatExpiresAt = (dateStr: string | null) => {
                     </div>
 
                     <!-- Token Section -->
-                    <div v-if="connectToken" class="rounded-lg border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20">
+                    <div
+                        v-if="connectToken"
+                        class="rounded-lg border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800 dark:bg-indigo-900/20"
+                    >
                         <h4 class="mb-3 font-medium text-indigo-900 dark:text-indigo-200">Langkah-langkah Menghubungkan:</h4>
-                        
+
                         <ol class="mb-4 space-y-3 text-sm text-indigo-800 dark:text-indigo-300">
                             <li class="flex items-start gap-2">
-                                <span class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-200 text-xs font-medium text-indigo-700 dark:bg-indigo-800 dark:text-indigo-200">1</span>
-                                <span>Buka <a href="https://t.me/FabrikuBot" target="_blank" class="font-medium underline">@FabrikuBot</a> di Telegram</span>
+                                <span
+                                    class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-200 text-xs font-medium text-indigo-700 dark:bg-indigo-800 dark:text-indigo-200"
+                                    >1</span
+                                >
+                                <span
+                                    >Buka <a href="https://t.me/FabrikuBot" target="_blank" class="font-medium underline">@FabrikuBot</a> di
+                                    Telegram</span
+                                >
                             </li>
                             <li class="flex items-start gap-2">
-                                <span class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-200 text-xs font-medium text-indigo-700 dark:bg-indigo-800 dark:text-indigo-200">2</span>
+                                <span
+                                    class="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-indigo-200 text-xs font-medium text-indigo-700 dark:bg-indigo-800 dark:text-indigo-200"
+                                    >2</span
+                                >
                                 <span>Salin dan kirim kode berikut ke bot:</span>
                             </li>
                         </ol>
 
                         <div class="flex items-center gap-2">
-                            <code class="flex-1 rounded-lg bg-white px-4 py-3 font-mono text-lg font-semibold text-indigo-900 dark:bg-gray-800 dark:text-indigo-200">
+                            <code
+                                class="flex-1 rounded-lg bg-white px-4 py-3 font-mono text-lg font-semibold text-indigo-900 dark:bg-gray-800 dark:text-indigo-200"
+                            >
                                 CONNECT {{ connectToken }}
                             </code>
                             <button
@@ -244,9 +290,7 @@ const formatExpiresAt = (dateStr: string | null) => {
                             </button>
                         </div>
 
-                        <p class="mt-3 text-xs text-indigo-600 dark:text-indigo-400">
-                            Token berlaku hingga: {{ formatExpiresAt(tokenExpiresAt) }}
-                        </p>
+                        <p class="mt-3 text-xs text-indigo-600 dark:text-indigo-400">Token berlaku hingga: {{ formatExpiresAt(tokenExpiresAt) }}</p>
                     </div>
 
                     <!-- Generate Token Button -->
