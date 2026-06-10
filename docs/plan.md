@@ -1,243 +1,207 @@
 # Enhancement Plans
 
-> **Status (Mei 2026)**: Plan A (Retail) dan Plan B (Homemade) keduanya **SELESAI PENUH**. Semua fitur aktif di production. Lihat `docs/current-status.md` untuk detail modul.
+> **Status (Juni 2026)**: Plan A (Retail) dan Plan B (Homemade) **selesai penuh dan sudah dipindah** ke `docs/current-status.md` (lihat bagian "Catatan Implementasi Retail & Homemade"). Dokumen ini sekarang berisi satu plan aktif: **Plan C — kategori `service` (UMKM bidang jasa)**.
 
 ---
 
-## Plan A: Retail — SELESAI ✅ (semua fase diimplementasikan)
+## Plan C: Kategori `service` — UMKM Bidang Jasa (BELUM DIMULAI)
 
-### Fase 7: Purchase Report ✅ SELESAI
+### Latar Belakang
 
-Diimplementasikan:
-- `GET /reports/purchase` (`reports.purchase`) + `GET /reports/purchase/export` (`reports.purchase.export`) di `ReportController`
-- Query: `StockAdjustment` where `adjustment_type = 'purchase'`, group per `batch_id`, join `inventoryItem` + `adjustedBy`
-- Vue page: `resources/js/pages/Reports/PurchaseReport.vue` — tabel per transaksi + drill-down per batch (collapsible)
-- Export Excel via `app/Exports/PurchaseReportExport.php` + view `resources/views/exports/purchase-report.blade.php`
-- Export PDF via `resources/views/pdf/purchase-report.blade.php`
-- Wayfinder: `purchase` + `exportPurchase` ter-generate di `resources/js/actions/App/Http/Controllers/ReportController.ts`
-- Sidebar: menu "Pembelian" muncul di Laporan kalau `isModuleEnabled('purchase')` (retail only); Material + Produksi laporan sudah hidden untuk retail
+**Target user**: UMKM yang menjual jasa/layanan, bukan (atau tidak hanya) produk fisik — bengkel motor/mobil, salon, barbershop, laundry, service elektronik, jahit permak. Karakteristik:
 
-### Test Integrasi ✅ SELESAI
+- Pendapatan utama dari **layanan** dengan harga per jenis layanan (cukur, creambath, ganti oli, servis ringan, cuci kiloan).
+- Sebagian punya **produk fisik pendamping**: bengkel jual sparepart + oli, salon jual shampoo/vitamin — pola beli-jual ini identik dengan kategori `retail` (purchase receipt → stok → jual).
+- Tidak ada bahan baku/produksi — modul material, pattern, preparation, production tidak relevan.
+- Transaksi dominan walk-in → **Quick Checkout** adalah UI kasir utama.
 
-File: `tests/Feature/Integration/RetailWorkflowTest.php`
-
-Cover yang diimplementasikan:
-1. Login tenant retail → dashboard accessible
-2. Buat inventory item
-3. Catat purchase receipt → stok bertambah (20 unit), `StockAdjustment` TYPE_PURCHASE tercreate
-4. Cek laporan pembelian → 1 batch, total_cost 240000
-5. Export purchase Excel + PDF → HTTP 200
-6. Quick checkout → stok berkurang (20 → 15)
-
-Tidak di-cover (low priority):
-- Sidebar module visibility assertions (material/produksi tidak muncul)
-
----
-
-## Plan B: Kategori `homemade` — SELESAI (semua fase diimplementasikan)
-
-### Latar Belakang & Keputusan Desain
-
-**Target user**: UMKM produksi skala rumah — toko kue rumahan, kerajinan tangan, frozen food rumahan. Mereka:
-- Membeli bahan baku (tepung, mentega, kemasan) — **perlu modul material**
-- Tidak mencatat line production detail (tidak pakai Production Order, tidak pakai Contractor)
-- Langsung input produk jadi ke inventory setelah selesai produksi
-- Menjual via quick checkout (mirip retail)
-
-**Keputusan: kategori baru `homemade`** (bukan modifikasi `food`/`craft` yang sudah ada, bukan opsi di register step).
-
-Alasan:
-- `food` dan `craft` existing diasumsikan full-flow (preparation → production order). Mengubah perilaku mereka merusak tenant yang sudah pakai.
-- Kategori baru = config bersih, tidak ada conditional dalam conditional.
-- Satu langkah pilih di register (tidak ada step tambahan), konsisten dengan UX saat ini.
+**Keputusan: kategori baru `service`** — konsisten dengan keputusan `retail`/`homemade` (kategori baru, bukan opsi dalam kategori existing). Secara fungsional `service` = **superset retail**: semua fitur retail (inventory produk jadi, purchase receipt, quick checkout) + satu konsep baru: **Katalog Layanan**.
 
 ### Perbedaan vs Kategori Lain
 
-| Fitur | retail | homemade | food/craft/garment/cosmetic |
-|---|---|---|---|
-| Bahan baku (Materials) | ❌ | ✅ | ✅ |
-| Pattern / Resep | ❌ | ✅ (opsional) | ✅ |
-| Preparation Order | ❌ | ❌ | ✅ |
-| Production Order | ❌ | ❌ | ✅ |
-| Input Produk Jadi (Simple Production) | ❌ | ✅ **baru** | ❌ (lewat prod. order) |
-| Quick Checkout POS | ✅ | ✅ | ❌ |
-| Purchase Receipt (beli produk jadi) | ✅ | ❌ | ❌ |
+| Fitur | retail | homemade | **service** | full-flow (garment dll) |
+|---|---|---|---|---|
+| Bahan baku (Materials) | ❌ | ✅ | ❌ | ✅ |
+| Production / Preparation Order | ❌ | ❌ | ❌ | ✅ |
+| Simple Production | ❌ | ✅ | ❌ | ❌ |
+| Inventory produk fisik | ✅ | ✅ | ✅ (sparepart/produk jual) | ✅ |
+| Purchase Receipt | ✅ | ❌ | ✅ | ❌ |
+| **Katalog Layanan (Services)** | ❌ | ❌ | ✅ **baru** | ❌ |
+| Quick Checkout POS | ✅ | ✅ | ✅ (layanan + produk dalam satu cart) | ❌ |
+
+### Blocker Teknis Utama (WAJIB dibaca sebelum implementasi)
+
+1. **`sales_order_items.inventory_item_id` adalah NOT NULL + FK cascade** (`2026_01_07_000001_create_sales_tables.php:50`). Line item layanan tidak punya inventory item → kolom harus jadi nullable + tambah `service_id` nullable FK. Migrasi menyentuh tabel yang dipakai SEMUA kategori — harus additive, dan ingat aturan Laravel 12: saat modify kolom, sertakan semua atribut yang sebelumnya didefinisikan.
+2. **`SalesOrderObserver` adalah single source of truth untuk stok** (reserve saat confirmed, deduct saat completed, release saat cancelled). Observer harus **skip line item layanan** (`service_id` terisi, `inventory_item_id` null) — layanan tidak punya stok. Jangan tambah manual stock call di controller.
+3. Banyak kode existing meng-assume relasi `items.inventoryItem` selalu ada (eager load, invoice print, export, report sales). Audit semua pemakaian sebelum membuat `inventory_item_id` nullable; gunakan `product_name` (sudah ada, nullable) sebagai display name fallback untuk line layanan.
 
 ### Prinsip Desain
 
-1. **Additive only** — tambah kategori ke `config/business.php`, tidak ubah tabel.
-2. **Reuse maksimal** — material, material_receipts, inventory, sales sudah ada. Hanya perlu satu fitur baru: "Simple Production" (input produk jadi).
-3. **UI gating** — sama dengan retail: sidebar + dashboard filter via `rules`.
-4. **"Simple Production" bukan fork Production Order** — halaman sederhana satu form, bukan state machine. Tidak pakai tabel `production_orders`.
+1. **Additive only** — kategori baru di `config/business.php`; satu tabel baru `services`; alter `sales_order_items` hanya menambah/melonggarkan kolom (nullable), tidak mengubah perilaku kategori lain.
+2. **Reuse maksimal** — inventory, purchase receipt, quick checkout, dashboard retail, laporan sudah ada. Fitur benar-benar baru hanya: katalog layanan + dukungan service line di sales order.
+3. **UI gating via `rules`** — sama dengan retail/homemade: sidebar + DashboardController baca `rules` dari `useBusinessContext()`, tanpa hardcode kategori.
+4. **Validasi line item**: tepat satu dari `inventory_item_id` / `service_id` terisi. Enforce di Form Request (bukan DB check constraint, supaya portable pgsql/mysql).
 
 ### Roadmap Implementasi
 
-#### Fase 1: Config Kategori `homemade` ✅ SELESAI
+#### Fase 1: Config Kategori `service`
 
 **File**: `config/business.php`
 
 ```php
-'homemade' => [
-    'label' => 'Produksi Rumahan',
-    'description' => 'UMKM yang membuat produk sendiri dari bahan baku, tanpa alur produksi formal',
-    'icon' => 'home',
-    'mode' => 'homemade',
+'service' => [
+    'label' => 'Jasa & Layanan',
+    'description' => 'UMKM bidang jasa: bengkel, salon, barbershop, laundry, service elektronik',
+    'icon' => 'wrench',
+    'mode' => 'service',
     'terminology' => [
-        'material'         => 'Bahan Baku',
-        'inventory'        => 'Produk Jadi',
-        'production'       => 'Catatan Produksi',
-        'production_order' => 'Catatan Produksi',
-        'preparation'      => 'Resep',
+        'material'         => 'N/A',
+        'inventory'        => 'Produk & Sparepart',
+        'production'       => 'N/A',
+        'production_order' => 'N/A',
+        'preparation'      => 'N/A',
         'contractor'       => 'N/A',
+        'service'          => 'Layanan',          // key terminologi baru
     ],
-    'material_types' => ['bahan_baku', 'kemasan', 'bahan_tambahan'],
+    'material_types' => [],
     'material_attributes' => [],
     'rules' => [
-        'enable_production_flow'    => false,   // sembunyikan Production Order full
-        'enable_material_module'    => true,    // bahan baku tetap ada
-        'enable_preparation_module' => true,    // resep opsional
-        'enable_pattern_module'     => true,    // alias resep
-        'enable_contractor_module'  => false,   // tidak pakai kontraktor
-        'enable_simple_production'  => true,    // flag baru: "Catatan Produksi" sederhana
-        'enable_inventory_module'   => true,
+        'enable_production_flow'    => false,
+        'enable_material_module'    => false,
+        'enable_preparation_module' => false,
+        'enable_pattern_module'     => false,
+        'enable_contractor_module'  => false,
+        'enable_simple_production'  => false,
+        'enable_inventory_module'   => true,   // sparepart / produk jual
         'enable_sales_module'       => true,
-        'enable_purchase_module'    => false,   // tidak beli produk jadi
-        'track_batch_number'        => true,    // useful untuk food (nomor batch produksi)
-        'track_expired_date'        => true,    // expired date untuk food
+        'enable_purchase_module'    => true,   // beli sparepart/produk seperti retail
+        'enable_service_module'     => true,   // flag baru: katalog layanan
+        'track_batch_number'        => false,
+        'track_expired_date'        => false,
     ],
 ],
 ```
 
-Tambah `'homemade'` ke `enabled_categories`. Tidak perlu migrasi.
+Tambah `'service'` ke `enabled_categories`. Tambah computed `isServiceMode` / `hasServiceModule` di `useBusinessContext.ts`.
 
-#### Fase 2: Sidebar Filtering ✅ SELESAI
+#### Fase 2: Migrasi
 
-`Sidebar.vue` sudah pakai `isModuleEnabled` — extend:
-- Sembunyikan "Kontraktor" kalau `!enable_contractor_module`
-- Sembunyikan "Production Order" kalau `!enable_production_flow` (sudah ada via `isRetailMode`, perlu generalisasi ke `enable_production_flow`)
-- Tampilkan "Catatan Produksi" kalau `enable_simple_production`
+**Tabel baru `services`** (tenant-scoped, pola sama dengan master data lain):
 
-Composable `useBusinessContext.ts`:
-```ts
-const isSimpleProductionMode = computed<boolean>(() =>
-    businessContext.value?.rules?.enable_simple_production === true
-)
+```sql
+CREATE TABLE services (
+    id BIGSERIAL PRIMARY KEY,
+    tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    code VARCHAR(50) NOT NULL,             -- auto-generate, unique per tenant
+    name VARCHAR(255) NOT NULL,            -- "Cukur Dewasa", "Ganti Oli", "Cuci Kiloan /kg"
+    category VARCHAR(100),                 -- grouping bebas: "Potong Rambut", "Servis Ringan"
+    description TEXT,
+    price NUMERIC(15,2) NOT NULL,
+    duration_minutes INTEGER,              -- opsional, estimasi durasi
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP, updated_at TIMESTAMP,
+    CONSTRAINT services_tenant_code_unique UNIQUE (tenant_id, code)
+);
 ```
 
-#### Fase 3: "Catatan Produksi" (Simple Production Entry) ✅ SELESAI
+Model `Service`: `TenantScope` global scope + auto-fill `tenant_id` di `booted()` + trait `HasAuditLogs` — ikuti pola model tenant-owned existing. **Unique langsung per-tenant dari awal** (jangan ulangi bug global-unique yang dulu diperbaiki di `2026_04_30_*`/`2026_05_01_*`).
 
-Ini satu-satunya fitur baru yang membutuhkan controller + halaman baru. **Tidak pakai tabel baru** — reuse `stock_adjustments` + `material_receipts`.
+**Alter `sales_order_items`** (satu migrasi):
+- `inventory_item_id` → nullable (pertahankan FK + semua atribut lain saat modify).
+- Tambah `service_id` BIGINT nullable, FK ke `services(id)` ON DELETE RESTRICT (line layanan di transaksi historis tidak boleh hilang karena layanan dihapus — soft-deactivate via `is_active`).
 
-**Alur**:
-1. User pilih resep (opsional) atau input manual
-2. Input: produk yang dibuat, qty yang dihasilkan, bahan baku yang dipakai (per item + qty)
-3. Submit:
-   - Per bahan baku: create `StockAdjustment` type `subtract` (deduct bahan baku)
-   - Untuk produk jadi: create `InventoryItem` baru atau update `current_quantity` item existing + create `StockAdjustment` type `add` dengan `adjustment_type = 'production_entry'`
-4. Semua adjustment di-group via `batch_id` (kolom sudah ada dari Fase 4 Plan A)
+#### Fase 3: CRUD Katalog Layanan
 
-**Controller**: `SimpleProductionController` (resource, tidak pakai `production_orders`)
+- `ServiceController` (resource) + Form Requests; FK validation pakai `Rule::exists('services','id')->where('tenant_id', ...)`.
+- Permission baru: `service.view`, `service.edit`; route middleware `permission:service.*`.
+- Vue pages `resources/js/pages/Services/` (Index, Form) — pola CRUD master data existing; dark mode wajib.
+- Sidebar: menu "Layanan" muncul bila `rules.enable_service_module`.
+- Regenerate Wayfinder setelah route baru.
 
-**Form fields**:
-- Tanggal produksi
-- Pilih inventory item (produk jadi) atau buat baru inline
-- Qty dihasilkan
-- Catatan / batch number
-- Section bahan baku: multi-row (material + qty pakai)
+#### Fase 4: Service Line di Sales Order + Quick Checkout
 
-**Migrasi**: tidak perlu — `adjustment_type = 'production_entry'` adalah nilai string baru di kolom existing.
+- `SalesOrderItem`: tambah relasi `service()`; validasi Form Request "tepat satu dari `inventory_item_id`/`service_id`"; snapshot `product_name` + harga dari service saat create (harga layanan bisa berubah, transaksi historis tidak boleh ikut berubah).
+- **`SalesOrderObserver`: skip semua stock transition untuk line dengan `service_id`** — tidak ada reserve/deduct/release.
+- `QuickCheckout.vue`: tab/section "Layanan" di samping grid produk; layanan dan produk bisa campur dalam satu cart. Untuk tenant service, tab Layanan jadi default.
+- Invoice print + export CSV: tampilkan nama layanan dari `product_name`/relasi service; pastikan tidak error saat `inventoryItem` null.
 
-#### Fase 4: Permission Seeder ✅ SELESAI
+#### Fase 5: Dashboard `service`
 
-Role `homemade_admin`, `homemade_staff`:
-- `material.view`, `material.edit`
-- `pattern.view` (resep)
-- `inventory.view`, `inventory.edit`
-- `sales.view`, `sales.edit`
-- `report.view`
-- Permission baru: `simple_production.view`, `simple_production.edit`
-- TIDAK ada `production.view`, `production.edit`, `purchase.view`
+`DashboardController` fork `serviceDashboard()` bila `enable_service_module` (pola sama `retailDashboard()`/`homemadeDashboard()`):
+- Omzet hari ini / bulan ini, split **jasa vs produk**.
+- Layanan terlaris 30 hari.
+- Top produk/sparepart terjual.
+- Low stock produk/sparepart (reuse logic retail).
 
-#### Fase 5: Dashboard `homemade` ✅ SELESAI
+Vue: `ServiceDashboard.vue` — fork ringan dari `RetailDashboard.vue` + section layanan.
 
-Fork `DashboardController`: kalau `enable_simple_production && !enable_production_flow`, return dashboard yang tampilkan:
-- Stok bahan baku rendah (peringatan)
-- Produksi hari ini (dari `stock_adjustments` type `production_entry` hari ini)
-- Omzet hari ini / bulan ini
-- Top produk terjual
-- Value inventory produk jadi
+#### Fase 6: Laporan Layanan
 
-Bisa reuse sebagian besar `RetailDashboard.vue` — tambah section "Stok Bahan Baku".
+- `reports.service`: rekap penjualan layanan per periode (qty, omzet per layanan, per kategori layanan) — query `sales_order_items` where `service_id` not null. Export Excel + PDF (pola `PurchaseReport`).
+- Laporan sales existing: pastikan line layanan ikut terhitung di omzet (kemungkinan sudah otomatis via `total_amount`, verifikasi query yang join `inventory_items`).
+- Sidebar Laporan untuk tenant service: tampilkan Penjualan, Layanan, Pembelian, Inventory; sembunyikan Material + Produksi.
 
-#### Fase 6: Quick Checkout untuk `homemade` ✅ SELESAI
+#### Fase 7: Permission Seeder, Onboarding, Demo Tenant
 
-Reuse `QuickCheckout.vue` existing — sudah tidak terikat kategori `retail` secara hardcode. Verifikasi bahwa `isRetailMode` sudah generalized ke `!enable_production_flow || enable_simple_production`, atau tambah computed terpisah `useQuickCheckout`.
+- PermissionSeeder: tambah `service.view`, `service.edit` (tanpa role kategori terpisah — konsisten retail/homemade, pakai `users.role`).
+- Onboarding saat register kategori `service`: auto-create `InventoryLocation` default ("Etalase / Gudang"), `Customer` default ("Walk-in Customer"), contoh kategori layanan + 2–3 layanan contoh.
+- Demo tenant baru: `admin@bengkelberkah.com` (bengkel motor) — seeder `ServiceTenantSeeder` (pola `HomemadeTenantSeeder`): katalog layanan (ganti oli, servis ringan, tambal ban), sparepart di inventory, beberapa transaksi campur jasa+produk. Daftarkan di `demo:reset`.
 
-#### Fase 7: Onboarding Default Data ✅ SELESAI
+#### Fase 8: Test Integrasi
 
-Pas register kategori `homemade`:
-1. Auto-create `MaterialType` default ("Bahan Baku", "Kemasan")
-2. Auto-create `InventoryLocation` default ("Dapur / Workshop")
-3. Auto-create `Customer` default ("Walk-in Customer")
-4. Auto-create `InventoryItemCategory` contoh ("Kue Kering", "Minuman", "Kemasan")
-
-#### Fase 8: Test Integrasi ✅ SELESAI
-
-File: `tests/Feature/Integration/HomemadeWorkflowTest.php`
+File: `tests/Feature/Integration/ServiceWorkflowTest.php`
 
 Cover:
-1. Register tenant `homemade` → sidebar tampil Material, Resep, Catatan Produksi; tidak tampil Production Order, Kontraktor
-2. Beli bahan baku (`material_receipt`) → stok bahan baku bertambah
-3. Catat produksi sederhana → bahan baku berkurang, produk jadi bertambah di inventory
-4. Quick checkout → stok produk jadi berkurang, SO `completed`
+1. Register tenant `service` → sidebar tampil Layanan, Inventory, Pembelian, Quick Checkout; TIDAK tampil Material, Produksi, Kontraktor, Catatan Produksi.
+2. CRUD layanan → code unique per tenant (tenant lain boleh pakai code sama).
+3. Purchase receipt sparepart → stok bertambah.
+4. Quick checkout campur: 1 layanan + 1 sparepart → SO `completed`; stok sparepart berkurang; **stok TIDAK berkurang/error untuk line layanan**.
+5. Laporan layanan → agregat benar; export 200.
+6. Regression observer: tenant non-service buat SO normal → reserve/deduct tetap jalan (pastikan skip logic tidak bocor).
+
+Tambah juga unit/feature test khusus observer untuk service line (draft→confirmed→completed→cancelled tidak menyentuh stok).
 
 ### Estimasi Effort
 
 | Fase | Effort | Blocker |
 |---|---|---|
-| 1. Config `homemade` | 0.5 hari | - |
-| 2. Sidebar filtering generalisasi | 0.5 hari | Fase 1 |
-| 3. Simple Production Controller + UI | 3 hari | Fase 1; batch_id dari Plan A sudah ada |
-| 4. Permission seeder | 0.5 hari | Fase 1 |
-| 5. Dashboard homemade | 1 hari | Fase 2 |
-| 6. Quick Checkout generalisasi | 0.5 hari | Fase 2 |
-| 7. Onboarding data | 0.5 hari | Fase 1 |
-| 8. Test integrasi | 1.5 hari | Semua fase selesai |
-| **Total** | **8 hari** + 1 hari QA | - |
+| 1. Config `service` | 0.5 hari | - |
+| 2. Migrasi services + alter sales_order_items | 1 hari | - |
+| 3. CRUD Katalog Layanan | 1.5 hari | Fase 1–2 |
+| 4. Service line SO + Quick Checkout + Observer | 3 hari | Fase 2; **paling berisiko** |
+| 5. Dashboard service | 1 hari | Fase 1 |
+| 6. Laporan layanan | 1 hari | Fase 4 |
+| 7. Seeder + onboarding + demo tenant | 1 hari | Fase 1–3 |
+| 8. Test integrasi | 1.5 hari | Semua |
+| **Total** | **10.5 hari** + 1 hari QA | - |
 
 ### Acceptance Criteria
 
-- Tenant baru pilih "Produksi Rumahan" → sidebar: Dashboard, Bahan Baku, Resep (opsional), Catatan Produksi, Inventory Produk Jadi, Penjualan (Quick Checkout), Laporan, Pengaturan. Tidak ada: Production Order, Kontraktor, Pembelian Produk Jadi.
-- Workflow: beli bahan baku → catat produksi (bahan baku berkurang, produk jadi masuk inventory) → quick checkout (produk jadi berkurang, transaksi tersimpan).
-- Tenant `food`/`craft`/`garment`/`cosmetic`/`retail` existing: tidak ada perubahan visible.
-- Tidak ada migrasi yang menyentuh tabel yang dipakai kategori lain.
-- Test `HomemadeWorkflowTest.php` hijau.
+- Tenant baru pilih "Jasa & Layanan" → sidebar: Dashboard, Layanan, Produk & Sparepart (inventory), Pembelian, Penjualan (Quick Checkout), Riwayat Penjualan, Laporan, Pengaturan. Tidak ada: Bahan Baku, Pattern/Resep, Persiapan, Production Order, Kontraktor, Catatan Produksi.
+- Quick checkout bisa campur layanan + produk dalam satu transaksi; stok hanya berubah untuk produk.
+- Harga layanan diubah → transaksi historis tidak berubah (snapshot).
+- Tenant kategori lain: tidak ada perubahan visible; semua test existing tetap hijau (terutama SalesOrder observer test).
+- `ServiceWorkflowTest.php` hijau.
 
 ### Risiko & Mitigasi
 
 | Risiko | Mitigasi |
 |---|---|
-| `isRetailMode` hardcoded di beberapa tempat, tidak cover `homemade` | Grep `isRetailMode` sebelum implementasi; ganti ke logika generik `!enable_production_flow` |
-| Simple Production deduct bahan baku: race condition kalau qty tidak cukup | Validasi di controller sebelum create adjustments; wrap dalam DB transaction |
-| User `homemade` bingung perbedaan "Resep" vs "Catatan Produksi" | Copy UI: Resep = template (opsional), Catatan Produksi = actual entry. Onboarding tooltip. |
-| `stock_adjustments` makin overloaded (purchase + production_entry + correction) | Filter ketat di setiap UI berdasarkan `adjustment_type`; tidak campur di list umum |
+| Nullable `inventory_item_id` memecah kode yang assume relasi selalu ada (print, export, report) | Grep semua pemakaian `inventoryItem`/`inventory_item_id` di SO sebelum migrasi; null-safe access + fallback `product_name` |
+| Skip logic observer bocor → stok produk tidak ter-deduct, atau line layanan error | Test observer eksplisit per transisi status, untuk service line dan mixed cart |
+| `total_amount` SO query report join `inventory_items` → line layanan hilang dari omzet | Verifikasi semua report query; hitung dari `sales_order_items` langsung, bukan via join inventory |
+| Migrasi modify kolom drop atribut (perilaku Laravel 12) | Tulis ulang definisi kolom lengkap di migrasi alter; test migrate fresh pgsql + mysql |
+| Scope creep: booking, komisi, work order | Tegas out of scope (lihat bawah); rilis MVP kasir dulu |
+
+### Fase Opsional (setelah MVP, kalau ada demand)
+
+- **Staff assignment per layanan**: kolom `served_by` (FK `staff`) nullable di `sales_order_items` + laporan omzet per staff → dasar perhitungan komisi salon/barbershop.
+- **Consumable auto-deduct**: layanan tertentu otomatis deduct produk (ganti oli → deduct 1 botol oli) via mapping service→inventory item.
 
 ### Out of Scope
 
-- Perhitungan HPP otomatis per produk (butuh cost allocation yang kompleks).
-- Waste/scrap tracking dari produksi.
-- Multi-batch produksi paralel.
-- Perencanaan produksi (MRP lite).
-
-### Catatan Post-Implementasi (Review Mei 2026)
-
-**Bug yang ditemukan dan diperbaiki saat review:**
-1. `Sidebar.vue:34` — `rules` tidak di-destructure dari `useBusinessContext()` → runtime error saat akses `rules.value.enable_simple_production`. Fix: tambah `rules` ke destructure.
-2. `Sidebar.vue` — Quick Checkout muncul dua kali untuk homemade (top-level "Penjualan" + child di Sales Order section). Fix: kondisi child berubah ke `!retail && !hasSimpleProduction`; nama section Sales jadi "Riwayat Penjualan" untuk homemade.
-
-**Deviasi dari plan (intentional):**
-- Role RBAC `homemade_admin`/`homemade_staff` tidak dibuat di PermissionSeeder. Konsisten dengan retail yang juga tidak punya role terpisah — sistem pakai `users.role = 'admin'/'manager'/'staff'` untuk simple role check.
-- `SimpleProductionController::store()` deduct bahan baku via `PreparationOrder` (reuse FIFO logic dari service), bukan langsung `StockAdjustment`. Ini lebih konsisten dengan alur existing tapi menambah `preparation_orders` record tersembunyi.
-- `show()` match PrepOrder via `notes LIKE` — fragile kalau ada banyak produksi di hari sama. Low priority tapi perlu refactor ke simpan `preparation_order_id` di `StockAdjustment` atau metadata.
-- `customers.code` per-tenant unique diperbaiki langsung di migration original (bukan via alter migration terpisah) — konsisten dengan fresh install, tidak backward compatible untuk DB yang sudah running.
-- Demo tenant homemade pakai `subscription_plan: 'trial'` (bukan PRO).
+- Booking / appointment / antrian online.
+- Perhitungan komisi otomatis (persentase, payroll).
+- Work order tracking detail untuk bengkel (status kendaraan: diterima → dikerjakan → selesai → diambil) — status SO existing cukup untuk MVP.
+- Data aset pelanggan (kendaraan, riwayat servis per unit motor).
+- Paket/membership layanan (voucher 10x cuci).

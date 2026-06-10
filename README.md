@@ -2,7 +2,7 @@
 
 Platform SaaS multi-tenant untuk manajemen produksi dan penjualan UMKM Indonesia. Satu codebase melayani beberapa kategori bisnis lewat terminologi dinamis dan business rules per-kategori.
 
-**Status**: production-ready (per Mei 2026). Lihat [`docs/current-status.md`](docs/current-status.md) untuk detail modul yang aktif.
+**Status**: production-ready (per Juni 2026). Lihat [`docs/current-status.md`](docs/current-status.md) untuk detail modul yang aktif.
 
 ## Kategori Bisnis yang Didukung
 
@@ -135,7 +135,7 @@ php artisan trial:send-reminders            # email trial expiry (daily 09:00 vi
 | [`docs/05-user-flows.md`](docs/05-user-flows.md) | Alur user per kategori |
 | [`docs/current-status.md`](docs/current-status.md) | **Status aktual modul, dependency, gap** |
 | [`docs/code-review.md`](docs/code-review.md) | **Code review findings — severity-tagged** |
-| [`docs/plan.md`](docs/plan.md) | **Enhancement plans: retail (sisa) + kategori homemade** |
+| [`docs/plan.md`](docs/plan.md) | **Enhancement plan: kategori `service` (jasa — bengkel, salon, barbershop)** |
 | `CLAUDE.md` | Pedoman kerja untuk Claude Code |
 
 ## Konvensi Singkat
@@ -153,6 +153,7 @@ Detail lengkap konvensi: `CLAUDE.md` dan `.github/copilot-instructions.md`.
 
 Semua modul aktif (auth, RBAC, audit log, semua workflow produksi, sales, reports, dashboard, mode retail, mode homemade, Purchase Report, Quick Checkout POS, Telegram bot, email system). Yang belum:
 
+- **Kategori `service` (jasa: bengkel, salon, barbershop)** — planned, lihat [`docs/plan.md`](docs/plan.md).
 - Payment gateway terintegrasi (Midtrans/Xendit) — masih manual upload bukti.
 - Mobile app native.
 - Shipping API (JNE/JNT/SiCepat).

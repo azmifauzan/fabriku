@@ -140,7 +140,7 @@ This project has Laravel Boost (`laravel/boost`) installed. When available, pref
 - `docs/01-business-requirements.md` through `docs/05-user-flows.md` — original business/architecture/schema/API/user-flow specs.
 - `docs/current-status.md` — actual state of every module, gaps, what is NOT shipped.
 - `docs/code-review.md` — severity-tagged findings (CRITICAL / HIGH / MEDIUM / LOW). Read before extending Sales, Inventory, or AI modules.
-- `docs/plan.md` — enhancement plans: retail sisa (Purchase Report + `RetailWorkflowTest`) + kategori `homemade` baru (UMKM produksi rumahan tanpa production order).
+- `docs/plan.md` — enhancement plan aktif: kategori `service` baru (UMKM jasa — bengkel, salon, barbershop; katalog layanan + service line di sales order). Plan retail & homemade sudah selesai dan dipindah ke `current-status.md`.
 - `.github/copilot-instructions.md` — Laravel Boost guidelines (PHP/Eloquent/Inertia/Tailwind/Pest conventions). Authoritative for style.
 
 ## Demo accounts (dev)

@@ -1,6 +1,6 @@
 # API Endpoints & Routes - Fabriku
 
-> **Last Updated**: February 3, 2026
+> **Last Updated**: June 10, 2026
 
 ## Overview
 
@@ -51,6 +51,22 @@ Prefix: `/inventory`
 | POST | `/inventory/items/{id}/adjust` | Adjust stock (Correction, Damage, etc) |
 | GET | `/inventory/items/{id}/adjustments` | View adjustment history |
 
+#### Purchase Receipts (kategori `retail` saja)
+Permission: `purchase.view` / `purchase.edit`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/purchase-receipts` | List penerimaan pembelian (group per `batch_id`) |
+| POST | `/purchase-receipts` | Catat pembelian produk jadi (multi-item, satu batch) |
+| GET | `/purchase-receipts/batch/{batch_id}` | Detail satu batch pembelian |
+
+#### Simple Production / Catatan Produksi (kategori `homemade` saja)
+Permission: `simple_production.view` / `simple_production.create`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/simple-production` | List catatan produksi |
+| POST | `/simple-production` | Catat produksi: deduct bahan baku, tambah produk jadi |
+| GET | `/simple-production/{id}` | Detail catatan produksi |
+
 #### Materials & Production
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -74,6 +90,8 @@ Prefix: `/inventory`
 |--------|----------|-------------|
 | GET | `/sales-orders` | List sales orders |
 | POST | `/sales-orders` | Create sales order |
+| GET | `/sales-orders/quick-checkout` | Halaman POS Quick Checkout (retail + homemade) |
+| POST | `/sales-orders/quick-checkout` | Submit transaksi kasir (SO langsung `completed`) |
 | GET | `/sales-orders/{id}/print` | Print invoice/DO |
 | GET | `/sales-orders/{id}/export` | Export to PDF/Excel |
 | GET | `/customers` | List customers |
@@ -88,6 +106,8 @@ Prefix: `/reports`
 | GET | `/reports/sales` | Sales analysis |
 | GET | `/reports/sales-recap` | Recap view |
 | GET | `/reports/production` | Efficiency & defects report |
+| GET | `/reports/purchase` | Laporan pembelian per batch (retail) |
+| GET | `/reports/purchase/export` | Export laporan pembelian (Excel/PDF) |
 
 ### 3. Admin Panel (Super Admin)
 Prefix: `/admin`
