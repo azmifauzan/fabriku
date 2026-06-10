@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Customer;
+use App\Models\SalesOrder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SalesOrder>
+ * @extends Factory<SalesOrder>
  */
 class SalesOrderFactory extends Factory
 {
@@ -27,7 +29,7 @@ class SalesOrderFactory extends Factory
         return [
             'tenant_id' => 1,
             'order_number' => strtoupper(fake()->unique()->bothify('SO-######')),
-            'customer_id' => \App\Models\Customer::factory(),
+            'customer_id' => Customer::factory(),
             'order_date' => fake()->dateTimeBetween('-3 months', 'now'),
             'delivery_date' => fake()->optional()->dateTimeBetween('now', '+30 days'),
             'channel' => fake()->randomElement($channels),

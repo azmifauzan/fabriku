@@ -14,7 +14,7 @@ class SalesOrderItemObserver
         $salesOrder = $item->salesOrder;
 
         // If order is already confirmed/processing, reserve stock for this new item
-        if (in_array($salesOrder->status, ['confirmed', 'processing'])) {
+        if ($item->inventory_item_id && in_array($salesOrder->status, ['confirmed', 'processing'])) {
             $item->inventoryItem->increment('reserved_quantity', $item->quantity);
         }
     }
@@ -27,7 +27,7 @@ class SalesOrderItemObserver
         $salesOrder = $item->salesOrder;
 
         // If order is confirmed/processing, adjust reserved stock
-        if (in_array($salesOrder->status, ['confirmed', 'processing'])) {
+        if ($item->inventory_item_id && in_array($salesOrder->status, ['confirmed', 'processing'])) {
             if ($item->isDirty('quantity')) {
                 $difference = $item->quantity - $item->getOriginal('quantity');
 
@@ -48,7 +48,7 @@ class SalesOrderItemObserver
         $salesOrder = $item->salesOrder;
 
         // If order is confirmed/processing, release reserved stock
-        if (in_array($salesOrder->status, ['confirmed', 'processing'])) {
+        if ($item->inventory_item_id && in_array($salesOrder->status, ['confirmed', 'processing'])) {
             $item->inventoryItem->decrement('reserved_quantity', $item->quantity);
         }
     }

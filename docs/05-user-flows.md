@@ -492,9 +492,9 @@ Dokumen ini menjelaskan alur kerja pengguna (user flows) untuk berbagai proses b
 
 ---
 
-### Flow 9: Quick Checkout / POS (Retail & Homemade)
+### Flow 9: Quick Checkout / POS (Retail, Homemade & Service)
 
-**Applicable**: kategori `retail` dan `homemade`. Muncul di sidebar top-level "Penjualan".
+**Applicable**: kategori `retail`, `homemade`, dan `service`. Muncul di sidebar top-level "Penjualan". Untuk kategori `service`, grid juga menampilkan katalog layanan (badge "JASA", stok unlimited) dan satu cart bisa campur layanan + produk; line layanan tidak menyentuh stok.
 
 **Actor**: Sales Staff / Kasir
 
@@ -551,6 +551,39 @@ Dokumen ini menjelaskan alur kerja pengguna (user flows) untuk berbagai proses b
 
 **Error Cases**:
 - Stok bahan tidak cukup → validasi error sebelum simpan, tidak ada deduction parsial
+
+---
+
+### Flow 11: Service — Katalog Layanan & Penjualan Jasa
+
+**Applicable**: kategori `service` saja. Permission `service.view`. Menu "Layanan" di Master Data.
+
+**Actor**: Admin / Pemilik usaha jasa
+
+**Steps (kelola katalog)**:
+1. Navigate "Layanan" → "Tambah Layanan"
+2. Input: kode (unique per tenant), nama (mis. "Ganti Oli"), kategori bebas, harga, estimasi durasi (opsional), status aktif
+3. Layanan aktif otomatis muncul di grid Quick Checkout dengan badge "JASA"
+
+**Steps (kelola bahan pendukung — opsional)**:
+1. Di form layanan, section "Bahan Pendukung", pilih produk/sparepart + qty
+2. Saat layanan terjual, stok bahan ini otomatis berkurang (mis. Ganti Oli → 1 botol oli)
+
+**Steps (penjualan)** — lihat Flow 9; tambahan untuk service:
+- Satu cart bisa berisi layanan + produk fisik (sparepart/produk jual)
+- Line layanan: harga snapshot ke `sales_order_items`, tidak ada reservasi/deduksi stok untuk layanan itu sendiri
+- Line produk: stok berkurang normal
+- Per baris layanan dapat dipilih staff yang mengerjakan (`served_by`) — masuk laporan omzet per staff
+- Bahan pendukung (consumables) yang ter-mapping ke layanan otomatis ter-deduct; jika stok bahan tidak cukup, transaksi ditolak
+
+**Postcondition tambahan**: stok bahan pendukung berkurang sesuai mapping; laporan layanan (`/reports/service`) menampilkan rekap per layanan + per staff.
+
+**Error Cases**:
+- Hapus layanan yang pernah dipakai transaksi → ditolak dengan pesan, sarankan nonaktifkan (`is_active = false`)
+- Satu baris berisi produk DAN layanan sekaligus → validasi error
+- `service_id` milik tenant lain → validasi error (tenant-scoped `Rule::exists`)
+
+**Postcondition**: SO `completed` + `paid`; stok hanya berubah untuk line produk
 
 ---
 

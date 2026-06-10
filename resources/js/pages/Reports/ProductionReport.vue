@@ -133,7 +133,7 @@ const exportReport = (format: 'pdf' | 'excel') => {
                                 </button>
                                 <div
                                     v-if="showExportMenu"
-                                    class="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800"
+                                    class="ring-opacity-5 absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black dark:bg-gray-800"
                                 >
                                     <button
                                         type="button"
@@ -334,9 +334,7 @@ const exportReport = (format: 'pdf' | 'excel') => {
                                         {{ formatCurrency(order.total_cost) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div v-if="order.sent_date" class="text-xs text-gray-500 dark:text-gray-400">
-                                            Sent: {{ order.sent_date }}
-                                        </div>
+                                        <div v-if="order.sent_date" class="text-xs text-gray-500 dark:text-gray-400">Sent: {{ order.sent_date }}</div>
                                         <div v-if="order.estimated_date" class="text-xs text-gray-500 dark:text-gray-400">
                                             Est: {{ order.estimated_date }}
                                         </div>

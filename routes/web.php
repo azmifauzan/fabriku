@@ -30,10 +30,11 @@ use App\Http\Controllers\ProductionOrderController;
 use App\Http\Controllers\PurchaseReceiptController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalesOrderController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SimpleProductionController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\SimpleProductionController;
 use App\Http\Controllers\TelegramController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Models\SystemSetting;
@@ -160,6 +161,11 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
     Route::resource('material-types', MaterialTypeController::class)
         ->middleware('permission:material.view');
 
+    // Services Management
+    Route::resource('services', ServiceController::class)
+        ->except(['show'])
+        ->middleware('permission:service.view');
+
     // Staff Management (admin-only enforced in controller)
     Route::resource('staff', StaffController::class);
 
@@ -251,6 +257,8 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
         Route::get('production/export', [ReportController::class, 'exportProduction'])->name('production.export');
         Route::get('purchase', [ReportController::class, 'purchase'])->name('purchase');
         Route::get('purchase/export', [ReportController::class, 'exportPurchase'])->name('purchase.export');
+        Route::get('service', [ReportController::class, 'service'])->name('service');
+        Route::get('service/export', [ReportController::class, 'exportService'])->name('service.export');
     });
 
     // Settings

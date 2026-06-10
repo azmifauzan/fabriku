@@ -40,7 +40,6 @@ test('can create preparation order', function () {
     $response = $this->post('/preparation-orders', [
         'pattern_id' => $pattern->id,
         'order_date' => now()->toDateString(),
-        'prepared_by' => $this->user->id,
         'output_quantity' => 10,
         'output_unit' => 'pieces',
         'materials_used' => [
@@ -124,16 +123,17 @@ test('users can only see their tenant preparation orders', function () {
 
 test('can update preparation order', function () {
     $material = Material::factory()->create(['tenant_id' => $this->tenant->id, 'stock_quantity' => 100]);
+    $pattern = Pattern::factory()->create(['tenant_id' => $this->tenant->id]);
 
     $order = PreparationOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
+        'pattern_id' => $pattern->id,
         'status' => 'draft',
     ]);
 
     $response = $this->put("/preparation-orders/{$order->id}", [
-        'pattern_id' => $order->pattern_id,
+        'pattern_id' => $pattern->id,
         'order_date' => $order->preparation_date->toDateString(),
-        'prepared_by' => $order->prepared_by,
         'output_quantity' => 20,
         'output_unit' => 'pieces',
         'materials_used' => [

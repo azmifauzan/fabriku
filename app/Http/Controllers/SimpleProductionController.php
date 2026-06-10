@@ -123,9 +123,9 @@ class SimpleProductionController extends Controller
         // Check material stock availability first
         $insufficient = $this->stockService->checkStockAvailability($validated['materials']);
 
-        if (!empty($insufficient)) {
+        if (! empty($insufficient)) {
             return back()->withErrors([
-                'materials' => 'Stok bahan baku tidak mencukupi untuk beberapa item: ' .
+                'materials' => 'Stok bahan baku tidak mencukupi untuk beberapa item: '.
                     implode(', ', array_column($insufficient, 'material_name')),
             ])->withInput();
         }
@@ -136,7 +136,7 @@ class SimpleProductionController extends Controller
                 $item = InventoryItem::create([
                     'tenant_id' => $tenantId,
                     'product_name' => $validated['product_name'],
-                    'product_code' => $validated['product_code'] ?? 'FG-' . strtoupper(Str::random(5)),
+                    'product_code' => $validated['product_code'] ?? 'FG-'.strtoupper(Str::random(5)),
                     'source_type' => 'production',
                     'location_id' => $validated['location_id'],
                     'category_id' => $validated['category_id'] ?? null,
@@ -155,7 +155,7 @@ class SimpleProductionController extends Controller
 
             // 2. Find or create generic Pattern if not provided
             $patternId = $validated['pattern_id'] ?? null;
-            if (!$patternId) {
+            if (! $patternId) {
                 $genericPattern = Pattern::firstOrCreate(
                     ['tenant_id' => $tenantId, 'code' => 'GENERIC'],
                     [
@@ -173,8 +173,9 @@ class SimpleProductionController extends Controller
                 'pattern_id' => $patternId,
                 'output_quantity' => $validated['quantity'],
                 'output_unit' => 'pcs',
-                'material_usage' => array_map(function($m) {
+                'material_usage' => array_map(function ($m) {
                     $mat = Material::find($m['material_id']);
+
                     return [
                         'material_id' => $m['material_id'],
                         'material_name' => $mat?->name ?? 'Unknown',
@@ -186,7 +187,7 @@ class SimpleProductionController extends Controller
                 'status' => 'completed',
                 'preparation_date' => $validated['production_date'],
                 'completed_date' => $validated['production_date'],
-                'notes' => 'Otomatis dibuat oleh Catatan Produksi Sederhana. ' . ($validated['notes'] ?? ''),
+                'notes' => 'Otomatis dibuat oleh Catatan Produksi Sederhana. '.($validated['notes'] ?? ''),
             ]);
 
             // 4. Calculate actual cost of goods sold based on deducted material receipts
@@ -217,7 +218,7 @@ class SimpleProductionController extends Controller
 
             // 6. Update finished goods inventory item stock and unit cost
             $item->increment('current_quantity', $validated['quantity']);
-            
+
             $updateData = [];
             if ($calculatedUnitCost > 0) {
                 $updateData['unit_cost'] = $calculatedUnitCost;
@@ -225,7 +226,7 @@ class SimpleProductionController extends Controller
             if (isset($validated['expired_date'])) {
                 $updateData['expired_date'] = $validated['expired_date'];
             }
-            if (!empty($updateData)) {
+            if (! empty($updateData)) {
                 $item->update($updateData);
             }
         });

@@ -71,6 +71,7 @@ return [
                 'track_expired_date' => false,
                 'require_storage_temp' => false,
                 'enable_purchase_module' => false,
+                'enable_service_module' => false,
             ],
         ],
 
@@ -128,6 +129,7 @@ return [
                 'require_storage_temp' => true,
                 'shelf_life_alert_days' => 7, // Alert 7 hari sebelum expired
                 'enable_purchase_module' => false,
+                'enable_service_module' => false,
             ],
         ],
 
@@ -180,6 +182,7 @@ return [
                 'track_expired_date' => false,
                 'require_storage_temp' => false,
                 'enable_purchase_module' => false,
+                'enable_service_module' => false,
             ],
         ],
 
@@ -223,6 +226,7 @@ return [
                 'enable_inventory_module' => true,
                 'enable_sales_module' => true,
                 'enable_purchase_module' => true,
+                'enable_service_module' => false,
                 'track_batch_number' => false,
                 'track_expired_date' => true,
             ],
@@ -281,6 +285,7 @@ return [
                 'shelf_life_alert_days' => 30,
                 'require_bpom' => true, // Khusus Indonesia
                 'enable_purchase_module' => false,
+                'enable_service_module' => false,
             ],
         ],
 
@@ -329,8 +334,55 @@ return [
                 'enable_inventory_module' => true,
                 'enable_sales_module' => true,
                 'enable_purchase_module' => false,
+                'enable_service_module' => false,
                 'track_batch_number' => true,
                 'track_expired_date' => true,
+            ],
+        ],
+
+        'service' => [
+            'label' => 'Jasa & Layanan',
+            'description' => 'UMKM bidang jasa: bengkel, salon, barbershop, laundry, service elektronik',
+            'icon' => '🔧',
+            'mode' => 'service',
+            'sku_prefix' => 'SVC-',
+
+            'terminology' => [
+                'material' => 'N/A',
+                'pattern' => 'N/A',
+                'preparation' => 'N/A',
+                'preparation_order' => 'N/A',
+                'production' => 'N/A',
+                'production_order' => 'N/A',
+                'contractor' => 'N/A',
+                'service' => 'Layanan',
+            ],
+
+            'product_types' => [
+                'layanan' => 'Jasa/Layanan',
+                'sparepart' => 'Sparepart/Suku Cadang',
+                'produk' => 'Produk Retail',
+                'lainnya' => 'Lainnya',
+            ],
+
+            'sizes' => [],
+
+            'material_types' => [],
+            'material_attributes' => [],
+
+            'rules' => [
+                'enable_production_flow' => false,
+                'enable_material_module' => false,
+                'enable_preparation_module' => false,
+                'enable_pattern_module' => false,
+                'enable_contractor_module' => false,
+                'enable_simple_production' => false,
+                'enable_inventory_module' => true,
+                'enable_sales_module' => true,
+                'enable_purchase_module' => true,
+                'enable_service_module' => true,
+                'track_batch_number' => false,
+                'track_expired_date' => false,
             ],
         ],
     ],
@@ -354,5 +406,5 @@ return [
     | dengan mengubah 'enabled' => true di konfigurasi kategori di atas.
     |
     */
-    'enabled_categories' => ['garment', 'food', 'craft', 'cosmetic', 'retail', 'homemade'],
+    'enabled_categories' => ['garment', 'food', 'craft', 'cosmetic', 'retail', 'homemade', 'service'],
 ];

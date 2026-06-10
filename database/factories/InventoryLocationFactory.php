@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\InventoryLocation;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\InventoryLocation>
+ * @extends Factory<InventoryLocation>
  */
 class InventoryLocationFactory extends Factory
 {

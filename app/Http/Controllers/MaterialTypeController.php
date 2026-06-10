@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Material;
 use App\Models\MaterialType;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -92,7 +93,7 @@ class MaterialTypeController extends Controller
     public function destroy(MaterialType $materialType)
     {
         // Check if any materials use this type
-        if (\App\Models\Material::where('material_type_id', $materialType->id)->exists()) {
+        if (Material::where('material_type_id', $materialType->id)->exists()) {
             return back()->with('error', 'Jenis bahan tidak bisa dihapus karena masih digunakan oleh bahan baku.');
         }
 

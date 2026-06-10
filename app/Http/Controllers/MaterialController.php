@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreMaterialRequest;
 use App\Http\Requests\UpdateMaterialRequest;
 use App\Models\Material;
+use App\Models\MaterialReceipt;
 use App\Models\MaterialType;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class MaterialController extends Controller
@@ -95,7 +97,7 @@ class MaterialController extends Controller
         // Create initial receipt/batch if stock quantity is provided
         if ($initialStock > 0) {
             $year = now()->year;
-            $count = \App\Models\MaterialReceipt::whereYear('created_at', $year)->count() + 1;
+            $count = MaterialReceipt::whereYear('created_at', $year)->count() + 1;
             $receiptNumber = sprintf('REC-%d-%04d', $year, $count);
 
             $receiptData = [
@@ -213,7 +215,7 @@ class MaterialController extends Controller
         if ($request->hasFile('image')) {
             // Delete old image if exists
             if ($material->image_path) {
-                \Illuminate\Support\Facades\Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->delete($material->image_path);
+                Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->delete($material->image_path);
             }
 
             $tenantId = auth()->user()->tenant_id;
@@ -252,7 +254,7 @@ class MaterialController extends Controller
         }
 
         if ($material->image_path) {
-            \Illuminate\Support\Facades\Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->delete($material->image_path);
+            Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->delete($material->image_path);
         }
 
         $material->delete();

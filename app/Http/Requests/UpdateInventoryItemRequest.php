@@ -86,6 +86,7 @@ class UpdateInventoryItemRequest extends FormRequest
             'selling_price' => 'nullable|numeric|min:0',
 
             'quality_grade' => 'nullable|in:grade_a,grade_b,reject,A,B,Reject',
+            'expired_date' => ['nullable', 'date'],
             'status' => 'nullable|in:available,reserved,damaged,expired',
             'notes' => 'nullable|string|max:1000',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',

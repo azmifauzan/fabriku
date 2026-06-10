@@ -8,15 +8,17 @@ use App\Models\Material;
 use App\Models\PreparationOrder;
 use App\Models\ProductionOrder;
 use App\Models\SalesOrder;
+use App\Models\Service;
 use App\Models\StockAdjustment;
 use App\Models\Tenant;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): Response|\Illuminate\Http\RedirectResponse
+    public function index(): Response|RedirectResponse
     {
         $tenantId = auth()->user()->tenant_id;
 
@@ -26,16 +28,27 @@ class DashboardController extends Controller
         $enableProductionFlow = $categoryConfig['rules']['enable_production_flow'] ?? true;
         $enableSimpleProduction = $categoryConfig['rules']['enable_simple_production'] ?? false;
 
+        $enableServiceModule = $categoryConfig['rules']['enable_service_module'] ?? false;
+
         if (! $enableProductionFlow) {
             if ($enableSimpleProduction) {
                 if (request()->query('view') !== 'stats') {
                     return redirect()->route('sales-orders.quick-checkout');
                 }
+
                 return $this->homemadeDashboard($tenantId);
+            }
+            if ($enableServiceModule) {
+                if (request()->query('view') !== 'stats') {
+                    return redirect()->route('sales-orders.quick-checkout');
+                }
+
+                return $this->serviceDashboard($tenantId);
             }
             if (request()->query('view') !== 'stats') {
                 return redirect()->route('sales-orders.quick-checkout');
             }
+
             return $this->retailDashboard($tenantId);
         }
 
@@ -410,6 +423,67 @@ class DashboardController extends Controller
             'lowStockItems' => $lowStockItems,
             'lowStockMaterials' => $lowStockMaterials,
             'recentProductions' => $recentProductions,
+        ]);
+    }
+
+    private function serviceDashboard(int $tenantId): Response
+    {
+        $today = now()->toDateString();
+        $thisMonth = now()->month;
+        $thisYear = now()->year;
+
+        $stats = [
+            'sales_today' => SalesOrder::query()
+                ->whereDate('order_date', $today)
+                ->sum('total_amount'),
+            'sales_today_count' => SalesOrder::query()
+                ->whereDate('order_date', $today)
+                ->count(),
+            'sales_month' => SalesOrder::query()
+                ->whereMonth('order_date', $thisMonth)
+                ->whereYear('order_date', $thisYear)
+                ->sum('total_amount'),
+            'sales_month_count' => SalesOrder::query()
+                ->whereMonth('order_date', $thisMonth)
+                ->whereYear('order_date', $thisYear)
+                ->count(),
+            'total_services' => Service::query()->count(),
+            'outstanding_receivables' => SalesOrder::query()
+                ->where('payment_status', '!=', 'paid')
+                ->sum(DB::raw('total_amount - paid_amount')),
+        ];
+
+        $salesTrend = SalesOrder::query()
+            ->select(
+                DB::raw('DATE(order_date) as date'),
+                DB::raw('SUM(total_amount) as total'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->where('order_date', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $topServices = DB::table('sales_order_items')
+            ->join('sales_orders', 'sales_order_items.sales_order_id', '=', 'sales_orders.id')
+            ->join('services', 'sales_order_items.service_id', '=', 'services.id')
+            ->select(
+                'services.code as sku',
+                'services.name as name',
+                DB::raw('SUM(sales_order_items.quantity) as total_sold'),
+                DB::raw('SUM(sales_order_items.subtotal) as total_revenue')
+            )
+            ->where('sales_orders.tenant_id', $tenantId)
+            ->where('sales_orders.order_date', '>=', now()->subDays(30))
+            ->groupBy('services.id', 'services.code', 'services.name')
+            ->orderByDesc('total_sold')
+            ->limit(5)
+            ->get();
+
+        return Inertia::render('ServiceDashboard', [
+            'stats' => $stats,
+            'salesTrend' => $salesTrend,
+            'topProducts' => $topServices,
         ]);
     }
 }

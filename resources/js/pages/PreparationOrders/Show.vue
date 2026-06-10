@@ -146,7 +146,11 @@ const handleDelete = async () => {
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">
                                     {{
                                         order.preparation_date
-                                            ? new Date(order.preparation_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                                            ? new Date(order.preparation_date).toLocaleDateString('id-ID', {
+                                                  day: 'numeric',
+                                                  month: 'long',
+                                                  year: 'numeric',
+                                              })
                                             : '-'
                                     }}
                                 </p>

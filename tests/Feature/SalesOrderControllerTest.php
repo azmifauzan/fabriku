@@ -45,8 +45,8 @@ test('quick checkout store successfully registers checkout', function () {
                 'inventory_item_id' => $item->id,
                 'quantity' => 2,
                 'unit_price' => 5000,
-            ]
-        ]
+            ],
+        ],
     ];
 
     $response = $this->post(route('sales-orders.quick-checkout.store'), $postData);

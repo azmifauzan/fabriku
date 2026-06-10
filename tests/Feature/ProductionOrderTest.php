@@ -114,6 +114,8 @@ test('can update production order when status allows', function () {
     $order = ProductionOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
         'preparation_order_id' => $preparationOrder->id,
+        'type' => 'internal',
+        'contractor_id' => null,
         'status' => 'draft',
     ]);
 
@@ -137,6 +139,8 @@ test('cannot update production order when completed', function () {
     $order = ProductionOrder::factory()->completed()->create([
         'tenant_id' => $this->tenant->id,
         'preparation_order_id' => $preparationOrder->id,
+        'type' => 'internal',
+        'contractor_id' => null,
     ]);
 
     $response = $this->put(route('production-orders.update', $order), [

@@ -4,15 +4,17 @@ namespace App\Models;
 
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
+use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -78,9 +80,9 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get the roles for the user
      */
-    public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(\App\Models\Role::class, 'user_roles');
+        return $this->belongsToMany(Role::class, 'user_roles');
     }
 
     /**
@@ -114,7 +116,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Assign role to user
      */
-    public function assignRole(\App\Models\Role $role): void
+    public function assignRole(Role $role): void
     {
         $this->roles()->syncWithoutDetaching($role);
     }
@@ -122,7 +124,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Remove role from user
      */
-    public function removeRole(\App\Models\Role $role): void
+    public function removeRole(Role $role): void
     {
         $this->roles()->detach($role);
     }

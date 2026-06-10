@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\InventoryItem;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class StoreSalesOrderRequest extends FormRequest
@@ -19,7 +20,7 @@ class StoreSalesOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id' => ['required', \Illuminate\Validation\Rule::exists('customers', 'id')->where('tenant_id', $this->user()->tenant_id)],
+            'customer_id' => ['required', Rule::exists('customers', 'id')->where('tenant_id', $this->user()->tenant_id)],
             'order_date' => ['required', 'date'],
             'channel' => ['required', 'in:offline,online,reseller,marketplace'],
             'status' => ['nullable', 'in:draft,confirmed,processing,shipped,completed,cancelled'],
@@ -34,7 +35,8 @@ class StoreSalesOrderRequest extends FormRequest
             'invoice_number' => ['nullable', 'string', 'max:255'],
             'resi_number' => ['nullable', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.inventory_item_id' => ['required', \Illuminate\Validation\Rule::exists('inventory_items', 'id')->where('tenant_id', $this->user()->tenant_id)],
+            'items.*.inventory_item_id' => ['nullable', 'required_without:items.*.service_id', Rule::exists('inventory_items', 'id')->where('tenant_id', $this->user()->tenant_id)],
+            'items.*.service_id' => ['nullable', 'required_without:items.*.inventory_item_id', Rule::exists('services', 'id')->where('tenant_id', $this->user()->tenant_id)],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
             'items.*.discount_amount' => ['nullable', 'numeric', 'min:0'],
@@ -48,6 +50,13 @@ class StoreSalesOrderRequest extends FormRequest
             $items = $this->input('items', []);
 
             foreach ($items as $index => $item) {
+                if (! empty($item['inventory_item_id']) && ! empty($item['service_id'])) {
+                    $validator->errors()->add(
+                        "items.{$index}.service_id",
+                        'Satu baris hanya boleh berisi produk atau layanan, tidak keduanya.'
+                    );
+                }
+
                 if (empty($item['inventory_item_id']) || empty($item['quantity'])) {
                     continue;
                 }

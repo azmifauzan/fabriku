@@ -7,6 +7,8 @@ use App\Models\Traits\HasAuditLogs;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class MaterialReceipt extends Model
 {
@@ -85,7 +87,7 @@ class MaterialReceipt extends Model
         return 'BAT-'.strtoupper(uniqid());
     }
 
-    public function usages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function usages(): HasMany
     {
         return $this->hasMany(PreparationMaterialUsage::class);
     }
@@ -111,7 +113,7 @@ class MaterialReceipt extends Model
             return null;
         }
 
-        return \Illuminate\Support\Facades\Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->temporaryUrl(
+        return Storage::disk(config('filesystems.uploads_disk', 'fabriku_s3'))->temporaryUrl(
             $this->image_path,
             now()->addMinutes(config('filesystems.url_ttl_minutes', 25))
         );

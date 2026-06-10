@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SubscriptionPayment;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -111,7 +112,7 @@ class AdminTenantController extends Controller
         ];
 
         // Get payment history for the tenant
-        $payments = \App\Models\SubscriptionPayment::where('tenant_id', $tenant->id)
+        $payments = SubscriptionPayment::where('tenant_id', $tenant->id)
             ->with('admin')
             ->latest()
             ->take(10)

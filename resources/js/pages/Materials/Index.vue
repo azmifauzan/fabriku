@@ -3,7 +3,7 @@ import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { AlertTriangle, Edit, Search, Trash2, X, Plus } from 'lucide-vue-next';
+import { AlertTriangle, Edit, Plus, Search, Trash2, X } from 'lucide-vue-next';
 import { ref } from 'vue';
 import RestockModal from './Partials/RestockModal.vue';
 
@@ -133,7 +133,6 @@ const closeRestockModal = () => {
     showRestockModal.value = false;
     selectedMaterial.value = null;
 };
-
 </script>
 
 <template>
@@ -364,7 +363,9 @@ const closeRestockModal = () => {
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                        <span
+                                            class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                                        >
                                             {{ material.materialType?.name || '-' }}
                                         </span>
                                     </td>
@@ -406,8 +407,18 @@ const closeRestockModal = () => {
                                                 title="Lihat detail"
                                             >
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                                    />
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                                    />
                                                 </svg>
                                             </Link>
                                             <Link

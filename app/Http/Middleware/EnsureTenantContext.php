@@ -26,7 +26,20 @@ class EnsureTenantContext
             abort(403, 'User is not associated with any tenant.');
         }
 
-        // Ensure tenant is active
+        // Suspended by platform admin: hard block (web + API)
+        if (! $user->tenant->is_active) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'type' => 'tenant_suspended',
+                    'message' => 'Akun tenant Anda telah dinonaktifkan. Hubungi admin Fabriku.',
+                ], 403);
+            }
+
+            abort(403, 'Akun tenant Anda telah dinonaktifkan. Hubungi admin Fabriku.');
+        }
+
+        // Ensure tenant subscription is active
         if (! $user->tenant->isActive()) {
             // For API/JSON requests (like assistant), return proper JSON response
             if ($request->expectsJson()) {

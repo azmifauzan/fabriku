@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Material;
 use App\Models\MaterialType;
 use App\Models\Tenant;
 use App\Models\User;
@@ -61,7 +62,7 @@ it('cannot delete material type when used by materials', function () {
     ]);
 
     // Create a material that uses this type
-    \App\Models\Material::factory()->create([
+    Material::factory()->create([
         'tenant_id' => $tenant->id,
         'material_type_id' => $materialType->id,
     ]);

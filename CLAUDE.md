@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Fabriku — multi-tenant SaaS for Indonesian UMKM production & sales management. Category-agnostic platform: one codebase serves Garment, Food, Craft, Cosmetic, and Retail businesses via dynamic terminology and per-category rules in `config/business.php`.
+Fabriku — multi-tenant SaaS for Indonesian UMKM production & sales management. Category-agnostic platform: one codebase serves Garment, Food, Craft, Cosmetic, Retail, Homemade, and Service businesses via dynamic terminology and per-category rules in `config/business.php`.
 
 Stack: Laravel 12 + Inertia.js v2 + Vue 3.5 (`<script setup>`, Composition API) + Tailwind v4 + PostgreSQL/MySQL + Redis. Type-safe routes via Laravel Wayfinder (auto-generates TS in `resources/js/actions/` and `resources/js/routes/`).
 
@@ -56,7 +56,7 @@ php artisan trial:send-reminders          # trial expiry emails (daily 09:00 via
 ### Multi-tenancy (CRITICAL)
 - Tenant isolation enforced at model level via `App\Models\Scopes\TenantScope` global scope. Every tenant-owned model adds it in `booted()` and auto-fills `tenant_id` from `auth()->user()->tenant_id` on create.
 - `EnsureTenantContext` middleware (alias `tenant`) blocks users without `tenant_id`; for expired subscriptions, returns 403 JSON for API/assistant routes, allows web through in read-only mode (writes blocked by `subscription.check`).
-- Each tenant picks one `business_category` (garment/food/craft/cosmetic/retail/homemade). `Tenant::getCategoryConfig()` / `getTerminology($key)` reads `config/business.php`. Kategori `retail` punya `rules.enable_production_flow = false`; kategori `homemade` punya `rules.enable_simple_production = true` + `enable_contractor_module = false` — dibaca `Sidebar.vue` (via `rules` dari `useBusinessContext()`) dan `DashboardController` untuk UI gating tanpa mengubah tabel.
+- Each tenant picks one `business_category` (garment/food/craft/cosmetic/retail/homemade/service). `Tenant::getCategoryConfig()` / `getTerminology($key)` reads `config/business.php`. Kategori `retail` punya `rules.enable_production_flow = false`; kategori `homemade` punya `rules.enable_simple_production = true` + `enable_contractor_module = false`; kategori `service` punya `rules.enable_service_module = true` (katalog layanan, tanpa material/produksi) — dibaca `Sidebar.vue` (via `rules` dari `useBusinessContext()`) dan `DashboardController` untuk UI gating tanpa mengubah tabel. **`isModuleEnabled()` di frontend men-default `true` bila key rule tidak ada** — rule opt-in baru (seperti `enable_service_module`) wajib di-set `false` eksplisit di semua kategori lain.
 - Separate `admin` auth guard (`App\Models\AdminUser`) for platform-level admin panel at `/admin/*`. Tenant users use default `web` guard.
 
 ### Authorization layers
@@ -86,6 +86,8 @@ Domain logic in `app/Services/`:
 
 ### Known Sharp Edges (see `docs/code-review.md` for full list)
 - **SalesOrder stock flow — observer is single source of truth**: `SalesOrderController` no longer calls `reserveStock`/`releaseReservedStock` manually. `SalesOrderObserver` handles all stock transitions on status changes (draft→confirmed=reserve, confirmed→completed=deduct, confirmed→cancelled=release). New code must not add manual stock calls in controller.
+- **Service lines have no stock**: `sales_order_items` punya `inventory_item_id` (nullable) ATAU `service_id` (nullable, FK `RESTRICT` ke `services`) — tepat satu terisi (divalidasi di Form Request, bukan DB constraint). Kedua observer skip semua stock ops bila `inventory_item_id` null. Kode yang membaca `items.inventoryItem` wajib null-safe dan fallback ke `items.service`. Kolom `served_by` (FK `staff`) opsional untuk line layanan.
+- **Consumable auto-deduct bukan via observer**: `service_consumables` memetakan layanan→inventory item. Deduct stok bahan pendukung dilakukan eksplisit di `SalesOrderController::quickCheckoutStore` (DB transaction + `lockForUpdate`), divalidasi stoknya di `after`-hook validator. Observer tidak tahu soal consumable. Sales order manual belum trigger consumable deduct.
 - **`FormRequest::authorize()` returns `$this->user() !== null`** — relies on middleware for tenant/permission checks. If you add an action that bypasses the route middleware stack (e.g. an internal job), check tenancy yourself. Always use `Rule::exists('table','id')->where('tenant_id', auth()->user()->tenant_id)` for FK validation in new Form Requests.
 - **`Storage::disk('fabriku_s3')` is hardcoded** in `InventoryItem`, `Material`, and several controllers. Tests fail without this disk configured.
 - **`OpenAIService` default model is `gpt-5-nano`** (not a valid OpenAI ID). Set `OPENAI_MODEL` in `.env` or change the default in `config/services.php` before relying on AI features.
@@ -140,11 +142,11 @@ This project has Laravel Boost (`laravel/boost`) installed. When available, pref
 - `docs/01-business-requirements.md` through `docs/05-user-flows.md` — original business/architecture/schema/API/user-flow specs.
 - `docs/current-status.md` — actual state of every module, gaps, what is NOT shipped.
 - `docs/code-review.md` — severity-tagged findings (CRITICAL / HIGH / MEDIUM / LOW). Read before extending Sales, Inventory, or AI modules.
-- `docs/plan.md` — enhancement plan aktif: kategori `service` baru (UMKM jasa — bengkel, salon, barbershop; katalog layanan + service line di sales order). Plan retail & homemade sudah selesai dan dipindah ke `current-status.md`.
+- `docs/plan.md` — sisa enhancement kategori `service` (laporan layanan khusus, staff assignment, consumable auto-deduct) + backlog lintas kategori. Plan retail, homemade, dan service inti sudah selesai dan dipindah ke `current-status.md`.
 - `.github/copilot-instructions.md` — Laravel Boost guidelines (PHP/Eloquent/Inertia/Tailwind/Pest conventions). Authoritative for style.
 
 ## Demo accounts (dev)
 
-Tenant users (`/login`): `admin@konveksi.com`, `admin@kuemama.com`, `admin@crafty.com`, `admin@glowbeauty.com`, `admin@tokoserbaada.com` (retail), `admin@homemade.com` (homemade/produksi rumahan) — all password `password`.
+Tenant users (`/login`): `admin@konveksi.com`, `admin@kuemama.com`, `admin@crafty.com`, `admin@glowbeauty.com`, `admin@tokoserbaada.com` (retail), `admin@homemade.com` (homemade/produksi rumahan), `admin@bengkel.com` (service/jasa) — all password `password`.
 Super admin (`/admin/login`): `admin@fabriku.com` / `password`.
 Demo data auto-resets hourly via scheduler.

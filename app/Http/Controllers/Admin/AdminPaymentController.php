@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SubscriptionPayment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class AdminPaymentController extends Controller
@@ -58,7 +59,7 @@ class AdminPaymentController extends Controller
     {
         $payment->load('tenant');
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($payment) {
+        DB::transaction(function () use ($payment) {
             // Update Payment
             $payment->update([
                 'status' => 'approved',

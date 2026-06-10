@@ -24,9 +24,9 @@ class UpdateProductionOrderRequest extends FormRequest
         $tenantId = $this->user()->tenant_id;
 
         return [
-            'preparation_order_id' => ['required', \Illuminate\Validation\Rule::exists('preparation_orders', 'id')->where('tenant_id', $tenantId)],
+            'preparation_order_id' => ['required', Rule::exists('preparation_orders', 'id')->where('tenant_id', $tenantId)],
             'type' => ['required', 'string', Rule::in(['internal', 'external'])],
-            'contractor_id' => ['nullable', \Illuminate\Validation\Rule::exists('contractors', 'id')->where('tenant_id', $tenantId), 'required_if:type,external'],
+            'contractor_id' => ['nullable', Rule::exists('contractors', 'id')->where('tenant_id', $tenantId), 'required_if:type,external'],
             'estimated_completion_date' => ['nullable', 'date', 'after_or_equal:today'],
             'sent_date' => ['nullable', 'date'],
             'completed_date' => ['nullable', 'date'],

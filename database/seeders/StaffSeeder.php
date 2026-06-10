@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Staff;
+use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 
 class StaffSeeder extends Seeder
@@ -9,12 +11,12 @@ class StaffSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(\App\Models\Tenant $tenant = null): void
+    public function run(?Tenant $tenant = null): void
     {
-        $tenants = $tenant ? [$tenant] : \App\Models\Tenant::all();
+        $tenants = $tenant ? [$tenant] : Tenant::all();
 
         foreach ($tenants as $tenant) {
-            \App\Models\Staff::create([
+            Staff::create([
                 'tenant_id' => $tenant->id,
                 'code' => 'STF001',
                 'name' => 'Ahmad Supervisor',
@@ -24,7 +26,7 @@ class StaffSeeder extends Seeder
                 'is_active' => true,
             ]);
 
-            \App\Models\Staff::create([
+            Staff::create([
                 'tenant_id' => $tenant->id,
                 'code' => 'STF002',
                 'name' => 'Budi Manager',
@@ -34,7 +36,7 @@ class StaffSeeder extends Seeder
                 'is_active' => true,
             ]);
 
-            \App\Models\Staff::create([
+            Staff::create([
                 'tenant_id' => $tenant->id,
                 'code' => 'STF003',
                 'name' => 'Siti Koordinator',

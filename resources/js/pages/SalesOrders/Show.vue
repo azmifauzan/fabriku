@@ -247,9 +247,26 @@
                                     <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                                         <tr v-for="item in salesOrder.items" :key="item.id">
                                             <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                                <div class="font-medium">{{ item.inventory_item.pattern?.name || item.inventory_item.product_name || 'N/A' }}</div>
-                                                <div class="text-gray-500 dark:text-gray-400">
-                                                    SKU: {{ item.inventory_item.sku }}, Lokasi: {{ item.inventory_item.inventory_location?.name || 'N/A' }}
+                                                <div class="font-medium">
+                                                    {{
+                                                        item.inventory_item?.pattern?.name ||
+                                                        item.inventory_item?.product_name ||
+                                                        item.service?.name ||
+                                                        'N/A'
+                                                    }}
+                                                    <span
+                                                        v-if="item.service"
+                                                        class="ml-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400"
+                                                        >JASA</span
+                                                    >
+                                                </div>
+                                                <div v-if="item.inventory_item" class="text-gray-500 dark:text-gray-400">
+                                                    SKU: {{ item.inventory_item.sku }}, Lokasi:
+                                                    {{ item.inventory_item.inventory_location?.name || 'N/A' }}
+                                                </div>
+                                                <div v-else-if="item.service" class="text-gray-500 dark:text-gray-400">
+                                                    Kode: {{ item.service.code }}
+                                                    <span v-if="item.served_by"> · Dikerjakan: {{ item.served_by.name }}</span>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 text-right text-sm text-gray-900 dark:text-gray-100">

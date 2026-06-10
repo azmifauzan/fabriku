@@ -67,21 +67,22 @@ describe('Inventory Management Integration', function () {
 
         $productionOrder = ProductionOrder::factory()->create([
             'tenant_id' => $this->tenant->id,
-            'status' => 'COMPLETED',
+            'status' => 'completed',
         ]);
 
         // Create inventory item
         $response = $this->actingAs($this->user)
             ->post(route('inventory.items.store'), [
                 'production_order_id' => $productionOrder->id,
-                'inventory_location_id' => $location->id,
-                'pattern_id' => $pattern->id,
-                'product_name' => 'Mukena Dewasa Putih',
-                'product_type' => 'MUKENA',
+                'location_id' => $location->id,
+                'name' => 'Mukena Dewasa Putih',
                 'sku' => 'MKN-001',
-                'initial_quantity' => 10,
-                'quality_grade' => 'A',
-                'notes' => 'Produksi batch 1',
+                'target_quantity' => 10,
+                'stock_quantity' => 10,
+                'unit_cost' => 50000,
+                'selling_price' => 95000,
+                'quality_grade' => 'grade_a',
+                'status' => 'available',
             ]);
 
         $response->assertRedirect();
@@ -89,13 +90,12 @@ describe('Inventory Management Integration', function () {
         $item = InventoryItem::where('sku', 'MKN-001')->first();
         expect($item)->not->toBeNull();
         expect($item->current_quantity)->toBe(10);
-        expect($item->status)->toBe('AVAILABLE');
+        expect($item->status)->toBe('available');
     });
 
     it('handles stock adjustments correctly', function () {
         $item = InventoryItem::factory()->create([
             'tenant_id' => $this->tenant->id,
-            'initial_quantity' => 100,
             'current_quantity' => 100,
             'reserved_quantity' => 0,
         ]);
@@ -103,7 +103,8 @@ describe('Inventory Management Integration', function () {
         // Adjust stock (damage)
         $response = $this->actingAs($this->user)
             ->post(route('inventory.items.adjust', $item), [
-                'adjustment_type' => 'DAMAGE',
+                'type' => 'subtract',
+                'adjustment_type' => 'damage',
                 'quantity' => 5,
                 'reason' => 'Produk cacat ditemukan',
                 'notes' => 'Ditemukan saat quality check',
@@ -117,8 +118,8 @@ describe('Inventory Management Integration', function () {
         // Verify adjustment recorded
         $adjustment = StockAdjustment::where('inventory_item_id', $item->id)->first();
         expect($adjustment)->not->toBeNull();
-        expect($adjustment->adjustment_type)->toBe('DAMAGE');
-        expect($adjustment->quantity)->toBe(-5);
+        expect($adjustment->adjustment_type)->toBe('damage');
+        expect($adjustment->quantity_after)->toBe(95);
     });
 
     it('tracks stock with different adjustment types', function () {
@@ -130,7 +131,8 @@ describe('Inventory Management Integration', function () {
         // Found items (positive adjustment)
         $this->actingAs($this->user)
             ->post(route('inventory.items.adjust', $item), [
-                'adjustment_type' => 'FOUND',
+                'type' => 'add',
+                'adjustment_type' => 'found',
                 'quantity' => 3,
                 'reason' => 'Ditemukan stok tersembunyi',
             ])
@@ -142,7 +144,8 @@ describe('Inventory Management Integration', function () {
         // Lost items (negative adjustment)
         $this->actingAs($this->user)
             ->post(route('inventory.items.adjust', $item), [
-                'adjustment_type' => 'LOST',
+                'type' => 'subtract',
+                'adjustment_type' => 'loss',
                 'quantity' => 2,
                 'reason' => 'Hilang/tidak ditemukan',
             ])
@@ -199,7 +202,6 @@ describe('Inventory Management Integration', function () {
 
         $pattern = Pattern::factory()->create([
             'tenant_id' => $this->tenant->id,
-            'category' => 'FOOD',
         ]);
 
         $productionOrder = ProductionOrder::factory()->create([
@@ -210,15 +212,16 @@ describe('Inventory Management Integration', function () {
         $response = $this->actingAs($this->user)
             ->post(route('inventory.items.store'), [
                 'production_order_id' => $productionOrder->id,
-                'inventory_location_id' => $location->id,
-                'pattern_id' => $pattern->id,
-                'product_name' => 'Brownies Coklat',
-                'product_type' => 'BROWNIES',
+                'location_id' => $location->id,
+                'name' => 'Brownies Coklat',
                 'sku' => 'BWN-001',
-                'initial_quantity' => 20,
-                'production_date' => now()->format('Y-m-d'),
+                'target_quantity' => 20,
+                'stock_quantity' => 20,
+                'unit_cost' => 15000,
+                'selling_price' => 30000,
+                'status' => 'available',
+                'quality_grade' => 'grade_a',
                 'expired_date' => now()->addDays(7)->format('Y-m-d'),
-                'notes' => 'Batch produksi pagi',
             ]);
 
         $response->assertRedirect();
@@ -360,137 +363,101 @@ describe('Sales Order Stock Integration', function () {
 
         $this->item = InventoryItem::factory()->create([
             'tenant_id' => $this->tenant->id,
-            'initial_quantity' => 100,
             'current_quantity' => 100,
             'reserved_quantity' => 0,
+            'status' => 'available',
         ]);
     });
 
-    it('reserves stock when sales order is created', function () {
-        $response = $this->actingAs($this->user)
-            ->post(route('sales-orders.store'), [
-                'customer_id' => $this->customer->id,
-                'order_date' => now()->format('Y-m-d'),
-                'sales_channel' => 'OFFLINE',
-                'order_status' => 'PENDING',
-                'payment_status' => 'UNPAID',
-                'items' => [
-                    [
-                        'inventory_item_id' => $this->item->id,
-                        'quantity' => 10,
-                        'unit_price' => 100000,
-                    ],
+    function makeOrderPayload($customer, $item, int $qty, string $status = 'draft'): array
+    {
+        return [
+            'customer_id' => $customer->id,
+            'order_date' => now()->format('Y-m-d'),
+            'channel' => 'offline',
+            'status' => $status,
+            'payment_method' => 'cash',
+            'items' => [
+                [
+                    'inventory_item_id' => $item->id,
+                    'quantity' => $qty,
+                    'unit_price' => 100000,
                 ],
-            ]);
+            ],
+        ];
+    }
 
-        $response->assertRedirect();
+    it('does not reserve stock while order is draft, reserves on confirm', function () {
+        $this->actingAs($this->user)
+            ->post(route('sales-orders.store'), makeOrderPayload($this->customer, $this->item, 10))
+            ->assertRedirect();
+
+        // Order dibuat sebagai draft — belum ada reservasi (observer semantics)
+        $this->item->refresh();
+        expect($this->item->reserved_quantity)->toBe(0);
+        expect($this->item->current_quantity)->toBe(100);
+
+        $order = SalesOrder::where('tenant_id', $this->tenant->id)->latest('id')->first();
+        expect($order->status)->toBe('draft');
+
+        // Confirm → observer reserve
+        $this->actingAs($this->user)
+            ->patch(route('sales-orders.update', $order), makeOrderPayload($this->customer, $this->item, 10, 'confirmed'))
+            ->assertRedirect();
 
         $this->item->refresh();
         expect($this->item->reserved_quantity)->toBe(10);
         expect($this->item->current_quantity)->toBe(100);
     });
 
-    it('deducts stock when order is confirmed', function () {
-        $salesOrder = SalesOrder::factory()->create([
-            'tenant_id' => $this->tenant->id,
-            'customer_id' => $this->customer->id,
-            'order_status' => 'PENDING',
-        ]);
+    it('deducts stock when order is completed', function () {
+        $this->actingAs($this->user)
+            ->post(route('sales-orders.store'), makeOrderPayload($this->customer, $this->item, 15))
+            ->assertRedirect();
 
-        $salesOrder->items()->create([
-            'tenant_id' => $this->tenant->id,
-            'inventory_item_id' => $this->item->id,
-            'product_name' => $this->item->product_name,
-            'quantity' => 15,
-            'unit_price' => 100000,
-            'subtotal' => 1500000,
-        ]);
+        $order = SalesOrder::where('tenant_id', $this->tenant->id)->latest('id')->first();
 
-        // Reserve stock
-        $this->item->update(['reserved_quantity' => 15]);
+        $this->actingAs($this->user)
+            ->patch(route('sales-orders.update', $order), makeOrderPayload($this->customer, $this->item, 15, 'confirmed'))
+            ->assertRedirect();
 
-        // Confirm order
-        $response = $this->actingAs($this->user)
-            ->patch(route('sales-orders.update', $salesOrder), [
-                'customer_id' => $this->customer->id,
-                'order_date' => now()->format('Y-m-d'),
-                'order_status' => 'CONFIRMED',
-                'payment_status' => 'UNPAID',
-                'sales_channel' => 'OFFLINE',
-                'items' => [
-                    [
-                        'inventory_item_id' => $this->item->id,
-                        'quantity' => 15,
-                        'unit_price' => 100000,
-                    ],
-                ],
-            ]);
-
-        $response->assertRedirect();
+        $this->actingAs($this->user)
+            ->patch(route('sales-orders.update', $order), makeOrderPayload($this->customer, $this->item, 15, 'completed'))
+            ->assertRedirect();
 
         $this->item->refresh();
-        expect($this->item->current_quantity)->toBe(85); // 100 - 15
+        expect($this->item->current_quantity)->toBe(85);
         expect($this->item->reserved_quantity)->toBe(0);
     });
 
     it('releases reserved stock when order is cancelled', function () {
-        $salesOrder = SalesOrder::factory()->create([
-            'tenant_id' => $this->tenant->id,
-            'customer_id' => $this->customer->id,
-            'order_status' => 'PENDING',
-        ]);
+        $this->actingAs($this->user)
+            ->post(route('sales-orders.store'), makeOrderPayload($this->customer, $this->item, 20))
+            ->assertRedirect();
 
-        $salesOrder->items()->create([
-            'tenant_id' => $this->tenant->id,
-            'inventory_item_id' => $this->item->id,
-            'product_name' => $this->item->product_name,
-            'quantity' => 20,
-            'unit_price' => 100000,
-            'subtotal' => 2000000,
-        ]);
+        $order = SalesOrder::where('tenant_id', $this->tenant->id)->latest('id')->first();
 
-        $this->item->update(['reserved_quantity' => 20]);
-
-        // Cancel order
-        $response = $this->actingAs($this->user)
-            ->patch(route('sales-orders.update', $salesOrder), [
-                'customer_id' => $this->customer->id,
-                'order_date' => now()->format('Y-m-d'),
-                'order_status' => 'CANCELLED',
-                'payment_status' => 'UNPAID',
-                'sales_channel' => 'OFFLINE',
-                'items' => [
-                    [
-                        'inventory_item_id' => $this->item->id,
-                        'quantity' => 20,
-                        'unit_price' => 100000,
-                    ],
-                ],
-            ]);
-
-        $response->assertRedirect();
+        $this->actingAs($this->user)
+            ->patch(route('sales-orders.update', $order), makeOrderPayload($this->customer, $this->item, 20, 'confirmed'))
+            ->assertRedirect();
 
         $this->item->refresh();
-        expect($this->item->reserved_quantity)->toBe(0); // Should be released
-        expect($this->item->current_quantity)->toBe(100); // Should not be deducted
+        expect($this->item->reserved_quantity)->toBe(20);
+
+        $this->actingAs($this->user)
+            ->patch(route('sales-orders.update', $order), makeOrderPayload($this->customer, $this->item, 20, 'cancelled'))
+            ->assertRedirect();
+
+        $this->item->refresh();
+        expect($this->item->reserved_quantity)->toBe(0);
+        expect($this->item->current_quantity)->toBe(100);
     });
 
     it('prevents overselling inventory', function () {
-        // Try to create order with more than available
-        $response = $this->actingAs($this->user)
-            ->post(route('sales-orders.store'), [
-                'customer_id' => $this->customer->id,
-                'order_date' => now()->format('Y-m-d'),
-                'sales_channel' => 'OFFLINE',
-                'items' => [
-                    [
-                        'inventory_item_id' => $this->item->id,
-                        'quantity' => 150, // More than available (100)
-                        'unit_price' => 100000,
-                    ],
-                ],
-            ]);
+        $this->actingAs($this->user)
+            ->post(route('sales-orders.store'), makeOrderPayload($this->customer, $this->item, 150))
+            ->assertSessionHasErrors();
 
-        $response->assertSessionHasErrors();
+        expect(SalesOrder::where('tenant_id', $this->tenant->id)->count())->toBe(0);
     });
 });

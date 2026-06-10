@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -100,7 +101,7 @@ class AssistantConversation extends Model
     /**
      * Get recent messages for context
      */
-    public function getRecentMessages(int $limit = 10): \Illuminate\Database\Eloquent\Collection
+    public function getRecentMessages(int $limit = 10): Collection
     {
         return $this->messages()
             ->orderBy('created_at', 'desc')

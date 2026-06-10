@@ -1,13 +1,13 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3'
-import AdminLayout from '@/layouts/AdminLayout.vue'
-import { ArrowLeft } from 'lucide-vue-next'
+import AdminLayout from '@/layouts/AdminLayout.vue';
+import { Head, useForm } from '@inertiajs/vue3';
+import { ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({
     user: Object,
     tenants: Array,
     roles: Array,
-})
+});
 
 const form = useForm({
     tenant_id: props.user.tenant_id,
@@ -16,12 +16,12 @@ const form = useForm({
     role: props.user.role,
     phone: props.user.phone || '',
     is_active: props.user.is_active,
-    role_ids: props.user.roles?.map(r => r.id) || [],
-})
+    role_ids: props.user.roles?.map((r) => r.id) || [],
+});
 
 const submit = () => {
-    form.put(`/admin/users/${props.user.id}`)
-}
+    form.put(`/admin/users/${props.user.id}`);
+};
 </script>
 
 <template>
@@ -30,26 +30,29 @@ const submit = () => {
     <AdminLayout>
         <!-- Header -->
         <div class="mb-6">
-            <a :href="`/admin/users/${user.id}`" class="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4">
-                <ArrowLeft class="w-4 h-4 mr-2" />
+            <a
+                :href="`/admin/users/${user.id}`"
+                class="mb-4 inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            >
+                <ArrowLeft class="mr-2 h-4 w-4" />
                 Back to User
             </a>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit User</h1>
         </div>
 
         <!-- Form -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <form @submit.prevent="submit" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <!-- Tenant -->
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Tenant <span class="text-red-500">*</span>
                         </label>
                         <select
                             v-model="form.tenant_id"
                             required
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         >
                             <option value="">Select Tenant</option>
                             <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.id">{{ tenant.name }}</option>
@@ -59,54 +62,52 @@ const submit = () => {
 
                     <!-- Name -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Name <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.name"
                             type="text"
                             required
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
                         <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
                     </div>
 
                     <!-- Email -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Email <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.email"
                             type="email"
                             required
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
                         <p v-if="form.errors.email" class="mt-1 text-sm text-red-600">{{ form.errors.email }}</p>
                     </div>
 
                     <!-- Phone -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Phone
-                        </label>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"> Phone </label>
                         <input
                             v-model="form.phone"
                             type="text"
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
                         <p v-if="form.errors.phone" class="mt-1 text-sm text-red-600">{{ form.errors.phone }}</p>
                     </div>
 
                     <!-- Basic Role -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Basic Role <span class="text-red-500">*</span>
                         </label>
                         <select
                             v-model="form.role"
                             required
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         >
                             <option value="admin">Admin</option>
                             <option value="manager">Manager</option>
@@ -117,16 +118,18 @@ const submit = () => {
 
                     <!-- RBAC Roles -->
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Additional Roles (Optional)
-                        </label>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <label v-for="role in roles" :key="role.id" class="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"> Additional Roles (Optional) </label>
+                        <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+                            <label
+                                v-for="role in roles"
+                                :key="role.id"
+                                class="flex cursor-pointer items-center rounded-lg border border-gray-300 p-3 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+                            >
                                 <input
                                     v-model="form.role_ids"
                                     type="checkbox"
                                     :value="role.id"
-                                    class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                                    class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                                 />
                                 <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ role.name }}</span>
                             </label>
@@ -140,7 +143,7 @@ const submit = () => {
                             <input
                                 v-model="form.is_active"
                                 type="checkbox"
-                                class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                                class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                             />
                             <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Active</span>
                         </label>
@@ -149,17 +152,17 @@ const submit = () => {
                 </div>
 
                 <!-- Actions -->
-                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex justify-end space-x-3 border-t border-gray-200 pt-6 dark:border-gray-700">
                     <a
                         :href="`/admin/users/${user.id}`"
-                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                        class="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                     >
                         Cancel
                     </a>
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition disabled:opacity-50"
+                        class="rounded-lg bg-purple-600 px-4 py-2 text-white transition hover:bg-purple-700 disabled:opacity-50"
                     >
                         {{ form.processing ? 'Updating...' : 'Update User' }}
                     </button>

@@ -1,17 +1,14 @@
 <?php
 
-use App\Models\Tenant;
-use App\Models\User;
-use App\Models\Material;
-use App\Models\MaterialType;
-use App\Models\MaterialReceipt;
+use App\Models\Customer;
 use App\Models\InventoryItem;
 use App\Models\InventoryLocation;
+use App\Models\Material;
+use App\Models\MaterialReceipt;
+use App\Models\MaterialType;
 use App\Models\StockAdjustment;
-use App\Models\Customer;
-use App\Models\SalesOrder;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use App\Models\Tenant;
+use App\Models\User;
 
 describe('Homemade Tenant Workflow', function () {
     beforeEach(function () {
@@ -93,8 +90,8 @@ describe('Homemade Tenant Workflow', function () {
                 [
                     'material_id' => $material->id,
                     'quantity' => 2,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $this->actingAs($this->user)
@@ -141,8 +138,8 @@ describe('Homemade Tenant Workflow', function () {
                     'inventory_item_id' => $item->id,
                     'quantity' => 3,
                     'unit_price' => 25000,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $this->actingAs($this->user)

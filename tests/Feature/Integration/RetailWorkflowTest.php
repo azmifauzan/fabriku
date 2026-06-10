@@ -1,14 +1,11 @@
 <?php
 
-use App\Models\Tenant;
-use App\Models\User;
+use App\Models\Customer;
 use App\Models\InventoryItem;
 use App\Models\InventoryLocation;
 use App\Models\StockAdjustment;
-use App\Models\Customer;
-use App\Models\SalesOrder;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use App\Models\Tenant;
+use App\Models\User;
 
 describe('Retail Tenant Workflow', function () {
     beforeEach(function () {
@@ -63,8 +60,8 @@ describe('Retail Tenant Workflow', function () {
                     'inventory_item_id' => $item->id,
                     'quantity' => 20,
                     'unit_cost' => 12000,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $this->actingAs($this->user)
@@ -120,8 +117,8 @@ describe('Retail Tenant Workflow', function () {
                     'inventory_item_id' => $item->id,
                     'quantity' => 5,
                     'unit_price' => 15000,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $this->actingAs($this->user)

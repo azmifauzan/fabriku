@@ -2,9 +2,9 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { AlertTriangle, Pencil, Plus, QrCode } from 'lucide-vue-next';
-import RestockModal from './Partials/RestockModal.vue';
-import EditBatchModal from './Partials/EditBatchModal.vue';
 import { ref } from 'vue';
+import EditBatchModal from './Partials/EditBatchModal.vue';
+import RestockModal from './Partials/RestockModal.vue';
 
 interface MaterialAttribute {
     id: number;
@@ -134,7 +134,7 @@ const closeEditBatchModal = () => {
 
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     <!-- Main Content -->
-                    <div class="lg:col-span-2 space-y-6">
+                    <div class="space-y-6 lg:col-span-2">
                         <!-- Material Information -->
                         <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                             <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
@@ -155,8 +155,10 @@ const closeEditBatchModal = () => {
                                         <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ material.code }}</dd>
                                     </div>
                                     <div v-if="material.image_url" class="row-span-3">
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Gambar</dt>
-                                        <div class="h-32 w-32 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-700">
+                                        <dt class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Gambar</dt>
+                                        <div
+                                            class="h-32 w-32 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-700"
+                                        >
                                             <img :src="material.image_url" :alt="material.name" class="h-full w-full object-cover" />
                                         </div>
                                     </div>
@@ -204,7 +206,11 @@ const closeEditBatchModal = () => {
                                     <button
                                         @click="activeTab = 'batches'"
                                         class="text-sm font-semibold transition-colors"
-                                        :class="activeTab === 'batches' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'"
+                                        :class="
+                                            activeTab === 'batches'
+                                                ? 'text-indigo-600 dark:text-indigo-400'
+                                                : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                                        "
                                     >
                                         Daftar Batch
                                     </button>
@@ -212,7 +218,11 @@ const closeEditBatchModal = () => {
                                     <button
                                         @click="activeTab = 'usages'"
                                         class="text-sm font-semibold transition-colors"
-                                        :class="activeTab === 'usages' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'"
+                                        :class="
+                                            activeTab === 'usages'
+                                                ? 'text-indigo-600 dark:text-indigo-400'
+                                                : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                                        "
                                     >
                                         Riwayat Penggunaan
                                     </button>
@@ -224,14 +234,46 @@ const closeEditBatchModal = () => {
                                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                                         <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Batch Info</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Image</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Supplier & Harga</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Qty Awal</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Sisa</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Status</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Barcode</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Aksi</th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Batch Info
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Image
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Supplier & Harga
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Qty Awal
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Sisa
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Status
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Barcode
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Aksi
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
@@ -242,25 +284,39 @@ const closeEditBatchModal = () => {
                                                 <div class="text-xs text-gray-500">{{ formatDate(receipt.receipt_date) }}</div>
                                             </td>
                                             <td class="px-6 py-4">
-                                                <div v-if="receipt.image_url" class="h-10 w-10 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-700">
+                                                <div
+                                                    v-if="receipt.image_url"
+                                                    class="h-10 w-10 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-700"
+                                                >
                                                     <img :src="receipt.image_url" alt="Batch Image" class="h-full w-full object-cover" />
                                                 </div>
                                                 <span v-else class="text-xs text-gray-400 italic">No image</span>
                                             </td>
                                             <td class="px-6 py-4">
-                                                 <div class="text-sm font-medium text-gray-900 dark:text-white">{{ receipt.supplier_name }}</div>
-                                                 <div class="text-xs text-gray-500">{{ formatCurrency(receipt.price_per_unit) }}</div>
+                                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ receipt.supplier_name }}</div>
+                                                <div class="text-xs text-gray-500">{{ formatCurrency(receipt.price_per_unit) }}</div>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                                                 {{ formatNumber(receipt.quantity) }} {{ material.unit }}
                                             </td>
-                                            <td class="px-6 py-4 text-sm font-semibold" :class="parseFloat(receipt.remaining_quantity || '0') > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'">
+                                            <td
+                                                class="px-6 py-4 text-sm font-semibold"
+                                                :class="
+                                                    parseFloat(receipt.remaining_quantity || '0') > 0
+                                                        ? 'text-green-600 dark:text-green-400'
+                                                        : 'text-red-500'
+                                                "
+                                            >
                                                 {{ formatNumber(receipt.remaining_quantity ?? receipt.quantity) }} {{ material.unit }}
                                             </td>
                                             <td class="px-6 py-4">
-                                                <span 
-                                                    class="inline-flex rounded-full px-2 text-xs font-semibold leading-5"
-                                                    :class="receipt.status === 'active' && parseFloat(receipt.remaining_quantity || '0') > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
+                                                <span
+                                                    class="inline-flex rounded-full px-2 text-xs leading-5 font-semibold"
+                                                    :class="
+                                                        receipt.status === 'active' && parseFloat(receipt.remaining_quantity || '0') > 0
+                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                                                    "
                                                 >
                                                     {{ parseFloat(receipt.remaining_quantity || '0') > 0 ? 'Aktif' : 'Habis' }}
                                                 </span>
@@ -296,10 +352,26 @@ const closeEditBatchModal = () => {
                                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                                         <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Tanggal</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Kegiatan/Order</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Batch Asal</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">Qty Digunakan</th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Tanggal
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Kegiatan/Order
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Batch Asal
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                            >
+                                                Qty Digunakan
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
@@ -310,9 +382,9 @@ const closeEditBatchModal = () => {
                                                     {{ usage.date }}
                                                 </td>
                                                 <td class="px-6 py-4">
-                                                     <Link :href="`/preparation-orders`" class="text-indigo-600 hover:underline dark:text-indigo-400">
+                                                    <Link :href="`/preparation-orders`" class="text-indigo-600 hover:underline dark:text-indigo-400">
                                                         {{ usage.preparation_order_number }}
-                                                     </Link>
+                                                    </Link>
                                                 </td>
                                                 <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                                                     {{ receipt.batch_number || receipt.receipt_number }}
@@ -322,7 +394,7 @@ const closeEditBatchModal = () => {
                                                 </td>
                                             </tr>
                                         </template>
-                                        <tr v-if="!material.receipts?.some(r => r.usages?.length)">
+                                        <tr v-if="!material.receipts?.some((r) => r.usages?.length)">
                                             <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
                                                 Belum ada riwayat penggunaan.
                                             </td>
@@ -340,7 +412,7 @@ const closeEditBatchModal = () => {
                             <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Status Stok</h3>
                             </div>
-                            <div class="p-6 space-y-4">
+                            <div class="space-y-4 p-6">
                                 <div>
                                     <div class="flex items-center justify-between">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Stok Saat Ini</dt>
@@ -350,9 +422,12 @@ const closeEditBatchModal = () => {
                                     </div>
                                 </div>
 
-                                <div v-if="isLowStock()" class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/30 dark:bg-yellow-900/20">
+                                <div
+                                    v-if="isLowStock()"
+                                    class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/30 dark:bg-yellow-900/20"
+                                >
                                     <div class="flex gap-3">
-                                        <AlertTriangle class="h-5 w-5 text-yellow-600 dark:text-yellow-500 flex-shrink-0" />
+                                        <AlertTriangle class="h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-500" />
                                         <div>
                                             <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-200">Stok Rendah</p>
                                             <p class="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
@@ -365,12 +440,14 @@ const closeEditBatchModal = () => {
                                 <div class="space-y-2">
                                     <div class="flex justify-between">
                                         <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Minimum Stok</span>
-                                        <span class="text-sm text-gray-900 dark:text-gray-100">{{ formatNumber(material.min_stock) }} {{ material.unit }}</span>
+                                        <span class="text-sm text-gray-900 dark:text-gray-100"
+                                            >{{ formatNumber(material.min_stock) }} {{ material.unit }}</span
+                                        >
                                     </div>
                                 </div>
-                                
-                                <div class="pt-4 border-t border-gray-100 dark:border-gray-700">
-                                    <button 
+
+                                <div class="border-t border-gray-100 pt-4 dark:border-gray-700">
+                                    <button
                                         @click="showRestockModal = true"
                                         class="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-indigo-700 active:bg-indigo-800"
                                     >
@@ -384,7 +461,7 @@ const closeEditBatchModal = () => {
                 </div>
             </div>
         </div>
-        
+
         <RestockModal
             :show="showRestockModal"
             :material-id="material.id"
@@ -393,11 +470,6 @@ const closeEditBatchModal = () => {
             @close="showRestockModal = false"
         />
 
-        <EditBatchModal
-            :show="showEditBatchModal"
-            :batch="selectedBatch"
-            :unit="material.unit"
-            @close="closeEditBatchModal"
-        />
+        <EditBatchModal :show="showEditBatchModal" :batch="selectedBatch" :unit="material.unit" @close="closeEditBatchModal" />
     </AppLayout>
 </template>

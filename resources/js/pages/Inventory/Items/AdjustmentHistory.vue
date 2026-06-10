@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft, Clock, User, FileText, TrendingUp, TrendingDown, RefreshCw } from 'lucide-vue-next';
+import { ArrowLeft, Clock, FileText, RefreshCw, TrendingDown, TrendingUp, User } from 'lucide-vue-next';
 
 interface AdminUser {
     id: number;
@@ -107,12 +107,8 @@ const getAdjustmentIcon = (quantity: number) => {
 
                     <div class="flex items-start justify-between">
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                                Riwayat Adjustment Stock
-                            </h1>
-                            <p class="mt-1 text-gray-600 dark:text-gray-400">
-                                {{ item.name }} ({{ item.sku }})
-                            </p>
+                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Riwayat Adjustment Stock</h1>
+                            <p class="mt-1 text-gray-600 dark:text-gray-400">{{ item.name }} ({{ item.sku }})</p>
                         </div>
                         <div class="text-right">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Stock Saat Ini</p>
@@ -153,21 +149,19 @@ const getAdjustmentIcon = (quantity: number) => {
                     </div>
 
                     <div v-else class="divide-y divide-gray-200 dark:divide-gray-700">
-                        <div
-                            v-for="adjustment in adjustments"
-                            :key="adjustment.id"
-                            class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                        >
+                        <div v-for="adjustment in adjustments" :key="adjustment.id" class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                             <div class="flex items-start justify-between gap-4">
                                 <div class="flex items-start gap-4">
                                     <!-- Icon -->
                                     <div
                                         class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
-                                        :class="adjustment.adjustment_quantity > 0 
-                                            ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' 
-                                            : adjustment.adjustment_quantity < 0 
-                                                ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                                                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'"
+                                        :class="
+                                            adjustment.adjustment_quantity > 0
+                                                ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
+                                                : adjustment.adjustment_quantity < 0
+                                                  ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                                                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                                        "
                                     >
                                         <component :is="getAdjustmentIcon(adjustment.adjustment_quantity)" class="h-5 w-5" />
                                     </div>
@@ -214,11 +208,13 @@ const getAdjustmentIcon = (quantity: number) => {
                                     </div>
                                     <p
                                         class="mt-1 text-sm font-medium"
-                                        :class="adjustment.adjustment_quantity > 0 
-                                            ? 'text-green-600 dark:text-green-400' 
-                                            : adjustment.adjustment_quantity < 0 
-                                                ? 'text-red-600 dark:text-red-400'
-                                                : 'text-gray-500'"
+                                        :class="
+                                            adjustment.adjustment_quantity > 0
+                                                ? 'text-green-600 dark:text-green-400'
+                                                : adjustment.adjustment_quantity < 0
+                                                  ? 'text-red-600 dark:text-red-400'
+                                                  : 'text-gray-500'
+                                        "
                                     >
                                         {{ adjustment.adjustment_quantity > 0 ? '+' : '' }}{{ adjustment.adjustment_quantity }}
                                     </p>

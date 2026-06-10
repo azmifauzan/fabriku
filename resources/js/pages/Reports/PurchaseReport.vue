@@ -1,15 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { 
-    Download, 
-    FileBarChart, 
-    FileSpreadsheet, 
-    Filter, 
-    Search, 
-    ChevronDown, 
-    ChevronUp 
-} from 'lucide-vue-next';
+import { ChevronDown, ChevronUp, Download, FileBarChart, FileSpreadsheet, Filter, Search } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface PurchaseItem {
@@ -137,7 +129,7 @@ const toggleBatch = (batchId: string) => {
                                 </button>
                                 <div
                                     v-if="showExportMenu"
-                                    class="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800"
+                                    class="ring-opacity-5 absolute right-0 z-10 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black dark:bg-gray-800"
                                 >
                                     <button
                                         type="button"
@@ -226,14 +218,14 @@ const toggleBatch = (batchId: string) => {
                                 <button
                                     type="button"
                                     @click="applyFilter"
-                                    class="flex-1 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 cursor-pointer"
+                                    class="flex-1 cursor-pointer rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                                 >
                                     Terapkan
                                 </button>
                                 <button
                                     type="button"
                                     @click="resetFilter"
-                                    class="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 cursor-pointer"
+                                    class="cursor-pointer rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                                 >
                                     Reset
                                 </button>
@@ -278,12 +270,12 @@ const toggleBatch = (batchId: string) => {
                                 </tr>
                                 <template v-for="batch in batches" :key="batch.batch_id">
                                     <!-- Main Row -->
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td class="px-6 py-4 text-center whitespace-nowrap">
-                                            <button 
-                                                type="button" 
+                                            <button
+                                                type="button"
                                                 @click="toggleBatch(batch.batch_id)"
-                                                class="text-gray-500 hover:text-indigo-600 focus:outline-none cursor-pointer"
+                                                class="cursor-pointer text-gray-500 hover:text-indigo-600 focus:outline-none"
                                             >
                                                 <ChevronUp v-if="expandedBatches[batch.batch_id]" :size="18" />
                                                 <ChevronDown v-else :size="18" />
@@ -315,31 +307,60 @@ const toggleBatch = (batchId: string) => {
                                     <!-- Collapsible Detail Row -->
                                     <tr v-if="expandedBatches[batch.batch_id]">
                                         <td colspan="8" class="bg-gray-50/50 p-4 dark:bg-gray-900/40">
-                                            <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-inner dark:border-gray-700 dark:bg-gray-800">
+                                            <div
+                                                class="rounded-lg border border-gray-200 bg-white p-4 shadow-inner dark:border-gray-700 dark:bg-gray-800"
+                                            >
                                                 <h4 class="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Detail Pembelian Barang</h4>
-                                                
+
                                                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                                     <thead class="bg-gray-50 dark:bg-gray-900/80">
                                                         <tr>
-                                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">SKU</th>
-                                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Nama Produk</th>
-                                                            <th class="px-4 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400">Quantity</th>
-                                                            <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">Harga Beli</th>
-                                                            <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">Total</th>
+                                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                                                SKU
+                                                            </th>
+                                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                                                Nama Produk
+                                                            </th>
+                                                            <th class="px-4 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                                                Quantity
+                                                            </th>
+                                                            <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                                                Harga Beli
+                                                            </th>
+                                                            <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                                                Total
+                                                            </th>
                                                         </tr>
                                                     </thead>
                                                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                                        <tr v-for="item in batch.items" :key="item.sku" class="hover:bg-gray-50/50 dark:hover:bg-gray-700/50">
-                                                            <td class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 font-mono">{{ item.sku }}</td>
-                                                            <td class="px-4 py-2 text-sm text-gray-900 dark:text-white font-medium">{{ item.name }}</td>
-                                                            <td class="px-4 py-2 text-center text-sm text-gray-700 dark:text-gray-300">{{ item.quantity }}</td>
-                                                            <td class="px-4 py-2 text-right text-sm text-gray-700 dark:text-gray-300">{{ formatCurrency(item.unit_cost) }}</td>
-                                                            <td class="px-4 py-2 text-right text-sm font-semibold text-gray-900 dark:text-white">{{ formatCurrency(item.total_cost) }}</td>
+                                                        <tr
+                                                            v-for="item in batch.items"
+                                                            :key="item.sku"
+                                                            class="hover:bg-gray-50/50 dark:hover:bg-gray-700/50"
+                                                        >
+                                                            <td class="px-4 py-2 font-mono text-sm text-gray-700 dark:text-gray-300">
+                                                                {{ item.sku }}
+                                                            </td>
+                                                            <td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-white">
+                                                                {{ item.name }}
+                                                            </td>
+                                                            <td class="px-4 py-2 text-center text-sm text-gray-700 dark:text-gray-300">
+                                                                {{ item.quantity }}
+                                                            </td>
+                                                            <td class="px-4 py-2 text-right text-sm text-gray-700 dark:text-gray-300">
+                                                                {{ formatCurrency(item.unit_cost) }}
+                                                            </td>
+                                                            <td class="px-4 py-2 text-right text-sm font-semibold text-gray-900 dark:text-white">
+                                                                {{ formatCurrency(item.total_cost) }}
+                                                            </td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
 
-                                                <div v-if="batch.notes" class="mt-3 rounded border border-gray-100 bg-gray-50 p-2.5 text-xs text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+                                                <div
+                                                    v-if="batch.notes"
+                                                    class="mt-3 rounded border border-gray-100 bg-gray-50 p-2.5 text-xs text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
+                                                >
                                                     <strong>Catatan:</strong> {{ batch.notes }}
                                                 </div>
                                             </div>

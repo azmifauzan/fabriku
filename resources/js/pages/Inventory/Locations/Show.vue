@@ -198,14 +198,21 @@ const capacityPercentage = () => {
                                 class="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-700"
                             >
                                 <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
                                 </svg>
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="truncate text-sm font-medium text-gray-900 dark:text-white">{{ item.name }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.sku }}</p>
                                 <div class="mt-1 flex items-center gap-2">
-                                    <span class="text-xs text-gray-600 dark:text-gray-400">Stok: <strong>{{ item.current_stock }}</strong></span>
+                                    <span class="text-xs text-gray-600 dark:text-gray-400"
+                                        >Stok: <strong>{{ item.current_stock }}</strong></span
+                                    >
                                     <span class="text-xs text-gray-400">·</span>
                                     <span class="text-xs text-gray-600 capitalize dark:text-gray-400">{{ item.status }}</span>
                                 </div>
@@ -254,7 +261,12 @@ const capacityPercentage = () => {
                                             class="flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-700"
                                         >
                                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                />
                                             </svg>
                                         </div>
                                     </td>

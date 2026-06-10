@@ -2,10 +2,12 @@
     <Modal :show="show" @close="close" max-width="md">
         <div class="px-6 py-4">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Tambah Customer Baru</h3>
-            
+
             <form @submit.prevent="submit" class="mt-4 space-y-4">
                 <div>
-                    <label for="code" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kode Customer <span class="text-red-600">*</span></label>
+                    <label for="code" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >Kode Customer <span class="text-red-600">*</span></label
+                    >
                     <input
                         id="code"
                         v-model="form.code"
@@ -18,7 +20,9 @@
                 </div>
 
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama <span class="text-red-600">*</span></label>
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >Nama <span class="text-red-600">*</span></label
+                    >
                     <input
                         id="name"
                         v-model="form.name"
@@ -43,16 +47,16 @@
                 </div>
 
                 <div>
-                     <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                     <input
-                         id="email"
-                         v-model="form.email"
-                         type="email"
-                         class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                         :class="{ 'border-red-500': form.errors.email }"
-                     />
-                     <p v-if="form.errors.email" class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.errors.email }}</p>
-                 </div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <input
+                        id="email"
+                        v-model="form.email"
+                        type="email"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        :class="{ 'border-red-500': form.errors.email }"
+                    />
+                    <p v-if="form.errors.email" class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.errors.email }}</p>
+                </div>
 
                 <div>
                     <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipe</label>
@@ -66,7 +70,7 @@
                         <option value="reseller">Reseller</option>
                         <option value="distributor">Distributor</option>
                     </select>
-                     <p v-if="form.errors.type" class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.errors.type }}</p>
+                    <p v-if="form.errors.type" class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.errors.type }}</p>
                 </div>
 
                 <div>
@@ -85,14 +89,14 @@
                     <button
                         type="button"
                         @click="close"
-                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     >
                         Batal
                     </button>
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+                        class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
                     >
                         {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                     </button>
@@ -104,8 +108,8 @@
 
 <script setup lang="ts">
 import Modal from '@/components/Modal.vue';
-import { reactive } from 'vue';
 import axios from 'axios';
+import { reactive } from 'vue';
 
 const props = defineProps({
     show: Boolean,
@@ -140,36 +144,37 @@ const submit = () => {
     form.processing = true;
     form.errors = {};
 
-    axios.post('/customers', {
-        code: form.code,
-        name: form.name,
-        phone: form.phone,
-        email: form.email,
-        type: form.type,
-        address: form.address,
-    })
-    .then(response => {
-        form.processing = false;
-        // The response structure based on our controller update
-        if (response.data.customer) {
-            emit('created', response.data.customer);
-            close();
-        }
-    })
-    .catch(error => {
-        form.processing = false;
-        if (error.response && error.response.status === 422) {
-            // Validation errors
-            form.errors = error.response.data.errors;
-            // Map array errors to single string if needed, mostly Laravel returns array of strings
-            for (const key in form.errors) {
-                 if (Array.isArray(form.errors[key])) {
-                     form.errors[key] = form.errors[key][0];
-                 }
+    axios
+        .post('/customers', {
+            code: form.code,
+            name: form.name,
+            phone: form.phone,
+            email: form.email,
+            type: form.type,
+            address: form.address,
+        })
+        .then((response) => {
+            form.processing = false;
+            // The response structure based on our controller update
+            if (response.data.customer) {
+                emit('created', response.data.customer);
+                close();
             }
-        } else {
-            console.error('Error creating customer:', error);
-        }
-    });
+        })
+        .catch((error) => {
+            form.processing = false;
+            if (error.response && error.response.status === 422) {
+                // Validation errors
+                form.errors = error.response.data.errors;
+                // Map array errors to single string if needed, mostly Laravel returns array of strings
+                for (const key in form.errors) {
+                    if (Array.isArray(form.errors[key])) {
+                        form.errors[key] = form.errors[key][0];
+                    }
+                }
+            } else {
+                console.error('Error creating customer:', error);
+            }
+        });
 };
 </script>

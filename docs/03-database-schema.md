@@ -486,6 +486,42 @@ CREATE TABLE stock_adjustments (
 ```
 ```
 
+#### services
+Katalog layanan untuk kategori `service` (bengkel, salon, barbershop, dll). Layanan dijual lewat `sales_order_items.service_id` tanpa efek stok.
+
+```sql
+CREATE TABLE services (
+    id BIGSERIAL PRIMARY KEY,
+    tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(100),
+    description TEXT,
+    price NUMERIC(15,2) NOT NULL,
+    duration_minutes INTEGER,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP, updated_at TIMESTAMP,
+    CONSTRAINT services_tenant_id_code_unique UNIQUE (tenant_id, code)
+);
+```
+
+#### service_consumables
+Bahan pendukung yang otomatis berkurang dari stok saat layanan terjual (mis. Ganti Oli → 1 botol oli).
+
+```sql
+CREATE TABLE service_consumables (
+    id BIGSERIAL PRIMARY KEY,
+    tenant_id BIGINT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    service_id BIGINT NOT NULL REFERENCES services(id) ON DELETE CASCADE,
+    inventory_item_id BIGINT NOT NULL REFERENCES inventory_items(id) ON DELETE CASCADE,
+    quantity INTEGER DEFAULT 1,
+    created_at TIMESTAMP, updated_at TIMESTAMP,
+    CONSTRAINT service_consumables_service_id_inventory_item_id_unique UNIQUE (service_id, inventory_item_id)
+);
+```
+
+Catatan terkait di `sales_order_items` (patch `2026_06_10_*`): `inventory_item_id` menjadi nullable; kolom baru `service_id BIGINT REFERENCES services(id) ON DELETE RESTRICT` (nullable; tepat satu dari keduanya terisi per baris, divalidasi di aplikasi) dan `served_by BIGINT REFERENCES staff(id) ON DELETE SET NULL` (nullable; staff yang mengerjakan layanan).
+
 #### customers
 Customer data.
 

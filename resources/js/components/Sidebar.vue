@@ -7,15 +7,15 @@ import {
     ChevronDown,
     ChevronLeft,
     ChevronRight,
+    CreditCard,
     Factory,
     Home,
     Package,
     Settings,
-    ShoppingCart,
     ShoppingBag,
+    ShoppingCart,
     Warehouse,
     X,
-    CreditCard,
 } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 
@@ -36,7 +36,6 @@ const { terminology: terminologyComposable, isModuleEnabled, isRetailMode, rules
 // Track expanded menu items
 const expandedMenus = ref<string[]>([]);
 
-const businessCategory = computed(() => (page.props.tenant as any)?.business_category as string | undefined);
 const terminology = computed(() => terminologyComposable.value as Record<string, string>);
 
 // Get user permissions from shared data
@@ -57,11 +56,6 @@ const hasPermission = (permissionSlug: string): boolean => {
     return userPermissions.value.includes(permissionSlug);
 };
 
-// Check if user has any of the given permissions
-const hasAnyPermission = (slugs: string[]): boolean => {
-    return slugs.some((slug) => hasPermission(slug));
-};
-
 const allMenuItems = computed(() => {
     const retail = isRetailMode.value;
     const hasMaterial = isModuleEnabled('material');
@@ -74,6 +68,7 @@ const allMenuItems = computed(() => {
 
     const masterDataChildren = [
         ...(hasMaterial ? [{ name: 'Jenis Bahan', href: '/material-types', permission: 'material.view' }] : []),
+        ...(isModuleEnabled('service') ? [{ name: terminology.value.service || 'Layanan', href: '/services', permission: 'service.view' }] : []),
         { name: 'Staff', href: '/staff', permission: null, adminOnly: true },
         { name: 'Lokasi Inventory', href: '/inventory/locations', permission: 'inventory.view' },
         { name: 'Customer', href: '/customers', permission: 'sales.view' },
@@ -87,18 +82,23 @@ const allMenuItems = computed(() => {
         { name: 'Penjualan', href: '/reports/sales', permission: 'report.view' },
         ...(hasProductionFlow ? [{ name: 'Produksi', href: '/reports/production', permission: 'report.view' }] : []),
         ...(hasPurchase ? [{ name: 'Pembelian', href: '/reports/purchase', permission: 'report.view' }] : []),
+        ...(isModuleEnabled('service') ? [{ name: 'Layanan', href: '/reports/service', permission: 'report.view' }] : []),
     ];
 
     return [
-        ...(retail || hasSimpleProduction ? [{
-            name: 'Penjualan',
-            href: '/sales-orders/quick-checkout',
-            icon: ShoppingCart,
-            permission: 'sales.create',
-        }] : []),
+        ...(retail || hasSimpleProduction
+            ? [
+                  {
+                      name: 'Penjualan',
+                      href: '/sales-orders/quick-checkout',
+                      icon: ShoppingCart,
+                      permission: 'sales.create',
+                  },
+              ]
+            : []),
         {
             name: 'Dashboard',
-            href: (retail || hasSimpleProduction) ? '/dashboard?view=stats' : '/dashboard',
+            href: retail || hasSimpleProduction ? '/dashboard?view=stats' : '/dashboard',
             icon: Home,
             permission: null,
         },
@@ -109,36 +109,56 @@ const allMenuItems = computed(() => {
             permission: null,
             children: masterDataChildren,
         },
-        ...(hasMaterial ? [{
-            name: terminology.value.material || 'Bahan Baku',
-            href: '/materials',
-            icon: Package,
-            permission: 'material.view',
-        }] : []),
-        ...(hasPreparation && !hasSimpleProduction ? [{
-            name: 'Preparation',
-            href: '/preparation-orders',
-            icon: CheckCircle2,
-            permission: 'preparation.view',
-        }] : []),
-        ...(hasSimpleProduction ? [{
-            name: terminology.value.production || 'Catatan Produksi',
-            href: '/simple-production',
-            icon: Factory,
-            permission: 'simple_production.view',
-        }] : []),
-        ...(hasProductionFlow ? [{
-            name: 'Production Order',
-            href: '/production-orders',
-            icon: Factory,
-            permission: 'production.view',
-        }] : []),
-        ...(hasPurchase ? [{
-            name: 'Pembelian',
-            href: '/purchase-receipts',
-            icon: ShoppingBag,
-            permission: 'purchase.view',
-        }] : []),
+        ...(hasMaterial
+            ? [
+                  {
+                      name: terminology.value.material || 'Bahan Baku',
+                      href: '/materials',
+                      icon: Package,
+                      permission: 'material.view',
+                  },
+              ]
+            : []),
+        ...(hasPreparation && !hasSimpleProduction
+            ? [
+                  {
+                      name: 'Preparation',
+                      href: '/preparation-orders',
+                      icon: CheckCircle2,
+                      permission: 'preparation.view',
+                  },
+              ]
+            : []),
+        ...(hasSimpleProduction
+            ? [
+                  {
+                      name: terminology.value.production || 'Catatan Produksi',
+                      href: '/simple-production',
+                      icon: Factory,
+                      permission: 'simple_production.view',
+                  },
+              ]
+            : []),
+        ...(hasProductionFlow
+            ? [
+                  {
+                      name: 'Production Order',
+                      href: '/production-orders',
+                      icon: Factory,
+                      permission: 'production.view',
+                  },
+              ]
+            : []),
+        ...(hasPurchase
+            ? [
+                  {
+                      name: 'Pembelian',
+                      href: '/purchase-receipts',
+                      icon: ShoppingBag,
+                      permission: 'purchase.view',
+                  },
+              ]
+            : []),
         {
             name: 'Inventory',
             href: '/inventory',
@@ -158,18 +178,22 @@ const allMenuItems = computed(() => {
             ],
         },
         {
-            name: (retail || hasSimpleProduction) ? 'Riwayat Penjualan' : 'Sales Order',
+            name: retail || hasSimpleProduction ? 'Riwayat Penjualan' : 'Sales Order',
             href: '/sales-orders',
             icon: ShoppingCart,
             permission: 'sales.view',
             children: [
-                ...(!retail && !hasSimpleProduction ? [{
-                    name: 'Quick Checkout',
-                    href: '/sales-orders/quick-checkout',
-                    permission: 'sales.create',
-                }] : []),
+                ...(!retail && !hasSimpleProduction
+                    ? [
+                          {
+                              name: 'Quick Checkout',
+                              href: '/sales-orders/quick-checkout',
+                              permission: 'sales.create',
+                          },
+                      ]
+                    : []),
                 {
-                    name: (retail || hasSimpleProduction) ? 'Daftar' : 'List',
+                    name: retail || hasSimpleProduction ? 'Daftar' : 'List',
                     href: '/sales-orders',
                     permission: 'sales.view',
                 },
@@ -243,19 +267,19 @@ const isChildActive = (childHref: string, children: any[]) => {
     if (props.currentRoute === childHref) {
         return true;
     }
-    
+
     // Otherwise, check if this child has the longest matching href prefix
     // among all children that match the current route
-    const matchingChildren = children.filter(child => props.currentRoute.startsWith(child.href));
+    const matchingChildren = children.filter((child) => props.currentRoute.startsWith(child.href));
     if (matchingChildren.length === 0) {
         return false;
     }
-    
+
     // Find the child with the longest href
     const bestMatch = matchingChildren.reduce((longest, current) => {
         return current.href.length > longest.href.length ? current : longest;
     }, matchingChildren[0]);
-    
+
     return bestMatch.href === childHref;
 };
 
@@ -317,7 +341,7 @@ const handleLinkClick = () => {
 <template>
     <aside
         :class="[
-            'fixed top-16 z-40 h-[calc(100vh-4rem)] flex flex-col border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-700 dark:bg-gray-800',
+            'fixed top-16 z-40 flex h-[calc(100vh-4rem)] flex-col border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-700 dark:bg-gray-800',
             // Mobile: slide from left, Desktop: always visible
             isMobile ? ['left-0 w-64 max-w-[90vw]', isOpen ? 'translate-x-0' : '-translate-x-full'] : ['left-0', isOpen ? 'w-64' : 'w-16'],
         ]"
@@ -430,7 +454,7 @@ const handleLinkClick = () => {
         </nav>
 
         <!-- Sidebar Footer (Membership) -->
-        <div class="border-t border-gray-200 dark:border-gray-700 p-2">
+        <div class="border-t border-gray-200 p-2 dark:border-gray-700">
             <Link
                 href="/subscription"
                 :class="[
@@ -450,9 +474,7 @@ const handleLinkClick = () => {
                             : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300',
                     ]"
                 />
-                <span v-if="isMobile || isOpen" class="text-sm font-medium whitespace-nowrap">
-                    Membership
-                </span>
+                <span v-if="isMobile || isOpen" class="text-sm font-medium whitespace-nowrap"> Membership </span>
             </Link>
         </div>
     </aside>

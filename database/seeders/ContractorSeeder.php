@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 
 class ContractorSeeder extends Seeder
 {
-    public function run(Tenant $tenant = null): void
+    public function run(?Tenant $tenant = null): void
     {
         // Get the demo tenant or use provided
         if (! $tenant) {

@@ -8,9 +8,9 @@ use Illuminate\Database\Seeder;
 
 class PatternSeeder extends Seeder
 {
-    public function run(Tenant $tenant = null): void
+    public function run(?Tenant $tenant = null): void
     {
-        if (!$tenant) {
+        if (! $tenant) {
             $tenant = Tenant::where('slug', 'demo')->first();
         }
 
@@ -18,6 +18,7 @@ class PatternSeeder extends Seeder
             if ($this->command) {
                 $this->command->warn('Tenant not found for PatternSeeder.');
             }
+
             return;
         }
 

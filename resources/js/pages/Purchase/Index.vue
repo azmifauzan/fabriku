@@ -42,8 +42,7 @@ const clearSearch = () => {
     router.get('/purchase-receipts', {}, { preserveState: true, replace: true });
 };
 
-const formatRupiah = (value: number) =>
-    'Rp ' + Number(value).toLocaleString('id-ID', { maximumFractionDigits: 0 });
+const formatRupiah = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { maximumFractionDigits: 0 });
 </script>
 
 <template>
@@ -61,23 +60,24 @@ const formatRupiah = (value: number) =>
 
                 <!-- Search -->
                 <div class="mb-4 flex items-center gap-2">
-                    <div class="relative flex-1 max-w-sm">
-                        <Search :size="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <div class="relative max-w-sm flex-1">
+                        <Search :size="16" class="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
                         <input
                             v-model="search"
                             type="text"
                             placeholder="Cari supplier / nomor invoice..."
-                            class="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                            class="w-full rounded-lg border border-gray-300 py-2 pr-8 pl-9 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                             @keydown.enter="applySearch"
                         />
-                        <button v-if="search" @click="clearSearch" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        <button
+                            v-if="search"
+                            @click="clearSearch"
+                            class="absolute top-1/2 right-2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
                             <X :size="14" />
                         </button>
                     </div>
-                    <button
-                        @click="applySearch"
-                        class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                    >
+                    <button @click="applySearch" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
                         Cari
                     </button>
                 </div>
@@ -85,7 +85,7 @@ const formatRupiah = (value: number) =>
                 <!-- Table -->
                 <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <table class="w-full text-sm">
-                        <thead class="bg-gray-50 text-xs font-medium uppercase text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                        <thead class="bg-gray-50 text-xs font-medium text-gray-500 uppercase dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th class="px-4 py-3 text-left">Tanggal</th>
                                 <th class="px-4 py-3 text-left">Supplier</th>
@@ -98,15 +98,9 @@ const formatRupiah = (value: number) =>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-if="receipts.data.length === 0">
-                                <td colspan="7" class="px-4 py-8 text-center text-gray-400">
-                                    Belum ada catatan pembelian
-                                </td>
+                                <td colspan="7" class="px-4 py-8 text-center text-gray-400">Belum ada catatan pembelian</td>
                             </tr>
-                            <tr
-                                v-for="receipt in receipts.data"
-                                :key="receipt.batch_id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                            >
+                            <tr v-for="receipt in receipts.data" :key="receipt.batch_id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
                                     {{ new Date(receipt.created_at).toLocaleDateString('id-ID') }}
                                 </td>
@@ -139,7 +133,10 @@ const formatRupiah = (value: number) =>
                     </table>
 
                     <!-- Pagination -->
-                    <div v-if="receipts.last_page > 1" class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700">
+                    <div
+                        v-if="receipts.last_page > 1"
+                        class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700"
+                    >
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             {{ receipts.from }}–{{ receipts.to }} dari {{ receipts.total }} transaksi
                         </p>

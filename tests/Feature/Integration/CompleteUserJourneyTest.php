@@ -5,7 +5,6 @@ use App\Models\Customer;
 use App\Models\InventoryItem;
 use App\Models\InventoryLocation;
 use App\Models\Material;
-use App\Models\MaterialReceipt;
 use App\Models\MaterialType;
 use App\Models\Pattern;
 use App\Models\PreparationOrder;
@@ -17,7 +16,7 @@ use App\Models\User;
 describe('Complete User Journey - Garment Workflow', function () {
     beforeEach(function () {
         $this->tenant = Tenant::factory()->create([
-            'business_category' => 'GARMENT',
+            'business_category' => 'garment',
             'is_active' => true,
             'subscription_plan' => 'PRO',
             'subscription_expires_at' => now()->addMonth(),
@@ -31,276 +30,204 @@ describe('Complete User Journey - Garment Workflow', function () {
         ]);
     });
 
-    it('completes full garment workflow from registration to sale', function () {
-        // Step 1: Login
+    it('completes full garment workflow from material receipt to sale', function () {
+        // Step 1: Login & dashboard
         $this->actingAs($this->user)
             ->get(route('dashboard'))
-            ->assertSuccessful()
-            ->assertSee('Dashboard');
+            ->assertSuccessful();
 
-        // Step 2: Create Material Type
+        // Step 2-3: Master data material
         $materialType = MaterialType::factory()->create([
             'tenant_id' => $this->tenant->id,
             'name' => 'Kain Katun',
-            'category' => 'FABRIC',
         ]);
 
-        // Step 3: Create Material
         $material = Material::factory()->create([
             'tenant_id' => $this->tenant->id,
             'material_type_id' => $materialType->id,
             'name' => 'Kain Katun Putih',
             'code' => 'KT-001',
-            'unit' => 'METER',
+            'unit' => 'meter',
             'stock_quantity' => 0,
         ]);
 
-        // Step 4: Receive Material
-        $materialReceipt = MaterialReceipt::factory()->create([
-            'tenant_id' => $this->tenant->id,
-            'material_id' => $material->id,
-            'quantity' => 100,
-            'unit_price' => 50000,
-            'total_price' => 5000000,
-            'received_at' => now(),
-            'batch_number' => 'BATCH-001',
-            'attributes' => [
-                'color' => 'Putih',
-                'width' => 150,
-            ],
-        ]);
+        // Step 4: Receive material via HTTP
+        $this->actingAs($this->user)
+            ->post(route('material-receipts.store'), [
+                'material_id' => $material->id,
+                'supplier_name' => 'PT Kain Sejahtera',
+                'quantity' => 100,
+                'unit_price' => 50000,
+                'receipt_date' => now()->format('Y-m-d'),
+                'batch_number' => 'BATCH-001',
+            ])
+            ->assertRedirect();
 
-        // Verify material stock updated
         $material->refresh();
-        expect($material->stock_quantity)->toBe(100.0);
+        expect((float) $material->stock_quantity)->toBe(100.0);
 
-        // Step 5: Create Pattern
+        // Step 5: Create pattern
         $pattern = Pattern::factory()->create([
             'tenant_id' => $this->tenant->id,
             'code' => 'MKN-001',
             'name' => 'Mukena Dewasa',
-            'product_type' => 'MUKENA',
-            'category' => 'GARMENT',
         ]);
 
-        // Step 6: Create Preparation Order (Cutting)
-        $preparationOrder = PreparationOrder::factory()->create([
-            'tenant_id' => $this->tenant->id,
+        // Step 6-7: Preparation order (cutting) sampai completed → stok deduct
+        $prepPayload = [
             'pattern_id' => $pattern->id,
-            'order_number' => 'PREP-001',
-            'planned_quantity' => 10,
-            'actual_output' => null,
-            'status' => 'DRAFT',
-            'prepared_by' => $this->user->id,
-        ]);
+            'order_date' => now()->toDateString(),
+            'output_quantity' => 10,
+            'output_unit' => 'pieces',
+            'materials_used' => [
+                [
+                    'material_id' => $material->id,
+                    'material_name' => $material->name,
+                    'quantity' => 20,
+                    'unit' => 'meter',
+                ],
+            ],
+        ];
 
-        // Add material usage
-        $preparationOrder->materialUsages()->create([
-            'tenant_id' => $this->tenant->id,
-            'material_id' => $material->id,
-            'quantity_used' => 20,
-            'unit' => 'METER',
-            'batch_number' => 'BATCH-001',
-        ]);
-
-        // Step 7: Start Preparation
         $this->actingAs($this->user)
-            ->post(route('preparation-orders.update', $preparationOrder), [
-                'status' => 'IN_PROGRESS',
-                'pattern_id' => $pattern->id,
-                'planned_quantity' => 10,
-                'notes' => 'Mulai cutting',
-            ])
+            ->post(route('preparation-orders.store'), $prepPayload + ['status' => 'draft'])
             ->assertRedirect();
 
-        // Step 8: Complete Preparation
+        $preparationOrder = PreparationOrder::where('tenant_id', $this->tenant->id)->first();
+        expect($preparationOrder)->not->toBeNull();
+
         $this->actingAs($this->user)
-            ->post(route('preparation-orders.update', $preparationOrder), [
-                'status' => 'COMPLETED',
-                'pattern_id' => $pattern->id,
-                'planned_quantity' => 10,
-                'actual_output' => 10,
-                'notes' => 'Cutting selesai',
-            ])
+            ->patch(route('preparation-orders.update', $preparationOrder), $prepPayload + ['status' => 'completed'])
             ->assertRedirect();
 
-        // Verify material stock deducted
         $material->refresh();
-        expect($material->stock_quantity)->toBe(80.0);
+        expect((float) $material->stock_quantity)->toBe(80.0);
 
-        // Step 9: Create Contractor
+        // Step 8: Contractor + production order eksternal
         $contractor = Contractor::factory()->create([
             'tenant_id' => $this->tenant->id,
             'name' => 'Penjahit Bu Siti',
-            'type' => 'SEWER',
-            'phone' => '081234567890',
         ]);
 
-        // Step 10: Create Production Order
         $productionOrder = ProductionOrder::factory()->create([
             'tenant_id' => $this->tenant->id,
             'preparation_order_id' => $preparationOrder->id,
+            'type' => 'external',
             'contractor_id' => $contractor->id,
-            'order_number' => 'PROD-001',
-            'quantity' => 10,
-            'status' => 'PENDING',
-            'production_type' => 'OUTSOURCE',
+            'status' => 'draft',
         ]);
 
-        // Step 11: Send Production Order
+        // Step 9: Send ke kontraktor → status sent
         $this->actingAs($this->user)
             ->post(route('production-orders.send', $productionOrder))
             ->assertRedirect();
 
         $productionOrder->refresh();
-        expect($productionOrder->status)->toBe('IN_PROGRESS');
+        expect($productionOrder->status)->toBe('sent');
 
-        // Step 12: Complete Production and Add to Inventory
+        // Step 10: Mark complete
         $this->actingAs($this->user)
-            ->post(route('production-orders.mark-complete', $productionOrder), [
-                'completed_quantity' => 10,
-                'quality_check' => [
-                    'grade_a' => 8,
-                    'grade_b' => 2,
-                    'reject' => 0,
-                ],
-                'notes' => 'Jahit selesai',
-            ])
+            ->post(route('production-orders.mark-complete', $productionOrder))
             ->assertRedirect();
 
         $productionOrder->refresh();
-        expect($productionOrder->status)->toBe('COMPLETED');
+        expect($productionOrder->status)->toBe('completed');
 
-        // Step 13: Create Inventory Location
+        // Step 11: Masukkan hasil produksi ke inventory via HTTP
         $location = InventoryLocation::factory()->create([
             'tenant_id' => $this->tenant->id,
             'name' => 'Rak A1',
             'code' => 'RA1',
         ]);
 
-        // Step 14: Add Items to Inventory
-        $inventoryItems = [];
-        for ($i = 1; $i <= 8; $i++) {
-            $inventoryItems[] = InventoryItem::factory()->create([
-                'tenant_id' => $this->tenant->id,
+        $this->actingAs($this->user)
+            ->post(route('inventory.items.store'), [
                 'production_order_id' => $productionOrder->id,
-                'inventory_location_id' => $location->id,
-                'pattern_id' => $pattern->id,
-                'sku' => "MKN-001-00{$i}",
-                'product_name' => 'Mukena Dewasa',
-                'product_type' => 'MUKENA',
-                'initial_quantity' => 1,
-                'current_quantity' => 1,
-                'reserved_quantity' => 0,
-                'status' => 'AVAILABLE',
-                'quality_grade' => 'A',
-            ]);
-        }
+                'location_id' => $location->id,
+                'name' => 'Mukena Dewasa',
+                'sku' => 'MKN-001-A',
+                'target_quantity' => 10,
+                'stock_quantity' => 8,
+                'unit_cost' => 60000,
+                'selling_price' => 400000,
+                'quality_grade' => 'grade_a',
+                'status' => 'available',
+            ])
+            ->assertRedirect();
 
-        // Verify inventory created
-        expect(count($inventoryItems))->toBe(8);
+        $inventoryItem = InventoryItem::where('sku', 'MKN-001-A')->first();
+        expect($inventoryItem)->not->toBeNull();
+        expect($inventoryItem->current_quantity)->toBe(8);
 
-        // Step 15: Create Customer
+        // Step 12: Customer + sales order draft → confirmed → completed
         $customer = Customer::factory()->create([
             'tenant_id' => $this->tenant->id,
             'name' => 'Toko Busana Muslim',
-            'type' => 'WHOLESALE',
-            'phone' => '082345678901',
         ]);
 
-        // Step 16: Create Sales Order
-        $salesOrder = SalesOrder::factory()->create([
-            'tenant_id' => $this->tenant->id,
+        $orderPayload = fn (string $status) => [
             'customer_id' => $customer->id,
-            'order_number' => 'SO-001',
-            'order_date' => now(),
-            'total_amount' => 2000000,
-            'payment_status' => 'UNPAID',
-            'order_status' => 'PENDING',
-            'sales_channel' => 'OFFLINE',
-        ]);
-
-        // Add sales items
-        $salesOrder->items()->create([
-            'tenant_id' => $this->tenant->id,
-            'inventory_item_id' => $inventoryItems[0]->id,
-            'product_name' => 'Mukena Dewasa',
-            'quantity' => 5,
-            'unit_price' => 400000,
-            'subtotal' => 2000000,
-        ]);
-
-        // Step 17: Confirm Sales Order (Should deduct stock)
-        $this->actingAs($this->user)
-            ->patch(route('sales-orders.update', $salesOrder), [
-                'order_status' => 'CONFIRMED',
-                'customer_id' => $customer->id,
-                'order_date' => now()->format('Y-m-d'),
-                'sales_channel' => 'OFFLINE',
-                'discount_amount' => 0,
-                'tax_amount' => 0,
-                'shipping_cost' => 0,
-                'notes' => 'Order confirmed',
-                'items' => [
-                    [
-                        'inventory_item_id' => $inventoryItems[0]->id,
-                        'quantity' => 5,
-                        'unit_price' => 400000,
-                    ],
+            'order_date' => now()->format('Y-m-d'),
+            'channel' => 'offline',
+            'status' => $status,
+            'payment_method' => 'transfer',
+            'items' => [
+                [
+                    'inventory_item_id' => $inventoryItem->id,
+                    'quantity' => 5,
+                    'unit_price' => 400000,
                 ],
+            ],
+        ];
+
+        $this->actingAs($this->user)
+            ->post(route('sales-orders.store'), $orderPayload('draft'))
+            ->assertRedirect();
+
+        $salesOrder = SalesOrder::where('tenant_id', $this->tenant->id)->latest('id')->first();
+        expect($salesOrder->status)->toBe('draft');
+
+        // Confirm → observer reserve
+        $this->actingAs($this->user)
+            ->patch(route('sales-orders.update', $salesOrder), $orderPayload('confirmed'))
+            ->assertRedirect();
+
+        $inventoryItem->refresh();
+        expect($inventoryItem->reserved_quantity)->toBe(5);
+
+        // Complete + bayar → observer deduct
+        $this->actingAs($this->user)
+            ->patch(route('sales-orders.update', $salesOrder), $orderPayload('completed') + [
+                'payment_status' => 'paid',
+                'paid_amount' => 2000000,
             ])
             ->assertRedirect();
 
-        // Step 18: Mark as Paid
-        $this->actingAs($this->user)
-            ->patch(route('sales-orders.update', $salesOrder), [
-                'payment_status' => 'PAID',
-                'customer_id' => $customer->id,
-                'order_date' => now()->format('Y-m-d'),
-                'order_status' => 'CONFIRMED',
-                'sales_channel' => 'OFFLINE',
-                'items' => [
-                    [
-                        'inventory_item_id' => $inventoryItems[0]->id,
-                        'quantity' => 5,
-                        'unit_price' => 400000,
-                    ],
-                ],
-            ])
-            ->assertRedirect();
+        $inventoryItem->refresh();
+        expect($inventoryItem->current_quantity)->toBe(3);
+        expect($inventoryItem->reserved_quantity)->toBe(0);
 
         $salesOrder->refresh();
-        expect($salesOrder->payment_status)->toBe('PAID');
+        expect($salesOrder->status)->toBe('completed');
+        expect($salesOrder->payment_status)->toBe('paid');
 
-        // Step 19: View Reports
-        $this->actingAs($this->user)
-            ->get(route('reports.material'))
-            ->assertSuccessful();
+        // Step 13: Reports + dashboard
+        foreach (['reports.material', 'reports.inventory', 'reports.production', 'reports.sales'] as $report) {
+            $this->actingAs($this->user)
+                ->get(route($report))
+                ->assertSuccessful();
+        }
 
-        $this->actingAs($this->user)
-            ->get(route('reports.inventory'))
-            ->assertSuccessful();
-
-        $this->actingAs($this->user)
-            ->get(route('reports.production'))
-            ->assertSuccessful();
-
-        $this->actingAs($this->user)
-            ->get(route('reports.sales'))
-            ->assertSuccessful();
-
-        // Step 20: Verify Dashboard Metrics
         $this->actingAs($this->user)
             ->get(route('dashboard'))
-            ->assertSuccessful()
-            ->assertSee('Dashboard');
+            ->assertSuccessful();
     });
 });
 
 describe('Complete User Journey - Food Workflow', function () {
     beforeEach(function () {
         $this->tenant = Tenant::factory()->create([
-            'business_category' => 'FOOD',
+            'business_category' => 'food',
             'is_active' => true,
             'subscription_plan' => 'PRO',
             'subscription_expires_at' => now()->addMonth(),
@@ -314,175 +241,165 @@ describe('Complete User Journey - Food Workflow', function () {
         ]);
     });
 
-    it('completes full food workflow from registration to sale', function () {
-        // Step 1: Login
-        $this->actingAs($this->user)
-            ->get(route('dashboard'))
-            ->assertSuccessful();
-
-        // Step 2: Create Material Type
+    it('completes full food workflow from ingredient to sale', function () {
+        // Step 1: Bahan baku
         $materialType = MaterialType::factory()->create([
             'tenant_id' => $this->tenant->id,
             'name' => 'Tepung',
-            'category' => 'BAKING',
         ]);
 
-        // Step 3: Create Material (with expiry date)
         $material = Material::factory()->create([
             'tenant_id' => $this->tenant->id,
             'material_type_id' => $materialType->id,
             'name' => 'Tepung Terigu',
             'code' => 'TPG-001',
-            'unit' => 'KG',
+            'unit' => 'kg',
             'stock_quantity' => 0,
         ]);
 
-        // Step 4: Receive Material
-        $materialReceipt = MaterialReceipt::factory()->create([
-            'tenant_id' => $this->tenant->id,
-            'material_id' => $material->id,
-            'quantity' => 50,
-            'unit_price' => 15000,
-            'total_price' => 750000,
-            'received_at' => now(),
-            'batch_number' => 'BATCH-TPG-001',
-            'attributes' => [
-                'expired_date' => now()->addMonths(6)->format('Y-m-d'),
-                'storage_temp' => 'ROOM_TEMP',
-            ],
-        ]);
+        $this->actingAs($this->user)
+            ->post(route('material-receipts.store'), [
+                'material_id' => $material->id,
+                'supplier_name' => 'Toko Bahan Kue',
+                'quantity' => 50,
+                'unit_price' => 15000,
+                'receipt_date' => now()->format('Y-m-d'),
+                'batch_number' => 'BATCH-TPG-001',
+            ])
+            ->assertRedirect();
 
         $material->refresh();
-        expect($material->stock_quantity)->toBe(50.0);
+        expect((float) $material->stock_quantity)->toBe(50.0);
 
-        // Step 5: Create Pattern (Recipe)
+        // Step 2: Resep + preparation (mixing) → completed
         $pattern = Pattern::factory()->create([
             'tenant_id' => $this->tenant->id,
             'code' => 'BWN-001',
             'name' => 'Brownies Coklat',
-            'product_type' => 'BROWNIES',
-            'category' => 'FOOD',
         ]);
 
-        // Step 6: Create Preparation Order (Mixing)
-        $preparationOrder = PreparationOrder::factory()->create([
-            'tenant_id' => $this->tenant->id,
+        $prepPayload = [
             'pattern_id' => $pattern->id,
-            'order_number' => 'PREP-FOOD-001',
-            'planned_quantity' => 20,
-            'actual_output' => null,
-            'status' => 'DRAFT',
-            'prepared_by' => $this->user->id,
-        ]);
+            'order_date' => now()->toDateString(),
+            'output_quantity' => 20,
+            'output_unit' => 'pieces',
+            'materials_used' => [
+                [
+                    'material_id' => $material->id,
+                    'material_name' => $material->name,
+                    'quantity' => 5,
+                    'unit' => 'kg',
+                ],
+            ],
+        ];
 
-        // Add material usage
-        $preparationOrder->materialUsages()->create([
-            'tenant_id' => $this->tenant->id,
-            'material_id' => $material->id,
-            'quantity_used' => 5,
-            'unit' => 'KG',
-            'batch_number' => 'BATCH-TPG-001',
-        ]);
-
-        // Step 7: Complete Preparation
         $this->actingAs($this->user)
-            ->patch(route('preparation-orders.update', $preparationOrder), [
-                'status' => 'COMPLETED',
-                'pattern_id' => $pattern->id,
-                'planned_quantity' => 20,
-                'actual_output' => 20,
-                'notes' => 'Mixing selesai',
-            ])
+            ->post(route('preparation-orders.store'), $prepPayload + ['status' => 'draft'])
+            ->assertRedirect();
+
+        $preparationOrder = PreparationOrder::where('tenant_id', $this->tenant->id)->first();
+
+        $this->actingAs($this->user)
+            ->patch(route('preparation-orders.update', $preparationOrder), $prepPayload + ['status' => 'completed'])
             ->assertRedirect();
 
         $material->refresh();
-        expect($material->stock_quantity)->toBe(45.0);
+        expect((float) $material->stock_quantity)->toBe(45.0);
 
-        // Step 8: Create Production Order (Baking)
+        // Step 3: Produksi internal (baking) → in_progress via send → complete
         $productionOrder = ProductionOrder::factory()->create([
             'tenant_id' => $this->tenant->id,
             'preparation_order_id' => $preparationOrder->id,
-            'order_number' => 'PROD-FOOD-001',
-            'quantity' => 20,
-            'status' => 'IN_PROGRESS',
-            'production_type' => 'INTERNAL',
+            'type' => 'internal',
             'contractor_id' => null,
+            'status' => 'draft',
         ]);
 
-        // Step 9: Complete Production
         $this->actingAs($this->user)
-            ->post(route('production-orders.mark-complete', $productionOrder), [
-                'completed_quantity' => 20,
-                'quality_check' => [
-                    'premium' => 18,
-                    'standard' => 2,
-                ],
-                'notes' => 'Baking selesai',
-            ])
+            ->post(route('production-orders.send', $productionOrder))
             ->assertRedirect();
 
         $productionOrder->refresh();
-        expect($productionOrder->status)->toBe('COMPLETED');
+        expect($productionOrder->status)->toBe('in_progress');
 
-        // Step 10: Create Inventory Location
+        $this->actingAs($this->user)
+            ->post(route('production-orders.mark-complete', $productionOrder))
+            ->assertRedirect();
+
+        $productionOrder->refresh();
+        expect($productionOrder->status)->toBe('completed');
+
+        // Step 4: Inventory dengan expired date
         $location = InventoryLocation::factory()->create([
             'tenant_id' => $this->tenant->id,
             'name' => 'Display Chiller',
             'code' => 'CH1',
         ]);
 
-        // Step 11: Add to Inventory (with expiry date)
-        $inventoryItem = InventoryItem::factory()->create([
-            'tenant_id' => $this->tenant->id,
-            'production_order_id' => $productionOrder->id,
-            'inventory_location_id' => $location->id,
-            'pattern_id' => $pattern->id,
-            'sku' => 'BWN-001-001',
-            'product_name' => 'Brownies Coklat',
-            'product_type' => 'BROWNIES',
-            'initial_quantity' => 20,
-            'current_quantity' => 20,
-            'reserved_quantity' => 0,
-            'status' => 'AVAILABLE',
-            'production_date' => now(),
-            'expired_date' => now()->addDays(7),
-        ]);
+        $this->actingAs($this->user)
+            ->post(route('inventory.items.store'), [
+                'production_order_id' => $productionOrder->id,
+                'location_id' => $location->id,
+                'name' => 'Brownies Coklat',
+                'sku' => 'BWN-001-001',
+                'target_quantity' => 20,
+                'stock_quantity' => 20,
+                'unit_cost' => 20000,
+                'selling_price' => 50000,
+                'status' => 'available',
+                'quality_grade' => 'grade_a',
+                'expired_date' => now()->addDays(7)->format('Y-m-d'),
+            ])
+            ->assertRedirect();
 
-        // Step 12: Create Customer and Sales Order
+        $inventoryItem = InventoryItem::where('sku', 'BWN-001-001')->first();
+        expect($inventoryItem)->not->toBeNull();
+        expect($inventoryItem->expired_date)->not->toBeNull();
+
+        // Step 5: Jual 10 pcs sampai completed → stok 10
         $customer = Customer::factory()->create([
             'tenant_id' => $this->tenant->id,
             'name' => 'Pelanggan Retail',
-            'type' => 'RETAIL',
         ]);
 
-        $salesOrder = SalesOrder::factory()->create([
-            'tenant_id' => $this->tenant->id,
+        $orderPayload = fn (string $status) => [
             'customer_id' => $customer->id,
-            'order_number' => 'SO-FOOD-001',
-            'order_date' => now(),
-            'total_amount' => 500000,
-            'payment_status' => 'PAID',
-            'order_status' => 'CONFIRMED',
-            'sales_channel' => 'ONLINE',
-        ]);
+            'order_date' => now()->format('Y-m-d'),
+            'channel' => 'online',
+            'status' => $status,
+            'payment_method' => 'transfer',
+            'items' => [
+                [
+                    'inventory_item_id' => $inventoryItem->id,
+                    'quantity' => 10,
+                    'unit_price' => 50000,
+                ],
+            ],
+        ];
 
-        $salesOrder->items()->create([
-            'tenant_id' => $this->tenant->id,
-            'inventory_item_id' => $inventoryItem->id,
-            'product_name' => 'Brownies Coklat',
-            'quantity' => 10,
-            'unit_price' => 50000,
-            'subtotal' => 500000,
-        ]);
+        $this->actingAs($this->user)
+            ->post(route('sales-orders.store'), $orderPayload('draft'))
+            ->assertRedirect();
 
-        // Verify inventory stock deducted
+        $salesOrder = SalesOrder::where('tenant_id', $this->tenant->id)->latest('id')->first();
+
+        $this->actingAs($this->user)
+            ->patch(route('sales-orders.update', $salesOrder), $orderPayload('confirmed'))
+            ->assertRedirect();
+
+        $this->actingAs($this->user)
+            ->patch(route('sales-orders.update', $salesOrder), $orderPayload('completed') + [
+                'payment_status' => 'paid',
+                'paid_amount' => 500000,
+            ])
+            ->assertRedirect();
+
         $inventoryItem->refresh();
         expect($inventoryItem->current_quantity)->toBe(10);
 
-        // Step 13: Access Reports
+        // Step 6: Report inventory
         $this->actingAs($this->user)
             ->get(route('reports.inventory'))
-            ->assertSuccessful()
-            ->assertSee('Inventory Report');
+            ->assertSuccessful();
     });
 });

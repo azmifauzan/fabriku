@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { AlertTriangle, Edit, Eye, Plus, Search, Trash2, Users } from 'lucide-vue-next';
-import { ref, watch, computed } from 'vue';
-import { useSweetAlert } from '@/composables/useSweetAlert';
+import { computed, ref, watch } from 'vue';
 
 interface Role {
     id: number;
@@ -56,20 +56,12 @@ let searchTimeout: ReturnType<typeof setTimeout>;
 watch(search, (value) => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-        router.get(
-            '/staff',
-            { search: value, is_active: isActive.value },
-            { preserveState: true, replace: true },
-        );
+        router.get('/staff', { search: value, is_active: isActive.value }, { preserveState: true, replace: true });
     }, 300);
 });
 
 watch(isActive, (value) => {
-    router.get(
-        '/staff',
-        { search: search.value, is_active: value },
-        { preserveState: true, replace: true },
-    );
+    router.get('/staff', { search: search.value, is_active: value }, { preserveState: true, replace: true });
 });
 
 const deleteStaff = async (staff: StaffItem) => {
@@ -107,9 +99,7 @@ const isAdmin = computed(() => (page.props.auth as any)?.user?.role === 'admin')
                 <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-white">Daftar Staff</h1>
-                        <p class="mt-2 text-sm text-gray-600 sm:text-base dark:text-gray-400">
-                            Kelola data staff / karyawan
-                        </p>
+                        <p class="mt-2 text-sm text-gray-600 sm:text-base dark:text-gray-400">Kelola data staff / karyawan</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <!-- Staff Quota Badge -->
@@ -209,19 +199,13 @@ const isAdmin = computed(() => (page.props.auth as any)?.user?.role === 'admin')
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                                <tr
-                                    v-for="item in staff.data"
-                                    :key="item.id"
-                                    class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                                >
+                                <tr v-for="item in staff.data" :key="item.id" class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                     <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
                                         {{ item.code }}
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">{{ item.name }}</div>
-                                        <div v-if="item.user" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                                            Memiliki akun login
-                                        </div>
+                                        <div v-if="item.user" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Memiliki akun login</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
@@ -286,9 +270,7 @@ const isAdmin = computed(() => (page.props.auth as any)?.user?.role === 'admin')
                     <div v-if="staff.data.length === 0" class="p-12 text-center">
                         <Users :size="48" class="mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                         <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">Belum ada staff</h3>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">
-                            Mulai tambahkan staff untuk mengelola karyawan Anda
-                        </p>
+                        <p class="mb-4 text-gray-500 dark:text-gray-400">Mulai tambahkan staff untuk mengelola karyawan Anda</p>
                         <Link
                             v-if="isAdmin && !isAtLimit"
                             href="/staff/create"

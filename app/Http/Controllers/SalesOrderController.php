@@ -7,11 +7,16 @@ use App\Http\Requests\UpdateSalesOrderRequest;
 use App\Models\Customer;
 use App\Models\InventoryItem;
 use App\Models\SalesOrder;
+use App\Models\Service;
+use App\Models\ServiceConsumable;
+use App\Models\Staff;
 use App\Models\SystemSetting;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -74,7 +79,7 @@ class SalesOrderController extends Controller
 
     public function show(SalesOrder $salesOrder)
     {
-        $salesOrder->load(['customer', 'items.inventoryItem.inventoryLocation', 'items.inventoryItem.productionOrder.preparationOrder.pattern']);
+        $salesOrder->load(['customer', 'items.inventoryItem.inventoryLocation', 'items.inventoryItem.productionOrder.preparationOrder.pattern', 'items.service', 'items.servedBy']);
 
         return Inertia::render('SalesOrders/Show', [
             'salesOrder' => $salesOrder,
@@ -107,7 +112,8 @@ class SalesOrderController extends Controller
                 $subtotal += $itemSubtotal;
 
                 $items[] = [
-                    'inventory_item_id' => $item['inventory_item_id'],
+                    'inventory_item_id' => $item['inventory_item_id'] ?? null,
+                    'service_id' => $item['service_id'] ?? null,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'discount_amount' => $item['discount_amount'] ?? 0,
@@ -210,7 +216,8 @@ class SalesOrderController extends Controller
                 $subtotal += $itemSubtotal;
 
                 $items[] = [
-                    'inventory_item_id' => $item['inventory_item_id'],
+                    'inventory_item_id' => $item['inventory_item_id'] ?? null,
+                    'service_id' => $item['service_id'] ?? null,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'discount_amount' => $item['discount_amount'] ?? 0,
@@ -227,7 +234,14 @@ class SalesOrderController extends Controller
             $taxAmount = $validated['tax_amount'] ?? 0;
             $totalAmount = $subtotal - $discountAmount + $taxAmount;
 
-            // Update sales order
+            // Replace items FIRST, while the order still has its old status, and
+            // delete per-model so SalesOrderItemObserver fires (bulk delete skips
+            // events and would leak reservations on confirmed orders). The status
+            // change below then lets SalesOrderObserver handle stock exactly once
+            // over the final item set.
+            $salesOrder->items()->get()->each->delete();
+            $salesOrder->items()->createMany($items);
+
             $salesOrder->update([
                 'customer_id' => $validated['customer_id'],
                 'order_date' => $validated['order_date'],
@@ -246,24 +260,6 @@ class SalesOrderController extends Controller
                 'invoice_number' => $validated['invoice_number'] ?? null,
                 'resi_number' => $validated['resi_number'] ?? null,
             ]);
-
-            // Stock release and reservation are now handled by SalesOrderObserver
-            // Release reserved stock for old items
-            // $salesOrder->load('items');
-            // foreach ($salesOrder->items as $oldItem) {
-            //     $inventoryItem = InventoryItem::lockForUpdate()->find($oldItem->inventory_item_id);
-            //     $inventoryItem?->releaseReservedStock((int) $oldItem->quantity);
-            // }
-
-            // Delete old items and create new ones
-            $salesOrder->items()->delete();
-            $salesOrder->items()->createMany($items);
-
-            // Reserve stock for new items
-            // foreach ($validated['items'] as $item) {
-            //     $inventoryItem = InventoryItem::lockForUpdate()->find($item['inventory_item_id']);
-            //     $inventoryItem?->reserveStock((int) $item['quantity']);
-            // }
 
             DB::commit();
 
@@ -308,31 +304,81 @@ class SalesOrderController extends Controller
             ->orderBy('product_name')
             ->get();
 
+        $services = Service::where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'code', 'name', 'price', 'category']);
+
         $customers = Customer::query()
             ->where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'name', 'code']);
 
+        // Staff untuk assignment layanan (kategori service)
+        $staff = Staff::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         return Inertia::render('SalesOrders/QuickCheckout', [
             'inventoryItems' => $items,
+            'services' => $services,
             'customers' => $customers,
+            'staff' => $staff,
         ]);
     }
 
     public function quickCheckoutStore(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        $tenantId = auth()->user()->tenant_id;
+
+        $validator = Validator::make($request->all(), [
             'payment_method' => ['required', 'string'],
-            'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
+            'customer_id' => ['nullable', 'integer', Rule::exists('customers', 'id')->where('tenant_id', $tenantId)],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.inventory_item_id' => ['required', 'integer', 'exists:inventory_items,id'],
+            'items.*.inventory_item_id' => ['nullable', 'required_without:items.*.service_id', 'integer', Rule::exists('inventory_items', 'id')->where('tenant_id', $tenantId)],
+            'items.*.service_id' => ['nullable', 'required_without:items.*.inventory_item_id', 'integer', Rule::exists('services', 'id')->where('tenant_id', $tenantId)],
+            'items.*.served_by' => ['nullable', 'integer', Rule::exists('staff', 'id')->where('tenant_id', $tenantId)],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
         ]);
 
-        $tenantId = auth()->user()->tenant_id;
+        $validator->after(function ($validator) use ($request) {
+            $consumableNeeds = [];
 
-        if (!empty($validated['customer_id'])) {
+            foreach ($request->input('items', []) as $index => $line) {
+                if (! empty($line['inventory_item_id']) && ! empty($line['service_id'])) {
+                    $validator->errors()->add("items.{$index}.service_id", 'Satu baris hanya boleh berisi produk atau layanan, tidak keduanya.');
+                }
+
+                // Akumulasi kebutuhan consumable per inventory item untuk validasi stok
+                if (! empty($line['service_id']) && ! empty($line['quantity'])) {
+                    $consumables = ServiceConsumable::query()
+                        ->where('service_id', $line['service_id'])
+                        ->get();
+
+                    foreach ($consumables as $consumable) {
+                        $consumableNeeds[$consumable->inventory_item_id] =
+                            ($consumableNeeds[$consumable->inventory_item_id] ?? 0)
+                            + ($consumable->quantity * (int) $line['quantity']);
+                    }
+                }
+            }
+
+            foreach ($consumableNeeds as $inventoryItemId => $needed) {
+                $item = InventoryItem::find($inventoryItemId);
+
+                if ($item && $item->available_stock < $needed) {
+                    $validator->errors()->add(
+                        'items',
+                        "Stok bahan pendukung \"{$item->product_name}\" tidak cukup (butuh {$needed}, tersedia {$item->available_stock})."
+                    );
+                }
+            }
+        });
+
+        $validated = $validator->validate();
+
+        if (! empty($validated['customer_id'])) {
             $customer = Customer::findOrFail($validated['customer_id']);
         } else {
             $customer = Customer::firstOrCreate(
@@ -352,7 +398,9 @@ class SalesOrderController extends Controller
                 $lineSubtotal = $line['quantity'] * $line['unit_price'];
                 $subtotal += $lineSubtotal;
                 $items[] = [
-                    'inventory_item_id' => $line['inventory_item_id'],
+                    'inventory_item_id' => $line['inventory_item_id'] ?? null,
+                    'service_id' => $line['service_id'] ?? null,
+                    'served_by' => $line['served_by'] ?? null,
                     'quantity' => $line['quantity'],
                     'unit_price' => $line['unit_price'],
                     'discount_amount' => 0,
@@ -381,8 +429,22 @@ class SalesOrderController extends Controller
 
             // Deduct stock directly — observer only handles updates, not creates
             foreach ($validated['items'] as $line) {
-                $inventoryItem = InventoryItem::lockForUpdate()->find($line['inventory_item_id']);
-                $inventoryItem?->deductStock((int) $line['quantity']);
+                if (! empty($line['inventory_item_id'])) {
+                    $inventoryItem = InventoryItem::lockForUpdate()->find($line['inventory_item_id']);
+                    $inventoryItem?->deductStock((int) $line['quantity']);
+                }
+
+                // Auto-deduct consumables yang ter-mapping ke layanan
+                if (! empty($line['service_id'])) {
+                    $consumables = ServiceConsumable::query()
+                        ->where('service_id', $line['service_id'])
+                        ->get();
+
+                    foreach ($consumables as $consumable) {
+                        $item = InventoryItem::lockForUpdate()->find($consumable->inventory_item_id);
+                        $item?->deductStock($consumable->quantity * (int) $line['quantity']);
+                    }
+                }
             }
         });
 
@@ -394,7 +456,7 @@ class SalesOrderController extends Controller
     {
         // For now, return a simple view or just a placeholder message for testing
         // Ideally this would generate a PDF
-        $salesOrder->load(['customer', 'items.inventoryItem']);
+        $salesOrder->load(['customer', 'items.inventoryItem', 'items.service', 'items.servedBy']);
         $settings = SystemSetting::getAllForTenant(auth()->user()->tenant_id);
 
         return Inertia::render('SalesOrders/Print', [
@@ -405,7 +467,7 @@ class SalesOrderController extends Controller
 
     public function deliveryOrder(SalesOrder $salesOrder)
     {
-        $salesOrder->load(['customer', 'items.inventoryItem']);
+        $salesOrder->load(['customer', 'items.inventoryItem', 'items.service', 'items.servedBy']);
         $settings = SystemSetting::getAllForTenant(auth()->user()->tenant_id);
 
         return Inertia::render('SalesOrders/DeliveryOrder', [
@@ -416,7 +478,7 @@ class SalesOrderController extends Controller
 
     public function export(SalesOrder $salesOrder)
     {
-        $salesOrder->load(['customer', 'items.inventoryItem']);
+        $salesOrder->load(['customer', 'items.inventoryItem', 'items.service', 'items.servedBy']);
 
         $csvFileName = 'Invoice-'.str_replace('/', '-', $salesOrder->invoice_number ?? $salesOrder->order_number).'.csv';
         $headers = [
@@ -443,8 +505,9 @@ class SalesOrderController extends Controller
 
             // Items
             foreach ($salesOrder->items as $item) {
+                $itemName = $item->inventoryItem ? ($item->inventoryItem->product_name ?? $item->inventoryItem->sku) : ($item->service->name ?? 'Layanan');
                 fputcsv($file, [
-                    $item->inventoryItem->product_name ?? $item->inventoryItem->sku,
+                    $itemName,
                     $item->quantity,
                     $item->unit_price,
                     $item->discount_amount,

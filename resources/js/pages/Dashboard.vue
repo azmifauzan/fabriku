@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import QrScanner from '@/components/QrScanner.vue';
 import { useBusinessContext } from '@/composables/useBusinessContext';
 import AppLayout from '@/layouts/AppLayout.vue';
-import QrScanner from '@/components/QrScanner.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { AlertTriangle, Box, ClipboardList, Factory, Layers, Package, ShoppingCart, TrendingUp } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -166,7 +166,12 @@ const getStatusBadgeClass = (status: string) => {
                                     class="inline-flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition-all hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
                                 >
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                                        />
                                     </svg>
                                     Scan QR Code
                                 </button>
@@ -176,7 +181,7 @@ const getStatusBadgeClass = (status: string) => {
                 </div>
 
                 <!-- Stats Grid -->
-                <div class="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
                     <!-- Total Materials -->
                     <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
                         <div class="p-6">
@@ -299,7 +304,7 @@ const getStatusBadgeClass = (status: string) => {
                                 <TrendingUp :size="20" class="text-indigo-500" />
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Produk Terlaris (30 Hari Terakhir)</h3>
                             </div>
-                            <div class="max-h-[400px] overflow-y-auto space-y-3">
+                            <div class="max-h-[400px] space-y-3 overflow-y-auto">
                                 <div
                                     v-for="product in topProducts"
                                     :key="product.sku"
@@ -329,7 +334,7 @@ const getStatusBadgeClass = (status: string) => {
                                 <ClipboardList :size="20" class="text-indigo-500" />
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Aktivitas Terkini</h3>
                             </div>
-                            <div class="max-h-[400px] overflow-y-auto space-y-3">
+                            <div class="max-h-[400px] space-y-3 overflow-y-auto">
                                 <div
                                     v-for="(activity, idx) in recentActivities"
                                     :key="idx"
@@ -448,16 +453,16 @@ const getStatusBadgeClass = (status: string) => {
                     <!-- Stock Status Summary -->
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <!-- Available Stock Count -->
-                        <div class="overflow-hidden rounded-lg border-2 border-green-200 bg-green-50 shadow-sm dark:border-green-800 dark:bg-green-900/20">
+                        <div
+                            class="overflow-hidden rounded-lg border-2 border-green-200 bg-green-50 shadow-sm dark:border-green-800 dark:bg-green-900/20"
+                        >
                             <div class="p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <dt class="text-sm font-medium text-green-800 dark:text-green-300">Stock Aman</dt>
                                         <dd class="mt-1 text-3xl font-bold text-green-600 dark:text-green-400">
                                             {{
-                                                inventorySummary.total_items -
-                                                inventorySummary.low_stock_count -
-                                                inventorySummary.out_of_stock_count
+                                                inventorySummary.total_items - inventorySummary.low_stock_count - inventorySummary.out_of_stock_count
                                             }}
                                         </dd>
                                         <p class="mt-1 text-xs text-green-700 dark:text-green-400">Items dengan stock mencukupi</p>
@@ -470,7 +475,9 @@ const getStatusBadgeClass = (status: string) => {
                         </div>
 
                         <!-- Low Stock Count -->
-                        <div class="overflow-hidden rounded-lg border-2 border-yellow-200 bg-yellow-50 shadow-sm dark:border-yellow-800 dark:bg-yellow-900/20">
+                        <div
+                            class="overflow-hidden rounded-lg border-2 border-yellow-200 bg-yellow-50 shadow-sm dark:border-yellow-800 dark:bg-yellow-900/20"
+                        >
                             <div class="p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -541,14 +548,9 @@ const getStatusBadgeClass = (status: string) => {
                             <div class="mb-4 flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <Package :size="20" class="text-purple-500" />
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {{ materialLabel }} - Nilai Tertinggi
-                                    </h3>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ materialLabel }} - Nilai Tertinggi</h3>
                                 </div>
-                                <Link
-                                    href="/reports/material"
-                                    class="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
-                                >
+                                <Link href="/reports/material" class="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
                                     Lihat Report →
                                 </Link>
                             </div>
@@ -619,10 +621,7 @@ const getStatusBadgeClass = (status: string) => {
                             <Box :size="20" class="text-indigo-500" />
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Inventory by Location</h3>
                         </div>
-                        <Link
-                            href="/inventory/visualization"
-                            class="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
-                        >
+                        <Link href="/inventory/visualization" class="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
                             Visualisasi Lengkap →
                         </Link>
                     </div>
@@ -659,25 +658,21 @@ const getStatusBadgeClass = (status: string) => {
                                         {{ location.used_capacity }} / {{ location.capacity }}
                                     </span>
                                 </div>
-                                <div v-if="!location.is_unlimited" class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
+                                <div
+                                    v-if="!location.is_unlimited"
+                                    class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700"
+                                >
                                     <div
                                         class="h-full rounded-full transition-all duration-500"
                                         :class="
-                                            location.percentage >= 90
-                                                ? 'bg-red-500'
-                                                : location.percentage >= 70
-                                                  ? 'bg-yellow-500'
-                                                  : 'bg-green-500'
+                                            location.percentage >= 90 ? 'bg-red-500' : location.percentage >= 70 ? 'bg-yellow-500' : 'bg-green-500'
                                         "
                                         :style="{ width: `${Math.min(location.percentage, 100)}%` }"
                                     ></div>
                                 </div>
                             </div>
 
-                            <Link
-                                :href="`/inventory/visualization?location=${location.id}`"
-                                class="absolute inset-0 z-10 focus:outline-none"
-                            >
+                            <Link :href="`/inventory/visualization?location=${location.id}`" class="absolute inset-0 z-10 focus:outline-none">
                                 <span class="sr-only">View detail</span>
                             </Link>
                         </div>

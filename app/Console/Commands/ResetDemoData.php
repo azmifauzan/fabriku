@@ -4,15 +4,29 @@ namespace App\Console\Commands;
 
 use App\Models\Contractor;
 use App\Models\Customer;
+use App\Models\InventoryItem;
+use App\Models\InventoryItemCategory;
 use App\Models\InventoryLocation;
 use App\Models\Material;
 use App\Models\MaterialReceipt;
 use App\Models\MaterialType;
 use App\Models\Pattern;
+use App\Models\SalesOrder;
+use App\Models\SalesOrderItem;
 use App\Models\Staff;
+use App\Models\StockAdjustment;
 use App\Models\Tenant;
+use App\Models\User;
+use Database\Seeders\ContractorSeeder;
+use Database\Seeders\InventorySeeder;
+use Database\Seeders\MaterialSeeder;
+use Database\Seeders\MaterialTypeSeeder;
+use Database\Seeders\PatternSeeder;
+use Database\Seeders\ServiceTenantSeeder;
+use Database\Seeders\StaffSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ResetDemoData extends Command
 {
@@ -43,6 +57,7 @@ class ResetDemoData extends Command
             'admin@glowbeauty.com',
             'admin@tokoserbaada.com',
             'admin@homemade.com',
+            'admin@bengkel.com',
         ];
 
         $tenantOption = $this->option('tenant');
@@ -98,6 +113,8 @@ class ResetDemoData extends Command
             })->delete();
 
             DB::table('sales_orders')->where('tenant_id', $tenant->id)->delete();
+
+            DB::table('services')->where('tenant_id', $tenant->id)->delete();
 
             DB::table('inventory_items')->where('tenant_id', $tenant->id)->delete();
             DB::table('stock_adjustments')->where('tenant_id', $tenant->id)->delete();
@@ -173,6 +190,9 @@ class ResetDemoData extends Command
             case 'homemade':
                 $this->reseedHomemadeTenant($tenant);
                 break;
+            case 'service':
+                $this->reseedServiceTenant($tenant);
+                break;
             default:
                 $this->warn("  Unknown business category: {$tenant->business_category}");
         }
@@ -181,27 +201,27 @@ class ResetDemoData extends Command
     private function reseedGarmentTenant(Tenant $tenant)
     {
         // Get the user for this tenant (needed for MaterialSeeder)
-        $user = \App\Models\User::where('tenant_id', $tenant->id)->first();
+        $user = User::where('tenant_id', $tenant->id)->first();
 
         if (! $user) {
             return;
         }
 
         // Use the existing seeders with tenant context
-        $staffSeeder = new \Database\Seeders\StaffSeeder;
+        $staffSeeder = new StaffSeeder;
         $staffSeeder->run($tenant);
 
-        $contractorSeeder = new \Database\Seeders\ContractorSeeder;
+        $contractorSeeder = new ContractorSeeder;
         $contractorSeeder->run($tenant);
 
-        $materialTypeSeeder = new \Database\Seeders\MaterialTypeSeeder;
+        $materialTypeSeeder = new MaterialTypeSeeder;
         $materialTypeSeeder->run($tenant);
 
-        $materialSeeder = new \Database\Seeders\MaterialSeeder;
-        $patternSeeder = new \Database\Seeders\PatternSeeder;
+        $materialSeeder = new MaterialSeeder;
+        $patternSeeder = new PatternSeeder;
         $patternSeeder->run($tenant);
 
-        $inventorySeeder = new \Database\Seeders\InventorySeeder;
+        $inventorySeeder = new InventorySeeder;
         $inventorySeeder->run($tenant);
     }
 
@@ -667,17 +687,17 @@ class ResetDemoData extends Command
         );
 
         // 3. Categories
-        \App\Models\InventoryItemCategory::firstOrCreate(
+        InventoryItemCategory::firstOrCreate(
             ['tenant_id' => $tenant->id, 'name' => 'Umum'],
             ['description' => 'Produk umum']
         );
-        \App\Models\InventoryItemCategory::firstOrCreate(
+        InventoryItemCategory::firstOrCreate(
             ['tenant_id' => $tenant->id, 'name' => 'Best Seller'],
             ['description' => 'Produk terlaris']
         );
 
         // 4. Inventory Items
-        $itemIndomie = \App\Models\InventoryItem::firstOrCreate(
+        $itemIndomie = InventoryItem::firstOrCreate(
             ['tenant_id' => $tenant->id, 'sku' => 'INV-RTL-001'],
             [
                 'product_name' => 'Indomie Goreng',
@@ -694,7 +714,7 @@ class ResetDemoData extends Command
             ]
         );
 
-        $itemAquaGelas = \App\Models\InventoryItem::firstOrCreate(
+        $itemAquaGelas = InventoryItem::firstOrCreate(
             ['tenant_id' => $tenant->id, 'sku' => 'INV-RTL-002'],
             [
                 'product_name' => 'Aqua Gelas 240ml',
@@ -711,7 +731,7 @@ class ResetDemoData extends Command
             ]
         );
 
-        $itemSabunMandi = \App\Models\InventoryItem::firstOrCreate(
+        $itemSabunMandi = InventoryItem::firstOrCreate(
             ['tenant_id' => $tenant->id, 'sku' => 'INV-RTL-003'],
             [
                 'product_name' => 'Sabun Mandi Lifebuoy 110g',
@@ -728,7 +748,7 @@ class ResetDemoData extends Command
             ]
         );
 
-        $itemRokokSurya = \App\Models\InventoryItem::firstOrCreate(
+        $itemRokokSurya = InventoryItem::firstOrCreate(
             ['tenant_id' => $tenant->id, 'sku' => 'INV-RTL-004'],
             [
                 'product_name' => 'Rokok Surya 16',
@@ -746,7 +766,7 @@ class ResetDemoData extends Command
         );
 
         // 5. Purchase batch (StockAdjustments)
-        $batchId = \Illuminate\Support\Str::uuid()->toString();
+        $batchId = Str::uuid()->toString();
         $adjustments = [
             ['item' => $itemIndomie, 'qty' => 120, 'cost' => 2800],
             ['item' => $itemAquaGelas, 'qty' => 60, 'cost' => 600],
@@ -755,14 +775,14 @@ class ResetDemoData extends Command
         ];
 
         // Get retail admin user id
-        $adminUserId = \App\Models\User::where('tenant_id', $tenant->id)->where('role', 'admin')->value('id');
+        $adminUserId = User::where('tenant_id', $tenant->id)->where('role', 'admin')->value('id');
 
         foreach ($adjustments as $adj) {
-            \App\Models\StockAdjustment::firstOrCreate(
+            StockAdjustment::firstOrCreate(
                 ['batch_id' => $batchId, 'inventory_item_id' => $adj['item']->id],
                 [
                     'tenant_id' => $tenant->id,
-                    'adjustment_type' => \App\Models\StockAdjustment::TYPE_PURCHASE,
+                    'adjustment_type' => StockAdjustment::TYPE_PURCHASE,
                     'quantity_before' => 0,
                     'quantity_after' => $adj['qty'],
                     'adjustment_quantity' => $adj['qty'],
@@ -776,7 +796,7 @@ class ResetDemoData extends Command
         }
 
         // 6. Demo sales orders
-        $salesRetail1 = \App\Models\SalesOrder::firstOrCreate(
+        $salesRetail1 = SalesOrder::firstOrCreate(
             ['tenant_id' => $tenant->id, 'order_number' => 'SO-RTL-2026-001'],
             [
                 'customer_id' => $walkIn->id,
@@ -795,14 +815,27 @@ class ResetDemoData extends Command
             ]
         );
 
-        \App\Models\SalesOrderItem::firstOrCreate(
+        SalesOrderItem::firstOrCreate(
             ['sales_order_id' => $salesRetail1->id, 'inventory_item_id' => $itemIndomie->id],
             ['product_name' => $itemIndomie->product_name, 'sku' => $itemIndomie->sku, 'quantity' => 3, 'unit_price' => 3500, 'discount_amount' => 0, 'subtotal' => 10500]
         );
-        \App\Models\SalesOrderItem::firstOrCreate(
+        SalesOrderItem::firstOrCreate(
             ['sales_order_id' => $salesRetail1->id, 'inventory_item_id' => $itemAquaGelas->id],
             ['product_name' => $itemAquaGelas->product_name, 'sku' => $itemAquaGelas->sku, 'quantity' => 4, 'unit_price' => 800, 'discount_amount' => 0, 'subtotal' => 3200]
         );
+    }
+
+    private function reseedServiceTenant(Tenant $tenant)
+    {
+        // Walk-in customer untuk Quick Checkout
+        Customer::firstOrCreate(
+            ['tenant_id' => $tenant->id, 'code' => 'WALK-IN'],
+            ['name' => 'Walk-in Customer', 'is_active' => true]
+        );
+
+        // Lokasi, kategori, sparepart inventory, staff montir, katalog layanan,
+        // dan consumable mapping di-handle oleh ServiceTenantSeeder.
+        (new ServiceTenantSeeder)->run($tenant);
     }
 
     private function reseedHomemadeTenant(Tenant $tenant)
@@ -826,7 +859,7 @@ class ResetDemoData extends Command
         );
 
         // 3. Category
-        \App\Models\InventoryItemCategory::firstOrCreate(
+        InventoryItemCategory::firstOrCreate(
             ['tenant_id' => $tenant->id, 'name' => 'Coklat'],
             ['description' => 'Produk coklat praline dan bar']
         );
@@ -964,11 +997,11 @@ class ResetDemoData extends Command
         ]);
 
         // Log opening balance adjustment
-        $adminUserId = \App\Models\User::where('tenant_id', $tenant->id)->where('role', 'admin')->value('id');
-        \App\Models\StockAdjustment::create([
+        $adminUserId = User::where('tenant_id', $tenant->id)->where('role', 'admin')->value('id');
+        StockAdjustment::create([
             'tenant_id' => $tenant->id,
             'inventory_item_id' => $itemPralineBox->id,
-            'adjustment_type' => \App\Models\StockAdjustment::TYPE_OPENING_BALANCE,
+            'adjustment_type' => StockAdjustment::TYPE_OPENING_BALANCE,
             'quantity_before' => 0,
             'quantity_after' => 20,
             'adjustment_quantity' => 20,

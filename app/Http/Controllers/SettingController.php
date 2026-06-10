@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SystemSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class SettingController extends Controller
@@ -30,8 +31,8 @@ class SettingController extends Controller
         // Handle file upload
         if ($request->hasFile('company_logo')) {
             $file = $request->file('company_logo');
-            $path = \Illuminate\Support\Facades\Storage::disk('s3')->putFile('logos', $file, 'public');
-            $url = \Illuminate\Support\Facades\Storage::disk('s3')->url($path);
+            $path = Storage::disk('s3')->putFile('logos', $file, 'public');
+            $url = Storage::disk('s3')->url($path);
             SystemSetting::set('company_logo', $url, 'string', $tenantId);
         }
 

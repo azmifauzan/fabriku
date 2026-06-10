@@ -125,7 +125,7 @@
 
                 <!-- Filters and Search -->
                 <div class="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <form @submit.prevent="search" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6 items-end">
+                    <form @submit.prevent="search" class="grid grid-cols-1 items-end gap-4 sm:grid-cols-2 lg:grid-cols-6">
                         <div class="lg:col-span-2">
                             <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300"> Pencarian </label>
                             <input
@@ -419,7 +419,7 @@ import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Edit, Eye, Trash2, Printer, Truck } from 'lucide-vue-next';
+import { Edit, Eye, Printer, Trash2, Truck } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
 const props = defineProps({

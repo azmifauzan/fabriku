@@ -3,7 +3,11 @@
 namespace App\Providers;
 
 use App\Models\InventoryItem;
+use App\Models\SalesOrder;
+use App\Models\SalesOrderItem;
 use App\Observers\InventoryObserver;
+use App\Observers\SalesOrderItemObserver;
+use App\Observers\SalesOrderObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register observers
         InventoryItem::observe(InventoryObserver::class);
-        \App\Models\SalesOrder::observe(\App\Observers\SalesOrderObserver::class);
-        \App\Models\SalesOrderItem::observe(\App\Observers\SalesOrderItemObserver::class);
+        SalesOrder::observe(SalesOrderObserver::class);
+        SalesOrderItem::observe(SalesOrderItemObserver::class);
     }
 }
