@@ -114,18 +114,51 @@ class SalesOrder extends Model
         return $this->status === 'cancelled';
     }
 
+    public function isShipped(): bool
+    {
+        return $this->status === 'shipped';
+    }
+
+    /**
+     * Only draft orders can be fully edited (items + status).
+     * For confirmed+ orders, use the dedicated updateStatus action instead.
+     */
     public function canBeEdited(): bool
     {
-        if (in_array($this->status, ['draft', 'confirmed'])) {
-            return true;
-        }
+        return $this->status === 'draft';
+    }
 
-        // Completed orders can still be edited if payment has not been received
-        if ($this->status === 'completed' && $this->payment_status !== 'paid') {
-            return true;
-        }
+    /**
+     * Strict state-machine transition map.
+     * Backend validates this; frontend should mirror it for UX.
+     *
+     * @return array<string, string[]>
+     */
+    public static function transitionMap(): array
+    {
+        return [
+            'draft' => ['confirmed', 'processing', 'cancelled'],
+            'confirmed' => ['processing', 'shipped', 'completed', 'cancelled'],
+            'processing' => ['shipped', 'completed', 'cancelled'],
+            'shipped' => ['completed', 'cancelled'],
+            'completed' => [],
+            'cancelled' => [],
+        ];
+    }
 
-        return false;
+    public function canTransitionTo(string $newStatus): bool
+    {
+        return in_array($newStatus, $this->allowedTransitions());
+    }
+
+    /**
+     * Allowed target statuses for the Update Status modal (excludes current).
+     *
+     * @return string[]
+     */
+    public function allowedTransitions(): array
+    {
+        return self::transitionMap()[$this->status] ?? [];
     }
 
     public function canBeCancelled(): bool

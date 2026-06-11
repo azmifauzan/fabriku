@@ -344,8 +344,17 @@
                                             >
                                                 <Truck :size="16" />
                                             </a>
+                                            <!-- Update Status -->
+                                            <button
+                                                v-if="!['completed', 'cancelled'].includes(order.status)"
+                                                @click="openStatusModal(order)"
+                                                class="inline-flex items-center justify-center rounded-lg p-1.5 text-amber-600 transition-colors hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-900/30"
+                                                title="Update status pesanan"
+                                            >
+                                                <ArrowRightLeft :size="16" />
+                                            </button>
                                             <Link
-                                                v-if="order.status === 'draft' || order.status === 'confirmed'"
+                                                v-if="order.status === 'draft'"
                                                 :href="`/sales-orders/${order.id}/edit`"
                                                 class="inline-flex items-center justify-center rounded-lg p-1.5 text-indigo-600 transition-colors hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
                                                 title="Edit sales order"
@@ -412,6 +421,16 @@
             </div>
         </div>
     </AppLayout>
+
+    <!-- Status Update Modal (inline on Index) -->
+    <StatusUpdateModal
+        v-if="selectedOrder"
+        :show="showStatusModal"
+        :sales-order-id="selectedOrder.id"
+        :current-status="selectedOrder.status"
+        :allowed-transitions="allowedTransitionsFor(selectedOrder.status)"
+        @close="closeStatusModal"
+    />
 </template>
 
 <script setup lang="ts">
@@ -419,8 +438,9 @@ import PageHeader from '@/components/PageHeader.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Edit, Eye, Printer, Trash2, Truck } from 'lucide-vue-next';
+import { ArrowRightLeft, Edit, Eye, Printer, Trash2, Truck } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
+import StatusUpdateModal from './StatusUpdateModal.vue';
 
 const props = defineProps({
     orders: Object,
@@ -436,6 +456,33 @@ const form = ref({
     payment_status: props.filters.payment_status || '',
     channel: props.filters.channel || '',
 });
+
+// Status modal state
+const showStatusModal = ref(false);
+const selectedOrder = ref<any>(null);
+
+const TRANSITION_MAP: Record<string, string[]> = {
+    draft:      ['confirmed', 'processing', 'cancelled'],
+    confirmed:  ['processing', 'shipped', 'completed', 'cancelled'],
+    processing: ['shipped', 'completed', 'cancelled'],
+    shipped:    ['completed', 'cancelled'],
+    completed:  [],
+    cancelled:  [],
+};
+
+function allowedTransitionsFor(status: string): string[] {
+    return TRANSITION_MAP[status] ?? [];
+}
+
+function openStatusModal(order: any) {
+    selectedOrder.value = order;
+    showStatusModal.value = true;
+}
+
+function closeStatusModal() {
+    showStatusModal.value = false;
+    selectedOrder.value = null;
+}
 
 watch(
     form,

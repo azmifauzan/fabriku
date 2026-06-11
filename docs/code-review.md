@@ -20,9 +20,9 @@ Semua Store/Update Request sudah return `return $this->user() !== null;`.
 Controller manual `reserveStock`/`releaseReservedStock` di `store()`, `update()`, `destroy()` sudah dihapus. Observer adalah single source of truth:
 - create → status `draft` (no reserve)
 - status `draft→confirmed/processing` → observer reserve
-- status `confirmed/processing→completed` → observer deduct
-- status `confirmed/processing→cancelled` → observer release
-- soft-delete → observer release (jika confirmed/processing)
+- status `confirmed/processing/shipped→completed` → observer deduct
+- status `confirmed/processing/shipped→cancelled` → observer release
+- soft-delete → observer release (jika confirmed/processing/shipped)
 - Destroy: `canBeCancelled()` guard, kemudian `$salesOrder->delete()` (observer handle release).
 
 ### ✅ RESOLVED — Order bisa dibuat dengan `status=confirmed` lewat client
@@ -32,7 +32,15 @@ Controller manual `reserveStock`/`releaseReservedStock` di `store()`, `update()`
 `InventoryItem::reserveStock()`, `releaseReservedStock()`, `deductStock()` sudah punya `DB::transaction` + `self::lockForUpdate()->find($this->id)` di dalam method itu sendiri. `Illuminate\Support\Facades\DB` sudah di-import di model.
 
 ### ✅ RESOLVED — `SalesOrderController::update` tidak enforce `canBeEdited()`
-Added guard: `if (! $salesOrder->canBeEdited()) { abort(403, ...); }` di awal `update()`.
+`canBeEdited()` sekarang strict `status === 'draft'` (sebelumnya juga true untuk `confirmed` dan `completed` belum lunas). Guard `if (! $salesOrder->canBeEdited()) { abort(403, ...); }` tetap di awal `update()`.
+
+### ✅ RESOLVED — Order `processing`/`shipped` nyangkut, observer tidak handle `shipped`
+`processing`/`shipped` mentok tanpa jalur lanjut (lihat `docs/plan.md` CRITICAL #1-3, Juni 2026). Fix:
+- `SalesOrder::transitionMap()` (state machine tunggal, dipakai `canTransitionTo()` + `allowedTransitions()`): `draft→{confirmed,processing,cancelled}`, `confirmed→{processing,shipped,completed,cancelled}`, `processing→{shipped,completed,cancelled}`, `shipped→{completed,cancelled}`.
+- `PATCH sales-orders/{id}/update-status` (`UpdateStatusRequest`, permission `sales.edit`) — 422 bila transisi di luar map. `resi_number`+`shipped_date` diisi saat target `shipped`; `completed_date` saat target `completed`.
+- `StatusUpdateModal.vue` di Index & Show (frontend mirror transition map untuk UX, backend tetap source of truth).
+- `SalesOrderObserver` — `'shipped'` ditambahkan ke ketiga `in_array` check (`updated`/`deleted`/`forceDeleting`) sehingga `shipped→completed` deduct & `shipped→cancelled`/hapus order `shipped` release reserved stock.
+- Test: `tests/Feature/SalesOrderUpdateStatusTest.php`.
 
 ### ✅ RESOLVED — Telegram webhook tanpa rate limit
 `routes/api.php` — ditambah `->middleware('throttle:60,1')`. Log level debug diturunkan ke info dengan payload ringkas.

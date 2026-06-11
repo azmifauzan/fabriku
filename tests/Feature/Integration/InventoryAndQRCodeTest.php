@@ -421,8 +421,9 @@ describe('Sales Order Stock Integration', function () {
             ->patch(route('sales-orders.update', $order), makeOrderPayload($this->customer, $this->item, 15, 'confirmed'))
             ->assertRedirect();
 
+        // Use update-status to complete
         $this->actingAs($this->user)
-            ->patch(route('sales-orders.update', $order), makeOrderPayload($this->customer, $this->item, 15, 'completed'))
+            ->patch(route('sales-orders.update-status', $order), ['status' => 'completed'])
             ->assertRedirect();
 
         $this->item->refresh();
@@ -444,8 +445,9 @@ describe('Sales Order Stock Integration', function () {
         $this->item->refresh();
         expect($this->item->reserved_quantity)->toBe(20);
 
+        // Use update-status to cancel
         $this->actingAs($this->user)
-            ->patch(route('sales-orders.update', $order), makeOrderPayload($this->customer, $this->item, 20, 'cancelled'))
+            ->patch(route('sales-orders.update-status', $order), ['status' => 'cancelled'])
             ->assertRedirect();
 
         $this->item->refresh();
