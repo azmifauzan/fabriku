@@ -18,14 +18,22 @@
                             <div class="border-b border-gray-200 p-6 dark:border-gray-700">
                                 <div class="flex items-center justify-between">
                                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Informasi Pesanan</h3>
-                                    <div class="flex gap-2">
+                                    <div class="flex flex-wrap gap-2">
                                         <Link
-                                            v-if="salesOrder.status === 'draft' || salesOrder.status === 'confirmed'"
+                                            v-if="salesOrder.status === 'draft'"
                                             :href="`/sales-orders/${salesOrder.id}/edit`"
                                             class="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out hover:bg-indigo-700 focus:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none active:bg-indigo-900"
                                         >
                                             Edit
                                         </Link>
+                                        <button
+                                            v-if="allowedTransitions.length > 0"
+                                            type="button"
+                                            @click="showStatusModal = true"
+                                            class="inline-flex items-center rounded-md border border-transparent bg-amber-500 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out hover:bg-amber-600 focus:bg-amber-600 focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:outline-none active:bg-amber-700"
+                                        >
+                                            Update Status
+                                        </button>
                                         <button
                                             v-if="salesOrder.status !== 'cancelled'"
                                             type="button"
@@ -367,6 +375,14 @@
             :paid-amount="Number(salesOrder.paid_amount)"
             @close="showPaymentModal = false"
         />
+
+        <StatusUpdateModal
+            :show="showStatusModal"
+            :sales-order-id="salesOrder.id"
+            :current-status="salesOrder.status"
+            :allowed-transitions="allowedTransitions"
+            @close="showStatusModal = false"
+        />
     </AppLayout>
 </template>
 
@@ -376,13 +392,13 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import PaymentUpdateModal from './PaymentUpdateModal.vue';
+import StatusUpdateModal from './StatusUpdateModal.vue';
 
-const props = defineProps({
-    salesOrder: {
-        type: Object,
-        required: true,
-    },
-});
+const props = defineProps<{
+    salesOrder: Record<string, any>;
+    allowedTransitions: string[];
+}>();
 
 const showPaymentModal = ref(false);
+const showStatusModal = ref(false);
 </script>

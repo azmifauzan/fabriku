@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSalesOrderRequest;
 use App\Http\Requests\UpdatePaymentRequest;
 use App\Http\Requests\UpdateSalesOrderRequest;
+use App\Http\Requests\UpdateStatusRequest;
 use App\Models\Customer;
 use App\Models\InventoryItem;
 use App\Models\SalesOrder;
@@ -84,6 +85,7 @@ class SalesOrderController extends Controller
 
         return Inertia::render('SalesOrders/Show', [
             'salesOrder' => $salesOrder,
+            'allowedTransitions' => $salesOrder->allowedTransitions(),
         ]);
     }
 
@@ -271,6 +273,41 @@ class SalesOrderController extends Controller
             DB::rollBack();
             throw $e;
         }
+    }
+
+    public function updateStatus(UpdateStatusRequest $request, SalesOrder $salesOrder): RedirectResponse
+    {
+        $newStatus = $request->validated('status');
+
+        if (! $salesOrder->canTransitionTo($newStatus)) {
+            abort(422, "Transisi status dari '{$salesOrder->status}' ke '{$newStatus}' tidak diizinkan.");
+        }
+
+        $updateData = ['status' => $newStatus];
+
+        if ($newStatus === 'shipped') {
+            $updateData['resi_number'] = $request->validated('resi_number');
+            $updateData['shipped_date'] = now();
+        }
+
+        if ($newStatus === 'completed') {
+            $updateData['completed_date'] = now();
+        }
+
+        $salesOrder->update($updateData);
+
+        $label = match ($newStatus) {
+            'confirmed' => 'Pesanan dikonfirmasi.',
+            'processing' => 'Pesanan sedang diproses.',
+            'shipped' => 'Pesanan telah dikirim.',
+            'completed' => 'Pesanan selesai.',
+            'cancelled' => 'Pesanan dibatalkan.',
+            default => 'Status berhasil diupdate.',
+        };
+
+        return redirect()
+            ->route('sales-orders.show', $salesOrder)
+            ->with('success', $label);
     }
 
     public function updatePayment(UpdatePaymentRequest $request, SalesOrder $salesOrder): RedirectResponse

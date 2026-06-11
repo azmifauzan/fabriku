@@ -195,10 +195,16 @@ describe('Complete User Journey - Garment Workflow', function () {
         $inventoryItem->refresh();
         expect($inventoryItem->reserved_quantity)->toBe(5);
 
-        // Complete + bayar → observer deduct
+        // Complete via update-status → observer deduct
         $this->actingAs($this->user)
-            ->patch(route('sales-orders.update', $salesOrder), $orderPayload('completed') + [
-                'payment_status' => 'paid',
+            ->patch(route('sales-orders.update-status', $salesOrder), [
+                'status' => 'completed',
+            ])
+            ->assertRedirect();
+
+        // Update payment separately
+        $this->actingAs($this->user)
+            ->patch(route('sales-orders.update-payment', $salesOrder), [
                 'paid_amount' => 2000000,
             ])
             ->assertRedirect();
@@ -387,9 +393,16 @@ describe('Complete User Journey - Food Workflow', function () {
             ->patch(route('sales-orders.update', $salesOrder), $orderPayload('confirmed'))
             ->assertRedirect();
 
+        // Complete via update-status → observer deduct
         $this->actingAs($this->user)
-            ->patch(route('sales-orders.update', $salesOrder), $orderPayload('completed') + [
-                'payment_status' => 'paid',
+            ->patch(route('sales-orders.update-status', $salesOrder), [
+                'status' => 'completed',
+            ])
+            ->assertRedirect();
+
+        // Pay via update-payment
+        $this->actingAs($this->user)
+            ->patch(route('sales-orders.update-payment', $salesOrder), [
                 'paid_amount' => 500000,
             ])
             ->assertRedirect();

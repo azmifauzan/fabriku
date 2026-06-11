@@ -242,6 +242,8 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
         ->middleware('permission:sales.view');
     Route::patch('sales-orders/{sales_order}/update-payment', [SalesOrderController::class, 'updatePayment'])->name('sales-orders.update-payment')
         ->middleware('permission:sales.edit');
+    Route::patch('sales-orders/{sales_order}/update-status', [SalesOrderController::class, 'updateStatus'])->name('sales-orders.update-status')
+        ->middleware('permission:sales.edit');
     Route::resource('sales-orders', SalesOrderController::class)
         ->middleware('permission:sales.view');
 

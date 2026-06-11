@@ -25,13 +25,13 @@ class SalesOrderObserver
                 $this->reserveStock($salesOrder);
             }
 
-            // Confirmed/Processing -> Completed: Deduct Stock
-            elseif (in_array($originalStatus, ['confirmed', 'processing']) && $newStatus === 'completed') {
+            // Confirmed/Processing/Shipped -> Completed: Deduct Stock
+            elseif (in_array($originalStatus, ['confirmed', 'processing', 'shipped']) && $newStatus === 'completed') {
                 $this->deductStock($salesOrder);
             }
 
-            // Confirmed/Processing -> Cancelled: Release Reserved Stock
-            elseif (in_array($originalStatus, ['confirmed', 'processing']) && $newStatus === 'cancelled') {
+            // Confirmed/Processing/Shipped -> Cancelled: Release Reserved Stock
+            elseif (in_array($originalStatus, ['confirmed', 'processing', 'shipped']) && $newStatus === 'cancelled') {
                 $this->releaseReservedStock($salesOrder);
             }
 
@@ -45,8 +45,8 @@ class SalesOrderObserver
      */
     public function deleted(SalesOrder $salesOrder): void
     {
-        // If order was confirmed/processing, release reserved stock
-        if (in_array($salesOrder->status, ['confirmed', 'processing'])) {
+        // If order was confirmed/processing/shipped, release reserved stock
+        if (in_array($salesOrder->status, ['confirmed', 'processing', 'shipped'])) {
             $this->releaseReservedStock($salesOrder);
         }
     }
@@ -56,8 +56,8 @@ class SalesOrderObserver
      */
     public function restored(SalesOrder $salesOrder): void
     {
-        // If order is confirmed/processing, reserve stock again
-        if (in_array($salesOrder->status, ['confirmed', 'processing'])) {
+        // If order is confirmed/processing/shipped, reserve stock again
+        if (in_array($salesOrder->status, ['confirmed', 'processing', 'shipped'])) {
             $this->reserveStock($salesOrder);
         }
     }
@@ -70,7 +70,7 @@ class SalesOrderObserver
         // Only release stock if it wasn't already released by a soft delete
         // If the order is already trashed (soft deleted), stock was released in 'deleted' event.
         // We only care if we are force deleting a NON-trashed order (direct hard delete).
-        if (! $salesOrder->trashed() && in_array($salesOrder->status, ['confirmed', 'processing'])) {
+        if (! $salesOrder->trashed() && in_array($salesOrder->status, ['confirmed', 'processing', 'shipped'])) {
             $this->releaseReservedStock($salesOrder);
         }
     }

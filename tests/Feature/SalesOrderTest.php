@@ -184,7 +184,7 @@ it('cannot edit completed sales order', function () {
     $response->assertForbidden();
 });
 
-it('can edit completed sales order with unpaid payment status', function () {
+it('cannot edit completed sales order even when unpaid (use updatePayment instead)', function () {
     $order = SalesOrder::factory()->completed()->create([
         'tenant_id' => $this->tenant->id,
         'customer_id' => $this->customer->id,
@@ -197,8 +197,6 @@ it('can edit completed sales order with unpaid payment status', function () {
         'order_date' => now()->toDateString(),
         'channel' => 'offline',
         'payment_method' => 'transfer',
-        'payment_status' => 'paid',
-        'paid_amount' => $order->total_amount,
         'items' => [
             [
                 'inventory_item_id' => $this->inventoryItem->id,
@@ -211,11 +209,8 @@ it('can edit completed sales order with unpaid payment status', function () {
 
     $response = $this->put(route('sales-orders.update', $order), $updateData);
 
-    $response->assertRedirect();
-    $this->assertDatabaseHas('sales_orders', [
-        'id' => $order->id,
-        'payment_status' => 'paid',
-    ]);
+    // Completed orders are locked for editing — use updatePayment or updateStatus instead
+    $response->assertForbidden();
 });
 
 it('can view sales order with items', function () {
