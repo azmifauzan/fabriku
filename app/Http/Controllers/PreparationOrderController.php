@@ -30,7 +30,7 @@ class PreparationOrderController extends Controller
             ->when($request->status, fn ($q) => $q->where('status', $request->status))
             ->when($request->pattern_id, fn ($q) => $q->where('pattern_id', $request->pattern_id))
             ->latest('preparation_date')
-            ->paginate(15)
+            ->paginate(self::DEFAULT_PER_PAGE)
             ->withQueryString();
 
         return Inertia::render('PreparationOrders/Index', [

@@ -24,7 +24,7 @@ class ProductionOrderController extends Controller
             ->when(request('type'), fn ($query, $type) => $query->where('type', $type))
             ->when(request('contractor_id'), fn ($query, $id) => $query->where('contractor_id', $id))
             ->latest()
-            ->paginate(15)
+            ->paginate(self::DEFAULT_PER_PAGE)
             ->withQueryString();
 
         $contractors = Contractor::active()->get(['id', 'name']);

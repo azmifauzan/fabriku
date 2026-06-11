@@ -18,7 +18,7 @@ class PatternController extends Controller
                     ->orWhere('code', 'like', "%{$search}%");
             })
             ->latest()
-            ->paginate(15)
+            ->paginate(self::DEFAULT_PER_PAGE)
             ->withQueryString()
             ->through(fn ($pattern) => [
                 'id' => $pattern->id,

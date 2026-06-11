@@ -38,7 +38,7 @@ class CustomerController extends Controller
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        $customers = $query->latest()->paginate(15);
+        $customers = $query->latest()->paginate(self::DEFAULT_PER_PAGE);
 
         return Inertia::render('Customers/Index', [
             'customers' => $customers,

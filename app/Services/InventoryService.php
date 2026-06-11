@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\Models\InventoryItem;
+use App\Models\InventoryItemCategory;
 use App\Models\InventoryLocation;
+use App\Models\Pattern;
+use App\Models\ProductionOrder;
 use App\Models\StockAdjustment;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -305,6 +308,49 @@ class InventoryService
             'expiring_soon' => $this->getExpiryAlerts(7),
             'expired' => $this->getExpiredItems(),
             'damaged' => InventoryItem::where('status', 'damaged')->get(),
+        ];
+    }
+
+    /**
+     * Get related data required for create or edit forms of InventoryItem
+     */
+    public function getFormDataForCreateOrEdit(?InventoryItem $item = null): array
+    {
+        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'capacity']);
+        $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'output_quantity']);
+        $categories = InventoryItemCategory::active()->orderBy('sort_order')->orderBy('name')->get(['id', 'name']);
+
+        $productionOrdersQuery = ProductionOrder::whereIn('status', ['completed', 'sent'])
+            ->with(['preparationOrder' => function ($query) {
+                $query->select('id', 'pattern_id', 'output_quantity', 'output_unit')
+                    ->with(['materialUsages.materialReceipt']);
+            }, 'preparationOrder.pattern'])
+            ->orderByRaw('COALESCE(completed_date, estimated_completion_date) DESC');
+
+        if ($item) {
+            $productionOrdersQuery->where(function ($query) use ($item) {
+                $query->whereDoesntHave('inventoryItems')
+                    ->orWhere('id', $item->production_order_id);
+            });
+        } else {
+            $productionOrdersQuery->whereDoesntHave('inventoryItems');
+        }
+
+        $productionOrders = $productionOrdersQuery->get(['id', 'order_number', 'preparation_order_id', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status'])
+            ->map(function ($order) {
+                $materialCost = $order->preparationOrder?->materialUsages->sum(function ($usage) {
+                    return $usage->quantity * ($usage->materialReceipt->price_per_unit ?? 0);
+                }) ?? 0;
+                $order->material_cost = $materialCost;
+
+                return $order;
+            });
+
+        return [
+            'locations' => $locations,
+            'patterns' => $patterns,
+            'productionOrders' => $productionOrders,
+            'categories' => $categories,
         ];
     }
 }

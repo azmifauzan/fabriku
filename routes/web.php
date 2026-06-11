@@ -234,7 +234,7 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
         ->middleware('permission:sales.create');
     Route::post('sales-orders/quick-checkout', [SalesOrderController::class, 'quickCheckoutStore'])->name('sales-orders.quick-checkout.store')
         ->middleware('permission:sales.create');
-    Route::get('sales-orders/{sales_order}/print', [SalesOrderController::class, 'print'])->name('sales-orders.print')
+    Route::get('sales-orders/{sales_order}/invoice', [SalesOrderController::class, 'invoice'])->name('sales-orders.invoice')
         ->middleware('permission:sales.view');
     Route::get('sales-orders/{sales_order}/delivery-order', [SalesOrderController::class, 'deliveryOrder'])->name('sales-orders.delivery-order')
         ->middleware('permission:sales.view');

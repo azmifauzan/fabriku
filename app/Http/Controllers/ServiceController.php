@@ -30,7 +30,7 @@ class ServiceController extends Controller
             $query->where('is_active', (bool) $request->get('status'));
         }
 
-        $services = $query->latest()->paginate(15);
+        $services = $query->latest()->paginate(self::DEFAULT_PER_PAGE);
 
         return Inertia::render('Services/Index', [
             'services' => $services,

@@ -32,7 +32,7 @@ class AdminPaymentController extends Controller
             $query->where('plan_type', $request->plan_type);
         }
 
-        $payments = $query->latest()->paginate(15)->withQueryString();
+        $payments = $query->latest()->paginate(self::DEFAULT_PER_PAGE)->withQueryString();
 
         // Get summary stats
         $stats = [

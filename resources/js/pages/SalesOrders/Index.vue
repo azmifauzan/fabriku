@@ -341,7 +341,7 @@
                                                 <Eye :size="16" />
                                             </Link>
                                             <a
-                                                :href="`/sales-orders/${order.id}/print`"
+                                                :href="`/sales-orders/${order.id}/invoice`"
                                                 target="_blank"
                                                 class="inline-flex items-center justify-center rounded-lg p-1.5 text-gray-600 transition-colors hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-900/30"
                                                 title="Print Invoice"

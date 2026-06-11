@@ -24,7 +24,7 @@ class MaterialController extends Controller
             })
             ->when(request('material_type_id'), fn ($query, $typeId) => $query->where('material_type_id', $typeId))
             ->latest()
-            ->paginate(15)
+            ->paginate(self::DEFAULT_PER_PAGE)
             ->withQueryString()
             ->through(fn ($material) => [
                 ...$material->toArray(),

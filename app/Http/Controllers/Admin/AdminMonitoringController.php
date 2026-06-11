@@ -56,7 +56,7 @@ class AdminMonitoringController extends Controller
             ->when($request->filled('command'), fn ($q) => $q->where('command', 'like', '%'.$request->command.'%'))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->latest()
-            ->paginate(20)
+            ->paginate(self::DEFAULT_PER_PAGE)
             ->withQueryString();
 
         // Get unique commands for filter
@@ -110,7 +110,7 @@ class AdminMonitoringController extends Controller
             })
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->latest()
-            ->paginate(20)
+            ->paginate(self::DEFAULT_PER_PAGE)
             ->withQueryString();
 
         $stats = [

@@ -84,4 +84,18 @@ class SalesOrderFactory extends Factory
             'completed_date' => now(),
         ]);
     }
+
+    public function shipped(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'shipped',
+        ]);
+    }
+
+    public function cancelled(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'cancelled',
+        ]);
+    }
 }
