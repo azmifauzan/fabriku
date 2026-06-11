@@ -26,6 +26,14 @@
                                         >
                                             Edit
                                         </Link>
+                                        <button
+                                            v-if="salesOrder.status !== 'cancelled'"
+                                            type="button"
+                                            @click="showPaymentModal = true"
+                                            class="inline-flex items-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out hover:bg-green-700 focus:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none active:bg-green-900"
+                                        >
+                                            Update Pembayaran
+                                        </button>
                                         <a
                                             :href="`/sales-orders/${salesOrder.id}/print`"
                                             target="_blank"
@@ -351,6 +359,14 @@
                 </div>
             </div>
         </div>
+
+        <PaymentUpdateModal
+            :show="showPaymentModal"
+            :sales-order-id="salesOrder.id"
+            :total-amount="Number(salesOrder.total_amount)"
+            :paid-amount="Number(salesOrder.paid_amount)"
+            @close="showPaymentModal = false"
+        />
     </AppLayout>
 </template>
 
@@ -358,6 +374,8 @@
 import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import PaymentUpdateModal from './PaymentUpdateModal.vue';
 
 const props = defineProps({
     salesOrder: {
@@ -365,4 +383,6 @@ const props = defineProps({
         required: true,
     },
 });
+
+const showPaymentModal = ref(false);
 </script>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSalesOrderRequest;
+use App\Http\Requests\UpdatePaymentRequest;
 use App\Http\Requests\UpdateSalesOrderRequest;
 use App\Models\Customer;
 use App\Models\InventoryItem;
@@ -270,6 +271,30 @@ class SalesOrderController extends Controller
             DB::rollBack();
             throw $e;
         }
+    }
+
+    public function updatePayment(UpdatePaymentRequest $request, SalesOrder $salesOrder): RedirectResponse
+    {
+        if ($salesOrder->status === 'cancelled') {
+            abort(403, 'Pembayaran sales order yang dibatalkan tidak dapat diubah.');
+        }
+
+        $paidAmount = $request->validated('paid_amount');
+
+        $paymentStatus = match (true) {
+            $paidAmount <= 0 => 'unpaid',
+            $paidAmount >= $salesOrder->total_amount => 'paid',
+            default => 'partial',
+        };
+
+        $salesOrder->update([
+            'paid_amount' => $paidAmount,
+            'payment_status' => $paymentStatus,
+        ]);
+
+        return redirect()
+            ->route('sales-orders.show', $salesOrder)
+            ->with('success', 'Status pembayaran berhasil diupdate.');
     }
 
     public function destroy(SalesOrder $salesOrder)
