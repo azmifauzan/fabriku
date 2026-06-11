@@ -548,3 +548,113 @@ it('does not adjust reserved stock when updating a draft sales order items', fun
         'reserved_quantity' => 0,
     ]);
 });
+
+it('calculates totals correctly with shipping cost', function () {
+    $orderData = [
+        'customer_id' => $this->customer->id,
+        'order_date' => now()->toDateString(),
+        'channel' => 'offline',
+        'payment_method' => 'cash',
+        'shipping_cost' => 25000,
+        'items' => [
+            [
+                'inventory_item_id' => $this->inventoryItem->id,
+                'quantity' => 2,
+                'unit_price' => 150000,
+                'discount_amount' => 0,
+            ],
+        ],
+    ];
+
+    $response = $this->post(route('sales-orders.store'), $orderData);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('sales_orders', [
+        'subtotal' => 300000,
+        'shipping_cost' => 25000,
+        'total_amount' => 325000,
+    ]);
+});
+
+it('stores payment due date correctly', function () {
+    $dueDate = now()->addDays(14)->toDateString();
+    $orderData = [
+        'customer_id' => $this->customer->id,
+        'order_date' => now()->toDateString(),
+        'payment_due_date' => $dueDate,
+        'channel' => 'offline',
+        'payment_method' => 'cash',
+        'items' => [
+            [
+                'inventory_item_id' => $this->inventoryItem->id,
+                'quantity' => 1,
+                'unit_price' => 150000,
+                'discount_amount' => 0,
+            ],
+        ],
+    ];
+
+    $response = $this->post(route('sales-orders.store'), $orderData);
+
+    $response->assertRedirect();
+
+    $order = SalesOrder::latest('id')->first();
+    expect($order->customer_id)->toBe($this->customer->id);
+    expect($order->payment_due_date?->toDateString())->toBe($dueDate);
+});
+
+it('auto-generates invoice number when transitioning to confirmed', function () {
+    $order = SalesOrder::factory()->draft()->create([
+        'tenant_id' => $this->tenant->id,
+        'customer_id' => $this->customer->id,
+        'invoice_number' => null,
+    ]);
+    $order->items()->create([
+        'inventory_item_id' => $this->inventoryItem->id,
+        'quantity' => 2,
+        'unit_price' => 150000,
+        'subtotal' => 300000,
+    ]);
+
+    $response = $this->patch(route('sales-orders.update-status', $order), [
+        'status' => 'confirmed',
+    ]);
+
+    $response->assertRedirect();
+    $order->refresh();
+
+    $year = now()->year;
+    $month = str_pad(now()->month, 2, '0', STR_PAD_LEFT);
+    expect($order->invoice_number)->toMatch("/^INV\/{$year}\/{$month}\/\d{4}$/");
+});
+
+it('can filter sales orders by overdue payment status', function () {
+    $overdueOrder = SalesOrder::factory()->draft()->create([
+        'tenant_id' => $this->tenant->id,
+        'customer_id' => $this->customer->id,
+        'payment_status' => 'unpaid',
+        'payment_due_date' => now()->subDays(5)->toDateString(),
+    ]);
+
+    $notOverdueOrder = SalesOrder::factory()->draft()->create([
+        'tenant_id' => $this->tenant->id,
+        'customer_id' => $this->customer->id,
+        'payment_status' => 'unpaid',
+        'payment_due_date' => now()->addDays(5)->toDateString(),
+    ]);
+
+    $paidPastDueOrder = SalesOrder::factory()->draft()->create([
+        'tenant_id' => $this->tenant->id,
+        'customer_id' => $this->customer->id,
+        'payment_status' => 'paid',
+        'payment_due_date' => now()->subDays(5)->toDateString(),
+    ]);
+
+    $response = $this->get(route('sales-orders.index', ['payment_status' => 'overdue']));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->has('orders.data', 1)
+        ->where('orders.data.0.id', $overdueOrder->id)
+    );
+});

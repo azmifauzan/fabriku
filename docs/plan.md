@@ -1,6 +1,6 @@
 # Enhancement Plans
 
-> **Status (Juni 2026)**: Plan A (Retail), Plan B (Homemade), dan Plan C (Service/Jasa — termasuk laporan layanan, staff assignment, consumable auto-deduct) **selesai dan dipindah** ke `docs/current-status.md`. Sales Order CRITICAL #1-3 (Update Status, fix observer `shipped`, edit dikunci ke `draft`) dan HIGH (catatan pembayaran via tabel `payments` + refund saat cancel) **selesai**. Suite test lengkap hijau (360 passed). Dokumen ini berisi backlog MEDIUM/LOW yang belum dikerjakan.
+> **Status (Juni 2026)**: Plan A (Retail), Plan B (Homemade), dan Plan C (Service/Jasa — termasuk laporan layanan, staff assignment, consumable auto-deduct) **selesai dan dipindah** ke `docs/current-status.md`. Sales Order CRITICAL #1-3 (Update Status, fix observer `shipped`, edit dikunci ke `draft`) dan HIGH (catatan pembayaran via tabel `payments` + refund saat cancel) **selesai**. Sales Order MEDIUM #1-3 (jatuh tempo/overdue, shipping_cost aktif, auto invoice number) **selesai**. Suite test lengkap hijau (60 passed). Dokumen ini berisi backlog LOW yang belum dikerjakan.
 
 ---
 
@@ -41,39 +41,15 @@ Detail lengkap di `docs/code-review.md` (bagian SalesOrder).
 - **Stok retur**: tidak ada langkah tambahan — `transitionMap()` hanya izinkan `cancelled` dari `confirmed/processing/shipped` (belum `completed`, stok masih *reserved* bukan *deducted*), jadi `SalesOrderObserver`'s existing `releaseReservedStock` pada `→cancelled` sudah cukup. Skenario "retur barang dari order `completed`" sengaja di luar scope (butuh transisi `completed→cancelled` + restock logic terpisah — lihat backlog bila dibutuhkan).
 - Test: `tests/Feature/SalesOrderUpdatePaymentTest.php` (rewrite, 6 test) + tambahan refund test di `SalesOrderUpdateStatusTest.php`.
 
-### MEDIUM
+### ✅ MEDIUM selesai (Juni 2026) — jatuh tempo, ongkir, auto invoice number
 
-1. **`payment_due_date` mati → tidak ada penanda jatuh tempo.** *(versi UMKM dari AR aging)*
-   Kolom ada + di-cast (`SalesOrder.php`) tapi tak pernah diisi/dipakai. **Versi UMKM:** input tanggal jatuh tempo di form + badge "jatuh tempo/overdue" di Index/Show + filter "piutang overdue". **Tidak perlu** laporan aging berember 0-30/31-60/61-90 ala ERP. Reminder terjadwal opsional menyusul.
+1. **`payment_due_date` aktif.** Input tanggal jatuh tempo di form (Create/Edit). Badge "Jatuh Tempo" di Index + Show. Badge "Overdue" di kolom pembayaran Index + Show (merah, muncul bila `payment_status ∈ {unpaid,partial}` + `status ≠ cancelled` + tanggal sudah lewat). Filter `?payment_status=overdue` di controller + opsi dropdown di Index. Test: `it stores payment due date correctly` + `it can filter sales orders by overdue payment status`.
 
-2. **`shipping_cost` kolom orphan.**
-   Ada di tabel + factory, tapi **tidak** dipakai di Store/Update/Form/Show — total tak menghitung ongkir. Putuskan: aktifkan (input form + masuk `total_amount`) atau drop kolomnya. Keputusan kecil, tidak ada nuansa ERP.
+2. **`shipping_cost` aktif.** Input ongkos kirim di form (di bagian kalkulasi). Masuk `total_amount = subtotal - discount + tax + shipping_cost` di frontend dan backend (store + update). Ditampilkan di Show.vue (tfoot) dan masuk di CSV export. Test: `it calculates totals correctly with shipping cost`.
 
-3. **`invoice_number` manual, tanpa auto-generate.** *(P-OPSI 6, versi UMKM)*
-   `order_number` sudah auto-sequence (`SalesOrder::generateOrderNumber()`), tapi `invoice_number` text bebas → bisa kosong/duplikat. **Versi UMKM:** auto-generate + unik per tenant (mis. `INV/2026/06/0001`), terbit saat confirm. **Tidak perlu** gapless legal sequence (itu kebutuhan PKP/PPN — lihat scope di bawah).
+3. **`invoice_number` auto-generate.** `SalesOrder::booted()` `saving` hook: generate `INV/YYYY/MM/NNNN` unik per tenant per bulan saat SO pertama kali keluar dari `draft` (bukan `cancelled`). Manual override tetap dimungkinkan (input teks di form). Tampil di Index dan Show. Test: `it auto-generates invoice number when transitioning to confirmed`.
 
-### LOW
-
-4. **Pajak (`tax_amount`) input nominal manual.** *(opsional, hanya bila ada tenant PKP)*
-   Tidak ada `tax_rate`/PPN 11% otomatis/toggle inklusif. Untuk UMKM non-PKP (mayoritas) ini **cukup apa adanya** — angkat hanya kalau menargetkan tenant PKP. Bukan prioritas.
-
-5. **`print()` salah nama.** Mengembalikan Inertia page (bukan PDF). Rename `invoice()` + update route & frontend. Sudah tercatat di `docs/code-review.md`.
-
-6. **Export "Invoice" hanya CSV + belum ada PDF.** `Print.vue` cuma render layar; belum ada PDF resmi untuk dilampirkan ke pelanggan. Nice-to-have.
-
-### Sengaja DI LUAR scope (overkill untuk UMKM)
-
-- Pecah SO/Delivery/Invoice/Payment jadi tabel terpisah — cukup satu `sales_orders` + tabel `payments` sederhana.
-- Dokumen credit note akuntansi formal, jurnal double-entry, rekonsiliasi bank.
-- Gapless legal invoice numbering, tax engine per-baris, e-Faktur — hanya relevan kalau menargetkan PKP.
-- Partial delivery / partial invoicing / backorder, multi-currency, dunning otomatis, ATP/MRP.
-
-### Urutan eksekusi yang disarankan
-
-1. **#1** jatuh tempo / overdue → **#2** ongkir → **#3** auto invoice number.
-2. **#4–#6** (PKP/PPN, PDF, rename) hanya kalau ada kebutuhan nyata — jangan dikerjakan spekulatif.
-
-> Sisa item di sini cleanup/nice-to-have, tidak ada lagi yang mengganggu integritas stok/uang.
+Fix tambahan (dari code review): status dropdown di Form.vue (create/edit) diganti read-only badge "Draft" + keterangan — menghilangkan UI menyesatkan karena backend selalu force `draft` saat create dan state machine hanya bisa diubah via `updateStatus`; bug semantik komparasi tanggal overdue di Index + Show diperbaiki (`new Date(new Date().setHours(0,0,0,0))`).
 
 ---
 

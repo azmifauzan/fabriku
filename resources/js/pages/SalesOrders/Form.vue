@@ -52,6 +52,22 @@
                     </div>
 
                     <div>
+                        <label for="payment_due_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Tanggal Jatuh Tempo
+                        </label>
+                        <input
+                            id="payment_due_date"
+                            v-model="form.payment_due_date"
+                            type="date"
+                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            :class="{ 'border-red-500': form.errors.payment_due_date }"
+                        />
+                        <p v-if="form.errors.payment_due_date" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                            {{ form.errors.payment_due_date }}
+                        </p>
+                    </div>
+
+                    <div>
                         <label for="channel" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Channel <span class="text-red-600">*</span>
                         </label>
@@ -101,19 +117,12 @@
                     </div>
 
                     <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300"> Status </label>
-                        <select
-                            id="status"
-                            v-model="form.status"
-                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        >
-                            <option value="draft">Draft</option>
-                            <option value="confirmed">Dikonfirmasi</option>
-                            <option value="processing">Proses</option>
-                            <option value="shipped">Dikirim</option>
-                            <option value="completed">Selesai</option>
-                            <option value="cancelled">Dibatalkan</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"> Status </label>
+                        <div class="flex items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-400">
+                            <span class="inline-flex items-center rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-700 dark:bg-gray-600 dark:text-gray-300">Draft</span>
+                            <span class="ml-2 text-xs text-gray-400 dark:text-gray-500">Status hanya dapat diubah via tombol "Update Status"</span>
+                        </div>
+                        <input type="hidden" v-model="form.status" />
                     </div>
                 </div>
             </div>
@@ -391,6 +400,19 @@
                         />
                     </div>
 
+                    <div class="flex items-center justify-between gap-4">
+                        <label for="shipping_cost" class="text-sm text-gray-700 dark:text-gray-300">Ongkos Kirim</label>
+                        <input
+                            id="shipping_cost"
+                            v-model.number="form.shipping_cost"
+                            @input="calculateTotals"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            class="w-40 rounded-lg border border-gray-300 px-4 py-2.5 text-right text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
+                    </div>
+
                     <div class="flex justify-between border-t border-gray-300 pt-3 text-base font-bold dark:border-gray-600">
                         <span class="text-gray-900 dark:text-gray-100">Total</span>
                         <span class="text-gray-900 dark:text-gray-100"> Rp {{ calculatedTotal.toLocaleString('id-ID') }} </span>
@@ -547,6 +569,8 @@ const form = useForm({
     payment_method: props.salesOrder?.payment_method || 'cash',
     payment_status: props.salesOrder?.payment_status || 'unpaid',
     paid_amount: props.salesOrder?.paid_amount || 0,
+    payment_due_date: props.salesOrder?.payment_due_date || '',
+    shipping_cost: props.salesOrder?.shipping_cost || 0,
     discount_percentage: props.salesOrder?.discount_percentage || 0,
     tax_amount: props.salesOrder?.tax_amount || 0,
     shipping_address: props.salesOrder?.shipping_address || '',
@@ -580,7 +604,7 @@ const calculatedDiscountAmount = computed(() => {
 });
 
 const calculatedTotal = computed(() => {
-    return calculatedSubtotal.value - calculatedDiscountAmount.value + (Number(form.tax_amount) || 0);
+    return calculatedSubtotal.value - calculatedDiscountAmount.value + (Number(form.tax_amount) || 0) + (Number(form.shipping_cost) || 0);
 });
 
 function calculateItemSubtotal(index) {

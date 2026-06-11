@@ -85,6 +85,28 @@
                                         </dd>
                                     </div>
                                     <div>
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Tanggal Jatuh Tempo</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                            <span>
+                                                {{
+                                                    salesOrder.payment_due_date
+                                                        ? new Date(salesOrder.payment_due_date).toLocaleDateString('id-ID', {
+                                                              year: 'numeric',
+                                                              month: 'long',
+                                                              day: 'numeric',
+                                                          })
+                                                        : '-'
+                                                }}
+                                            </span>
+                                            <span
+                                                v-if="['unpaid', 'partial'].includes(salesOrder.payment_status) && salesOrder.status !== 'cancelled' && salesOrder.payment_due_date && new Date(salesOrder.payment_due_date) < new Date(new Date().setHours(0,0,0,0))"
+                                                class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600 dark:bg-red-950/40 dark:text-red-400"
+                                            >
+                                                Overdue
+                                            </span>
+                                        </dd>
+                                    </div>
+                                    <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">No. Invoice</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ salesOrder.invoice_number || '-' }}</dd>
                                     </div>
@@ -326,6 +348,14 @@
                                             </td>
                                             <td class="px-6 py-3 text-right text-sm font-medium text-gray-900 dark:text-gray-100">
                                                 Rp {{ Number(salesOrder.tax_amount).toLocaleString('id-ID') }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                Ongkos Kirim
+                                            </td>
+                                            <td class="px-6 py-3 text-right text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                Rp {{ Number(salesOrder.shipping_cost || 0).toLocaleString('id-ID') }}
                                             </td>
                                         </tr>
                                         <tr>

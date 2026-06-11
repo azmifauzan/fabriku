@@ -160,6 +160,7 @@
                                 <option value="unpaid">Belum Dibayar</option>
                                 <option value="partial">Dibayar Sebagian</option>
                                 <option value="paid">Lunas</option>
+                                <option value="overdue">Jatuh Tempo (Overdue)</option>
                             </select>
                         </div>
                         <div>
@@ -243,7 +244,10 @@
                                         </div>
                                     </td>
                                     <td class="px-4 py-2 text-xs whitespace-nowrap text-gray-500 dark:text-gray-400">
-                                        {{ new Date(order.order_date).toLocaleDateString('id-ID') }}
+                                        <div>{{ new Date(order.order_date).toLocaleDateString('id-ID') }}</div>
+                                        <div v-if="order.payment_due_date" class="mt-0.5 text-[10px] text-red-500 dark:text-red-400 font-medium">
+                                            Jatuh Tempo: {{ new Date(order.payment_due_date).toLocaleDateString('id-ID') }}
+                                        </div>
                                     </td>
                                     <td class="px-4 py-2 text-xs whitespace-nowrap text-gray-500 dark:text-gray-400">
                                         {{ order.invoice_number || '-' }}
@@ -301,23 +305,31 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-2 whitespace-nowrap">
-                                        <span
-                                            class="inline-flex rounded-full px-2 text-[10px] leading-5 font-semibold"
-                                            :class="{
-                                                'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': order.payment_status === 'unpaid',
-                                                'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200':
-                                                    order.payment_status === 'partial',
-                                                'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': order.payment_status === 'paid',
-                                            }"
-                                        >
-                                            {{
-                                                order.payment_status === 'unpaid'
-                                                    ? 'Belum Dibayar'
-                                                    : order.payment_status === 'partial'
-                                                      ? 'Sebagian'
-                                                      : 'Lunas'
-                                            }}
-                                        </span>
+                                        <div class="flex flex-col gap-1 items-start">
+                                            <span
+                                                class="inline-flex rounded-full px-2 text-[10px] leading-5 font-semibold"
+                                                :class="{
+                                                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': order.payment_status === 'unpaid',
+                                                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200':
+                                                        order.payment_status === 'partial',
+                                                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': order.payment_status === 'paid',
+                                                }"
+                                            >
+                                                {{
+                                                    order.payment_status === 'unpaid'
+                                                        ? 'Belum Dibayar'
+                                                        : order.payment_status === 'partial'
+                                                          ? 'Sebagian'
+                                                          : 'Lunas'
+                                                }}
+                                            </span>
+                                            <span
+                                                v-if="['unpaid', 'partial'].includes(order.payment_status) && order.status !== 'cancelled' && order.payment_due_date && new Date(order.payment_due_date) < new Date(new Date().setHours(0,0,0,0))"
+                                                class="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:bg-red-950/40 dark:text-red-400"
+                                            >
+                                                Overdue
+                                            </span>
+                                        </div>
                                     </td>
                                     <td class="px-4 py-2 text-right text-xs font-medium whitespace-nowrap">
                                         <div class="flex justify-end gap-2">

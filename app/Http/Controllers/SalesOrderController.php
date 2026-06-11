@@ -47,7 +47,14 @@ class SalesOrderController extends Controller
 
         // Filter by payment status
         if ($paymentStatus = $request->get('payment_status')) {
-            $query->where('payment_status', $paymentStatus);
+            if ($paymentStatus === 'overdue') {
+                $query->whereIn('payment_status', ['unpaid', 'partial'])
+                    ->where('status', '!=', 'cancelled')
+                    ->whereNotNull('payment_due_date')
+                    ->whereDate('payment_due_date', '<', now());
+            } else {
+                $query->where('payment_status', $paymentStatus);
+            }
         }
 
         // Filter by channel
@@ -132,7 +139,8 @@ class SalesOrderController extends Controller
             }
 
             $taxAmount = $validated['tax_amount'] ?? 0;
-            $totalAmount = $subtotal - $discountAmount + $taxAmount;
+            $shippingCost = $validated['shipping_cost'] ?? 0;
+            $totalAmount = $subtotal - $discountAmount + $taxAmount + $shippingCost;
 
             // Create sales order
             $salesOrder = SalesOrder::create([
@@ -145,10 +153,12 @@ class SalesOrderController extends Controller
                 'discount_amount' => $discountAmount,
                 'discount_percentage' => $validated['discount_percentage'] ?? 0,
                 'tax_amount' => $taxAmount,
+                'shipping_cost' => $shippingCost,
                 'total_amount' => $totalAmount,
                 'payment_method' => $validated['payment_method'],
                 'payment_status' => $validated['payment_status'] ?? 'unpaid',
                 'paid_amount' => $validated['paid_amount'] ?? 0,
+                'payment_due_date' => $validated['payment_due_date'] ?? null,
                 'notes' => $validated['notes'] ?? null,
                 'shipping_address' => $validated['shipping_address'] ?? null,
                 'invoice_number' => $validated['invoice_number'] ?? null,
@@ -236,7 +246,8 @@ class SalesOrderController extends Controller
             }
 
             $taxAmount = $validated['tax_amount'] ?? 0;
-            $totalAmount = $subtotal - $discountAmount + $taxAmount;
+            $shippingCost = $validated['shipping_cost'] ?? 0;
+            $totalAmount = $subtotal - $discountAmount + $taxAmount + $shippingCost;
 
             // Replace items FIRST, while the order still has its old status, and
             // delete per-model so SalesOrderItemObserver fires (bulk delete skips
@@ -255,10 +266,12 @@ class SalesOrderController extends Controller
                 'discount_amount' => $discountAmount,
                 'discount_percentage' => $validated['discount_percentage'] ?? 0,
                 'tax_amount' => $taxAmount,
+                'shipping_cost' => $shippingCost,
                 'total_amount' => $totalAmount,
                 'payment_method' => $validated['payment_method'],
                 'payment_status' => $validated['payment_status'] ?? $salesOrder->payment_status,
                 'paid_amount' => $validated['paid_amount'] ?? $salesOrder->paid_amount,
+                'payment_due_date' => $validated['payment_due_date'] ?? null,
                 'notes' => $validated['notes'] ?? null,
                 'shipping_address' => $validated['shipping_address'] ?? null,
                 'invoice_number' => $validated['invoice_number'] ?? null,
@@ -603,6 +616,7 @@ class SalesOrderController extends Controller
             fputcsv($file, ['INVOICE', $salesOrder->invoice_number ?? '-']);
             fputcsv($file, ['Order Number', $salesOrder->order_number]);
             fputcsv($file, ['Date', $salesOrder->order_date->format('Y-m-d')]);
+            fputcsv($file, ['Due Date', $salesOrder->payment_due_date ? $salesOrder->payment_due_date->format('Y-m-d') : '-']);
             fputcsv($file, ['Customer', $salesOrder->customer->name]);
             fputcsv($file, ['Resi', $salesOrder->resi_number ?? '-']);
             fputcsv($file, []); // Empty line
@@ -628,6 +642,7 @@ class SalesOrderController extends Controller
             fputcsv($file, ['', '', '', 'Subtotal', $salesOrder->subtotal]);
             fputcsv($file, ['', '', '', 'Discount', $salesOrder->discount_amount]);
             fputcsv($file, ['', '', '', 'Tax', $salesOrder->tax_amount]);
+            fputcsv($file, ['', '', '', 'Shipping Cost', $salesOrder->shipping_cost]);
             fputcsv($file, ['', '', '', 'Total', $salesOrder->total_amount]);
 
             fclose($file);
