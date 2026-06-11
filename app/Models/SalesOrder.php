@@ -27,6 +27,7 @@ class SalesOrder extends Model
         'discount_amount',
         'discount_percentage',
         'tax_amount',
+        'shipping_cost',
         'total_amount',
         'payment_method',
         'payment_status',
@@ -49,6 +50,7 @@ class SalesOrder extends Model
             'discount_amount' => 'decimal:2',
             'discount_percentage' => 'decimal:2',
             'tax_amount' => 'decimal:2',
+            'shipping_cost' => 'decimal:2',
             'total_amount' => 'decimal:2',
             'paid_amount' => 'decimal:2',
         ];
@@ -61,6 +63,12 @@ class SalesOrder extends Model
         static::creating(function (self $salesOrder) {
             if (empty($salesOrder->order_number)) {
                 $salesOrder->order_number = self::generateOrderNumber();
+            }
+        });
+
+        static::saving(function (self $salesOrder) {
+            if (empty($salesOrder->invoice_number) && $salesOrder->status !== 'draft' && $salesOrder->status !== 'cancelled') {
+                $salesOrder->invoice_number = self::generateInvoiceNumber($salesOrder->tenant_id);
             }
         });
     }
@@ -97,6 +105,32 @@ class SalesOrder extends Model
         $nextNumber = $lastOrder ? (int) substr($lastOrder->order_number, -4) + 1 : 1;
 
         return 'SO-'.$year.'-'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+    }
+
+    public static function generateInvoiceNumber(?int $tenantId = null): string
+    {
+        $tenantId = $tenantId ?? auth()->user()?->tenant_id;
+        if (! $tenantId) {
+            return '';
+        }
+
+        $year = now()->year;
+        $month = str_pad(now()->month, 2, '0', STR_PAD_LEFT);
+
+        $lastOrder = self::withoutGlobalScope(TenantScope::class)
+            ->where('tenant_id', $tenantId)
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', now()->month)
+            ->whereNotNull('invoice_number')
+            ->latest('id')
+            ->first();
+
+        $nextNumber = 1;
+        if ($lastOrder && preg_match('/INV\/'.$year.'\/'.$month.'\/(\d{4})/', $lastOrder->invoice_number, $matches)) {
+            $nextNumber = (int) $matches[1] + 1;
+        }
+
+        return 'INV/'.$year.'/'.$month.'/'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 
     public function isDraft(): bool

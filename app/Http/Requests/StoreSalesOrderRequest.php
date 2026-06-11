@@ -30,6 +30,8 @@ class StoreSalesOrderRequest extends FormRequest
             'discount_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'discount_amount' => ['nullable', 'numeric', 'min:0'],
             'tax_amount' => ['nullable', 'numeric', 'min:0'],
+            'payment_due_date' => ['nullable', 'date'],
+            'shipping_cost' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
             'shipping_address' => ['nullable', 'string'],
             'invoice_number' => ['nullable', 'string', 'max:255'],

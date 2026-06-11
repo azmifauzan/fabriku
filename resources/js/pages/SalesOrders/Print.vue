@@ -7,6 +7,7 @@
                 <p class="text-gray-500" v-if="salesOrder.invoice_number">Invoice #: {{ salesOrder.invoice_number }}</p>
                 <p class="text-gray-500" v-else>Order #: {{ salesOrder.order_number }}</p>
                 <p class="text-gray-500">Date: {{ new Date(salesOrder.order_date).toLocaleDateString('id-ID') }}</p>
+                <p class="text-gray-500" v-if="salesOrder.payment_due_date">Due Date: {{ new Date(salesOrder.payment_due_date).toLocaleDateString('id-ID') }}</p>
             </div>
             <div class="sm:text-right">
                 <img v-if="settings?.company_logo" :src="settings.company_logo" alt="Company Logo" class="mb-4 h-16 object-contain sm:ml-auto" />
@@ -94,6 +95,10 @@
                 <div class="flex justify-between border-b border-gray-100 py-2" v-if="salesOrder.tax_amount > 0">
                     <span class="text-gray-600">Tax</span>
                     <span class="font-medium">Rp {{ Number(salesOrder.tax_amount).toLocaleString('id-ID') }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-100 py-2" v-if="salesOrder.shipping_cost > 0">
+                    <span class="text-gray-600">Shipping Cost</span>
+                    <span class="font-medium">Rp {{ Number(salesOrder.shipping_cost).toLocaleString('id-ID') }}</span>
                 </div>
                 <div class="flex justify-between border-t-2 border-gray-300 py-4">
                     <span class="text-lg font-bold text-gray-900">Total</span>
