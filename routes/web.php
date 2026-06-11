@@ -240,6 +240,8 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
         ->middleware('permission:sales.view');
     Route::get('sales-orders/{sales_order}/export', [SalesOrderController::class, 'export'])->name('sales-orders.export')
         ->middleware('permission:sales.view');
+    Route::patch('sales-orders/{sales_order}/update-payment', [SalesOrderController::class, 'updatePayment'])->name('sales-orders.update-payment')
+        ->middleware('permission:sales.edit');
     Route::resource('sales-orders', SalesOrderController::class)
         ->middleware('permission:sales.view');
 
