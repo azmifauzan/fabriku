@@ -205,7 +205,9 @@ describe('Complete User Journey - Garment Workflow', function () {
         // Update payment separately
         $this->actingAs($this->user)
             ->patch(route('sales-orders.update-payment', $salesOrder), [
-                'paid_amount' => 2000000,
+                'amount' => 2000000,
+                'method' => 'transfer',
+                'paid_at' => now()->format('Y-m-d'),
             ])
             ->assertRedirect();
 
@@ -403,7 +405,9 @@ describe('Complete User Journey - Food Workflow', function () {
         // Pay via update-payment
         $this->actingAs($this->user)
             ->patch(route('sales-orders.update-payment', $salesOrder), [
-                'paid_amount' => 500000,
+                'amount' => 500000,
+                'method' => 'transfer',
+                'paid_at' => now()->format('Y-m-d'),
             ])
             ->assertRedirect();
 

@@ -10,29 +10,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
 });
 
-test('marks order as unpaid when paid amount is zero', function () {
-    $salesOrder = SalesOrder::factory()->create([
-        'tenant_id' => $this->tenant->id,
-        'status' => 'processing',
-        'total_amount' => 100000,
-        'paid_amount' => 50000,
-        'payment_status' => 'partial',
-    ]);
-
-    $response = $this->patch(route('sales-orders.update-payment', $salesOrder), [
-        'paid_amount' => 0,
-    ]);
-
-    $response->assertRedirect(route('sales-orders.show', $salesOrder));
-
-    $this->assertDatabaseHas('sales_orders', [
-        'id' => $salesOrder->id,
-        'paid_amount' => 0,
-        'payment_status' => 'unpaid',
-    ]);
-});
-
-test('marks order as partial when paid amount is between zero and total', function () {
+test('adds a payment and marks order as partial', function () {
     $salesOrder = SalesOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
         'status' => 'processing',
@@ -42,10 +20,20 @@ test('marks order as partial when paid amount is between zero and total', functi
     ]);
 
     $response = $this->patch(route('sales-orders.update-payment', $salesOrder), [
-        'paid_amount' => 40000,
+        'amount' => 40000,
+        'method' => 'transfer',
+        'paid_at' => now()->format('Y-m-d'),
+        'note' => 'DP pertama',
     ]);
 
     $response->assertRedirect(route('sales-orders.show', $salesOrder));
+
+    $this->assertDatabaseHas('payments', [
+        'sales_order_id' => $salesOrder->id,
+        'amount' => 40000,
+        'method' => 'transfer',
+        'note' => 'DP pertama',
+    ]);
 
     $this->assertDatabaseHas('sales_orders', [
         'id' => $salesOrder->id,
@@ -54,7 +42,7 @@ test('marks order as partial when paid amount is between zero and total', functi
     ]);
 });
 
-test('marks order as paid when paid amount equals total', function () {
+test('adds a payment and marks order as paid', function () {
     $salesOrder = SalesOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
         'status' => 'processing',
@@ -64,7 +52,9 @@ test('marks order as paid when paid amount equals total', function () {
     ]);
 
     $response = $this->patch(route('sales-orders.update-payment', $salesOrder), [
-        'paid_amount' => 100000,
+        'amount' => 100000,
+        'method' => 'cash',
+        'paid_at' => now()->format('Y-m-d'),
     ]);
 
     $response->assertRedirect(route('sales-orders.show', $salesOrder));
@@ -76,7 +66,7 @@ test('marks order as paid when paid amount equals total', function () {
     ]);
 });
 
-test('rejects paid amount greater than total amount', function () {
+test('rejects payment with amount less than or equal to zero', function () {
     $salesOrder = SalesOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
         'status' => 'processing',
@@ -86,19 +76,19 @@ test('rejects paid amount greater than total amount', function () {
     ]);
 
     $response = $this->patch(route('sales-orders.update-payment', $salesOrder), [
-        'paid_amount' => 150000,
+        'amount' => 0,
+        'method' => 'cash',
+        'paid_at' => now()->format('Y-m-d'),
     ]);
 
-    $response->assertSessionHasErrors('paid_amount');
+    $response->assertSessionHasErrors('amount');
 
-    $this->assertDatabaseHas('sales_orders', [
-        'id' => $salesOrder->id,
-        'paid_amount' => 0,
-        'payment_status' => 'unpaid',
+    $this->assertDatabaseMissing('payments', [
+        'sales_order_id' => $salesOrder->id,
     ]);
 });
 
-test('forbids updating payment for cancelled orders', function () {
+test('forbids adding payment for cancelled orders', function () {
     $salesOrder = SalesOrder::factory()->create([
         'tenant_id' => $this->tenant->id,
         'status' => 'cancelled',
@@ -108,7 +98,9 @@ test('forbids updating payment for cancelled orders', function () {
     ]);
 
     $response = $this->patch(route('sales-orders.update-payment', $salesOrder), [
-        'paid_amount' => 100000,
+        'amount' => 50000,
+        'method' => 'cash',
+        'paid_at' => now()->format('Y-m-d'),
     ]);
 
     $response->assertForbidden();
@@ -125,7 +117,9 @@ test('returns not found for sales orders belonging to another tenant', function 
     ]);
 
     $response = $this->patch(route('sales-orders.update-payment', $salesOrder), [
-        'paid_amount' => 100000,
+        'amount' => 50000,
+        'method' => 'cash',
+        'paid_at' => now()->format('Y-m-d'),
     ]);
 
     $response->assertNotFound();

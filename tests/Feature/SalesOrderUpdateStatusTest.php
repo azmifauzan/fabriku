@@ -90,6 +90,35 @@ test('transitions shipped to cancelled', function () {
     ]);
 });
 
+test('generates refund payment when cancelling a paid order', function () {
+    $salesOrder = SalesOrder::factory()->create([
+        'tenant_id' => $this->tenant->id,
+        'status' => 'shipped',
+        'total_amount' => 100000,
+        'paid_amount' => 100000,
+        'payment_status' => 'paid',
+    ]);
+
+    $response = $this->patch(route('sales-orders.update-status', $salesOrder), [
+        'status' => 'cancelled',
+    ]);
+
+    $response->assertRedirect(route('sales-orders.show', $salesOrder));
+
+    $this->assertDatabaseHas('payments', [
+        'sales_order_id' => $salesOrder->id,
+        'amount' => -100000,
+        'method' => 'refund',
+    ]);
+
+    $this->assertDatabaseHas('sales_orders', [
+        'id' => $salesOrder->id,
+        'status' => 'cancelled',
+        'paid_amount' => 0,
+        'payment_status' => 'refunded',
+    ]);
+});
+
 test('transitions confirmed to processing', function () {
     $salesOrder = SalesOrder::factory()->create([
         'tenant_id' => $this->tenant->id,

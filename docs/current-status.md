@@ -36,7 +36,8 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Juni 2026. Diturunkan 
 | Inventory item categories | aktif | klasifikasi item tambahan |
 | Stock adjustments | aktif | tipe: opening_balance, correction, damage, lost, found, dst |
 | Customers | aktif | CRUD |
-| Sales orders | aktif | line items, payment tracking; full status lifecycle `draft→confirmed→processing→shipped→completed`/`cancelled` via state machine `SalesOrder::transitionMap()` + modal Update Status (`PATCH sales-orders/{id}/update-status`); edit form dikunci ke `draft` saja (`canBeEdited()`); cetak invoice + surat jalan; export CSV |
+| Sales orders | aktif | line items; full status lifecycle `draft→confirmed→processing→shipped→completed`/`cancelled` via state machine `SalesOrder::transitionMap()` + modal Update Status (`PATCH sales-orders/{id}/update-status`); edit form dikunci ke `draft` saja (`canBeEdited()`); cetak invoice + surat jalan; export CSV |
+| Catatan pembayaran (payments ledger) | aktif | tabel `payments` (`amount`, `method`, `paid_at`, `note`); `paid_amount` = SUM, `payment_status` derivasi; `PATCH sales-orders/{id}/update-payment` = "tambah baris pembayaran" (`StorePaymentRequest`); cancel order berbayar auto-catat refund (baris negatif, `payment_status='refunded'`); riwayat pembayaran di Show.vue |
 | Reports (material, inventory, sales, sales-recap, production) | aktif | export Excel/PDF |
 | Dashboard | aktif | KPI bulanan + tren 7 hari + top produk 30 hari + low stock |
 | Settings tenant | aktif | data perusahaan, alamat, logo |
