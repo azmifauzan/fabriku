@@ -43,7 +43,7 @@ class AdminUserController extends Controller
             $query->where('is_active', $request->status === 'active');
         }
 
-        $users = $query->latest()->paginate(15)->withQueryString();
+        $users = $query->latest()->paginate(self::DEFAULT_PER_PAGE)->withQueryString();
 
         $tenants = Tenant::select('id', 'name')->orderBy('name')->get();
 

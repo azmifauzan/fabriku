@@ -36,7 +36,7 @@ class PurchaseReceiptController extends Controller
             });
         }
 
-        $receipts = $query->paginate(20)->withQueryString();
+        $receipts = $query->paginate(self::DEFAULT_PER_PAGE)->withQueryString();
 
         return Inertia::render('Purchase/Index', [
             'receipts' => $receipts,

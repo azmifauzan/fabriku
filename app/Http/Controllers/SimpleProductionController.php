@@ -45,7 +45,7 @@ class SimpleProductionController extends Controller
             });
         }
 
-        $productions = $query->paginate(20)->withQueryString();
+        $productions = $query->paginate(self::DEFAULT_PER_PAGE)->withQueryString();
 
         return Inertia::render('SimpleProduction/Index', [
             'productions' => $productions,

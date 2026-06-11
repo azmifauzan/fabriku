@@ -284,11 +284,11 @@ it('enforces tenant isolation for sales orders', function () {
 it('can print invoice for a sales order', function () {
     $order = SalesOrder::factory()->create(['tenant_id' => $this->tenant->id]);
 
-    $response = $this->get(route('sales-orders.print', $order));
+    $response = $this->get(route('sales-orders.invoice', $order));
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->component('SalesOrders/Print')
+        ->component('SalesOrders/Invoice')
         ->has('salesOrder')
         ->has('settings')
     );

@@ -73,7 +73,7 @@ class InventoryItemController extends Controller
         $sortDirection = $request->get('direction', 'desc');
         $query->orderBy($sortBy, $sortDirection);
 
-        $items = $query->paginate(20);
+        $items = $query->paginate(self::DEFAULT_PER_PAGE);
 
         return Inertia::render('Inventory/Items/Index', [
             'items' => $items,
@@ -110,30 +110,12 @@ class InventoryItemController extends Controller
 
     public function create(Request $request)
     {
-        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'capacity']);
-        $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'output_quantity']);
-        // Only show completed or sent production orders that don't have inventory items yet
-        $productionOrders = ProductionOrder::whereIn('status', ['completed', 'sent'])
-            ->whereDoesntHave('inventoryItems')
-            ->with(['preparationOrder' => function ($query) {
-                $query->select('id', 'pattern_id', 'output_quantity', 'output_unit')
-                    ->with(['materialUsages.materialReceipt']);
-            }, 'preparationOrder.pattern'])
-            ->orderByRaw('COALESCE(completed_date, estimated_completion_date) DESC')
-            ->get(['id', 'order_number', 'preparation_order_id', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status'])
-            ->map(function ($order) {
-                $materialCost = $order->preparationOrder->materialUsages->sum(function ($usage) {
-                    return $usage->quantity * ($usage->materialReceipt->price_per_unit ?? 0);
-                });
-                $order->material_cost = $materialCost;
-
-                return $order;
-            });
+        $data = $this->inventoryService->getFormDataForCreateOrEdit();
 
         return Inertia::render('Inventory/Items/Create', [
-            'locations' => $locations,
-            'patterns' => $patterns,
-            'productionOrders' => $productionOrders,
+            'locations' => $data['locations'],
+            'patterns' => $data['patterns'],
+            'productionOrders' => $data['productionOrders'],
             'allowManualEntry' => true,
             'sourceTypes' => [
                 'production' => 'Dari Production Order',
@@ -141,7 +123,7 @@ class InventoryItemController extends Controller
                 'purchase' => 'Pembelian Langsung',
                 'return' => 'Retur Customer',
             ],
-            'categories' => InventoryItemCategory::active()->orderBy('sort_order')->orderBy('name')->get(['id', 'name']),
+            'categories' => $data['categories'],
         ]);
     }
 
@@ -185,35 +167,13 @@ class InventoryItemController extends Controller
 
     public function edit(InventoryItem $item)
     {
-        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'capacity']);
-        $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'output_quantity']);
-        // Only show completed or sent production orders that don't have inventory items yet
-        // Include current item's production order
-        $productionOrders = ProductionOrder::whereIn('status', ['completed', 'sent'])
-            ->where(function ($query) use ($item) {
-                $query->whereDoesntHave('inventoryItems')
-                    ->orWhere('id', $item->production_order_id);
-            })
-            ->with(['preparationOrder' => function ($query) {
-                $query->select('id', 'pattern_id', 'output_quantity', 'output_unit')
-                    ->with(['materialUsages.materialReceipt']);
-            }, 'preparationOrder.pattern'])
-            ->orderByRaw('COALESCE(completed_date, estimated_completion_date) DESC')
-            ->get(['id', 'order_number', 'preparation_order_id', 'labor_cost', 'completed_date', 'estimated_completion_date', 'status'])
-            ->map(function ($order) {
-                $materialCost = $order->preparationOrder->materialUsages->sum(function ($usage) {
-                    return $usage->quantity * ($usage->materialReceipt->price_per_unit ?? 0);
-                });
-                $order->material_cost = $materialCost;
-
-                return $order;
-            });
+        $data = $this->inventoryService->getFormDataForCreateOrEdit($item);
 
         return Inertia::render('Inventory/Items/Edit', [
             'item' => $item->load('productionOrder.preparationOrder.pattern', 'category'),
-            'locations' => $locations,
-            'patterns' => $patterns,
-            'productionOrders' => $productionOrders,
+            'locations' => $data['locations'],
+            'patterns' => $data['patterns'],
+            'productionOrders' => $data['productionOrders'],
             'allowManualEntry' => true,
             'sourceTypes' => [
                 'production' => 'Dari Production Order',
@@ -221,7 +181,7 @@ class InventoryItemController extends Controller
                 'purchase' => 'Pembelian Langsung',
                 'return' => 'Retur Customer',
             ],
-            'categories' => InventoryItemCategory::active()->orderBy('sort_order')->orderBy('name')->get(['id', 'name']),
+            'categories' => $data['categories'],
         ]);
     }
 

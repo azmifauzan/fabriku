@@ -40,7 +40,7 @@ class AdminAuditLogController extends Controller
             $query->where('auditable_type', $request->auditable_type);
         }
 
-        $logs = $query->latest()->paginate(20)->withQueryString();
+        $logs = $query->latest()->paginate(self::DEFAULT_PER_PAGE)->withQueryString();
 
         return Inertia::render('Admin/AuditLogs/Index', [
             'logs' => $logs,

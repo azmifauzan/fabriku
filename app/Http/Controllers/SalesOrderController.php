@@ -70,7 +70,7 @@ class SalesOrderController extends Controller
             $query->whereDate('order_date', '<=', $endDate);
         }
 
-        $orders = $query->latest('order_date')->paginate(15);
+        $orders = $query->latest('order_date')->paginate(self::DEFAULT_PER_PAGE);
 
         return Inertia::render('SalesOrders/Index', [
             'orders' => $orders,
@@ -572,14 +572,14 @@ class SalesOrderController extends Controller
             ->with('success', 'Transaksi berhasil dicatat.');
     }
 
-    public function print(SalesOrder $salesOrder)
+    public function invoice(SalesOrder $salesOrder)
     {
         // For now, return a simple view or just a placeholder message for testing
         // Ideally this would generate a PDF
         $salesOrder->load(['customer', 'items.inventoryItem', 'items.service', 'items.servedBy']);
         $settings = SystemSetting::getAllForTenant(auth()->user()->tenant_id);
 
-        return Inertia::render('SalesOrders/Print', [
+        return Inertia::render('SalesOrders/Invoice', [
             'salesOrder' => $salesOrder,
             'settings' => $settings,
         ]);

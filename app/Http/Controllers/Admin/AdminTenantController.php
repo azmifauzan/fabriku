@@ -38,7 +38,7 @@ class AdminTenantController extends Controller
             $query->where('subscription_plan', $request->plan);
         }
 
-        $tenants = $query->latest()->paginate(15)->withQueryString();
+        $tenants = $query->latest()->paginate(self::DEFAULT_PER_PAGE)->withQueryString();
 
         return Inertia::render('Admin/Tenants/Index', [
             'tenants' => $tenants,

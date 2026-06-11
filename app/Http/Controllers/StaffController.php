@@ -37,7 +37,7 @@ class StaffController extends Controller
             })
             ->when(request('is_active') !== null, fn ($query) => $query->where('is_active', request('is_active')))
             ->orderBy('name')
-            ->paginate(15)
+            ->paginate(self::DEFAULT_PER_PAGE)
             ->withQueryString();
 
         $maxStaff = (int) SystemSetting::get('max_staff_per_tenant', 5, $user->tenant_id)

@@ -19,7 +19,7 @@ class MaterialTypeController extends Controller
             ->when(request('is_active') !== null, fn ($query) => $query->where('is_active', request('is_active')))
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->paginate(15)
+            ->paginate(self::DEFAULT_PER_PAGE)
             ->withQueryString();
 
         return Inertia::render('MaterialTypes/Index', [

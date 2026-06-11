@@ -116,7 +116,7 @@
         <!-- Print Button (Hidden when printing) -->
         <div class="fixed right-4 bottom-4 sm:right-8 sm:bottom-8 print:hidden">
             <button
-                @click="print"
+                @click="printInvoice"
                 class="flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-3 text-sm text-white shadow-lg transition-colors hover:bg-indigo-700 sm:px-6"
             >
                 <svg
@@ -148,7 +148,7 @@ const props = defineProps({
     settings: Object,
 });
 
-function print() {
+function printInvoice() {
     window.print();
 }
 

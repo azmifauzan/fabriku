@@ -23,7 +23,7 @@ class ContractorController extends Controller
             ->when(request('specialty'), fn ($query, $specialty) => $query->where('specialty', $specialty))
             ->when(request('status') !== null && request('status') !== '', fn ($query) => $query->where('is_active', (bool) request('status')))
             ->latest()
-            ->paginate(15)
+            ->paginate(self::DEFAULT_PER_PAGE)
             ->withQueryString();
 
         return Inertia::render('Contractors/Index', [
