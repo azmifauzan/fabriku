@@ -1,6 +1,6 @@
 # Enhancement Plans
 
-> **Status (Juni 2026)**: Plan A (Retail), Plan B (Homemade), dan Plan C (Service/Jasa — termasuk laporan layanan, staff assignment, consumable auto-deduct) **selesai dan dipindah** ke `docs/current-status.md`. Sales Order CRITICAL #1-3 (Update Status, fix observer `shipped`, edit dikunci ke `draft`) **selesai**. Suite test lengkap hijau (360 passed). Dokumen ini berisi backlog yang belum dikerjakan.
+> **Status (Juni 2026)**: Plan A (Retail), Plan B (Homemade), dan Plan C (Service/Jasa — termasuk laporan layanan, staff assignment, consumable auto-deduct) **selesai dan dipindah** ke `docs/current-status.md`. Sales Order CRITICAL #1-3 (Update Status, fix observer `shipped`, edit dikunci ke `draft`) dan HIGH (catatan pembayaran via tabel `payments` + refund saat cancel) **selesai**. Suite test lengkap hijau (360 passed). Dokumen ini berisi backlog MEDIUM/LOW yang belum dikerjakan.
 
 ---
 
@@ -34,33 +34,32 @@ Sebelumnya: satu-satunya jalur ubah `status` SO adalah Edit form (terkunci di `d
 
 Detail lengkap di `docs/code-review.md` (bagian SalesOrder).
 
-### HIGH — right-sized untuk UMKM
+### ✅ HIGH selesai (Juni 2026) — catatan pembayaran + refund
 
-1. **Tidak ada catatan pembayaran (DP + pelunasan).** *(P-INTI 2)*
-   `paid_amount` satu kolom yang ditimpa tiap update (termasuk fitur Update Pembayaran). DP lalu pelunasan — sangat umum di UMKM — tidak punya jejak kapan/berapa/metode. **Versi UMKM:** tabel `payments` **sederhana** (`sales_order_id`, `tenant_id`, `amount`, `method`, `paid_at`, `note`); `paid_amount` = SUM, `payment_status` = turunan. Update Pembayaran yang ada di-refactor jadi "tambah baris pembayaran". **Tidak perlu** alokasi multi-invoice atau rekonsiliasi bank. Fondasi untuk #2.
-
-2. **Tidak ada refund + retur barang.** *(P-OPSI 4)*
-   Enum `payment_status = 'refunded'` ada tapi tak pernah di-set. Order berbayar lalu batal → uang kembali tidak tercatat, stok retur tidak masuk lagi. **Versi UMKM:** saat cancel order berbayar, catat baris `payments` bernilai negatif (refund) + (kalau barang balik) kembalikan stok; set `payment_status = 'refunded'`. **Tidak perlu** dokumen credit note akuntansi formal. Butuh #1.
+- **Tabel `payments`** (`tenant_id`, `sales_order_id`, `amount`, `method`, `paid_at`, `note`) — `paid_amount` = `payments()->sum('amount')`, `payment_status` derivasi (`unpaid`/`partial`/`paid`). Endpoint `updatePayment` di-refactor jadi "tambah baris pembayaran" (`StorePaymentRequest`); `PaymentUpdateModal.vue` rewrite (amount/method/paid_at/note); `Show.vue` tambah tabel "Riwayat Pembayaran".
+- **Refund saat cancel order berbayar** — `updateStatus()`: bila transisi ke `cancelled` dan `paid_amount > 0`, catat baris `payments` negatif (`method='refund'`) + set `paid_amount=0`, `payment_status='refunded'`. Badge `refunded` di Show.vue.
+- **Stok retur**: tidak ada langkah tambahan — `transitionMap()` hanya izinkan `cancelled` dari `confirmed/processing/shipped` (belum `completed`, stok masih *reserved* bukan *deducted*), jadi `SalesOrderObserver`'s existing `releaseReservedStock` pada `→cancelled` sudah cukup. Skenario "retur barang dari order `completed`" sengaja di luar scope (butuh transisi `completed→cancelled` + restock logic terpisah — lihat backlog bila dibutuhkan).
+- Test: `tests/Feature/SalesOrderUpdatePaymentTest.php` (rewrite, 6 test) + tambahan refund test di `SalesOrderUpdateStatusTest.php`.
 
 ### MEDIUM
 
-3. **`payment_due_date` mati → tidak ada penanda jatuh tempo.** *(versi UMKM dari AR aging)*
+1. **`payment_due_date` mati → tidak ada penanda jatuh tempo.** *(versi UMKM dari AR aging)*
    Kolom ada + di-cast (`SalesOrder.php`) tapi tak pernah diisi/dipakai. **Versi UMKM:** input tanggal jatuh tempo di form + badge "jatuh tempo/overdue" di Index/Show + filter "piutang overdue". **Tidak perlu** laporan aging berember 0-30/31-60/61-90 ala ERP. Reminder terjadwal opsional menyusul.
 
-4. **`shipping_cost` kolom orphan.**
+2. **`shipping_cost` kolom orphan.**
    Ada di tabel + factory, tapi **tidak** dipakai di Store/Update/Form/Show — total tak menghitung ongkir. Putuskan: aktifkan (input form + masuk `total_amount`) atau drop kolomnya. Keputusan kecil, tidak ada nuansa ERP.
 
-5. **`invoice_number` manual, tanpa auto-generate.** *(P-OPSI 6, versi UMKM)*
+3. **`invoice_number` manual, tanpa auto-generate.** *(P-OPSI 6, versi UMKM)*
    `order_number` sudah auto-sequence (`SalesOrder::generateOrderNumber()`), tapi `invoice_number` text bebas → bisa kosong/duplikat. **Versi UMKM:** auto-generate + unik per tenant (mis. `INV/2026/06/0001`), terbit saat confirm. **Tidak perlu** gapless legal sequence (itu kebutuhan PKP/PPN — lihat scope di bawah).
 
 ### LOW
 
-6. **Pajak (`tax_amount`) input nominal manual.** *(opsional, hanya bila ada tenant PKP)*
+4. **Pajak (`tax_amount`) input nominal manual.** *(opsional, hanya bila ada tenant PKP)*
    Tidak ada `tax_rate`/PPN 11% otomatis/toggle inklusif. Untuk UMKM non-PKP (mayoritas) ini **cukup apa adanya** — angkat hanya kalau menargetkan tenant PKP. Bukan prioritas.
 
-7. **`print()` salah nama.** Mengembalikan Inertia page (bukan PDF). Rename `invoice()` + update route & frontend. Sudah tercatat di `docs/code-review.md`.
+5. **`print()` salah nama.** Mengembalikan Inertia page (bukan PDF). Rename `invoice()` + update route & frontend. Sudah tercatat di `docs/code-review.md`.
 
-8. **Export "Invoice" hanya CSV + belum ada PDF.** `Print.vue` cuma render layar; belum ada PDF resmi untuk dilampirkan ke pelanggan. Nice-to-have.
+6. **Export "Invoice" hanya CSV + belum ada PDF.** `Print.vue` cuma render layar; belum ada PDF resmi untuk dilampirkan ke pelanggan. Nice-to-have.
 
 ### Sengaja DI LUAR scope (overkill untuk UMKM)
 
@@ -69,18 +68,12 @@ Detail lengkap di `docs/code-review.md` (bagian SalesOrder).
 - Gapless legal invoice numbering, tax engine per-baris, e-Faktur — hanya relevan kalau menargetkan PKP.
 - Partial delivery / partial invoicing / backorder, multi-currency, dunning otomatis, ATP/MRP.
 
-### ✅ Sudah dikerjakan (sesi-sesi sebelumnya)
-
-- **Update Pembayaran** — modal di `Show.vue` + endpoint `PATCH sales-orders/{id}/update-payment` (`updatePayment`, permission `sales.edit`). Validasi `paid_amount` (0..`total_amount`), auto-derive `payment_status` (unpaid/partial/paid), blokir status `cancelled`. 6 test di `tests/Feature/SalesOrderUpdatePaymentTest.php`. Mengisi sebagian gap "ubah pembayaran setelah order tidak bisa diedit", tapi **belum** catatan pembayaran (#1 di atas) — saat tabel `payments` dibuat, fitur ini di-refactor jadi "tambah baris pembayaran".
-
 ### Urutan eksekusi yang disarankan
 
-1. **#1** catatan pembayaran sederhana (fondasi uang; refactor fitur Update Pembayaran ke ledger).
-2. **#2** refund + retur (butuh #1).
-3. **#3** jatuh tempo / overdue → **#4** ongkir → **#5** auto invoice number.
-4. **#6–#8** (PKP/PPN, PDF, rename) hanya kalau ada kebutuhan nyata — jangan dikerjakan spekulatif.
+1. **#1** jatuh tempo / overdue → **#2** ongkir → **#3** auto invoice number.
+2. **#4–#6** (PKP/PPN, PDF, rename) hanya kalau ada kebutuhan nyata — jangan dikerjakan spekulatif.
 
-> #1–#2 inti integritas uang. Sisanya cleanup/nice-to-have.
+> Sisa item di sini cleanup/nice-to-have, tidak ada lagi yang mengganggu integritas stok/uang.
 
 ---
 

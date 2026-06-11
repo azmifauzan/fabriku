@@ -1,51 +1,80 @@
 <template>
     <Modal :show="show" @close="close" max-width="md">
         <div class="px-6 py-4">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Update Pembayaran</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Tambah Pembayaran</h3>
 
             <form @submit.prevent="submit" class="mt-4 space-y-4">
-                <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pesanan</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">Rp {{ Number(totalAmount).toLocaleString('id-ID') }}</dd>
+                <div class="flex justify-between rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
+                    <div>
+                        <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Pesanan</dt>
+                        <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">Rp {{ Number(totalAmount).toLocaleString('id-ID') }}</dd>
+                    </div>
+                    <div class="text-right">
+                        <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">Sisa Pembayaran</dt>
+                        <dd class="mt-1 text-sm font-semibold text-red-600 dark:text-red-400">Rp {{ remainingAmount.toLocaleString('id-ID') }}</dd>
+                    </div>
                 </div>
 
                 <div>
-                    <label for="paid_amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Jumlah Dibayar <span class="text-red-600">*</span>
                     </label>
                     <input
-                        id="paid_amount"
-                        v-model.number="form.paid_amount"
+                        id="amount"
+                        v-model.number="form.amount"
                         type="number"
-                        min="0"
-                        :max="totalAmount"
+                        min="0.01"
                         step="0.01"
                         required
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        :class="{ 'border-red-500': form.errors.paid_amount }"
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        :class="{ 'border-red-500': form.errors.amount }"
                     />
-                    <p v-if="form.errors.paid_amount" class="mt-2 text-sm text-red-600 dark:text-red-400">{{ form.errors.paid_amount }}</p>
+                    <p v-if="form.errors.amount" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ form.errors.amount }}</p>
                 </div>
 
                 <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Sisa Pembayaran</dt>
-                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">Rp {{ remainingAmount.toLocaleString('id-ID') }}</dd>
+                    <label for="method" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Metode Pembayaran <span class="text-red-600">*</span>
+                    </label>
+                    <select
+                        id="method"
+                        v-model="form.method"
+                        required
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        :class="{ 'border-red-500': form.errors.method }"
+                    >
+                        <option value="cash">Cash</option>
+                        <option value="transfer">Transfer</option>
+                        <option value="credit_card">Kartu Kredit</option>
+                        <option value="qris">QRIS</option>
+                        <option value="cod">COD</option>
+                    </select>
+                    <p v-if="form.errors.method" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ form.errors.method }}</p>
                 </div>
 
                 <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status Pembayaran</dt>
-                    <dd class="mt-1">
-                        <span
-                            class="inline-flex rounded-full px-2 text-xs leading-5 font-semibold"
-                            :class="{
-                                'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': previewStatus === 'unpaid',
-                                'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': previewStatus === 'partial',
-                                'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': previewStatus === 'paid',
-                            }"
-                        >
-                            {{ previewStatus === 'unpaid' ? 'Belum Dibayar' : previewStatus === 'partial' ? 'Dibayar Sebagian' : 'Lunas' }}
-                        </span>
-                    </dd>
+                    <label for="paid_at" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Tanggal Bayar <span class="text-red-600">*</span>
+                    </label>
+                    <input
+                        id="paid_at"
+                        v-model="form.paid_at"
+                        type="date"
+                        required
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        :class="{ 'border-red-500': form.errors.paid_at }"
+                    />
+                    <p v-if="form.errors.paid_at" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ form.errors.paid_at }}</p>
+                </div>
+
+                <div>
+                    <label for="note" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Catatan</label>
+                    <textarea
+                        id="note"
+                        v-model="form.note"
+                        rows="2"
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    ></textarea>
                 </div>
 
                 <div class="mt-6 flex justify-end gap-3">
@@ -84,23 +113,29 @@ const props = defineProps<{
 
 const emit = defineEmits(['close']);
 
+const remainingAmount = computed(() => Math.max(0, props.totalAmount - props.paidAmount));
+
+const getTodayDate = () => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+};
+
 const form = useForm({
-    paid_amount: props.paidAmount,
-});
-
-const remainingAmount = computed(() => Math.max(0, props.totalAmount - (form.paid_amount || 0)));
-
-const previewStatus = computed(() => {
-    if (!form.paid_amount || form.paid_amount <= 0) {
-        return 'unpaid';
-    }
-
-    return form.paid_amount >= props.totalAmount ? 'paid' : 'partial';
+    amount: remainingAmount.value || 0,
+    method: 'cash',
+    paid_at: getTodayDate(),
+    note: '',
 });
 
 const close = () => {
     form.clearErrors();
-    form.paid_amount = props.paidAmount;
+    form.amount = remainingAmount.value || 0;
+    form.method = 'cash';
+    form.paid_at = getTodayDate();
+    form.note = '';
     emit('close');
 };
 

@@ -117,6 +117,8 @@ Always check the actual migration file for the source of truth. `.github/COLUMN-
 - `payment_method`, `payment_status` (enum: `unpaid` / `pending` / `partial` / `paid` / `refunded`)
 - `payment_due_date`, `shipped_date`, `completed_date`, `shipping_address`
 
+**`payments`** (`2026_06_11_*_create_payments_table.php`): simple payment ledger, `tenant_id`, `sales_order_id`, `amount` (negative = refund), `method`, `paid_at`, `note`. `sales_orders.paid_amount` is derived as `payments()->sum('amount')` and `payment_status` from that sum vs `total_amount` — both written via `SalesOrderController::updatePayment()` (adds a row) and the refund branch of `updateStatus()` (adds a negative row on cancel). Don't write `paid_amount`/`payment_status` directly outside these paths — they'll drift from the ledger.
+
 **`inventory_items` model has confusing alias accessors** (`current_stock`, `reserved_stock`, `name`, `inventory_location_id`, `pattern`, `batch_number`, `expiry_date`) that proxy to the canonical columns. Prefer canonical names in new code; aliases exist for backwards compatibility only.
 
 **Per-tenant unique constraints**: `staff.code`, `contractors.code`, `sales_orders.order_number`, `inventory_items.sku`, `inventory_locations.code` are unique per `tenant_id` (fixed in `2026_04_30_*` and `2026_05_01_*` migrations) — do not write code assuming globally unique.

@@ -80,6 +80,11 @@ class SalesOrder extends Model
         return $this->hasMany(SalesOrderItem::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     public static function generateOrderNumber(): string
     {
         $year = now()->year;

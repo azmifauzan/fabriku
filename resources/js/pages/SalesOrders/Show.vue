@@ -40,7 +40,7 @@
                                             @click="showPaymentModal = true"
                                             class="inline-flex items-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out hover:bg-green-700 focus:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none active:bg-green-900"
                                         >
-                                            Update Pembayaran
+                                            Tambah Pembayaran
                                         </button>
                                         <a
                                             :href="`/sales-orders/${salesOrder.id}/print`"
@@ -192,6 +192,8 @@
                                                         salesOrder.payment_status === 'partial',
                                                     'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200':
                                                         salesOrder.payment_status === 'paid',
+                                                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200':
+                                                        salesOrder.payment_status === 'refunded',
                                                 }"
                                             >
                                                 {{
@@ -199,7 +201,9 @@
                                                         ? 'Belum Dibayar'
                                                         : salesOrder.payment_status === 'partial'
                                                           ? 'Dibayar Sebagian'
-                                                          : 'Lunas'
+                                                          : salesOrder.payment_status === 'paid'
+                                                            ? 'Lunas'
+                                                            : 'Dikembalikan (Refund)'
                                                 }}
                                             </span>
                                         </dd>
@@ -334,6 +338,46 @@
                                         </tr>
                                     </tfoot>
                                 </table>
+                            </div>
+                        </div>
+
+                        <!-- Riwayat Pembayaran -->
+                        <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
+                            <div class="border-b border-gray-200 p-6 dark:border-gray-700">
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Riwayat Pembayaran</h3>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table v-if="salesOrder.payments && salesOrder.payments.length > 0" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead class="bg-gray-50 dark:bg-gray-700">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">Tanggal</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">Metode</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">Catatan</th>
+                                            <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">Jumlah</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                                        <tr v-for="payment in salesOrder.payments" :key="payment.id">
+                                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                                {{ new Date(payment.paid_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) }}
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                                <span class="inline-flex rounded-full bg-gray-100 px-2 text-xs leading-5 font-semibold text-gray-800 dark:bg-gray-700 dark:text-gray-300 uppercase">
+                                                    {{ payment.method }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                                {{ payment.note || '-' }}
+                                            </td>
+                                            <td class="px-6 py-4 text-right text-sm font-medium" :class="Number(payment.amount) < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'">
+                                                {{ Number(payment.amount) < 0 ? '-' : '' }}Rp {{ Math.abs(Number(payment.amount)).toLocaleString('id-ID') }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div v-else class="p-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                    Belum ada riwayat pembayaran.
+                                </div>
                             </div>
                         </div>
                     </div>

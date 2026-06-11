@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePaymentRequest;
 use App\Http\Requests\StoreSalesOrderRequest;
-use App\Http\Requests\UpdatePaymentRequest;
 use App\Http\Requests\UpdateSalesOrderRequest;
 use App\Http\Requests\UpdateStatusRequest;
 use App\Models\Customer;
 use App\Models\InventoryItem;
+use App\Models\Payment;
 use App\Models\SalesOrder;
 use App\Models\Service;
 use App\Models\ServiceConsumable;
@@ -81,7 +82,7 @@ class SalesOrderController extends Controller
 
     public function show(SalesOrder $salesOrder)
     {
-        $salesOrder->load(['customer', 'items.inventoryItem.inventoryLocation', 'items.inventoryItem.productionOrder.preparationOrder.pattern', 'items.service', 'items.servedBy']);
+        $salesOrder->load(['customer', 'items.inventoryItem.inventoryLocation', 'items.inventoryItem.productionOrder.preparationOrder.pattern', 'items.service', 'items.servedBy', 'payments']);
 
         return Inertia::render('SalesOrders/Show', [
             'salesOrder' => $salesOrder,
@@ -294,7 +295,33 @@ class SalesOrderController extends Controller
             $updateData['completed_date'] = now();
         }
 
-        $salesOrder->update($updateData);
+        $refundAmount = $salesOrder->paid_amount;
+        $isRefund = $newStatus === 'cancelled' && $refundAmount > 0;
+
+        if ($isRefund) {
+            $updateData['paid_amount'] = 0;
+            $updateData['payment_status'] = 'refunded';
+        }
+
+        DB::beginTransaction();
+        try {
+            $salesOrder->update($updateData);
+
+            if ($isRefund) {
+                $salesOrder->payments()->create([
+                    'tenant_id' => $salesOrder->tenant_id,
+                    'amount' => -$refundAmount,
+                    'method' => 'refund',
+                    'paid_at' => now(),
+                    'note' => 'Auto refund for cancelled order',
+                ]);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
 
         $label = match ($newStatus) {
             'confirmed' => 'Pesanan dikonfirmasi.',
@@ -310,28 +337,46 @@ class SalesOrderController extends Controller
             ->with('success', $label);
     }
 
-    public function updatePayment(UpdatePaymentRequest $request, SalesOrder $salesOrder): RedirectResponse
+    public function updatePayment(StorePaymentRequest $request, SalesOrder $salesOrder): RedirectResponse
     {
         if ($salesOrder->status === 'cancelled') {
-            abort(403, 'Pembayaran sales order yang dibatalkan tidak dapat diubah.');
+            abort(403, 'Pembayaran sales order yang dibatalkan tidak dapat ditambah.');
         }
 
-        $paidAmount = $request->validated('paid_amount');
+        DB::beginTransaction();
+        try {
+            $validated = $request->validated();
 
-        $paymentStatus = match (true) {
-            $paidAmount <= 0 => 'unpaid',
-            $paidAmount >= $salesOrder->total_amount => 'paid',
-            default => 'partial',
-        };
+            $salesOrder->payments()->create([
+                'tenant_id' => $salesOrder->tenant_id,
+                'amount' => $validated['amount'],
+                'method' => $validated['method'],
+                'paid_at' => $validated['paid_at'],
+                'note' => $validated['note'] ?? null,
+            ]);
 
-        $salesOrder->update([
-            'paid_amount' => $paidAmount,
-            'payment_status' => $paymentStatus,
-        ]);
+            $totalPaid = $salesOrder->payments()->sum('amount');
+
+            $paymentStatus = match (true) {
+                $totalPaid <= 0 => 'unpaid',
+                $totalPaid >= $salesOrder->total_amount => 'paid',
+                default => 'partial',
+            };
+
+            $salesOrder->update([
+                'paid_amount' => $totalPaid,
+                'payment_status' => $paymentStatus,
+            ]);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
 
         return redirect()
             ->route('sales-orders.show', $salesOrder)
-            ->with('success', 'Status pembayaran berhasil diupdate.');
+            ->with('success', 'Pembayaran berhasil ditambahkan.');
     }
 
     public function destroy(SalesOrder $salesOrder)
