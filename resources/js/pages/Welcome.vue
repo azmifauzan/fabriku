@@ -47,8 +47,8 @@ const features = [
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <img src="/images/fabriku-logo-only.png" alt="Fabriku Logo" class="h-8 w-8 object-contain" />
-                        <img src="/images/fabriku-word.png" alt="Fabriku" class="h-5 object-contain" />
+                        <img src="/images/fabriku-logo-only.png?v=2" alt="Fabriku Logo" class="h-8 w-8 object-contain" />
+                        <img src="/images/fabriku-word.png?v=2" alt="Fabriku" class="h-5 object-contain" />
                     </div>
                     <div class="hidden items-center gap-6 md:flex">
                         <a href="#features" class="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"> Fitur </a>
@@ -442,8 +442,8 @@ const features = [
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
                     <div class="flex items-center gap-2">
-                        <img src="/images/fabriku-logo-only.png" alt="Fabriku Logo" class="h-6 w-6 object-contain" />
-                        <img src="/images/fabriku-word.png" alt="Fabriku" class="h-4 object-contain" />
+                        <img src="/images/fabriku-logo-only.png?v=2" alt="Fabriku Logo" class="h-6 w-6 object-contain" />
+                        <img src="/images/fabriku-word.png?v=2" alt="Fabriku" class="h-4 object-contain" />
                     </div>
                     <div class="flex items-center gap-6">
                         <a

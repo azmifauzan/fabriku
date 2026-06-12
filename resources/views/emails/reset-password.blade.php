@@ -97,7 +97,7 @@
     <div class="email-container">
         <div class="header">
             <div class="logo">
-                <img src="{{ asset('images/fabriku-word.png') }}" alt="Fabriku" style="height: 32px;" />
+                <img src="{{ asset('images/fabriku-word.png?v=2') }}" alt="Fabriku" style="height: 32px;" />
             </div>
             <h1 style="margin: 0; font-size: 24px;">🔐 Reset Password Akun</h1>
         </div>
