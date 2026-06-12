@@ -30,10 +30,8 @@ const showPasswordConfirmation = ref(false);
                 <div class="mb-6 text-center">
                     <Link href="/" class="inline-block">
                         <div class="mb-2 flex items-center justify-center gap-2">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600">
-                                <span class="text-lg font-bold text-white">F</span>
-                            </div>
-                            <h1 class="text-2xl font-bold text-gray-900">Fabriku</h1>
+                            <img src="/images/fabriku-logo-only.png" alt="Fabriku Logo" class="h-8 w-8 object-contain" />
+                            <img src="/images/fabriku-word.png" alt="Fabriku" class="h-6 object-contain" />
                         </div>
                     </Link>
                     <h2 class="mt-4 mb-2 text-xl font-bold text-gray-900">Reset Password</h2>

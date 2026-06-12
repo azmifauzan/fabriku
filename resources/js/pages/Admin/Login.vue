@@ -23,19 +23,15 @@ const submit = () => {
         <div class="w-full max-w-md space-y-8">
             <!-- Logo & Title -->
             <div class="text-center">
-                <div class="flex justify-center">
+                <div class="flex flex-col items-center justify-center space-y-4">
                     <div class="rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
-                        <svg class="h-16 w-16 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                            />
-                        </svg>
+                        <img src="/images/fabriku-logo-only.png" alt="Fabriku Logo" class="h-16 w-16 object-contain" />
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <img src="/images/fabriku-word.png" alt="Fabriku" class="h-8 object-contain" />
+                        <span class="text-4xl font-extrabold text-white">Admin</span>
                     </div>
                 </div>
-                <h2 class="mt-6 text-4xl font-extrabold text-white">Fabriku Admin</h2>
                 <p class="mt-2 text-sm text-purple-200">Platform Management Dashboard</p>
             </div>
 

@@ -47,10 +47,8 @@ const submit = () => {
                 <div class="mb-6 text-center">
                     <Link href="/" class="inline-block">
                         <div class="mb-2 flex items-center justify-center gap-2">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600">
-                                <span class="text-lg font-bold text-white">F</span>
-                            </div>
-                            <h1 class="text-2xl font-bold text-gray-900">Fabriku</h1>
+                            <img src="/images/fabriku-logo-only.png" alt="Fabriku Logo" class="h-8 w-8 object-contain" />
+                            <img src="/images/fabriku-word.png" alt="Fabriku" class="h-6 object-contain" />
                         </div>
                     </Link>
                     <p class="text-gray-600">Mulai kelola produksi bisnis Anda</p>
