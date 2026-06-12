@@ -6,7 +6,7 @@ const openIndex = ref(null);
 const faqs = [
     {
         question: 'Apa itu Fabriku?',
-        answer: 'Fabriku adalah platform manajemen produksi terpadu untuk UMKM konveksi dan manufaktur. Kami membantu Anda mengelola inventory, pesanan, produksi, hingga laporan keuangan dalam satu aplikasi.',
+        answer: 'Fabriku adalah platform manajemen produksi dan penjualan terpadu untuk UMKM lintas kategori: Garment, Makanan & Kue, Kerajinan, Kosmetik, Toko/Retail, Produksi Rumahan, hingga Jasa & Layanan (bengkel, salon, laundry, dll). Kami membantu Anda mengelola inventory, pesanan, produksi, hingga laporan keuangan dalam satu aplikasi.',
     },
     {
         question: 'Berapa biaya berlangganan Fabriku?',
