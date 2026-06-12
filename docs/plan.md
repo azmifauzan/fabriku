@@ -1,6 +1,6 @@
 # Enhancement Plans
 
-> **Status (Juni 2026)**: Plan A (Retail), Plan B (Homemade), dan Plan C (Service/Jasa — termasuk laporan layanan, staff assignment, consumable auto-deduct) **selesai dan dipindah** ke `docs/current-status.md`. Sales Order CRITICAL #1-3 (Update Status, fix observer `shipped`, edit dikunci ke `draft`) dan HIGH (catatan pembayaran via tabel `payments` + refund saat cancel) **selesai**. Sales Order MEDIUM #1-3 (jatuh tempo/overdue, shipping_cost aktif, auto invoice number) **selesai**. Suite test lengkap hijau (60 passed). Dokumen ini berisi backlog LOW yang belum dikerjakan.
+> **Status (Juni 2026)**: Plan A (Retail), Plan B (Homemade), dan Plan C (Service/Jasa — termasuk laporan layanan, staff assignment, consumable auto-deduct) **selesai dan dipindah** ke `docs/current-status.md`. Sales Order CRITICAL #1-3 (Update Status, fix observer `shipped`, edit dikunci ke `draft`) dan HIGH (catatan pembayaran via tabel `payments` + refund saat cancel) **selesai**. Sales Order MEDIUM #1-3 (jatuh tempo/overdue, shipping_cost aktif, auto invoice number) **selesai**. LOW backlog dari `docs/code-review.md` (rename `print()`→`invoice()`, standarisasi `paginate()`, unit test domain logic, refactor query `InventoryItemController`) **selesai**. Suite test lengkap hijau (377 passed, 6 skipped). Sisa backlog di dokumen ini scope-nya lintas kategori / out-of-scope, bukan technical debt.
 
 ---
 
@@ -50,6 +50,18 @@ Detail lengkap di `docs/code-review.md` (bagian SalesOrder).
 3. **`invoice_number` auto-generate.** `SalesOrder::booted()` `saving` hook: generate `INV/YYYY/MM/NNNN` unik per tenant per bulan saat SO pertama kali keluar dari `draft` (bukan `cancelled`). Manual override tetap dimungkinkan (input teks di form). Tampil di Index dan Show. Test: `it auto-generates invoice number when transitioning to confirmed`.
 
 Fix tambahan (dari code review): status dropdown di Form.vue (create/edit) diganti read-only badge "Draft" + keterangan — menghilangkan UI menyesatkan karena backend selalu force `draft` saat create dan state machine hanya bisa diubah via `updateStatus`; bug semantik komparasi tanggal overdue di Index + Show diperbaiki (`new Date(new Date().setHours(0,0,0,0))`).
+
+### ✅ LOW selesai (Juni 2026) — rename, standarisasi paginate, unit test, refactor query
+
+1. **`print()` → `invoice()`.** `SalesOrderController::print` di-rename `invoice()`; route `sales-orders/{id}/print` → `sales-orders/{id}/invoice` (`sales-orders.invoice`); `Print.vue` → `Invoice.vue`. Link "Print Invoice" di Index/Show dan `docs/04-api-endpoints.md` ikut diupdate. Test: `it can print invoice for a sales order` (rewrite ke `sales-orders.invoice` + komponen `SalesOrders/Invoice`).
+
+2. **`paginate()` distandarkan.** `Controller::DEFAULT_PER_PAGE = 15` (constant baru di base `Controller`). Semua controller (Sales, Inventory, Admin Audit/Monitoring/Payment/Tenant/User, Contractor, Customer, Material, MaterialType, Pattern, PreparationOrder, ProductionOrder, PurchaseReceipt, Service, SimpleProduction, Staff, InventoryLocation) pakai `self::DEFAULT_PER_PAGE` — sebelumnya campur `15`/`20`.
+
+3. **Unit test domain logic.** `tests/Unit/InventoryItemSkuTest.php` (prefix SKU per kategori dari `config/business.php` + auto-increment + skip SKU yang sudah ada), `tests/Unit/MaterialStockServiceTest.php` (cek ketersediaan stok per batch + deduct FIFO lintas `MaterialReceipt`), `tests/Unit/SalesOrderStatusTransitionTest.php` (6 test, semua state `transitionMap()`). `tests/Pest.php` extend `Unit` selain `Feature`. Factory `SalesOrderFactory` tambah state `shipped()`/`cancelled()`.
+
+4. **`InventoryItemController::create/edit` query dipindah ke service.** `InventoryService::getFormDataForCreateOrEdit(?InventoryItem $item = null)` — return `locations`, `patterns`, `categories`, `productionOrders` (termasuk kalkulasi `material_cost`). Controller cuma panggil service + render Inertia.
+
+Test suite penuh: 377 passed, 6 skipped.
 
 ---
 

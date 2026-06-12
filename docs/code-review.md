@@ -131,14 +131,14 @@ Semua hardcoded `addMinutes(30)` diganti dengan `config('filesystems.url_ttl_min
 ### ✅ RESOLVED — Dead code / komentar TODO
 `InventoryService::moveItem` — blok comment-out `StockMovement::create([...])` dan variabel `$oldLocationId` yang tidak terpakai sudah dihapus.
 
-### `print()` controller return Inertia render, bukan PDF
-`SalesOrderController::print` — nama method menyesatkan. Return Inertia view (bukan PDF). Rename ke `invoice()` saat ada bandwidth untuk update route + frontend.
+### ✅ RESOLVED — `print()` controller return Inertia render, bukan PDF
+`SalesOrderController::print` → di-rename `invoice()`. Route `sales-orders/{id}/print` → `sales-orders/{id}/invoice` (`sales-orders.invoice`), `Print.vue` → `Invoice.vue`. Test + dokumen API diupdate.
 
 ### ✅ RESOLVED — Magic numbers di SKU generator
 `InventoryItem::generateSku` — prefix per kategori dipindah ke `config/business.php` (key `sku_prefix` per kategori). Fallback tetap `'INV-ITM'`. Kategori cosmetic kini dapat prefix `INV-COS`.
 
-### Tidak konsisten antara `paginate(15)` vs `paginate(20)`
-SalesOrder pakai 15, Inventory pakai 20. Bisa distandarkan ke konstanta.
+### ✅ RESOLVED — Tidak konsisten antara `paginate(15)` vs `paginate(20)`
+Semua controller (Sales, Inventory, Admin, dll) sekarang pakai `Controller::DEFAULT_PER_PAGE` (= 15).
 
 ### `app/Helpers/helpers.php` auto-loaded tanpa konten review
 Perlu pastikan tidak ada fungsi global yang berkonflik.
@@ -146,11 +146,11 @@ Perlu pastikan tidak ada fungsi global yang berkonflik.
 ### Tidak ada `php artisan optimize:clear` di alur deploy
 README hanya menyebut cache. Tidak ada dokumen deploy.
 
-### Unit test kosong
-`tests/Unit/ExampleTest.php` cuma boilerplate. Domain logic (MaterialStockService, SKU generator, status transition) seharusnya punya unit test.
+### ✅ RESOLVED — Unit test kosong
+`tests/Unit/` kini punya `InventoryItemSkuTest` (SKU prefix per kategori + auto-increment), `MaterialStockServiceTest` (FIFO deduct + cek ketersediaan stok per batch), `SalesOrderStatusTransitionTest` (state machine per status). `tests/Pest.php` extend `Unit` selain `Feature`.
 
-### `Inertia::render` controller terlalu gemuk
-`InventoryItemController::create/edit` bangun query kompleks. Pindahkan ke service / view model.
+### ✅ RESOLVED — `Inertia::render` controller terlalu gemuk
+`InventoryItemController::create/edit` query (locations, patterns, categories, production orders) dipindah ke `InventoryService::getFormDataForCreateOrEdit()`.
 
 ### ✅ RESOLVED — `composer.json` `name: "laravel/blank-vue-starter-kit"`
 Diganti ke `"fabriku/fabriku"`.
@@ -172,7 +172,5 @@ Diganti ke `"fabriku/fabriku"`.
 3. **MEDIUM** — `InventoryItem` accessor alias cleanup: hapus `$appends` alias, update frontend.
 4. **MEDIUM** — `subscription.check` GET assistant: keputusan desain, dokumentasikan atau block GET juga.
 5. **MEDIUM** — `assistant_messages` retention policy.
-6. **LOW** — `print()` method rename ke `invoice()`.
-7. **LOW** — Standarisasi `paginate()` ke konstanta tunggal.
-8. **LOW** — Unit test untuk domain logic (MaterialStockService, SKU generator, status transitions).
-9. **LOW** — `InventoryItemController` query pindah ke service/view model.
+
+Semua item **LOW** (rename `print()`→`invoice()`, standarisasi `paginate()`, unit test domain logic, refactor query `InventoryItemController`) selesai Juni 2026 — lihat bagian `## LOW` di atas.

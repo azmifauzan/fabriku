@@ -103,7 +103,8 @@ Permission: `simple_production.view` / `simple_production.create`
 | POST | `/sales-orders` | Create sales order |
 | GET | `/sales-orders/quick-checkout` | Halaman POS Quick Checkout (retail + homemade + service) |
 | POST | `/sales-orders/quick-checkout` | Submit transaksi kasir (SO langsung `completed`); kategori service bisa campur layanan + produk |
-| GET | `/sales-orders/{id}/invoice` | Print invoice/DO |
+| GET | `/sales-orders/{id}/invoice` | Print invoice |
+| GET | `/sales-orders/{id}/delivery-order` | Print surat jalan (delivery order) |
 | GET | `/sales-orders/{id}/export` | Export to PDF/Excel |
 | GET | `/customers` | List customers |
 | POST | `/customers` | Create customer |
