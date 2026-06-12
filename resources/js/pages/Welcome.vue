@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import FAQ from '@/components/Landing/FAQ.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { Check, ChefHat, Home, Palette, Scissors, Sparkles, Store, X } from 'lucide-vue-next';
+import { Check, ChefHat, Home, Palette, Scissors, Sparkles, Store, Wrench, X } from 'lucide-vue-next';
 
 const props = defineProps({
     canLogin: {
@@ -120,6 +120,11 @@ const features = [
                             class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 shadow-sm"
                         >
                             <Home :size="14" class="text-gray-400" /> Produksi Rumahan
+                        </span>
+                        <span
+                            class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 shadow-sm"
+                        >
+                            <Wrench :size="14" class="text-gray-400" /> Jasa & Layanan
                         </span>
                     </div>
 
