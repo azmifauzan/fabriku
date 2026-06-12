@@ -147,6 +147,7 @@ This project has Laravel Boost (`laravel/boost`) installed. When available, pref
 - `docs/code-review.md` — severity-tagged findings (CRITICAL / HIGH / MEDIUM / LOW). Read before extending Sales, Inventory, or AI modules.
 - `docs/plan.md` — sisa enhancement kategori `service` (laporan layanan khusus, staff assignment, consumable auto-deduct) + backlog lintas kategori. Plan retail, homemade, dan service inti sudah selesai dan dipindah ke `current-status.md`.
 - `.github/copilot-instructions.md` — Laravel Boost guidelines (PHP/Eloquent/Inertia/Tailwind/Pest conventions). Authoritative for style.
+- `docs/deployment.md` — manual production deploy: build/tag/push Docker image, SSH ke server, update + recreate compose, migrate, monitor.
 
 ## Demo accounts (dev)
 
