@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateInventoryItemRequest;
 use App\Models\InventoryItem;
 use App\Models\InventoryItemCategory;
 use App\Models\InventoryLocation;
-use App\Models\Pattern;
 use App\Models\ProductionOrder;
 use App\Models\StockAdjustment;
 use App\Services\InventoryService;
