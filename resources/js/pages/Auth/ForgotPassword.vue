@@ -18,8 +18,8 @@ const form = {
                 <div class="mb-6 text-center">
                     <Link href="/" class="inline-block">
                         <div class="mb-2 flex items-center justify-center gap-2">
-                            <img src="/images/fabriku-logo-only.png" alt="Fabriku Logo" class="h-8 w-8 object-contain" />
-                            <img src="/images/fabriku-word.png" alt="Fabriku" class="h-6 object-contain" />
+                            <img src="/images/fabriku-logo-only.png?v=2" alt="Fabriku Logo" class="h-8 w-8 object-contain" />
+                            <img src="/images/fabriku-word.png?v=2" alt="Fabriku" class="h-6 object-contain" />
                         </div>
                     </Link>
                     <h2 class="mt-4 mb-2 text-xl font-bold text-gray-900">Lupa Password?</h2>

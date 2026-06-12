@@ -25,10 +25,10 @@ const submit = () => {
             <div class="text-center">
                 <div class="flex flex-col items-center justify-center space-y-4">
                     <div class="rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
-                        <img src="/images/fabriku-logo-only.png" alt="Fabriku Logo" class="h-16 w-16 object-contain" />
+                        <img src="/images/fabriku-logo-only.png?v=2" alt="Fabriku Logo" class="h-16 w-16 object-contain" />
                     </div>
                     <div class="flex items-center space-x-2">
-                        <img src="/images/fabriku-word.png" alt="Fabriku" class="h-8 object-contain" />
+                        <img src="/images/fabriku-word.png?v=2" alt="Fabriku" class="h-8 object-contain" />
                         <span class="text-4xl font-extrabold text-white">Admin</span>
                     </div>
                 </div>
