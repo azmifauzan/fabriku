@@ -41,19 +41,12 @@ const logout = () => {
             <!-- Logo -->
             <div class="flex h-16 items-center justify-between bg-black/20 px-6">
                 <div class="flex items-center space-x-3">
-                    <div class="rounded-lg bg-white/10 p-2">
-                        <svg class="h-6 w-6 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                            />
-                        </svg>
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 p-1">
+                        <img src="/images/fabriku-logo-only.png" alt="Fabriku Logo" class="h-full w-full object-contain" />
                     </div>
                     <div>
-                        <h1 class="text-lg font-bold text-white">Fabriku</h1>
-                        <p class="text-xs text-purple-200">Admin Panel</p>
+                        <img src="/images/fabriku-word.png" alt="Fabriku" class="h-5 object-contain" />
+                        <p class="text-xs text-purple-200 mt-0.5">Admin Panel</p>
                     </div>
                 </div>
                 <button @click="sidebarOpen = false" class="text-white lg:hidden">

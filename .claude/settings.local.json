@@ -18,7 +18,23 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(git stash *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(npx prettier *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8000/)",
+      "Read(//tmp/**)",
+      "Bash(sudo service postgresql status)",
+      "Bash(docker compose *)",
+      "Bash(pkill -f \"artisan serve\")",
+      "Bash(pkill -f \"vite\")",
+      "Bash(kill 120720 120721)",
+      "Bash(docker info *)",
+      "Bash(curl -s \"https://hub.docker.com/v2/repositories/azmifauzan/fabriku/tags?page_size=100\")",
+      "Bash(python3 -c ' *)",
+      "Bash(docker build *)",
+      "Bash(tee /tmp/docker-build.log)",
+      "Bash(wait 230566)",
+      "Bash(docker push *)",
+      "Bash(curl *)"
     ]
   }
 }
