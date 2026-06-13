@@ -36,7 +36,7 @@ docker build -t "azmifauzan/fabriku:${TAG}" -t azmifauzan/fabriku:latest .
 ```
 
 Catatan:
-- Build dari root repo (`Dockerfile` multi-stage: composer build → npm/Wayfinder build → runtime image dengan Apache + Supervisor + Cron + Queue Worker).
+- Build dari root repo (`Dockerfile` multi-stage: composer build → npm/Wayfinder build → runtime image dengan Apache + Supervisor + Queue Worker + Scheduler). Scheduler jalan via `schedule:work` (Supervisor, user `www-data`) — **tidak ada root cron**; cron sebagai root akan membuat `storage/logs/laravel.log` jadi `root:root` dan memblok write Apache (www-data) → HTTP 500 di semua perubahan status pesanan.
 - Tag `latest` opsional, untuk referensi cepat — server tetap pakai tag versi spesifik (`${TAG}`), bukan `latest`, supaya rollback jelas.
 
 ---
