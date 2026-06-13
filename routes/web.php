@@ -40,6 +40,7 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 // Landing Page
 Route::get('/', function () {
@@ -294,3 +295,14 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
         Route::get('telegram', [TelegramController::class, 'index'])->name('telegram');
     });
 });
+
+if (app()->environment('local', 'testing')) {
+    Route::get('/errors/{code}', function ($code) {
+        if (view()->exists("errors.{$code}")) {
+            return response()->view("errors.{$code}", [
+                'exception' => new HttpException($code, "Ini adalah pesan deskripsi contoh untuk error {$code}."),
+            ], $code);
+        }
+        abort(404);
+    });
+}
