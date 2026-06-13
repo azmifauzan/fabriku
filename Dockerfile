@@ -79,7 +79,6 @@ FROM php:8.4-apache
 # Install only runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     supervisor \
-    cron \
     netcat-openbsd \
     tzdata \
     && apt-get clean \
@@ -127,21 +126,22 @@ COPY --from=node-builder --chown=www-data:www-data /app/public/build ./public/bu
 # Copy vendor from composer-builder
 COPY --from=composer-builder --chown=www-data:www-data /app/vendor ./vendor
 
-# Setup environment and directories
+# Setup environment and directories.
+# Pre-create laravel.log owned by www-data and set the setgid bit on storage/logs
+# so every writer (apache/worker/scheduler all run as www-data) can append.
+# The scheduler runs as www-data via supervisord (program:laravel-scheduler);
+# there is intentionally NO root cron — a root-owned log would block www-data writes.
 RUN mv .env.example .env \
     && mkdir -p storage/app/public storage/app/public/uploads/user_photos \
                 storage/framework/cache storage/framework/sessions storage/framework/views \
                 storage/logs bootstrap/cache public \
+    && touch storage/logs/laravel.log \
     && chown -R www-data:www-data storage bootstrap/cache public \
+    && chmod -R 775 storage bootstrap/cache \
+    && chmod 664 storage/logs/laravel.log \
+    && chmod g+s storage/logs \
     && php artisan key:generate --force \
     && php artisan storage:link || true
-
-# Setup cron for Laravel scheduler
-RUN echo "* * * * * cd /var/www/html && /usr/local/bin/php artisan schedule:run >> /var/log/cron.log 2>&1" > /etc/cron.d/laravel-scheduler \
-    && chmod 0644 /etc/cron.d/laravel-scheduler \
-    && crontab /etc/cron.d/laravel-scheduler \
-    && touch /var/log/cron.log \
-    && chmod 666 /var/log/cron.log
 
 # Create volume for persistent storage
 VOLUME ["/var/www/html/storage/app/public"]

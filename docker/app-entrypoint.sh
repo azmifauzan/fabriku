@@ -20,10 +20,16 @@ php artisan config:cache
 echo "Creating storage link..."
 php artisan storage:link || true
 
-# Set proper permissions for Laravel directories
+# Set proper permissions for Laravel directories.
+# laravel.log must be created and owned by www-data BEFORE any www-data process
+# (apache/worker/scheduler) tries to append, or the log write throws
+# "Permission denied" and bubbles up as an HTTP 500 (e.g. on order status change).
 echo "Setting permissions..."
+touch storage/logs/laravel.log || true
 chown -R www-data:www-data storage bootstrap/cache public/storage || true
 chmod -R 775 storage bootstrap/cache public/storage || true
+chmod 664 storage/logs/laravel.log || true
+chmod g+s storage/logs || true
 
 echo "Laravel setup completed successfully!"
 
