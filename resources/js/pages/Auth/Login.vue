@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import { Form, Head, Link, usePage } from '@inertiajs/vue3';
-import { ChefHat, Eye, EyeOff, Home, Palette, Scissors, Sparkles, Store } from 'lucide-vue-next';
+import { ChefHat, Eye, EyeOff, Home, Palette, Scissors, Sparkles, Store, Wrench } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 
 const form = reactive({
@@ -263,6 +263,23 @@ watch(
                                             Dapur Coklat Rumahan <span class="font-normal text-gray-400">· Produksi Rumahan</span>
                                         </p>
                                         <p class="truncate font-mono text-[11px] text-indigo-600">admin@homemade.com</p>
+                                    </div>
+                                    <span class="shrink-0 text-[10px] text-gray-400">password</span>
+                                </div>
+
+                                <!-- Service Demo -->
+                                <div
+                                    @click="fillCredentials('admin@bengkel.com')"
+                                    class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors select-none hover:border-indigo-200 hover:bg-indigo-50/30"
+                                >
+                                    <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-white">
+                                        <Wrench :size="14" class="text-gray-500" />
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-xs font-semibold text-gray-800">
+                                            Bengkel Motor Maju Jaya <span class="font-normal text-gray-400">· Jasa</span>
+                                        </p>
+                                        <p class="truncate font-mono text-[11px] text-indigo-600">admin@bengkel.com</p>
                                     </div>
                                     <span class="shrink-0 text-[10px] text-gray-400">password</span>
                                 </div>
