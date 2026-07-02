@@ -7,7 +7,9 @@
                 <div class="flex justify-between rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
                     <div>
                         <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Pesanan</dt>
-                        <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">Rp {{ Number(totalAmount).toLocaleString('id-ID') }}</dd>
+                        <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            Rp {{ Number(totalAmount).toLocaleString('id-ID') }}
+                        </dd>
                     </div>
                     <div class="text-right">
                         <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">Sisa Pembayaran</dt>
@@ -99,8 +101,8 @@
 </template>
 
 <script setup lang="ts">
-import Modal from '@/components/Modal.vue';
 import { updatePayment } from '@/actions/App/Http/Controllers/SalesOrderController';
+import Modal from '@/components/Modal.vue';
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 

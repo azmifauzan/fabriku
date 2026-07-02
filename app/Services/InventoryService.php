@@ -317,6 +317,9 @@ class InventoryService
     public function getFormDataForCreateOrEdit(?InventoryItem $item = null): array
     {
         $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'capacity']);
+        $locations->each(function (InventoryLocation $location) {
+            $location->available_capacity = $location->available_capacity;
+        });
         $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'output_quantity']);
         $categories = InventoryItemCategory::active()->orderBy('sort_order')->orderBy('name')->get(['id', 'name']);
 

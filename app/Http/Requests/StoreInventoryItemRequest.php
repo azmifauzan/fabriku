@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Models\InventoryLocation;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreInventoryItemRequest extends FormRequest
 {
@@ -21,28 +23,28 @@ class StoreInventoryItemRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Map field names for backwards compatibility
-        $mappings = [
-            'name' => 'product_name',
-            'inventory_location_id' => 'location_id',
-            'current_stock' => 'current_quantity',
-            'stock_quantity' => 'current_quantity',
-        ];
+        if ($this->has('name') && ! $this->has('product_name')) {
+            $this->merge(['product_name' => $this->input('name')]);
+        }
 
-        $data = [];
-        foreach ($mappings as $old => $new) {
-            if ($this->has($old) && ! $this->has($new)) {
-                $data[$new] = $this->input($old);
-            }
+        // Map field names for backwards compatibility
+        $locationId = $this->input('location_id') ?? $this->input('inventory_location_id');
+        $quantity = $this->input('current_quantity') ?? $this->input('current_stock') ?? $this->input('stock_quantity');
+
+        if ($locationId && $quantity !== null) {
+            $this->merge([
+                'locations' => [
+                    [
+                        'location_id' => (int) $locationId,
+                        'quantity' => (int) $quantity,
+                    ]
+                ]
+            ]);
         }
 
         // For manual entry, default target_quantity to 0 if not provided
         if (empty($this->input('production_order_id')) && ! $this->has('target_quantity')) {
-            $data['target_quantity'] = 0;
-        }
-
-        if (! empty($data)) {
-            $this->merge($data);
+            $this->merge(['target_quantity' => 0]);
         }
     }
 
@@ -69,14 +71,13 @@ class StoreInventoryItemRequest extends FormRequest
             'product_name' => $isManualEntry ? 'required|string|max:255' : 'nullable|string|max:255',
             'name' => 'sometimes|string|max:255', // backwards compatibility
 
-            'location_id' => ['required', Rule::exists('inventory_locations', 'id')->where('tenant_id', $tenantId)],
-            'inventory_location_id' => ['sometimes', Rule::exists('inventory_locations', 'id')->where('tenant_id', $tenantId)], // backwards compatibility
+            // One or more rack allocations for this batch
+            'locations' => 'required|array|min:1',
+            'locations.*.location_id' => ['required', 'distinct', Rule::exists('inventory_locations', 'id')->where('tenant_id', $tenantId)],
+            'locations.*.quantity' => 'required|integer|min:1',
 
             // Quantities - required for manual entry
             'target_quantity' => $isManualEntry ? 'nullable|integer|min:0' : 'required|integer|min:0',
-            'current_quantity' => 'required|integer|min:0',
-            'current_stock' => 'sometimes|integer|min:0', // backwards compatibility
-            'stock_quantity' => 'sometimes|integer|min:0', // backwards compatibility
             'minimum_stock' => 'integer|min:0',
 
             // Category
@@ -94,16 +95,55 @@ class StoreInventoryItemRequest extends FormRequest
         ];
     }
 
+    /**
+     * Block any rack allocation that would overflow that rack's remaining capacity.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $locations = $this->input('locations', []);
+
+            if (! is_array($locations)) {
+                return;
+            }
+
+            foreach ($locations as $index => $entry) {
+                $locationId = $entry['location_id'] ?? null;
+                $quantity = (int) ($entry['quantity'] ?? 0);
+
+                if (! $locationId || $quantity < 1) {
+                    continue;
+                }
+
+                $location = InventoryLocation::find($locationId);
+
+                if (! $location || $location->capacity === null) {
+                    continue;
+                }
+
+                if ($quantity > $location->available_capacity) {
+                    $validator->errors()->add(
+                        "locations.{$index}.quantity",
+                        "Rak {$location->name} tidak cukup kapasitas (sisa: {$location->available_capacity})."
+                    );
+                }
+            }
+        });
+    }
+
     public function messages(): array
     {
         return [
             'production_order_id.exists' => 'Production order tidak ditemukan.',
             'product_name.required' => 'Nama produk harus diisi untuk manual entry.',
             'sku.unique' => 'SKU sudah digunakan.',
-            'inventory_location_id.exists' => 'Lokasi inventory tidak ditemukan.',
-            'location_id.required' => 'Lokasi harus dipilih.',
+            'locations.required' => 'Minimal 1 lokasi harus diisi.',
+            'locations.*.location_id.required' => 'Lokasi harus dipilih.',
+            'locations.*.location_id.distinct' => 'Lokasi tidak boleh dipilih dua kali dalam satu form.',
+            'locations.*.location_id.exists' => 'Lokasi inventory tidak ditemukan.',
+            'locations.*.quantity.required' => 'Jumlah stock harus diisi.',
+            'locations.*.quantity.min' => 'Jumlah stock minimal 1.',
             'target_quantity.required' => 'Jumlah target harus diisi.',
-            'current_quantity.required' => 'Jumlah stock saat ini harus diisi.',
             'unit_cost.required' => 'Harga modal harus diisi.',
         ];
     }

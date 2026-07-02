@@ -46,7 +46,7 @@ const logout = () => {
                     </div>
                     <div>
                         <img src="/images/fabriku-word.png?v=2" alt="Fabriku" class="h-5 object-contain" />
-                        <p class="text-xs text-purple-200 mt-0.5">Admin Panel</p>
+                        <p class="mt-0.5 text-xs text-purple-200">Admin Panel</p>
                     </div>
                 </div>
                 <button @click="sidebarOpen = false" class="text-white lg:hidden">
