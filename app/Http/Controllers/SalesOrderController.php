@@ -80,9 +80,13 @@ class SalesOrderController extends Controller
                 'draft_orders' => SalesOrder::where('status', 'draft')->count(),
                 'pending_orders' => SalesOrder::whereIn('status', ['confirmed', 'processing'])->count(),
                 'completed_orders' => SalesOrder::where('status', 'completed')->count(),
-                'pending_payment' => SalesOrder::where('payment_status', 'unpaid')->count(),
+                'pending_payment' => SalesOrder::where('payment_status', 'unpaid')
+                    ->where('status', '!=', 'cancelled')
+                    ->count(),
                 'realized_revenue' => SalesOrder::sum('paid_amount'),
-                'outstanding_revenue' => SalesOrder::where('payment_status', '!=', 'paid')->sum(DB::raw('total_amount - paid_amount')),
+                'outstanding_revenue' => SalesOrder::where('payment_status', '!=', 'paid')
+                    ->where('status', '!=', 'cancelled')
+                    ->sum(DB::raw('total_amount - paid_amount')),
             ],
         ]);
     }
@@ -308,19 +312,28 @@ class SalesOrderController extends Controller
             $updateData['completed_date'] = now();
         }
 
-        $refundAmount = $salesOrder->paid_amount;
-        $isRefund = $newStatus === 'cancelled' && $refundAmount > 0;
-
-        if ($isRefund) {
-            $updateData['paid_amount'] = 0;
-            $updateData['payment_status'] = 'refunded';
+        // When cancelling, fix payment_status so the order is excluded from
+        // piutang/receivables queries. Previously only refunded orders got
+        // their payment_status updated — unpaid cancelled orders stayed
+        // 'unpaid' and kept appearing in outstanding-receivable totals.
+        if ($newStatus === 'cancelled') {
+            if ($salesOrder->paid_amount > 0) {
+                $updateData['paid_amount'] = 0;
+                $updateData['payment_status'] = 'refunded';
+            } else {
+                $updateData['payment_status'] = 'cancelled';
+            }
         }
+
+        // Capture paid_amount before update zeros it out
+        $refundAmount = $salesOrder->paid_amount;
 
         DB::beginTransaction();
         try {
             $salesOrder->update($updateData);
 
-            if ($isRefund) {
+            // Record refund payment if the cancelled order had prior payments
+            if ($newStatus === 'cancelled' && $refundAmount > 0) {
                 $salesOrder->payments()->create([
                     'tenant_id' => $salesOrder->tenant_id,
                     'amount' => -$refundAmount,

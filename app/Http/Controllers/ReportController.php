@@ -392,6 +392,9 @@ class ReportController extends Controller
         // We filter by order_date
         $query->whereBetween('order_date', [$startDate, $endDate]);
 
+        // Exclude cancelled orders — they should not appear in receivables/recap
+        $query->where('status', '!=', 'cancelled');
+
         if ($request->filled('search')) {
             $query->whereHas('customer', function ($q) use ($request) {
                 $q->where('name', 'ilike', "%{$request->search}%");
@@ -803,6 +806,9 @@ class ReportController extends Controller
             : now()->endOfMonth()->format('Y-m-d');
 
         $query->whereBetween('order_date', [$startDate, $endDate]);
+
+        // Exclude cancelled orders — they should not appear in receivables/recap
+        $query->where('status', '!=', 'cancelled');
 
         if ($request->filled('search')) {
             $query->whereHas('customer', function ($q) use ($request) {

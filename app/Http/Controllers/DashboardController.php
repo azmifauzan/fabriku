@@ -80,6 +80,7 @@ class DashboardController extends Controller
                 ->sum('paid_amount'),
             'outstanding_receivables' => SalesOrder::query()
                 ->where('payment_status', '!=', 'paid')
+                ->where('status', '!=', 'cancelled')
                 ->sum(DB::raw('total_amount - paid_amount')),
         ];
 
@@ -274,6 +275,7 @@ class DashboardController extends Controller
             'inventory_value' => InventoryItem::query()->sum(DB::raw('current_quantity * unit_cost')),
             'outstanding_receivables' => SalesOrder::query()
                 ->where('payment_status', '!=', 'paid')
+                ->where('status', '!=', 'cancelled')
                 ->sum(DB::raw('total_amount - paid_amount')),
         ];
 
@@ -450,6 +452,7 @@ class DashboardController extends Controller
             'total_services' => Service::query()->count(),
             'outstanding_receivables' => SalesOrder::query()
                 ->where('payment_status', '!=', 'paid')
+                ->where('status', '!=', 'cancelled')
                 ->sum(DB::raw('total_amount - paid_amount')),
         ];
 
