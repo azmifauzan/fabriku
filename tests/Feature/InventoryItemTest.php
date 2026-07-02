@@ -63,9 +63,10 @@ it('can create new inventory item', function () {
         'production_order_id' => $this->productionOrder->id,
         'sku' => 'TEST001',
         'name' => 'Test Product',
-        'location_id' => $this->location->id,
+        'locations' => [
+            ['location_id' => $this->location->id, 'quantity' => 95],
+        ],
         'target_quantity' => 100,
-        'stock_quantity' => 95,
         'minimum_stock' => 10,
         'unit_cost' => 25.50,
         'selling_price' => 45.00,
@@ -99,8 +100,7 @@ it('validates required fields when creating item', function () {
     // production_order_id is no longer required (nullable for manual entry/opening balance)
     // product_name is required when no production_order_id is provided
     $response->assertSessionHasErrors([
-        'product_name',
-        'location_id', 'current_quantity', 'unit_cost',
+        'product_name', 'locations', 'unit_cost',
     ]);
 });
 
@@ -115,9 +115,10 @@ it('validates unique SKU within tenant', function () {
         'production_order_id' => $this->productionOrder->id,
         'sku' => 'EXISTING001',
         'name' => 'Test Product',
-        'location_id' => $this->location->id,
+        'locations' => [
+            ['location_id' => $this->location->id, 'quantity' => 100],
+        ],
         'target_quantity' => 100,
-        'stock_quantity' => 100,
         'unit_cost' => 25.50,
     ]);
 
@@ -315,4 +316,93 @@ it('handles stock movements and tracking', function () {
     expect($item->current_quantity)->toBe(70);
     expect($item->reserved_quantity)->toBe(0);
     expect($item->available_stock)->toBe(70);
+});
+
+it('exposes available capacity per location on the create form', function () {
+    $limitedLocation = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($limitedLocation, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create(['location_id' => $limitedLocation->id, 'current_quantity' => 250]);
+
+    $response = $this->get('/inventory/items/create');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn (AssertableInertia $page) => $page->component('Inventory/Items/Create')
+        ->where('locations', function ($locations) use ($limitedLocation) {
+            $match = collect($locations)->firstWhere('id', $limitedLocation->id);
+
+            return $match && $match['available_capacity'] === 50;
+        })
+    );
+});
+
+it('can split stock across multiple racks on create', function () {
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+    $rackB = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $response = $this->post('/inventory/items', [
+        'production_order_id' => $this->productionOrder->id,
+        'name' => 'Mukena Bali Putih',
+        'locations' => [
+            ['location_id' => $rackA->id, 'quantity' => 300],
+            ['location_id' => $rackB->id, 'quantity' => 100],
+        ],
+        'target_quantity' => 400,
+        'unit_cost' => 25.50,
+        'selling_price' => 45.00,
+    ]);
+
+    $response->assertRedirect();
+
+    $this->assertDatabaseHas('inventory_items', [
+        'product_name' => 'Mukena Bali Putih',
+        'location_id' => $rackA->id,
+        'current_quantity' => 300,
+    ]);
+
+    $this->assertDatabaseHas('inventory_items', [
+        'product_name' => 'Mukena Bali Putih',
+        'location_id' => $rackB->id,
+        'current_quantity' => 100,
+    ]);
+
+    expect(InventoryItem::where('product_name', 'Mukena Bali Putih')->count())->toBe(2);
+});
+
+it('rejects a split that exceeds rack capacity and creates no rows', function () {
+    $smallRack = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+    $countBefore = InventoryItem::count();
+
+    $response = $this->post('/inventory/items', [
+        'production_order_id' => $this->productionOrder->id,
+        'name' => 'Mukena Bali Putih',
+        'locations' => [
+            ['location_id' => $smallRack->id, 'quantity' => 400],
+        ],
+        'target_quantity' => 400,
+        'unit_cost' => 25.50,
+        'selling_price' => 45.00,
+    ]);
+
+    $response->assertSessionHasErrors(['locations.0.quantity']);
+    expect(InventoryItem::count())->toBe($countBefore);
+});
+
+it('rejects duplicate rack within one split submission', function () {
+    $response = $this->post('/inventory/items', [
+        'production_order_id' => $this->productionOrder->id,
+        'name' => 'Mukena Bali Putih',
+        'locations' => [
+            ['location_id' => $this->location->id, 'quantity' => 50],
+            ['location_id' => $this->location->id, 'quantity' => 50],
+        ],
+        'target_quantity' => 100,
+        'unit_cost' => 25.50,
+        'selling_price' => 45.00,
+    ]);
+
+    $response->assertSessionHasErrors(['locations.0.location_id', 'locations.1.location_id']);
 });

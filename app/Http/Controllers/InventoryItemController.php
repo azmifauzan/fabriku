@@ -15,6 +15,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class InventoryItemController extends Controller
@@ -128,7 +129,8 @@ class InventoryItemController extends Controller
 
     public function store(StoreInventoryItemRequest $request)
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', 'locations']);
+        $locations = $request->validated('locations');
 
         // Set source_type based on whether production_order_id is present
         if (empty($data['production_order_id'])) {
@@ -153,15 +155,32 @@ class InventoryItemController extends Controller
             );
         }
 
-        $item = InventoryItem::create($data);
+        $locationIds = array_column($locations, 'location_id');
 
-        // Note: Opening balance is now reflected in the initial current_quantity
-        // Stock adjustments will track subsequent changes to stock
-        // The source_type field indicates how this item was initially created
+        $firstItem = DB::transaction(function () use ($data, $locations, $locationIds) {
+            // Lock the involved racks so two concurrent submissions can't both
+            // pass the capacity check and overfill the same rack.
+            InventoryLocation::whereIn('id', $locationIds)->lockForUpdate()->get();
+
+            $createdItems = [];
+            foreach ($locations as $entry) {
+                $createdItems[] = InventoryItem::create([
+                    ...$data,
+                    'location_id' => $entry['location_id'],
+                    'current_quantity' => $entry['quantity'],
+                ]);
+            }
+
+            return $createdItems[0];
+        });
+
+        $message = count($locations) > 1
+            ? 'Inventory item berhasil dibuat di '.count($locations).' lokasi.'
+            : 'Inventory item berhasil dibuat.';
 
         return redirect()
-            ->route('inventory.items.show', $item)
-            ->with('success', 'Inventory item berhasil dibuat.');
+            ->route('inventory.items.show', $firstItem)
+            ->with('success', $message);
     }
 
     public function edit(InventoryItem $item)

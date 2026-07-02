@@ -14,7 +14,6 @@ beforeEach(function () {
     // Create tenant and user for browser tests
     $this->tenant = Tenant::factory()->create([
         'name' => 'Test Konveksi',
-        'slug' => 'test-konveksi',
         'business_category' => 'garment',
     ]);
 
@@ -28,7 +27,6 @@ beforeEach(function () {
     // Create some test materials
     $this->materials = Material::factory()->count(3)->create([
         'tenant_id' => $this->tenant->id,
-        'is_active' => true,
     ]);
 });
 

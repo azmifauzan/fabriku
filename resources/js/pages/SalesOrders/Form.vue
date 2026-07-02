@@ -52,9 +52,7 @@
                     </div>
 
                     <div>
-                        <label for="payment_due_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Tanggal Jatuh Tempo
-                        </label>
+                        <label for="payment_due_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300"> Tanggal Jatuh Tempo </label>
                         <input
                             id="payment_due_date"
                             v-model="form.payment_due_date"
@@ -118,8 +116,13 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"> Status </label>
-                        <div class="flex items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-400">
-                            <span class="inline-flex items-center rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-700 dark:bg-gray-600 dark:text-gray-300">Draft</span>
+                        <div
+                            class="flex items-center rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-400"
+                        >
+                            <span
+                                class="inline-flex items-center rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-700 dark:bg-gray-600 dark:text-gray-300"
+                                >Draft</span
+                            >
                             <span class="ml-2 text-xs text-gray-400 dark:text-gray-500">Status hanya dapat diubah via tombol "Update Status"</span>
                         </div>
                         <input type="hidden" v-model="form.status" />

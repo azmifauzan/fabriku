@@ -7,7 +7,9 @@
                 <p class="text-gray-500" v-if="salesOrder.invoice_number">Invoice #: {{ salesOrder.invoice_number }}</p>
                 <p class="text-gray-500" v-else>Order #: {{ salesOrder.order_number }}</p>
                 <p class="text-gray-500">Date: {{ new Date(salesOrder.order_date).toLocaleDateString('id-ID') }}</p>
-                <p class="text-gray-500" v-if="salesOrder.payment_due_date">Due Date: {{ new Date(salesOrder.payment_due_date).toLocaleDateString('id-ID') }}</p>
+                <p class="text-gray-500" v-if="salesOrder.payment_due_date">
+                    Due Date: {{ new Date(salesOrder.payment_due_date).toLocaleDateString('id-ID') }}
+                </p>
             </div>
             <div class="sm:text-right">
                 <img v-if="settings?.company_logo" :src="settings.company_logo" alt="Company Logo" class="mb-4 h-16 object-contain sm:ml-auto" />

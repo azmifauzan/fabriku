@@ -10,7 +10,13 @@ interface Location {
     id: number;
     name: string;
     code: string;
-    capacity: number;
+    capacity: number | null;
+    available_capacity: number;
+}
+
+interface LocationSplit {
+    location_id: number | null;
+    quantity: number;
 }
 
 interface Pattern {
@@ -70,6 +76,8 @@ const props = defineProps<{
     sourceTypes?: Record<string, string>;
 }>();
 
+const isEditing = !!props.item?.id;
+
 const { isRetailMode, rules } = useBusinessContext();
 const isRetail = computed(() => isRetailMode.value || rules.value.enable_production_flow === false);
 
@@ -90,11 +98,35 @@ const form = useForm({
     inventory_location_id: props.item?.inventory_location_id || null,
     target_quantity: props.item?.target_quantity || 0,
     current_stock: props.item?.current_stock || 0,
+    locations: (isEditing ? [] : [{ location_id: null, quantity: 0 }]) as LocationSplit[],
     unit_cost: props.item?.unit_cost || '0',
     selling_price: props.item?.selling_price || '0',
     notes: props.item?.notes || '',
     image: null as File | null,
 });
+
+const totalSplitQuantity = computed(() => form.locations.reduce((sum, split) => sum + (Number(split.quantity) || 0), 0));
+
+const availableLocationsFor = (index: number) => {
+    const chosenElsewhere = form.locations.filter((_, i) => i !== index).map((split) => split.location_id);
+    return props.locations.filter((loc) => !chosenElsewhere.includes(loc.id) || loc.id === form.locations[index].location_id);
+};
+
+const remainingCapacityLabel = (locationId: number | null) => {
+    const location = props.locations.find((loc) => loc.id === locationId);
+    if (!location) return '';
+    return location.capacity === null ? 'Kapasitas tidak terbatas' : `Sisa kapasitas: ${location.available_capacity}`;
+};
+
+const addLocationSplit = () => {
+    form.locations.push({ location_id: null, quantity: 0 });
+};
+
+const removeLocationSplit = (index: number) => {
+    if (form.locations.length > 1) {
+        form.locations.splice(index, 1);
+    }
+};
 
 // Watch entry type changes to reset related fields
 watch(entryType, (newValue) => {
@@ -176,17 +208,13 @@ const submit = () => {
     if (props.item?.id) {
         form.post(`/inventory/items/${props.item.id}?_method=PUT`, {
             preserveScroll: true,
-            forceFormData: true,
         });
     } else {
         form.post('/inventory/items', {
             preserveScroll: true,
-            forceFormData: true,
         });
     }
 };
-
-const isEditing = !!props.item?.id;
 
 const showCameraModal = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -564,7 +592,7 @@ const addCategory = async () => {
                             </p>
                         </div>
 
-                        <div>
+                        <div v-if="isEditing">
                             <label for="current_stock" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ isManualEntry ? 'Jumlah Stock' : 'Hasil Produksi Aktual' }} <span class="text-red-500">*</span>
                             </label>
@@ -655,7 +683,7 @@ const addCategory = async () => {
                 <div>
                     <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Informasi Tambahan</h3>
                     <div class="space-y-4">
-                        <div>
+                        <div v-if="isEditing">
                             <label for="inventory_location_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Lokasi <span class="text-red-500">*</span>
                             </label>
@@ -673,6 +701,81 @@ const addCategory = async () => {
                             </select>
                             <p v-if="form.errors.inventory_location_id" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.inventory_location_id }}
+                            </p>
+                        </div>
+
+                        <div v-else data-testid="location-splits">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Lokasi & Jumlah Stock <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-2 space-y-3">
+                                <div
+                                    v-for="(split, index) in form.locations"
+                                    :key="index"
+                                    data-testid="location-split-row"
+                                    class="flex flex-col gap-2 rounded-lg border border-gray-200 p-3 sm:flex-row sm:items-start dark:border-gray-700"
+                                >
+                                    <div class="flex-1">
+                                        <select
+                                            :name="`locations[${index}][location_id]`"
+                                            v-model="split.location_id"
+                                            required
+                                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                            :class="{ 'border-red-300': form.errors[`locations.${index}.location_id`] }"
+                                        >
+                                            <option :value="null">Pilih Rak</option>
+                                            <option v-for="location in availableLocationsFor(index)" :key="location.id" :value="location.id">
+                                                {{ location.name }} ({{ location.code }})
+                                            </option>
+                                        </select>
+                                        <p v-if="split.location_id" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            {{ remainingCapacityLabel(split.location_id) }}
+                                        </p>
+                                        <p v-if="form.errors[`locations.${index}.location_id`]" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                            {{ form.errors[`locations.${index}.location_id`] }}
+                                        </p>
+                                    </div>
+                                    <div class="w-full sm:w-40">
+                                        <input
+                                            :name="`locations[${index}][quantity]`"
+                                            v-model.number="split.quantity"
+                                            type="number"
+                                            min="1"
+                                            required
+                                            placeholder="Jumlah"
+                                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                            :class="{ 'border-red-300': form.errors[`locations.${index}.quantity`] }"
+                                        />
+                                        <p v-if="form.errors[`locations.${index}.quantity`]" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                            {{ form.errors[`locations.${index}.quantity`] }}
+                                        </p>
+                                    </div>
+                                    <button
+                                        v-if="form.locations.length > 1"
+                                        type="button"
+                                        data-testid="remove-rack-button"
+                                        @click="removeLocationSplit(index)"
+                                        class="mt-1 self-start rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-700"
+                                        title="Hapus rak ini"
+                                    >
+                                        <X class="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                data-testid="add-rack-button"
+                                @click="addLocationSplit"
+                                class="mt-3 inline-flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm text-indigo-700 transition-colors hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
+                            >
+                                <Plus class="h-4 w-4" />
+                                Tambah Rak
+                            </button>
+                            <p v-if="form.errors.locations" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                                {{ form.errors.locations }}
+                            </p>
+                            <p class="mt-3 text-sm font-medium text-gray-700 dark:text-gray-300" data-testid="total-split-quantity">
+                                Total Stock: {{ totalSplitQuantity }} {{ productionUnit }}
                             </p>
                         </div>
 

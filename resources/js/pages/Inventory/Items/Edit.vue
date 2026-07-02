@@ -7,7 +7,8 @@ interface Location {
     id: number;
     name: string;
     code: string;
-    capacity: number;
+    capacity: number | null;
+    available_capacity: number;
 }
 
 interface Pattern {

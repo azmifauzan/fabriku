@@ -86,7 +86,7 @@
                                     </div>
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Tanggal Jatuh Tempo</dt>
-                                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                        <dd class="mt-1 flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
                                             <span>
                                                 {{
                                                     salesOrder.payment_due_date
@@ -99,7 +99,12 @@
                                                 }}
                                             </span>
                                             <span
-                                                v-if="['unpaid', 'partial'].includes(salesOrder.payment_status) && salesOrder.status !== 'cancelled' && salesOrder.payment_due_date && new Date(salesOrder.payment_due_date) < new Date(new Date().setHours(0,0,0,0))"
+                                                v-if="
+                                                    ['unpaid', 'partial'].includes(salesOrder.payment_status) &&
+                                                    salesOrder.status !== 'cancelled' &&
+                                                    salesOrder.payment_due_date &&
+                                                    new Date(salesOrder.payment_due_date) < new Date(new Date().setHours(0, 0, 0, 0))
+                                                "
                                                 class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600 dark:bg-red-950/40 dark:text-red-400"
                                             >
                                                 Overdue
@@ -377,37 +382,68 @@
                                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Riwayat Pembayaran</h3>
                             </div>
                             <div class="overflow-x-auto">
-                                <table v-if="salesOrder.payments && salesOrder.payments.length > 0" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <table
+                                    v-if="salesOrder.payments && salesOrder.payments.length > 0"
+                                    class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                                >
                                     <thead class="bg-gray-50 dark:bg-gray-700">
                                         <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">Tanggal</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">Metode</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">Catatan</th>
-                                            <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300">Jumlah</th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+                                            >
+                                                Tanggal
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+                                            >
+                                                Metode
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+                                            >
+                                                Catatan
+                                            </th>
+                                            <th
+                                                class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+                                            >
+                                                Jumlah
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                                         <tr v-for="payment in salesOrder.payments" :key="payment.id">
                                             <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                                {{ new Date(payment.paid_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) }}
+                                                {{
+                                                    new Date(payment.paid_at).toLocaleDateString('id-ID', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                    })
+                                                }}
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                                <span class="inline-flex rounded-full bg-gray-100 px-2 text-xs leading-5 font-semibold text-gray-800 dark:bg-gray-700 dark:text-gray-300 uppercase">
+                                                <span
+                                                    class="inline-flex rounded-full bg-gray-100 px-2 text-xs leading-5 font-semibold text-gray-800 uppercase dark:bg-gray-700 dark:text-gray-300"
+                                                >
                                                     {{ payment.method }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                                 {{ payment.note || '-' }}
                                             </td>
-                                            <td class="px-6 py-4 text-right text-sm font-medium" :class="Number(payment.amount) < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'">
-                                                {{ Number(payment.amount) < 0 ? '-' : '' }}Rp {{ Math.abs(Number(payment.amount)).toLocaleString('id-ID') }}
+                                            <td
+                                                class="px-6 py-4 text-right text-sm font-medium"
+                                                :class="
+                                                    Number(payment.amount) < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'
+                                                "
+                                            >
+                                                {{ Number(payment.amount) < 0 ? '-' : '' }}Rp
+                                                {{ Math.abs(Number(payment.amount)).toLocaleString('id-ID') }}
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
-                                <div v-else class="p-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                                    Belum ada riwayat pembayaran.
-                                </div>
+                                <div v-else class="p-6 text-center text-sm text-gray-500 dark:text-gray-400">Belum ada riwayat pembayaran.</div>
                             </div>
                         </div>
                     </div>
