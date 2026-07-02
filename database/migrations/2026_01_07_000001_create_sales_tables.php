@@ -27,7 +27,7 @@ return new class extends Migration
             $table->decimal('shipping_cost', 15, 2)->default(0);
             $table->decimal('total_amount', 15, 2);
             $table->string('payment_method')->nullable();
-            $table->enum('payment_status', ['unpaid', 'pending', 'partial', 'paid', 'refunded'])->default('unpaid');
+            $table->enum('payment_status', ['unpaid', 'pending', 'partial', 'paid', 'refunded', 'cancelled'])->default('unpaid');
             $table->decimal('paid_amount', 15, 2)->default(0);
             $table->date('payment_due_date')->nullable();
             $table->date('shipped_date')->nullable();
