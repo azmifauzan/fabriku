@@ -432,3 +432,264 @@ it('auto-generates distinct SKUs per rack even when an explicit SKU is submitted
     expect($skus->unique())->toHaveCount(2);
     expect($skus)->not->toContain('SHARED001');
 });
+
+it('can transfer stock to another location', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'current_quantity' => 100,
+            'reserved_quantity' => 0,
+        ]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+    $rackB = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $response = $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [
+            ['location_id' => $rackA->id, 'quantity' => 40],
+            ['location_id' => $rackB->id, 'quantity' => 30],
+        ],
+        'reason' => 'Split stock',
+        'notes' => 'Test transfer',
+    ]);
+
+    $response->assertRedirect();
+
+    $item->refresh();
+    expect($item->current_quantity)->toBe(30);
+
+    $this->assertDatabaseHas('inventory_items', [
+        'product_name' => $item->product_name,
+        'location_id' => $rackA->id,
+        'current_quantity' => 40,
+    ]);
+
+    $this->assertDatabaseHas('inventory_items', [
+        'product_name' => $item->product_name,
+        'location_id' => $rackB->id,
+        'current_quantity' => 30,
+    ]);
+});
+
+it('soft deletes the source item when all available stock is transferred and reserved is zero', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'current_quantity' => 100,
+            'reserved_quantity' => 0,
+        ]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $response = $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [
+            ['location_id' => $rackA->id, 'quantity' => 100],
+        ],
+        'reason' => 'Move all',
+    ]);
+
+    $response->assertRedirect();
+    $this->assertSoftDeleted('inventory_items', ['id' => $item->id]);
+});
+
+it('keeps the source item when all available stock is transferred but reserved is greater than zero', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'current_quantity' => 100,
+            'reserved_quantity' => 20,
+        ]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $response = $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [
+            ['location_id' => $rackA->id, 'quantity' => 80],
+        ],
+        'reason' => 'Move available',
+    ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('inventory_items', [
+        'id' => $item->id,
+        'current_quantity' => 20,
+        'reserved_quantity' => 20,
+        'deleted_at' => null,
+    ]);
+});
+
+it('rejects transfer if total exceeds available stock', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'current_quantity' => 100,
+            'reserved_quantity' => 20,
+        ]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $response = $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [
+            ['location_id' => $rackA->id, 'quantity' => 90],
+        ],
+        'reason' => 'Move more than available',
+    ]);
+
+    $response->assertSessionHasErrors('splits');
+
+    $item->refresh();
+    expect($item->current_quantity)->toBe(100);
+});
+
+it('rejects transfer if destination rack capacity is insufficient', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'current_quantity' => 100,
+            'reserved_quantity' => 0,
+        ]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 50]);
+
+    $response = $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [
+            ['location_id' => $rackA->id, 'quantity' => 60],
+        ],
+        'reason' => 'Move to small rack',
+    ]);
+
+    $response->assertSessionHasErrors('splits.0.quantity');
+
+    $item->refresh();
+    expect($item->current_quantity)->toBe(100);
+});
+
+it('rejects transfer if duplicate destination rack', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'current_quantity' => 100,
+            'reserved_quantity' => 0,
+        ]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $response = $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [
+            ['location_id' => $rackA->id, 'quantity' => 40],
+            ['location_id' => $rackA->id, 'quantity' => 20],
+        ],
+        'reason' => 'Move duplicate',
+    ]);
+
+    $response->assertSessionHasErrors(['splits.0.location_id', 'splits.1.location_id']);
+});
+
+it('rejects transfer to the same location', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'current_quantity' => 100,
+            'reserved_quantity' => 0,
+        ]);
+
+    $response = $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [
+            ['location_id' => $item->location_id, 'quantity' => 40],
+        ],
+        'reason' => 'Move same',
+    ]);
+
+    $response->assertSessionHasErrors('splits.0.location_id');
+});
+
+it('cannot transfer another tenant item', function () {
+    $otherTenant = Tenant::factory()->create();
+    $otherLocation = InventoryLocation::factory()->for($otherTenant)->create();
+    $otherItem = InventoryItem::factory()
+        ->for($otherTenant)
+        ->for($otherLocation, 'inventoryLocation')
+        ->create(['current_quantity' => 100, 'reserved_quantity' => 0]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $response = $this->post("/inventory/items/{$otherItem->id}/transfer", [
+        'splits' => [
+            ['location_id' => $rackA->id, 'quantity' => 10],
+        ],
+        'reason' => 'Cross tenant attempt',
+    ]);
+
+    $response->assertNotFound();
+});
+
+it('rejects transfer to another tenant destination location', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create(['current_quantity' => 100, 'reserved_quantity' => 0]);
+
+    $otherTenant = Tenant::factory()->create();
+    $otherLocation = InventoryLocation::factory()->for($otherTenant)->create(['capacity' => 300]);
+
+    $response = $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [
+            ['location_id' => $otherLocation->id, 'quantity' => 10],
+        ],
+        'reason' => 'Cross tenant destination',
+    ]);
+
+    $response->assertSessionHasErrors('splits.0.location_id');
+
+    $item->refresh();
+    expect($item->current_quantity)->toBe(100);
+});
+
+it('creates stock adjustment records for transfer', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'current_quantity' => 100,
+            'reserved_quantity' => 0,
+        ]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $response = $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [
+            ['location_id' => $rackA->id, 'quantity' => 40],
+        ],
+        'reason' => 'Transfer stock',
+    ]);
+
+    $this->assertDatabaseHas('stock_adjustments', [
+        'inventory_item_id' => $item->id,
+        'adjustment_type' => 'transfer',
+        'adjustment_quantity' => -40,
+    ]);
+
+    $newItem = InventoryItem::where('location_id', $rackA->id)->first();
+
+    $this->assertDatabaseHas('stock_adjustments', [
+        'inventory_item_id' => $newItem->id,
+        'adjustment_type' => 'transfer',
+        'adjustment_quantity' => 40,
+    ]);
+});

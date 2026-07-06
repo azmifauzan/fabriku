@@ -4,6 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { History, RefreshCw } from 'lucide-vue-next';
 import { ref } from 'vue';
 import AdjustStockModal from './AdjustStockModal.vue';
+import TransferStockModal from './TransferStockModal.vue';
 
 interface Pattern {
     id: number;
@@ -32,6 +33,8 @@ interface InventoryLocation {
     id: number;
     name: string;
     code: string;
+    capacity?: number | null;
+    available_capacity?: number;
 }
 
 interface ItemCategory {
@@ -63,6 +66,7 @@ interface Item {
 interface Props {
     item: Item;
     adjustmentTypes?: Record<string, string>;
+    locations?: InventoryLocation[];
 }
 
 const props = defineProps<Props>();
@@ -78,6 +82,7 @@ const adjustmentTypes = props.adjustmentTypes || {
 };
 
 const showAdjustModal = ref(false);
+const showTransferModal = ref(false);
 
 const statusBadgeClass = (status: string) => {
     const classes: Record<string, string> = {
@@ -149,6 +154,13 @@ const productionUnit = () => {
                             <History class="h-4 w-4" />
                             Riwayat
                         </Link>
+                        <button
+                            @click="showTransferModal = true"
+                            class="inline-flex items-center gap-2 rounded-lg border border-blue-300 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 shadow-sm transition-all hover:bg-blue-100 sm:px-4 sm:py-2.5 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                            <RefreshCw class="h-4 w-4" />
+                            Pindah/Split Stock
+                        </button>
                         <button
                             @click="showAdjustModal = true"
                             class="inline-flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 shadow-sm transition-all hover:bg-indigo-100 sm:px-4 sm:py-2.5 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
@@ -331,5 +343,8 @@ const productionUnit = () => {
 
         <!-- Adjust Stock Modal -->
         <AdjustStockModal :show="showAdjustModal" :item="item" :adjustment-types="adjustmentTypes" @close="showAdjustModal = false" />
+
+        <!-- Transfer Stock Modal -->
+        <TransferStockModal :show="showTransferModal" :item="item" :locations="locations" @close="showTransferModal = false" />
     </AppLayout>
 </template>
