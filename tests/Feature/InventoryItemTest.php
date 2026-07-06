@@ -406,3 +406,29 @@ it('rejects duplicate rack within one split submission', function () {
 
     $response->assertSessionHasErrors(['locations.0.location_id', 'locations.1.location_id']);
 });
+
+it('auto-generates distinct SKUs per rack even when an explicit SKU is submitted for a split', function () {
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+    $rackB = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $response = $this->post('/inventory/items', [
+        'production_order_id' => $this->productionOrder->id,
+        'sku' => 'SHARED001',
+        'name' => 'Mukena Bali Putih',
+        'locations' => [
+            ['location_id' => $rackA->id, 'quantity' => 200],
+            ['location_id' => $rackB->id, 'quantity' => 100],
+        ],
+        'target_quantity' => 300,
+        'unit_cost' => 25.50,
+        'selling_price' => 45.00,
+    ]);
+
+    $response->assertRedirect();
+
+    $skus = InventoryItem::where('product_name', 'Mukena Bali Putih')->pluck('sku');
+
+    expect($skus)->toHaveCount(2);
+    expect($skus->unique())->toHaveCount(2);
+    expect($skus)->not->toContain('SHARED001');
+});

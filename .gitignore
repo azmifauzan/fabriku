@@ -27,3 +27,4 @@ yarn-error.log
 /.zed
 /.antigravitycli
 /docs/linkedin-*.md
+/tests/Browser/Screenshots
