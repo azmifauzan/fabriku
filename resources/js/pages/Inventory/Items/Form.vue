@@ -118,6 +118,18 @@ const remainingCapacityLabel = (locationId: number | null) => {
     return location.capacity === null ? 'Kapasitas tidak terbatas' : `Sisa kapasitas: ${location.available_capacity}`;
 };
 
+const capacityErrorFor = (split: LocationSplit) => {
+    if (!split.location_id || !split.quantity) return '';
+    const location = props.locations.find((loc) => loc.id === split.location_id);
+    if (!location || location.capacity === null) return '';
+    if (split.quantity > location.available_capacity) {
+        return `Rak ${location.name} tidak cukup kapasitas (sisa: ${location.available_capacity}).`;
+    }
+    return '';
+};
+
+const hasCapacityErrors = computed(() => form.locations.some((split) => capacityErrorFor(split) !== ''));
+
 const addLocationSplit = () => {
     form.locations.push({ location_id: null, quantity: 0 });
 };
@@ -205,6 +217,10 @@ watch([() => form.production_order_id], () => {
 });
 
 const submit = () => {
+    if (!isEditing && hasCapacityErrors.value) {
+        return;
+    }
+
     if (props.item?.id) {
         form.post(`/inventory/items/${props.item.id}?_method=PUT`, {
             preserveScroll: true,
@@ -744,10 +760,13 @@ const addCategory = async () => {
                                             required
                                             placeholder="Jumlah"
                                             class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                            :class="{ 'border-red-300': form.errors[`locations.${index}.quantity`] }"
+                                            :class="{ 'border-red-300': form.errors[`locations.${index}.quantity`] || capacityErrorFor(split) }"
                                         />
                                         <p v-if="form.errors[`locations.${index}.quantity`]" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                             {{ form.errors[`locations.${index}.quantity`] }}
+                                        </p>
+                                        <p v-else-if="capacityErrorFor(split)" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                            {{ capacityErrorFor(split) }}
                                         </p>
                                     </div>
                                     <button

@@ -157,6 +157,12 @@ class InventoryItemController extends Controller
 
         $locationIds = array_column($locations, 'location_id');
 
+        // An explicit SKU is only meaningful for a single row - splitting across
+        // racks must not insert the same SKU twice (unique per tenant).
+        if (count($locations) > 1) {
+            unset($data['sku']);
+        }
+
         $firstItem = DB::transaction(function () use ($data, $locations, $locationIds) {
             // Lock the involved racks so two concurrent submissions can't both
             // pass the capacity check and overfill the same rack.
