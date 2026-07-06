@@ -64,20 +64,51 @@ class InventoryService
     }
 
     /**
-     * Move item to different location
+     * Transfer stock to multiple locations
+     *
+     * @param  array<int, array{location_id:int, quantity:int}>  $splits
      */
-    public function moveItem(InventoryItem $item, InventoryLocation $newLocation, ?string $reason = null): bool
+    public function transferStock(InventoryItem $item, array $splits, string $reason, ?string $notes = null): array
     {
-        // Check if new location has capacity
-        if ($newLocation->capacity && $newLocation->available_capacity < $item->current_quantity) {
-            throw new \Exception('Location does not have sufficient capacity.');
-        }
+        return DB::transaction(function () use ($item, $splits, $reason, $notes) {
+            $locationIds = array_column($splits, 'location_id');
+            InventoryLocation::whereIn('id', $locationIds)->lockForUpdate()->get();
+            $item = InventoryItem::where('id', $item->id)->lockForUpdate()->first();
 
-        DB::transaction(function () use ($item, $newLocation) {
-            $item->update(['location_id' => $newLocation->id]);
+            $totalQuantity = array_sum(array_column($splits, 'quantity'));
+
+            $this->adjustStock($item, 'subtract', $totalQuantity, StockAdjustment::TYPE_TRANSFER, $reason, $notes);
+
+            $createdItems = [];
+            foreach ($splits as $split) {
+                $newItem = InventoryItem::create([
+                    'tenant_id' => $item->tenant_id,
+                    'product_name' => $item->product_name,
+                    'unit_cost' => $item->unit_cost,
+                    'selling_price' => $item->selling_price,
+                    'category_id' => $item->category_id,
+                    'production_order_id' => $item->production_order_id,
+                    'source_type' => $item->source_type,
+                    'location_id' => $split['location_id'],
+                    'current_quantity' => 0,
+                    'target_quantity' => $item->target_quantity,
+                    'minimum_stock' => $item->minimum_stock,
+                    'quality_grade' => $item->quality_grade,
+                    'status' => $item->status,
+                    'expired_date' => $item->expired_date,
+                    'notes' => $item->notes,
+                ]);
+
+                $this->adjustStock($newItem, 'add', $split['quantity'], StockAdjustment::TYPE_TRANSFER, $reason, $notes);
+                $createdItems[] = $newItem;
+            }
+
+            if ($item->fresh()->current_quantity === 0) {
+                $item->delete();
+            }
+
+            return $createdItems;
         });
-
-        return true;
     }
 
     /**

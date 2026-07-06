@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreInventoryItemRequest;
+use App\Http\Requests\TransferInventoryItemRequest;
 use App\Http\Requests\UpdateInventoryItemRequest;
 use App\Models\InventoryItem;
 use App\Models\InventoryItemCategory;
@@ -102,9 +103,15 @@ class InventoryItemController extends Controller
             'category',
         ]);
 
+        $locations = InventoryLocation::active()->orderBy('name')->get(['id', 'name', 'code', 'capacity']);
+        $locations->each(function (InventoryLocation $location) {
+            $location->available_capacity = $location->available_capacity;
+        });
+
         return Inertia::render('Inventory/Items/Show', [
             'item' => $item,
             'adjustmentTypes' => StockAdjustment::getAdjustmentTypes(),
+            'locations' => $locations,
         ]);
     }
 
@@ -319,21 +326,16 @@ class InventoryItemController extends Controller
         return back()->with('success', 'Reserved stock berhasil dilepaskan.');
     }
 
-    // Move item to different location
-    public function move(Request $request, InventoryItem $inventoryItem)
+    public function transfer(TransferInventoryItemRequest $request, InventoryItem $item)
     {
-        $request->validate([
-            'location_id' => 'required|exists:inventory_locations,id',
-            'reason' => 'nullable|string|max:255',
-        ]);
+        $created = $this->inventoryService->transferStock(
+            $item,
+            $request->validated('splits'),
+            $request->validated('reason'),
+            $request->validated('notes'),
+        );
 
-        $oldLocation = $inventoryItem->inventoryLocation;
-        $inventoryItem->update(['location_id' => $request->location_id]);
-
-        // Log location change
-        // StockMovement::create([...]);
-
-        return back()->with('success', 'Item berhasil dipindahkan.');
+        return back()->with('success', 'Stock berhasil dipindah ke '.count($created).' lokasi.');
     }
 
     // QR Code features

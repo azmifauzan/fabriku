@@ -29,6 +29,8 @@ class StockAdjustment extends Model
 
     public const TYPE_PRODUCTION_ENTRY = 'production_entry';
 
+    public const TYPE_TRANSFER = 'transfer';
+
     protected $fillable = [
         'tenant_id',
         'inventory_item_id',
@@ -116,6 +118,7 @@ class StockAdjustment extends Model
             self::TYPE_RETURN => 'Retur',
             self::TYPE_PURCHASE => 'Pembelian',
             self::TYPE_PRODUCTION_ENTRY => 'Hasil Produksi',
+            self::TYPE_TRANSFER => 'Transfer Lokasi',
             default => ucfirst($this->adjustment_type),
         };
     }
@@ -131,6 +134,7 @@ class StockAdjustment extends Model
             self::TYPE_RETURN => 'Retur',
             self::TYPE_PURCHASE => 'Pembelian',
             self::TYPE_PRODUCTION_ENTRY => 'Hasil Produksi',
+            self::TYPE_TRANSFER => 'Transfer Lokasi',
         ];
     }
 }

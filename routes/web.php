@@ -207,6 +207,7 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
 
         // Stock adjustment routes (must be before resource to avoid conflicts)
         Route::post('items/{item}/adjust', [InventoryItemController::class, 'adjustStock'])->name('items.adjust');
+        Route::post('items/{item}/transfer', [InventoryItemController::class, 'transfer'])->name('items.transfer');
         Route::get('items/{item}/adjustments', [InventoryItemController::class, 'adjustmentHistory'])->name('items.adjustments');
 
         Route::resource('items', InventoryItemController::class);
