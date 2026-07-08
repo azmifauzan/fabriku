@@ -50,6 +50,8 @@ class TransferInventoryItemRequest extends FormRequest
                 );
             }
 
+            $locations = InventoryLocation::whereIn('id', array_column($splits, 'location_id'))->get()->keyBy('id');
+
             foreach ($splits as $index => $entry) {
                 $locationId = $entry['location_id'] ?? null;
                 $quantity = (int) ($entry['quantity'] ?? 0);
@@ -58,7 +60,7 @@ class TransferInventoryItemRequest extends FormRequest
                     continue;
                 }
 
-                $location = InventoryLocation::find($locationId);
+                $location = $locations->get($locationId);
 
                 if (! $location || $location->capacity === null) {
                     continue;

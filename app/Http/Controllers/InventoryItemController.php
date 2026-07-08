@@ -328,12 +328,16 @@ class InventoryItemController extends Controller
 
     public function transfer(TransferInventoryItemRequest $request, InventoryItem $item)
     {
-        $created = $this->inventoryService->transferStock(
-            $item,
-            $request->validated('splits'),
-            $request->validated('reason'),
-            $request->validated('notes'),
-        );
+        try {
+            $created = $this->inventoryService->transferStock(
+                $item,
+                $request->validated('splits'),
+                $request->validated('reason'),
+                $request->validated('notes'),
+            );
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return back()->with('success', 'Stock berhasil dipindah ke '.count($created).' lokasi.');
     }

@@ -72,10 +72,30 @@ class InventoryService
     {
         return DB::transaction(function () use ($item, $splits, $reason, $notes) {
             $locationIds = array_column($splits, 'location_id');
-            InventoryLocation::whereIn('id', $locationIds)->lockForUpdate()->get();
+            $locations = InventoryLocation::whereIn('id', $locationIds)->lockForUpdate()->get()->keyBy('id');
+
             $item = InventoryItem::where('id', $item->id)->lockForUpdate()->first();
 
+            if (! $item) {
+                throw new \Exception('Item tidak ditemukan atau stoknya sudah dipindahkan sepenuhnya.');
+            }
+
             $totalQuantity = array_sum(array_column($splits, 'quantity'));
+
+            // Re-validate under the lock: the FormRequest already checked this,
+            // but that check ran before the transaction/lock, so a concurrent
+            // reservation or transfer landing in between must be re-checked here.
+            if ($totalQuantity > $item->available_stock) {
+                throw new \Exception("Total yang dipindah ({$totalQuantity}) melebihi stock tersedia ({$item->available_stock}).");
+            }
+
+            foreach ($splits as $split) {
+                $location = $locations->get($split['location_id']);
+
+                if ($location && $location->capacity !== null && $split['quantity'] > $location->available_capacity) {
+                    throw new \Exception("Rak {$location->name} tidak cukup kapasitas (sisa: {$location->available_capacity}).");
+                }
+            }
 
             $this->adjustStock($item, 'subtract', $totalQuantity, StockAdjustment::TYPE_TRANSFER, $reason, $notes);
 
@@ -84,6 +104,7 @@ class InventoryService
                 $newItem = InventoryItem::create([
                     'tenant_id' => $item->tenant_id,
                     'product_name' => $item->product_name,
+                    'product_code' => $item->product_code,
                     'unit_cost' => $item->unit_cost,
                     'selling_price' => $item->selling_price,
                     'category_id' => $item->category_id,
@@ -97,13 +118,14 @@ class InventoryService
                     'status' => $item->status,
                     'expired_date' => $item->expired_date,
                     'notes' => $item->notes,
+                    'image_path' => $item->image_path,
                 ]);
 
                 $this->adjustStock($newItem, 'add', $split['quantity'], StockAdjustment::TYPE_TRANSFER, $reason, $notes);
                 $createdItems[] = $newItem;
             }
 
-            if ($item->fresh()->current_quantity === 0) {
+            if ($item->current_quantity === 0 && $item->reserved_quantity === 0) {
                 $item->delete();
             }
 
