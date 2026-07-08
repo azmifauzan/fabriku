@@ -7,6 +7,7 @@ use App\Models\PreparationOrder;
 use App\Models\ProductionOrder;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\InventoryService;
 use Inertia\Testing\AssertableInertia;
 
 beforeEach(function () {
@@ -692,4 +693,132 @@ it('creates stock adjustment records for transfer', function () {
         'adjustment_type' => 'transfer',
         'adjustment_quantity' => 40,
     ]);
+});
+
+it('copies product_code and image_path to split items on transfer', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'current_quantity' => 100,
+            'reserved_quantity' => 0,
+            'product_code' => 'PC-001',
+            'image_path' => 'tenants/1/inventory/photo.jpg',
+        ]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [
+            ['location_id' => $rackA->id, 'quantity' => 40],
+        ],
+        'reason' => 'Test copy fields',
+    ]);
+
+    $this->assertDatabaseHas('inventory_items', [
+        'location_id' => $rackA->id,
+        'product_code' => 'PC-001',
+        'image_path' => 'tenants/1/inventory/photo.jpg',
+    ]);
+});
+
+it('rejects a transfer at the service layer if reserved stock grew after the item was loaded (TOCTOU)', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'current_quantity' => 10,
+            'reserved_quantity' => 4,
+        ]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    // Simulates a request that validated against a stale available_stock
+    // (e.g. before a concurrent sales-order reservation landed) reaching
+    // the service directly with a total that now exceeds available_stock.
+    expect(fn () => app(InventoryService::class)->transferStock(
+        $item,
+        [['location_id' => $rackA->id, 'quantity' => 10]],
+        'Race condition attempt',
+    ))->toThrow(Exception::class);
+
+    $item->refresh();
+    expect($item->current_quantity)->toBe(10);
+    expect(InventoryItem::where('location_id', $rackA->id)->count())->toBe(0);
+});
+
+it('rejects a transfer at the service layer if the destination rack filled up after validation (TOCTOU)', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'current_quantity' => 100,
+            'reserved_quantity' => 0,
+        ]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 50]);
+
+    InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($rackA, 'inventoryLocation')
+        ->create(['current_quantity' => 45, 'reserved_quantity' => 0]);
+
+    // Rack A now has only 5 available capacity, but the caller passes 10
+    // as if it had validated against a stale, larger available_capacity.
+    expect(fn () => app(InventoryService::class)->transferStock(
+        $item,
+        [['location_id' => $rackA->id, 'quantity' => 10]],
+        'Race condition attempt',
+    ))->toThrow(Exception::class);
+
+    $item->refresh();
+    expect($item->current_quantity)->toBe(100);
+    expect(InventoryItem::where('location_id', $rackA->id)->count())->toBe(1);
+});
+
+it('throws a friendly error instead of a fatal null deref when the item is gone by the time the transfer lock is acquired', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create(['current_quantity' => 100, 'reserved_quantity' => 0]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    // Simulates a concurrent transfer that already fully drained and
+    // soft-deleted this item before this call acquires its lock.
+    $item->delete();
+
+    expect(fn () => app(InventoryService::class)->transferStock(
+        $item,
+        [['location_id' => $rackA->id, 'quantity' => 10]],
+        'Race condition attempt',
+    ))->toThrow(Exception::class);
+});
+
+it('flashes a friendly error instead of a 500 when the transfer service throws', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create(['current_quantity' => 100, 'reserved_quantity' => 0]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $this->mock(InventoryService::class, function ($mock) {
+        $mock->shouldReceive('transferStock')->once()->andThrow(new Exception('Stok tidak cukup untuk dipindah.'));
+    });
+
+    $response = $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [
+            ['location_id' => $rackA->id, 'quantity' => 10],
+        ],
+        'reason' => 'Test controller error handling',
+    ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error', 'Stok tidak cukup untuk dipindah.');
 });
