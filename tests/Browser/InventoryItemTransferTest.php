@@ -80,3 +80,26 @@ it('transfers stock across two racks from the item show page', function () {
         'current_quantity' => 30,
     ]);
 });
+
+it('transfers stock across racks from the item edit page', function () {
+    actingAs($this->user);
+
+    $page = visit("/inventory/items/{$this->item->id}/edit");
+
+    $page->assertSee('Split ke Rak Lain')
+        ->click('Split ke Rak Lain')
+        ->assertSee('Lokasi Tujuan')
+        ->select('[name="splits[0][location_id]"]', (string) $this->rackA->id)
+        ->fill('[name="splits[0][quantity]"]', '40')
+        ->fill('#reason', 'Test transfer from edit page')
+        ->click('button[type="submit"]')
+        ->assertNoJavascriptErrors();
+
+    expect(InventoryItem::find($this->item->id)->current_quantity)->toBe(60);
+
+    $this->assertDatabaseHas('inventory_items', [
+        'product_name' => 'Mukena Bali Putih',
+        'location_id' => $this->rackA->id,
+        'current_quantity' => 40,
+    ]);
+});

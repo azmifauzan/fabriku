@@ -1,6 +1,6 @@
 # Status Saat Ini
 
-Dokumen ini merangkum kondisi aktual codebase Fabriku per Juni 2026. Diturunkan dari pembacaan langsung kode, migrasi, dan routing — bukan dari roadmap atau rencana.
+Dokumen ini merangkum kondisi aktual codebase Fabriku per Juli 2026. Diturunkan dari pembacaan langsung kode, migrasi, dan routing — bukan dari roadmap atau rencana.
 
 ## Ringkasan Eksekusi
 
@@ -11,7 +11,7 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Juni 2026. Diturunkan 
 - Storage upload: disk dikonfigurasi via `config('filesystems.uploads_disk')` (env `UPLOADS_DISK`, default `fabriku_s3`). URL temporary di-cache 25 menit (env `UPLOAD_URL_TTL`).
 - AI: integrasi ke OpenAI Chat Completions API tersedia di backend (`App\Services\Assistant\OpenAIService`) namun **tidak aktif di UI** (ChatWidget disembunyikan).
 - Telegram: bot dua arah — webhook penerimaan + push notifikasi keluar.
-- Tests: 30+ feature test files (Pest 4), 1 browser test, 0 unit test meaningful.
+- Tests: 30+ feature test files (Pest 4), 3 browser test files, 0 unit test meaningful.
 
 ## Modul Aktif
 
@@ -32,7 +32,7 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Juni 2026. Diturunkan 
 | Contractors | aktif | CRUD, dipakai di production order eksternal |
 | Production orders | aktif | status: draft/pending/in_progress/completed; actions: send/start/mark-complete |
 | Inventory locations | aktif | QR code generate + print |
-| Inventory items | aktif | sumber: production / opening_balance / purchase / return; SKU auto-generate per kategori |
+| Inventory items | aktif | sumber: production / opening_balance / purchase / return; SKU auto-generate per kategori; **multi-rack split**: create/edit form bisa alokasi stock ke beberapa rak sekaligus (`locations[]`, N `inventory_items` row terpisah per rak, tanpa pivot table); split stock item existing lewat "Pindah/Split Stock" (`POST items/{item}/transfer` → `InventoryService::transferStock()`, hanya `available_stock` yang bisa dipindah, `reserved_quantity` tetap di row asal, row asal soft-delete bila kosong total) — tombol tersedia di Show page dan di Edit form (`Form.vue`, embed `TransferStockModal`) |
 | Inventory item categories | aktif | klasifikasi item tambahan |
 | Stock adjustments | aktif | tipe: opening_balance, correction, damage, lost, found, dst |
 | Customers | aktif | CRUD |
