@@ -42,6 +42,7 @@ interface Item {
     inventory_location_id: number;
     target_quantity: number;
     current_stock: number;
+    reserved_stock: number;
     unit_cost: string;
     selling_price: string;
     source_type?: string;

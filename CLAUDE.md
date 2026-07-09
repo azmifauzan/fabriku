@@ -93,6 +93,7 @@ Domain logic in `app/Services/`:
 - **`Storage::disk('fabriku_s3')` is hardcoded** in `InventoryItem`, `Material`, and several controllers. Tests fail without this disk configured.
 - **`OpenAIService` default model is `gpt-5-nano`** (not a valid OpenAI ID). Set `OPENAI_MODEL` in `.env` or change the default in `config/services.php` before relying on AI features.
 - **`demo:reset` is guarded** by `app()->environment(['local', 'staging'])` in `routes/console.php` — safe to run scheduler in production.
+- **Inventory item multi-rack split**: create/edit forms and the "Pindah/Split Stock" flow (`TransferStockModal.vue` → `POST items/{item}/transfer` → `InventoryService::transferStock()`) each rack becomes its own `inventory_items` row (own SKU) — there is no pivot table linking split rows. Only `available_stock` (`current_quantity - reserved_quantity`) can be transferred out of an existing item; `reserved_quantity` stays on the source row until its sales order resolves. A form that embeds a sub-modal doing its own Inertia post (like `TransferStockModal` inside `Form.vue`'s edit mode) must `watch()` the reloaded `item` prop and resync any `useForm()` fields seeded from it — `useForm()` only snapshots props once at setup, so a same-page Inertia reload silently leaves stale values in already-initialized form fields.
 
 ## Database Column Conventions (actual schema)
 

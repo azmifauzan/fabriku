@@ -5,6 +5,7 @@ import { Link, useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 import { Camera, FileText, Package, Plus, RotateCcw, Tag, Truck, Upload, X } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
+import TransferStockModal from './TransferStockModal.vue';
 
 interface Location {
     id: number;
@@ -59,6 +60,7 @@ interface Item {
     inventory_location_id: number;
     target_quantity: number;
     current_stock: number;
+    reserved_stock: number;
     unit_cost: string;
     selling_price: string;
     production_date?: string;
@@ -106,6 +108,17 @@ const form = useForm({
 });
 
 const totalSplitQuantity = computed(() => form.locations.reduce((sum, split) => sum + (Number(split.quantity) || 0), 0));
+
+// Keep the form's stock/location fields in sync after a "Split ke Rak Lain"
+// transfer reloads `item` with fresh values from the server - otherwise
+// submitting Update Item would silently overwrite the post-transfer quantity.
+watch(
+    () => [props.item?.current_stock, props.item?.inventory_location_id],
+    ([newStock, newLocationId]) => {
+        if (newStock !== undefined) form.current_stock = newStock as number;
+        if (newLocationId !== undefined) form.inventory_location_id = newLocationId as number;
+    },
+);
 
 const availableLocationsFor = (index: number) => {
     const chosenElsewhere = form.locations.filter((_, i) => i !== index).map((split) => split.location_id);
@@ -231,6 +244,8 @@ const submit = () => {
         });
     }
 };
+
+const showTransferModal = ref(false);
 
 const showCameraModal = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -718,6 +733,18 @@ const addCategory = async () => {
                             <p v-if="form.errors.inventory_location_id" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.inventory_location_id }}
                             </p>
+                            <button
+                                type="button"
+                                data-testid="open-transfer-modal-button"
+                                @click="showTransferModal = true"
+                                class="mt-2 inline-flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm text-indigo-700 transition-colors hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
+                            >
+                                <Plus class="h-4 w-4" />
+                                Split ke Rak Lain
+                            </button>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Pindahkan sebagian stock tersedia item ini ke rak lain tanpa mengubah field di atas.
+                            </p>
                         </div>
 
                         <div v-else data-testid="location-splits">
@@ -886,6 +913,22 @@ const addCategory = async () => {
                 </div>
             </form>
         </div>
+
+        <!-- Transfer/Split Stock Modal -->
+        <TransferStockModal
+            v-if="isEditing && item"
+            :show="showTransferModal"
+            :item="{
+                id: item.id!,
+                sku: item.sku,
+                name: item.name,
+                current_stock: item.current_stock,
+                reserved_stock: item.reserved_stock,
+                inventory_location: { id: item.inventory_location_id },
+            }"
+            :locations="locations"
+            @close="showTransferModal = false"
+        />
 
         <!-- Camera Capture Modal -->
         <CameraCaptureModal :show="showCameraModal" @close="showCameraModal = false" @capture="handleCameraCapture" />
