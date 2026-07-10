@@ -17,7 +17,8 @@ class InventoryLocationController extends Controller
     public function index(Request $request)
     {
         $query = InventoryLocation::query()
-            ->withCount('inventoryItems');
+            ->withCount('inventoryItems')
+            ->withSum('inventoryItems as current_capacity', 'current_quantity');
 
         // Search functionality
         if ($search = $request->get('search')) {
@@ -37,6 +38,10 @@ class InventoryLocationController extends Controller
         // Map is_active boolean to status string for frontend
         $locations->getCollection()->transform(function ($location) {
             $location->status = $location->is_active ? 'active' : 'inactive';
+            $location->current_capacity = (int) ($location->current_capacity ?? 0);
+            $location->available_capacity = $location->capacity
+                ? max(0, $location->capacity - $location->current_capacity)
+                : PHP_INT_MAX;
 
             return $location;
         });
