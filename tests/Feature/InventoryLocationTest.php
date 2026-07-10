@@ -27,6 +27,31 @@ it('can list inventory locations', function () {
     );
 });
 
+it('includes used capacity on inventory location list', function () {
+    $location = InventoryLocation::factory()
+        ->for($this->tenant)
+        ->create(['capacity' => 1000]);
+
+    InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($location, 'inventoryLocation')
+        ->create(['current_quantity' => 200]);
+
+    InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($location, 'inventoryLocation')
+        ->create(['current_quantity' => 300]);
+
+    $response = $this->get('/inventory/locations');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn (AssertableInertia $page) => $page->component('Inventory/Locations/Index')
+        ->where('locations.data.0.id', $location->id)
+        ->where('locations.data.0.current_capacity', 500)
+        ->where('locations.data.0.available_capacity', 500)
+    );
+});
+
 it('can show inventory location details', function () {
     $location = InventoryLocation::factory()
         ->for($this->tenant)
