@@ -55,6 +55,7 @@ class ProductionOrder extends Model
 
                 // Find the highest order number for this tenant and year
                 $lastOrder = ProductionOrder::withoutGlobalScope(TenantScope::class)
+                    ->withTrashed()
                     ->where('tenant_id', $order->tenant_id)
                     ->whereYear('created_at', $year)
                     ->orderBy('id', 'desc')
@@ -71,6 +72,7 @@ class ProductionOrder extends Model
                 do {
                     $orderNumber = sprintf('PO-%d-%03d', $year, $nextNumber);
                     $exists = ProductionOrder::withoutGlobalScope(TenantScope::class)
+                        ->withTrashed()
                         ->where('tenant_id', $order->tenant_id)
                         ->where('order_number', $orderNumber)
                         ->exists();

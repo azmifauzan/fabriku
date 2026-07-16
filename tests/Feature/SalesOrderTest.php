@@ -96,6 +96,38 @@ it('auto-generates order number', function () {
     expect($order->order_number)->toMatch('/^SO-\d{4}-\d{4}$/');
 });
 
+it('skips an order_number still held by a soft-deleted order', function () {
+    $year = now()->year;
+    $existing = SalesOrder::factory()->create([
+        'tenant_id' => $this->tenant->id,
+        'order_number' => sprintf('SO-%d-0001', $year),
+    ]);
+    $existing->delete();
+
+    $orderData = [
+        'customer_id' => $this->customer->id,
+        'order_date' => now()->toDateString(),
+        'channel' => 'offline',
+        'payment_method' => 'cash',
+        'items' => [
+            [
+                'inventory_item_id' => $this->inventoryItem->id,
+                'quantity' => 1,
+                'unit_price' => 150000,
+                'discount_amount' => 0,
+            ],
+        ],
+    ];
+
+    $response = $this->post(route('sales-orders.store'), $orderData);
+
+    $response->assertRedirect()->assertSessionDoesntHaveErrors();
+    $this->assertDatabaseHas('sales_orders', [
+        'tenant_id' => $this->tenant->id,
+        'order_number' => sprintf('SO-%d-0002', $year),
+    ]);
+});
+
 it('calculates totals correctly with discount and tax', function () {
     $orderData = [
         'customer_id' => $this->customer->id,

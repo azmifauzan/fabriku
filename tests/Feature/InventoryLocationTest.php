@@ -102,6 +102,32 @@ it('validates unique name within tenant', function () {
     $response->assertSessionHasErrors(['name']);
 });
 
+it('auto-generated code skips past a soft-deleted location holding that code', function () {
+    // InventoryLocation::generateCode() must see soft-deleted rows
+    // (withTrashed()) when computing the next code — otherwise it would
+    // recompute "LOC-0001" forever after that row is soft-deleted, colliding
+    // with the still-physically-present row on the real INSERT.
+    InventoryLocation::factory()
+        ->for($this->tenant)
+        ->create(['code' => 'LOC-0001']);
+
+    InventoryLocation::where('code', 'LOC-0001')->first()->delete();
+
+    $response = $this->post('/inventory/locations', [
+        'name' => 'Gudang Baru',
+        'capacity' => 1000,
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect()->assertSessionDoesntHaveErrors();
+
+    $this->assertDatabaseHas('inventory_locations', [
+        'tenant_id' => $this->tenant->id,
+        'name' => 'Gudang Baru',
+        'code' => 'LOC-0002',
+    ]);
+});
+
 it('can update inventory location', function () {
     $location = InventoryLocation::factory()
         ->for($this->tenant)

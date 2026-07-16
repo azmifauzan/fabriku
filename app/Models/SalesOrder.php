@@ -97,6 +97,7 @@ class SalesOrder extends Model
     {
         $year = now()->year;
         $lastOrder = self::withoutGlobalScope(TenantScope::class)
+            ->withTrashed()
             ->where('tenant_id', auth()->user()->tenant_id)
             ->whereYear('created_at', $year)
             ->latest('id')
