@@ -1,85 +1,65 @@
-<script setup>
+<script setup lang="ts">
+import { Plus } from 'lucide-vue-next';
 import { ref } from 'vue';
 
-const openIndex = ref(null);
+const openIndex = ref<number | null>(0);
 
 const faqs = [
     {
-        question: 'Apa itu Fabriku?',
-        answer: 'Fabriku adalah platform manajemen produksi dan penjualan terpadu untuk UMKM lintas kategori: Garment, Makanan & Kue, Kerajinan, Kosmetik, Toko/Retail, Produksi Rumahan, hingga Jasa & Layanan (bengkel, salon, laundry, dll). Kami membantu Anda mengelola inventory, pesanan, produksi, hingga laporan keuangan dalam satu aplikasi.',
+        question: 'Fabriku cocok untuk bisnis apa?',
+        answer: 'Fabriku dibuat untuk UMKM retail, garment, makanan, kerajinan, kosmetik, produksi rumahan, serta jasa. Istilah dan alurnya dapat mengikuti kategori bisnis yang dipilih.',
     },
     {
-        question: 'Berapa biaya berlangganan Fabriku?',
-        answer: 'Kami menawarkan Free Trial selama 30 hari dengan akses penuh. Setelah itu, Anda bisa berlangganan paket Full Member seharga Rp 25.000/bulan untuk akses tanpa batas waktu.',
+        question: 'Apa saja yang terbuka saat trial?',
+        answer: 'Semua fitur dapat digunakan selama 30 hari: bahan baku, produksi, inventory, penjualan, dashboard, dan export laporan. Tidak perlu kartu kredit.',
     },
     {
-        question: 'Apakah data saya aman?',
-        answer: 'Sangat aman. Kami menggunakan enkripsi standar industri dan server yang andal untuk memastikan data bisnis Anda terlindungi dan dapat diakses kapan saja.',
+        question: 'Apa yang terjadi setelah trial selesai?',
+        answer: 'Akun berubah menjadi read-only. Data tetap dapat dilihat, tetapi transaksi baru tidak dapat dibuat sampai langganan diperpanjang.',
     },
     {
-        question: 'Bisakah saya upgrade atau membatalkan kapan saja?',
-        answer: 'Tentu! Anda bisa memperpanjang atau upgrade langganan kapan saja. Jika masa aktif berakhir, akun Anda akan masuk ke mode read-only (hanya bisa melihat data) sampai Anda melakukan perpanjangan.',
+        question: 'Apakah bisa produksi lewat pihak ketiga?',
+        answer: 'Bisa. Fabriku mendukung produksi internal maupun outsourcing, termasuk pencatatan proses dan quality control.',
     },
     {
-        question: 'Metode pembayaran apa yang tersedia?',
-        answer: 'Saat ini kami menerima pembayaran melalui transfer bank (BCA, Mandiri, dll). Konfirmasi pembayaran dilakukan secara manual oleh tim admin kami maksimum 1x24 jam.',
+        question: 'Bagaimana cara pembayarannya?',
+        answer: 'Pembayaran saat ini melalui transfer bank dan dikonfirmasi oleh admin maksimal 1x24 jam.',
     },
 ];
-
-const toggle = (index) => {
-    openIndex.value = openIndex.value === index ? null : index;
-};
 </script>
 
 <template>
-    <div class="bg-gray-50 py-24" id="faq">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mb-16 text-center">
-                <h2 class="text-base font-semibold tracking-wide text-indigo-600 uppercase">FAQ</h2>
-                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">Pertanyaan yang Sering Diajukan</p>
-                <p class="mx-auto mt-4 max-w-2xl text-xl text-gray-500">Temukan jawaban untuk pertanyaan umum seputar layanan Fabriku.</p>
+    <section id="faq" class="bg-[#f4f0e7] py-20 sm:py-28">
+        <div class="mx-auto grid max-w-[1200px] gap-12 px-5 sm:px-8 lg:grid-cols-[0.65fr_1.35fr] lg:gap-20">
+            <div>
+                <p class="mb-5 text-xs font-black tracking-[0.18em] text-[#ff6038] uppercase">Tanya sebelum mulai</p>
+                <h2 class="text-5xl leading-[0.92] font-black tracking-[-0.055em] uppercase sm:text-7xl">Yang sering bikin ragu.</h2>
+                <p class="mt-6 max-w-sm text-lg font-medium text-[#63716a]">Jawaban pendek untuk keputusan yang seharusnya tidak rumit.</p>
             </div>
 
-            <div class="mx-auto max-w-3xl divide-y-2 divide-gray-200">
-                <dl class="space-y-6 divide-y divide-gray-200">
-                    <div v-for="(faq, index) in faqs" :key="index" class="pt-6">
-                        <dt class="text-lg">
-                            <button @click="toggle(index)" class="flex w-full items-start justify-between text-left text-gray-400 focus:outline-none">
-                                <span class="font-medium text-gray-900">
-                                    {{ faq.question }}
-                                </span>
-                                <span class="ml-6 flex h-7 items-center">
-                                    <svg
-                                        class="h-6 w-6 transform transition-transform duration-200"
-                                        :class="{ '-rotate-180': openIndex === index, 'rotate-0': openIndex !== index }"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        aria-hidden="true"
-                                    >
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </span>
-                            </button>
-                        </dt>
-                        <transition
-                            enter-active-class="transition duration-100 ease-out"
-                            enter-from-class="transform scale-95 opacity-0"
-                            enter-to-class="transform scale-100 opacity-100"
-                            leave-active-class="transition duration-75 ease-in"
-                            leave-from-class="transform scale-100 opacity-100"
-                            leave-to-class="transform scale-95 opacity-0"
-                        >
-                            <dd v-if="openIndex === index" class="mt-2 pr-12">
-                                <p class="text-base text-gray-500">
-                                    {{ faq.answer }}
-                                </p>
-                            </dd>
-                        </transition>
+            <div class="border-t-2 border-[#17211d]">
+                <article v-for="(faq, index) in faqs" :key="faq.question" class="border-b-2 border-[#17211d]">
+                    <button
+                        type="button"
+                        class="flex w-full items-center justify-between gap-5 py-6 text-left sm:py-8"
+                        :aria-expanded="openIndex === index"
+                        :aria-controls="`faq-answer-${index}`"
+                        @click="openIndex = openIndex === index ? null : index"
+                    >
+                        <span class="text-lg font-black sm:text-xl">{{ String(index + 1).padStart(2, '0') }}. {{ faq.question }}</span>
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-[#17211d] bg-[#d7ff45]">
+                            <Plus :size="19" class="transition-transform duration-200" :class="openIndex === index && 'rotate-45'" />
+                        </span>
+                    </button>
+                    <div
+                        v-show="openIndex === index"
+                        :id="`faq-answer-${index}`"
+                        class="max-w-2xl pr-12 pb-7 text-base leading-relaxed font-medium text-[#63716a] sm:pb-8"
+                    >
+                        {{ faq.answer }}
                     </div>
-                </dl>
+                </article>
             </div>
         </div>
-    </div>
+    </section>
 </template>
