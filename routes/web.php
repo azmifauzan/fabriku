@@ -29,6 +29,7 @@ use App\Http\Controllers\PreparationOrderController;
 use App\Http\Controllers\ProductionOrderController;
 use App\Http\Controllers\PurchaseReceiptController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
@@ -169,6 +170,9 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
 
     // Staff Management (admin-only enforced in controller)
     Route::resource('staff', StaffController::class);
+
+    // Role Management (admin-only enforced in controller)
+    Route::resource('roles', RoleController::class)->except(['show']);
 
     // Pattern & Preparation Management (renamed from Cutting)
     Route::resource('patterns', PatternController::class)

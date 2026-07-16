@@ -70,6 +70,7 @@ const allMenuItems = computed(() => {
         ...(hasMaterial ? [{ name: 'Jenis Bahan', href: '/material-types', permission: 'material.view' }] : []),
         ...(isModuleEnabled('service') ? [{ name: terminology.value.service || 'Layanan', href: '/services', permission: 'service.view' }] : []),
         { name: 'Staff', href: '/staff', permission: null, adminOnly: true },
+        { name: 'Role & Izin', href: '/roles', permission: null, adminOnly: true },
         { name: 'Lokasi Inventory', href: '/inventory/locations', permission: 'inventory.view' },
         { name: 'Customer', href: '/customers', permission: 'sales.view' },
         ...(hasPattern ? [{ name: terminology.value.pattern || 'Pattern', href: '/patterns', permission: 'pattern.view' }] : []),

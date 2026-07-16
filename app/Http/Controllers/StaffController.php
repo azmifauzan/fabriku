@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PreparationOrder;
 use App\Models\Role;
+use App\Models\Scopes\TenantScope;
 use App\Models\Staff;
 use App\Models\SystemSetting;
 use App\Models\User;
@@ -70,12 +71,21 @@ class StaffController extends Controller
                 ->with('error', "Batas maksimal staff ({$maxStaff}) telah tercapai. Hubungi admin untuk menambah kuota.");
         }
 
-        // Get available roles (system roles, excluding tenant_admin)
-        $roles = Role::whereNull('tenant_id')
+        // System roles need withoutGlobalScope: TenantScope always ANDs
+        // tenant_id = current tenant, which would otherwise contradict
+        // the explicit whereNull('tenant_id') below and return nothing.
+        $systemRoles = Role::withoutGlobalScope(TenantScope::class)
+            ->whereNull('tenant_id')
             ->where('is_system_role', true)
             ->where('slug', '!=', 'tenant_admin')
             ->select('id', 'name', 'slug', 'description')
             ->get();
+
+        $customRoles = Role::where('is_system_role', false)
+            ->select('id', 'name', 'slug', 'description')
+            ->get();
+
+        $roles = $systemRoles->concat($customRoles)->sortBy('name')->values();
 
         return Inertia::render('Staff/Form', [
             'roles' => $roles,
@@ -188,11 +198,18 @@ class StaffController extends Controller
 
         $staff->load(['role', 'user']);
 
-        $roles = Role::whereNull('tenant_id')
+        $systemRoles = Role::withoutGlobalScope(TenantScope::class)
+            ->whereNull('tenant_id')
             ->where('is_system_role', true)
             ->where('slug', '!=', 'tenant_admin')
             ->select('id', 'name', 'slug', 'description')
             ->get();
+
+        $customRoles = Role::where('is_system_role', false)
+            ->select('id', 'name', 'slug', 'description')
+            ->get();
+
+        $roles = $systemRoles->concat($customRoles)->sortBy('name')->values();
 
         return Inertia::render('Staff/Form', [
             'staff' => $staff,

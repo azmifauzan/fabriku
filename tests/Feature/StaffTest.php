@@ -116,3 +116,23 @@ test('staff code must be unique within tenant', function () {
 
     $response->assertSessionHasErrors(['code']);
 });
+
+test('staff create form lists system roles and tenant custom roles', function () {
+    $tenant = Tenant::factory()->create();
+    $admin = User::factory()->create(['tenant_id' => $tenant->id, 'role' => 'admin']);
+
+    Role::create(['tenant_id' => null, 'name' => 'Manager', 'slug' => 'manager', 'is_system_role' => true]);
+    Role::create(['tenant_id' => null, 'name' => 'Tenant Admin', 'slug' => 'tenant_admin', 'is_system_role' => true]);
+    Role::create(['tenant_id' => $tenant->id, 'name' => 'Kasir Gudang', 'slug' => 'kasir-gudang', 'is_system_role' => false]);
+
+    $this->actingAs($admin);
+
+    $response = $this->get(route('staff.create'));
+
+    // Expect 2 roles: Manager (system, non-tenant_admin) and Kasir Gudang (custom)
+    // Tenant Admin should be excluded by the slug != 'tenant_admin' filter
+    $response->assertInertia(fn ($page) => $page
+        ->component('Staff/Form')
+        ->has('roles', 2)
+    );
+});
