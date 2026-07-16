@@ -77,13 +77,6 @@ const toggleModule = (modulePermissions: Permission[]) => {
 const isModuleFullySelected = (modulePermissions: Permission[]) => {
     return modulePermissions.every((p) => form.permission_ids.includes(p.id));
 };
-
-const isModulePartiallySelected = (modulePermissions: Permission[]) => {
-    return (
-        modulePermissions.some((p) => form.permission_ids.includes(p.id)) &&
-        !isModuleFullySelected(modulePermissions)
-    );
-};
 </script>
 
 <template>
