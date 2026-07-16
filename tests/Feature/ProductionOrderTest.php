@@ -9,6 +9,7 @@ use App\Models\ProductionOrder;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia;
 
 uses(RefreshDatabase::class);
@@ -87,6 +88,45 @@ test('can create a production order', function () {
         'preparation_order_id' => $preparationOrder->id,
         'status' => 'draft',
         'tenant_id' => $this->tenant->id,
+    ]);
+});
+
+test('auto-generated order_number skips past a soft-deleted order holding that number', function () {
+    $preparationOrder = createCompletedPreparationOrderForTenant($this->tenant->id);
+    $year = now()->year;
+
+    // ProductionOrder's own uniqueness pre-check must see soft-deleted rows
+    // (withTrashed()) — otherwise it would recompute the same order_number
+    // a trashed row still physically holds, and the real INSERT would
+    // collide with it since the DB unique index doesn't care about deleted_at.
+    DB::table('production_orders')->insert([
+        'tenant_id' => $this->tenant->id,
+        'order_number' => sprintf('PO-%d-%03d', $year, 1),
+        'preparation_order_id' => $preparationOrder->id,
+        'type' => 'internal',
+        'status' => 'cancelled',
+        'priority' => 'normal',
+        'created_at' => now(),
+        'updated_at' => now(),
+        'deleted_at' => now(),
+    ]);
+
+    $response = $this->post(route('production-orders.store'), [
+        'preparation_order_id' => $preparationOrder->id,
+        'type' => 'internal',
+        'contractor_id' => null,
+        'estimated_completion_date' => now()->addDays(7)->format('Y-m-d'),
+        'priority' => 'normal',
+        'labor_cost' => 500000,
+    ]);
+
+    $response->assertRedirect(route('production-orders.index'))
+        ->assertSessionHas('success')
+        ->assertSessionDoesntHaveErrors();
+
+    $this->assertDatabaseHas('production_orders', [
+        'preparation_order_id' => $preparationOrder->id,
+        'order_number' => sprintf('PO-%d-%03d', $year, 2),
     ]);
 });
 

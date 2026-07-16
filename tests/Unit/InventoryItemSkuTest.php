@@ -79,3 +79,20 @@ it('skips existing SKUs to avoid duplicates', function () {
 
     expect($item->sku)->toBe('INV-GRM-0003');
 });
+
+it('skips past a soft-deleted item still holding a SKU', function () {
+    $item = InventoryItem::factory()->create([
+        'tenant_id' => $this->tenant->id,
+        'location_id' => $this->location->id,
+        'sku' => 'INV-GRM-0001',
+    ]);
+    $item->delete();
+
+    $next = InventoryItem::factory()->create([
+        'tenant_id' => $this->tenant->id,
+        'location_id' => $this->location->id,
+        'sku' => null,
+    ]);
+
+    expect($next->sku)->toBe('INV-GRM-0002');
+});

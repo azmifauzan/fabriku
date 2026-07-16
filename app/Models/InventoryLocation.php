@@ -49,6 +49,7 @@ class InventoryLocation extends Model
     public static function generateCode(): string
     {
         $lastLocation = self::withoutGlobalScope(TenantScope::class)
+            ->withTrashed()
             ->where('tenant_id', auth()->user()->tenant_id)
             ->latest('id')
             ->first();

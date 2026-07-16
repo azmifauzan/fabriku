@@ -8,6 +8,7 @@ use App\Models\Contractor;
 use App\Models\PreparationOrder;
 use App\Models\ProductionOrder;
 use App\Services\ProductionService;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Inertia\Inertia;
 
 class ProductionOrderController extends Controller
@@ -61,12 +62,18 @@ class ProductionOrderController extends Controller
 
     public function store(StoreProductionOrderRequest $request)
     {
-        ProductionOrder::create(array_merge($request->validated(), [
-            'status' => 'draft',
-        ]));
-
         $tenant = auth()->user()?->tenant;
         $productionOrderLabel = $tenant?->getTerminology('production_order') ?? 'Production order';
+
+        try {
+            ProductionOrder::create(array_merge($request->validated(), [
+                'status' => 'draft',
+            ]));
+        } catch (UniqueConstraintViolationException) {
+            return back()->withErrors([
+                'order_number' => 'Nomor order sudah digunakan. Silakan coba lagi.',
+            ])->withInput();
+        }
 
         return redirect()->route('production-orders.index')
             ->with('success', "{$productionOrderLabel} berhasil ditambahkan.");

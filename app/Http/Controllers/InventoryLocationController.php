@@ -9,6 +9,7 @@ use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -84,7 +85,13 @@ class InventoryLocationController extends Controller
 
     public function store(StoreInventoryLocationRequest $request)
     {
-        $location = InventoryLocation::create($request->validated());
+        try {
+            InventoryLocation::create($request->validated());
+        } catch (UniqueConstraintViolationException) {
+            return back()->withErrors([
+                'code' => 'Kode lokasi sudah digunakan. Silakan coba lagi.',
+            ])->withInput();
+        }
 
         return redirect()
             ->route('inventory.locations.index')

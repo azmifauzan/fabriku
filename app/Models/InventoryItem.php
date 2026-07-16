@@ -315,6 +315,7 @@ class InventoryItem extends Model
 
         // Find next sequential number for this tenant and prefix
         $lastItem = static::withoutGlobalScope(TenantScope::class)
+            ->withTrashed()
             ->where('tenant_id', $item->tenant_id)
             ->where('sku', 'LIKE', $prefix.'%')
             ->orderBy('id', 'desc')
@@ -329,6 +330,7 @@ class InventoryItem extends Model
         do {
             $sku = sprintf('%s-%04d', $prefix, $nextNumber);
             $exists = static::withoutGlobalScope(TenantScope::class)
+                ->withTrashed()
                 ->where('tenant_id', $item->tenant_id)
                 ->where('sku', $sku)
                 ->exists();
