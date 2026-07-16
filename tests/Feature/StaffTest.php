@@ -169,3 +169,21 @@ test('staff can be created and updated with a system role', function () {
     $updateResponse->assertRedirect(route('staff.index'))->assertSessionHas('success');
     $this->assertDatabaseHas('staff', ['id' => $staff->id, 'role_id' => $otherSystemRole->id]);
 });
+
+test('staff index shows the role name for staff assigned a system role', function () {
+    $tenant = Tenant::factory()->create();
+    $admin = User::factory()->create(['tenant_id' => $tenant->id, 'role' => 'admin']);
+    $systemRole = Role::create(['tenant_id' => null, 'name' => 'Manager', 'slug' => 'manager-idx-name', 'is_system_role' => true]);
+    $staff = Staff::factory()->create(['tenant_id' => $tenant->id, 'role_id' => $systemRole->id]);
+
+    $this->actingAs($admin);
+
+    $response = $this->get(route('staff.index'));
+
+    $response->assertInertia(fn ($page) => $page
+        ->component('Staff/Index')
+        ->where('staff.data.0.role.name', 'Manager')
+    );
+
+    expect($staff->fresh()->role?->name)->toBe('Manager');
+});
