@@ -21,7 +21,7 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Juli 2026. Diturunkan 
 | Auth admin (login, dashboard, monitoring) | aktif | guard terpisah, password reset reuse notification |
 | Tenant management (admin) | aktif | CRUD tenant, suspend/activate |
 | User management (admin) | aktif | reset password, manage user lintas tenant |
-| RBAC (roles + permissions) | aktif | tabel `roles`, `permissions`, pivot `role_permissions`, `user_roles`; middleware `permission:<slug>` |
+| RBAC (roles + permissions) | aktif | tabel `roles`, `permissions`, pivot `role_permissions`, `user_roles`; middleware `permission:<slug>`; tenant admin kelola role custom sendiri di `/roles` (`RoleController`, admin-only via `isAdmin()` di controller, bukan `permission:` middleware) — role sistem (`tenant_id` null) read-only dari sisi tenant, hanya admin platform (`/admin/roles`) yang bisa ubah |
 | Audit log | aktif | trait `HasAuditLogs`, polymorphic `audit_logs` |
 | Subscription payments | aktif | upload bukti, approval/reject oleh admin |
 | Material types | aktif | CRUD master data |
@@ -42,7 +42,7 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Juli 2026. Diturunkan 
 | Dashboard | aktif | KPI bulanan + tren 7 hari + top produk 30 hari + low stock |
 | Settings tenant | aktif | data perusahaan, alamat, logo |
 | Settings admin (system settings) | aktif | per-tenant overrides untuk `max_staff_per_tenant`, harga membership, dll |
-| Staff management | aktif | bikin akun User otomatis, kirim kredensial via email; cek `max_staff_per_tenant` |
+| Staff management | aktif | bikin akun User otomatis, kirim kredensial via email; cek `max_staff_per_tenant`; dropdown role di form staff gabung role sistem + role custom tenant, sorted by name |
 | Assistant (web chat) | **disembunyikan** | Backend tersedia, ChatWidget dan routes `/assistant/*` ada di kode tapi tidak ditampilkan ke user |
 | Telegram bot (webhook) | aktif | command `/start /help /status /disconnect`, connect via 8-char token; forward ke assistant dinonaktifkan di UI |
 | Telegram notifikasi keluar | aktif | new user registered, payment uploaded |
