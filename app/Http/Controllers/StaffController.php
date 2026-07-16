@@ -143,7 +143,9 @@ class StaffController extends Controller
             'is_active' => ['sometimes', 'boolean'],
         ]);
 
-        $role = Role::findOrFail($validated['role_id']);
+        $role = Role::withoutGlobalScope(TenantScope::class)
+            ->where(fn ($query) => $query->whereNull('tenant_id')->orWhere('tenant_id', $user->tenant_id))
+            ->findOrFail($validated['role_id']);
 
         // Generate a random password
         $plainPassword = Str::random(10);
@@ -234,7 +236,9 @@ class StaffController extends Controller
             'is_active' => ['sometimes', 'boolean'],
         ]);
 
-        $role = Role::findOrFail($validated['role_id']);
+        $role = Role::withoutGlobalScope(TenantScope::class)
+            ->where(fn ($query) => $query->whereNull('tenant_id')->orWhere('tenant_id', $user->tenant_id))
+            ->findOrFail($validated['role_id']);
 
         DB::transaction(function () use ($validated, $staff, $role) {
             $staff->update([

@@ -136,3 +136,36 @@ test('staff create form lists system roles and tenant custom roles', function ()
         ->has('roles', 2)
     );
 });
+
+test('staff can be created and updated with a system role', function () {
+    $tenant = Tenant::factory()->create();
+    $admin = User::factory()->create(['tenant_id' => $tenant->id, 'role' => 'admin']);
+    $systemRole = Role::create(['tenant_id' => null, 'name' => 'Manager', 'slug' => 'manager-sys-assign', 'is_system_role' => true]);
+
+    $this->actingAs($admin);
+
+    $response = $this->post(route('staff.store'), [
+        'code' => 'STF-SYS',
+        'name' => 'System Role Staff',
+        'role_id' => $systemRole->id,
+        'email' => 'sysrole@example.com',
+        'is_active' => true,
+    ]);
+
+    $response->assertRedirect(route('staff.index'))->assertSessionHas('success');
+    $this->assertDatabaseHas('staff', ['code' => 'STF-SYS', 'role_id' => $systemRole->id]);
+
+    $staff = Staff::where('code', 'STF-SYS')->first();
+    $otherSystemRole = Role::create(['tenant_id' => null, 'name' => 'Supervisor', 'slug' => 'supervisor-sys-assign', 'is_system_role' => true]);
+
+    $updateResponse = $this->put(route('staff.update', $staff), [
+        'code' => 'STF-SYS',
+        'name' => 'System Role Staff',
+        'role_id' => $otherSystemRole->id,
+        'email' => 'sysrole@example.com',
+        'is_active' => true,
+    ]);
+
+    $updateResponse->assertRedirect(route('staff.index'))->assertSessionHas('success');
+    $this->assertDatabaseHas('staff', ['id' => $staff->id, 'role_id' => $otherSystemRole->id]);
+});
