@@ -39,6 +39,40 @@ it('creates a material type with unit', function () {
     expect(MaterialType::query()->where('tenant_id', $tenant->id)->where('code', 'MS')->exists())->toBeTrue();
 });
 
+it('allows two different tenants to use the same material type code', function () {
+    $tenantA = Tenant::factory()->active()->create();
+    $userA = User::factory()->forTenant($tenantA->id)->create();
+
+    $tenantB = Tenant::factory()->active()->create();
+    $userB = User::factory()->forTenant($tenantB->id)->create();
+
+    $this->actingAs($userA)
+        ->post('/material-types', [
+            'code' => 'MS',
+            'name' => 'Mesin',
+            'unit' => 'pcs',
+            'is_active' => true,
+        ])
+        ->assertRedirect(route('material-types.index'))
+        ->assertSessionHasNoErrors();
+
+    $this->actingAs($userB)
+        ->post('/material-types', [
+            'code' => 'MS',
+            'name' => 'Mesin',
+            'unit' => 'pcs',
+            'is_active' => true,
+        ])
+        ->assertRedirect(route('material-types.index'))
+        ->assertSessionHasNoErrors();
+
+    $this->actingAs($userA);
+    expect(MaterialType::query()->where('tenant_id', $tenantA->id)->where('code', 'MS')->exists())->toBeTrue();
+
+    $this->actingAs($userB);
+    expect(MaterialType::query()->where('tenant_id', $tenantB->id)->where('code', 'MS')->exists())->toBeTrue();
+});
+
 it('can delete material type when not used by any materials', function () {
     $tenant = Tenant::factory()->active()->create();
     $user = User::factory()->forTenant($tenant->id)->create();

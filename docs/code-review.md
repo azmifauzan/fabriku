@@ -45,6 +45,12 @@ Controller manual `reserveStock`/`releaseReservedStock` di `store()`, `update()`
 ### ✅ RESOLVED — Telegram webhook tanpa rate limit
 `routes/api.php` — ditambah `->middleware('throttle:60,1')`. Log level debug diturunkan ke info dengan payload ringkas.
 
+### ✅ RESOLVED — Raw exception message bocor di halaman 500 terlepas dari `APP_DEBUG`
+`resources/views/errors/500.blade.php` mencetak `$exception->getMessage()` tanpa syarat — termasuk SQL query + bindings dari `QueryException` — ke browser user, terlepas dari nilai `config('app.debug')`. Dikonfirmasi live di prod (`APP_DEBUG` di server sudah `false`, tapi probe exception lewat `ExceptionHandler::render()` asli tetap membocorkan pesan di HTML). Halaman error lain (401/403/404/419/429/503) aman karena semua `abort()` di codebase mengirim string statis milik developer, bukan exception mentah. Response JSON/Inertia-XHR juga aman (default framework, generic `"Server Error"`). Fix: `{{ config('app.debug') && $exception->getMessage() ? $exception->getMessage() : 'pesan generik' }}`. Test: `tests/Feature/Error500PageTest.php`.
+
+### ✅ RESOLVED — Kolom unique global pada tabel tenant-scoped (kelas bug berulang)
+Pola: kolom "kode/nomor" di tabel ber-`tenant_id` didefinisikan `unique()` global di migration, sementara generator nomornya (`count()+1` per tahun) atau validasi Form Request-nya sudah tenant-scoped — menyebabkan insert tenant kedua gagal dengan SQLSTATE 23505 begitu dua tenant kebetulan menghasilkan value yang sama (mis. `REC-2026-0001`, kode jenis material `MS`). Sudah diperbaiki bertahap: `staff.code`, `contractors.code`, `sales_orders`/`production_orders.order_number`, `inventory_items.sku`, `inventory_locations.code`, `customers.code` (migrasi `2026_04_30_*`–`2026_05_24_*`), lalu `material_receipts.receipt_number` dan `material_types.code` (migrasi `2026_07_16_*`, ditemukan lewat audit menyeluruh semua `unique(` di `database/migrations/`). Pola perbaikan konsisten: `dropUnique(global)` → `unique(['tenant_id', kolom])`. Kolom yang **sengaja** tetap global dan aman: `users.email`, `admin_users.email` (bukan model tenant), `jobs.uuid`, `permissions.slug` (tabel sistem), `material_receipts.barcode` (di-generate `uniqid()`, bukan counter per-tenant, risiko tabrakan diabaikan). Saat menambah kolom "kode unik" baru di tabel tenant-scoped, langsung pakai `unique(['tenant_id', 'kolom'])` sejak migration awal — jangan `unique()` polos lalu perbaiki belakangan.
+
 ---
 
 ## HIGH

@@ -50,5 +50,5 @@
 @section('message', 'Kesalahan Server Internal')
 
 @section('description')
-{{ $exception->getMessage() ?: 'Terjadi kesalahan internal pada server kami. Jangan khawatir, tim teknis kami telah menerima notifikasi dan sedang memperbaikinya.' }}
+{{ config('app.debug') && $exception->getMessage() ? $exception->getMessage() : 'Terjadi kesalahan internal pada server kami. Jangan khawatir, tim teknis kami telah menerima notifikasi dan sedang memperbaikinya.' }}
 @endsection

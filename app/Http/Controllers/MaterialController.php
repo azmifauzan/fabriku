@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateMaterialRequest;
 use App\Models\Material;
 use App\Models\MaterialReceipt;
 use App\Models\MaterialType;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -119,7 +120,12 @@ class MaterialController extends Controller
                 $receiptData['image_path'] = $data['image_path'];
             }
 
-            $material->receipts()->create($receiptData);
+            try {
+                $material->receipts()->create($receiptData);
+            } catch (UniqueConstraintViolationException) {
+                return redirect()->route('materials.index')
+                    ->with('warning', 'Material berhasil ditambahkan, tapi stok awal gagal dicatat karena nomor resi bentrok. Silakan tambah stok manual dari halaman material.');
+            }
         }
 
         return redirect()->route('materials.index')
