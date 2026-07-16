@@ -57,7 +57,7 @@ class Staff extends Model
 
     public function role(): BelongsTo
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(Role::class)->withoutGlobalScope(TenantScope::class);
     }
 
     public function preparationOrders(): HasMany
