@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateMaterialReceiptRequest;
 use App\Models\Material;
 use App\Models\MaterialReceipt;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -53,20 +54,26 @@ class MaterialReceiptController extends Controller
 
         Log::info('Creating receipt', ['validated' => $validated]);
 
-        $receipt = MaterialReceipt::create([
-            'tenant_id' => $request->user()->tenant_id,
-            'material_id' => $material->id,
-            'receipt_number' => $receiptNumber,
-            'supplier_name' => $validated['supplier_name'],
-            'quantity' => $validated['quantity'],
-            'unit' => $material->unit, // Assume same unit as material
-            'price_per_unit' => $validated['unit_price'],
-            'total_cost' => $validated['quantity'] * $validated['unit_price'],
-            'receipt_date' => $validated['receipt_date'],
-            'notes' => $validated['notes'] ?? null,
-            'batch_number' => $validated['batch_number'] ?? null,
-            'received_by' => $request->user()->id,
-        ]);
+        try {
+            $receipt = MaterialReceipt::create([
+                'tenant_id' => $request->user()->tenant_id,
+                'material_id' => $material->id,
+                'receipt_number' => $receiptNumber,
+                'supplier_name' => $validated['supplier_name'],
+                'quantity' => $validated['quantity'],
+                'unit' => $material->unit, // Assume same unit as material
+                'price_per_unit' => $validated['unit_price'],
+                'total_cost' => $validated['quantity'] * $validated['unit_price'],
+                'receipt_date' => $validated['receipt_date'],
+                'notes' => $validated['notes'] ?? null,
+                'batch_number' => $validated['batch_number'] ?? null,
+                'received_by' => $request->user()->id,
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            return redirect()->back()->withErrors([
+                'quantity' => 'Nomor resi bentrok, silakan coba lagi.',
+            ])->withInput();
+        }
 
         Log::info('Receipt created', ['id' => $receipt->id]);
 
