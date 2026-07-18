@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, router } from '@inertiajs/vue3';
 import { ChevronDown, ChevronUp, Download, FileBarChart, FileSpreadsheet, Filter, Search } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -158,13 +159,13 @@ const toggleBatch = (batchId: string) => {
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Transaksi</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ summary.total_transactions }}
+                            {{ formatNumber(summary.total_transactions) }}
                         </dd>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Qty Dibeli</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ summary.total_items_purchased }}
+                            {{ formatNumber(summary.total_items_purchased) }}
                         </dd>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
@@ -345,7 +346,7 @@ const toggleBatch = (batchId: string) => {
                                                                 {{ item.name }}
                                                             </td>
                                                             <td class="px-4 py-2 text-center text-sm text-gray-700 dark:text-gray-300">
-                                                                {{ item.quantity }}
+                                                                {{ formatNumber(item.quantity) }}
                                                             </td>
                                                             <td class="px-4 py-2 text-right text-sm text-gray-700 dark:text-gray-300">
                                                                 {{ formatCurrency(item.unit_cost) }}

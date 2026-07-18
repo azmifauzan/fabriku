@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
 import { Factory, Package, ShoppingCart, Sparkles, TrendingUp } from 'lucide-vue-next';
 
@@ -107,7 +108,7 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                             </div>
                         </div>
                         <p class="mt-3 text-xl font-bold text-gray-900 dark:text-gray-100">{{ fmt(stats.sales_today) }}</p>
-                        <p class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ stats.sales_today_count }} transaksi</p>
+                        <p class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ formatNumber(stats.sales_today_count) }} transaksi</p>
                     </div>
 
                     <!-- Revenue Month -->
@@ -121,7 +122,7 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                             </div>
                         </div>
                         <p class="mt-3 text-xl font-bold text-gray-900 dark:text-gray-100">{{ fmt(stats.sales_month) }}</p>
-                        <p class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ stats.sales_month_count }} transaksi</p>
+                        <p class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ formatNumber(stats.sales_month_count) }} transaksi</p>
                     </div>
 
                     <!-- Finished Goods Inventory Value -->
@@ -135,7 +136,9 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                             </div>
                         </div>
                         <p class="mt-3 text-xl font-bold text-gray-900 dark:text-gray-100">{{ fmt(stats.inventory_value) }}</p>
-                        <p class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ stats.total_inventory_items }} SKU produk jadi</p>
+                        <p class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                            {{ formatNumber(stats.total_inventory_items) }} SKU produk jadi
+                        </p>
                     </div>
 
                     <!-- Production Today -->
@@ -149,7 +152,7 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                             </div>
                         </div>
                         <p class="mt-3 text-xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ stats.production_today }} <span class="text-xs font-normal text-gray-400">unit</span>
+                            {{ formatNumber(stats.production_today) }} <span class="text-xs font-normal text-gray-400">unit</span>
                         </p>
                         <p class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">Dari catatan produksi harian</p>
                     </div>
@@ -212,7 +215,7 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                                     v-if="stats.low_stock_materials_count > 0"
                                     class="flex h-5 w-5 items-center justify-center rounded-full bg-red-100 text-[10px] font-bold text-red-600 dark:bg-red-950/30 dark:text-red-400"
                                 >
-                                    {{ stats.low_stock_materials_count }}
+                                    {{ formatNumber(stats.low_stock_materials_count) }}
                                 </span>
                             </h2>
                             <Link href="/materials" class="text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
@@ -231,8 +234,10 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                                     <p class="text-xs font-semibold text-gray-400">{{ mat.code }}</p>
                                 </div>
                                 <div class="shrink-0 text-right">
-                                    <p class="text-sm font-bold text-red-600 dark:text-red-400">{{ mat.stock_quantity }} {{ mat.unit }}</p>
-                                    <p class="text-xs font-medium text-gray-400">min. {{ mat.min_stock }} {{ mat.unit }}</p>
+                                    <p class="text-sm font-bold text-red-600 dark:text-red-400">
+                                        {{ formatNumber(mat.stock_quantity, 2) }} {{ mat.unit }}
+                                    </p>
+                                    <p class="text-xs font-medium text-gray-400">min. {{ formatNumber(mat.min_stock, 2) }} {{ mat.unit }}</p>
                                 </div>
                             </div>
                         </div>
@@ -247,7 +252,7 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                                     v-if="stats.low_stock_count > 0"
                                     class="flex h-5 w-5 items-center justify-center rounded-full bg-orange-100 text-[10px] font-bold text-orange-600 dark:bg-orange-950/30 dark:text-orange-400"
                                 >
-                                    {{ stats.low_stock_count }}
+                                    {{ formatNumber(stats.low_stock_count) }}
                                 </span>
                             </h2>
                             <Link href="/inventory/items" class="text-xs font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
@@ -267,9 +272,9 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                                 </div>
                                 <div class="shrink-0 text-right">
                                     <p class="text-sm font-bold text-orange-600 dark:text-orange-400">
-                                        {{ item.current_quantity - item.reserved_quantity }}
+                                        {{ formatNumber(item.current_quantity - item.reserved_quantity) }}
                                     </p>
-                                    <p class="text-xs font-medium text-gray-400">min. {{ item.minimum_stock }}</p>
+                                    <p class="text-xs font-medium text-gray-400">min. {{ formatNumber(item.minimum_stock) }}</p>
                                 </div>
                             </div>
                         </div>

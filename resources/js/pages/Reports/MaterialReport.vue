@@ -188,7 +188,7 @@ const exportReport = (format: 'pdf' | 'excel') => {
                             class="mt-1 text-2xl font-semibold"
                             :class="summary.low_stock_count > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'"
                         >
-                            {{ summary.low_stock_count }}
+                            {{ formatNumber(summary.low_stock_count, 0) }}
                         </dd>
                     </div>
                 </div>

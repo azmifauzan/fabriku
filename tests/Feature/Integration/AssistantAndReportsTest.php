@@ -3,6 +3,7 @@
 use App\Models\AssistantConversation;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\Assistant\OpenAIService;
 use Illuminate\Support\Facades\Http;
 
 describe('AI Assistant Integration', function () {
@@ -16,6 +17,18 @@ describe('AI Assistant Integration', function () {
             'tenant_id' => $this->tenant->id,
             'email_verified_at' => now(),
         ]);
+
+        $this->mock(OpenAIService::class, function ($mock) {
+            $mock->makePartial();
+            $mock->shouldReceive('isConfigured')->andReturn(true);
+            $mock->shouldReceive('getSystemPrompt')->andReturn('System prompt');
+            $mock->shouldReceive('chat')->andReturn([
+                'success' => true,
+                'content' => 'Test response from assistant.',
+                'tokens_input' => 100,
+                'tokens_output' => 50,
+            ]);
+        });
     });
 
     it('allows user to start conversation with assistant', function () {
@@ -189,6 +202,18 @@ describe('Report Generation Integration', function () {
             'tenant_id' => $this->tenant->id,
             'email_verified_at' => now(),
         ]);
+
+        $this->mock(OpenAIService::class, function ($mock) {
+            $mock->makePartial();
+            $mock->shouldReceive('isConfigured')->andReturn(true);
+            $mock->shouldReceive('getSystemPrompt')->andReturn('System prompt');
+            $mock->shouldReceive('chat')->andReturn([
+                'success' => true,
+                'content' => 'Test response from assistant.',
+                'tokens_input' => 100,
+                'tokens_output' => 50,
+            ]);
+        });
     });
 
     it('allows viewing material report', function () {

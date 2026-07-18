@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft, Clock, FileText, RefreshCw, TrendingDown, TrendingUp, User } from 'lucide-vue-next';
 
@@ -112,7 +113,7 @@ const getAdjustmentIcon = (quantity: number) => {
                         </div>
                         <div class="text-right">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Stock Saat Ini</p>
-                            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ item.current_stock }}</p>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ formatNumber(item.current_stock) }}</p>
                         </div>
                     </div>
                 </div>
@@ -199,11 +200,11 @@ const getAdjustmentIcon = (quantity: number) => {
                                 <div class="text-right">
                                     <div class="flex items-center gap-2">
                                         <span class="text-sm text-gray-500 dark:text-gray-400">
-                                            {{ adjustment.quantity_before }}
+                                            {{ formatNumber(adjustment.quantity_before) }}
                                         </span>
                                         <span class="text-gray-400">→</span>
                                         <span class="font-semibold text-gray-900 dark:text-white">
-                                            {{ adjustment.quantity_after }}
+                                            {{ formatNumber(adjustment.quantity_after) }}
                                         </span>
                                     </div>
                                     <p
@@ -216,7 +217,7 @@ const getAdjustmentIcon = (quantity: number) => {
                                                   : 'text-gray-500'
                                         "
                                     >
-                                        {{ adjustment.adjustment_quantity > 0 ? '+' : '' }}{{ adjustment.adjustment_quantity }}
+                                        {{ adjustment.adjustment_quantity > 0 ? '+' : '' }}{{ formatNumber(adjustment.adjustment_quantity) }}
                                     </p>
                                 </div>
                             </div>

@@ -2,6 +2,7 @@
 import { useBusinessContext } from '@/composables/useBusinessContext';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -197,7 +198,7 @@ const markComplete = async () => {
                             </div>
                             <div class="rounded-lg bg-gray-50 p-4">
                                 <p class="text-xs text-gray-500">Quantity</p>
-                                <p class="text-sm font-medium text-gray-900">{{ order.preparation_order.output_quantity }} pcs</p>
+                                <p class="text-sm font-medium text-gray-900">{{ formatNumber(order.preparation_order.output_quantity) }} pcs</p>
                             </div>
                             <div class="rounded-lg bg-gray-50 p-4">
                                 <p class="text-xs text-gray-500">Tipe</p>

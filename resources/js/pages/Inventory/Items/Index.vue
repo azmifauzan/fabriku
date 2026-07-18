@@ -2,6 +2,7 @@
 import PageHeader from '@/components/PageHeader.vue';
 import QrScanner from '@/components/QrScanner.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Edit, Eye, History, RefreshCw } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -258,9 +259,9 @@ const adjustmentTypes = {
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
                                         <div class="flex flex-col">
-                                            <span class="font-medium">{{ item.current_stock }}</span>
+                                            <span class="font-medium">{{ formatNumber(item.current_stock) }}</span>
                                             <span v-if="item.reserved_stock > 0" class="text-xs text-gray-500 dark:text-gray-400">
-                                                {{ item.reserved_stock }} reserved
+                                                {{ formatNumber(item.reserved_stock) }} reserved
                                             </span>
                                         </div>
                                     </td>

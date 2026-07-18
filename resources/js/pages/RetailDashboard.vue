@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
 import { AlertTriangle, Package, ShoppingBag, ShoppingCart, TrendingUp } from 'lucide-vue-next';
 
@@ -74,7 +75,7 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                             <TrendingUp :size="16" class="text-green-500" />
                         </div>
                         <p class="mt-2 text-xl font-bold text-gray-900 dark:text-gray-100">{{ fmt(stats.sales_today) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ stats.sales_today_count }} transaksi</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatNumber(stats.sales_today_count) }} transaksi</p>
                     </div>
 
                     <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -83,7 +84,7 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                             <ShoppingCart :size="16" class="text-indigo-500" />
                         </div>
                         <p class="mt-2 text-xl font-bold text-gray-900 dark:text-gray-100">{{ fmt(stats.sales_month) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ stats.sales_month_count }} transaksi</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatNumber(stats.sales_month_count) }} transaksi</p>
                     </div>
 
                     <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -92,7 +93,7 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                             <Package :size="16" class="text-blue-500" />
                         </div>
                         <p class="mt-2 text-xl font-bold text-gray-900 dark:text-gray-100">{{ fmt(stats.inventory_value) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ stats.total_inventory_items }} produk</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatNumber(stats.total_inventory_items) }} produk</p>
                     </div>
 
                     <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -101,9 +102,9 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                             <AlertTriangle :size="16" :class="stats.low_stock_count > 0 ? 'text-orange-500' : 'text-gray-400'" />
                         </div>
                         <p class="mt-2 text-xl font-bold" :class="stats.low_stock_count > 0 ? 'text-orange-500' : 'text-gray-900 dark:text-gray-100'">
-                            {{ stats.low_stock_count }}
+                            {{ formatNumber(stats.low_stock_count) }}
                         </p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ stats.out_of_stock_count }} habis total</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatNumber(stats.out_of_stock_count) }} habis total</p>
                     </div>
                 </div>
 
@@ -173,9 +174,9 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                                 </div>
                                 <div class="shrink-0 text-right">
                                     <p class="text-sm font-bold text-orange-600 dark:text-orange-400">
-                                        {{ item.current_quantity - item.reserved_quantity }}
+                                        {{ formatNumber(item.current_quantity - item.reserved_quantity) }}
                                     </p>
-                                    <p class="text-xs text-gray-400">min. {{ item.minimum_stock }}</p>
+                                    <p class="text-xs text-gray-400">min. {{ formatNumber(item.minimum_stock) }}</p>
                                 </div>
                             </div>
                         </div>

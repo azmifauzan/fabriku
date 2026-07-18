@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CameraCaptureModal from '@/components/CameraCaptureModal.vue';
 import { useBusinessContext } from '@/composables/useBusinessContext';
+import { formatNumber } from '@/lib/utils';
 import { Link, useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 import { Camera, FileText, Package, Plus, RotateCcw, Tag, Truck, Upload, X } from 'lucide-vue-next';
@@ -527,7 +528,7 @@ const addCategory = async () => {
                         <div>
                             <p class="text-xs text-indigo-700 dark:text-indigo-400">Target Produksi</p>
                             <p class="mt-1 font-medium text-indigo-900 dark:text-indigo-200">
-                                {{ selectedProductionOrder.preparation_order?.output_quantity || 0 }} {{ productionUnit }}
+                                {{ formatNumber(selectedProductionOrder.preparation_order?.output_quantity || 0) }} {{ productionUnit }}
                             </p>
                         </div>
                         <div>

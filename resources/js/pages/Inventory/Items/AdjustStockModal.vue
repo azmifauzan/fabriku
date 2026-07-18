@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber } from '@/lib/utils';
 import { useForm } from '@inertiajs/vue3';
 import { Minus, Plus, RefreshCw, X } from 'lucide-vue-next';
 import { computed, watch } from 'vue';
@@ -135,7 +136,7 @@ const availableAdjustmentTypes = computed(() => {
                                 <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
                                     <div class="flex items-center justify-between">
                                         <span class="text-sm text-gray-600 dark:text-gray-400">Stock Saat Ini</span>
-                                        <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ item.current_stock }}</span>
+                                        <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatNumber(item.current_stock) }}</span>
                                     </div>
                                 </div>
 
@@ -236,14 +237,14 @@ const availableAdjustmentTypes = computed(() => {
                                                           : 'text-gray-900 dark:text-white'
                                                 "
                                             >
-                                                {{ previewStock }}
+                                                {{ formatNumber(previewStock) }}
                                             </span>
                                             <p
                                                 v-if="stockDifference !== 0"
                                                 class="text-xs"
                                                 :class="stockDifference > 0 ? 'text-green-600' : 'text-red-600'"
                                             >
-                                                {{ stockDifference > 0 ? '+' : '' }}{{ stockDifference }}
+                                                {{ stockDifference > 0 ? '+' : '' }}{{ formatNumber(stockDifference) }}
                                             </p>
                                         </div>
                                     </div>

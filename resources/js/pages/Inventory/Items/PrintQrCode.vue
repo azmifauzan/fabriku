@@ -46,7 +46,7 @@
                         <!-- Additional Info -->
                         <div class="text-sm text-gray-600 dark:text-gray-400">
                             <p v-if="item.inventory_location">Lokasi: {{ item.inventory_location.name }}</p>
-                            <p class="mt-1">Stock: {{ item.current_quantity }} {{ item.unit || 'pcs' }}</p>
+                            <p class="mt-1">Stock: {{ formatNumber(item.current_quantity) }} {{ item.unit || 'pcs' }}</p>
                         </div>
                     </div>
                 </div>
@@ -91,6 +91,7 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Link } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue';
 

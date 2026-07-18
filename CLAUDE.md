@@ -138,7 +138,7 @@ Always check the actual migration file for the source of truth. `.github/COLUMN-
 - **Eloquent**: prefer `Model::query()` over `DB::`; relationship methods with return type hints; eager load to avoid N+1; Form Requests for validation (not inline).
 - **Routes**: use named routes + `route()` helper. Frontend uses Wayfinder imports.
 - **Tests**: every change needs a test. Use factories with custom states. Use specific assertion methods (`assertForbidden`, `assertNotFound`) not `assertStatus(403)`.
-- **Vue**: single root element; `<Link>` / `router.visit()` not raw `<a>`; check existing components in `resources/js/components/` (especially `ui/`) before creating new.
+- **Vue**: single root element; `<Link>` / `router.visit()` not raw `<a>`; check existing components in `resources/js/components/` (especially `ui/`) before creating new. Number display: import `formatNumber` from `@/lib/utils` for any quantity/stock/count interpolation (`{{ formatNumber(item.current_stock) }}`) — never interpolate a raw numeric prop directly, it silently drops the thousand separator once the value crosses 1000. Several pages had accumulated raw `{{ item.current_stock }}`-style interpolations before this was centralized; `formatNumber` accepts `number | string | null | undefined` and an optional `decimals` (default `0`) for fractional quantities like material kg.
 - **Tailwind v4**: CSS-first config via `@theme` (no `tailwind.config.js`); use `@import "tailwindcss"` not `@tailwind` directives; gap utilities for list spacing not margins.
 - **Localization**: default Bahasa Indonesia — UI strings, error messages, email templates are all Indonesian.
 - **Migrations**: when modifying a column, include ALL previously-defined attributes (Laravel 12 drops omitted ones).

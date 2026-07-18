@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, router } from '@inertiajs/vue3';
 import { AlertTriangle, Download, FileBarChart, FileSpreadsheet, Filter, Search } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -156,13 +157,13 @@ const exportReport = (format: 'pdf' | 'excel') => {
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Items</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ summary.total_items }}
+                            {{ formatNumber(summary.total_items) }}
                         </dd>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Quantity</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ summary.total_quantity }}
+                            {{ formatNumber(summary.total_quantity) }}
                         </dd>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
@@ -174,13 +175,13 @@ const exportReport = (format: 'pdf' | 'excel') => {
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-yellow-600 dark:text-yellow-400">Low Stock</dt>
                         <dd class="mt-1 text-2xl font-semibold text-yellow-600 dark:text-yellow-400">
-                            {{ summary.low_stock_items }}
+                            {{ formatNumber(summary.low_stock_items) }}
                         </dd>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-red-600 dark:text-red-400">Out of Stock</dt>
                         <dd class="mt-1 text-2xl font-semibold text-red-600 dark:text-red-400">
-                            {{ summary.out_of_stock_items }}
+                            {{ formatNumber(summary.out_of_stock_items) }}
                         </dd>
                     </div>
                 </div>
@@ -305,16 +306,16 @@ const exportReport = (format: 'pdf' | 'excel') => {
                                         {{ item.location || '-' }}
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white">
-                                        {{ item.quantity }}
+                                        {{ formatNumber(item.quantity) }}
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                                        {{ item.reserved_quantity }}
+                                        {{ formatNumber(item.reserved_quantity) }}
                                     </td>
                                     <td
                                         class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap"
                                         :class="item.is_low_stock ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'"
                                     >
-                                        {{ item.available_quantity }}
+                                        {{ formatNumber(item.available_quantity) }}
                                         <span v-if="item.is_low_stock" class="ml-1">
                                             <AlertTriangle :size="14" class="inline" />
                                         </span>

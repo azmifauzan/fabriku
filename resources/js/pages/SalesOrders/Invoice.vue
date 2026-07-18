@@ -51,7 +51,7 @@
                     <p class="shrink-0 font-semibold text-gray-900">Rp {{ Number(item.subtotal).toLocaleString('id-ID') }}</p>
                 </div>
                 <div class="mt-1 flex gap-4 text-xs text-gray-500">
-                    <span>Qty: {{ item.quantity }}</span>
+                    <span>Qty: {{ Number(item.quantity).toLocaleString('id-ID') }}</span>
                     <span>Harga: Rp {{ Number(item.unit_price).toLocaleString('id-ID') }}</span>
                     <span v-if="item.discount_amount > 0">Disc: Rp {{ Number(item.discount_amount).toLocaleString('id-ID') }}</span>
                 </div>
@@ -75,7 +75,7 @@
                         <p class="font-medium">{{ item.inventory_item?.product_name || item.inventory_item?.pattern?.name || item.service?.name }}</p>
                         <p class="text-xs text-gray-500">{{ item.inventory_item?.sku || item.service?.code }}</p>
                     </td>
-                    <td class="py-4 text-right text-sm text-gray-900">{{ item.quantity }}</td>
+                    <td class="py-4 text-right text-sm text-gray-900">{{ Number(item.quantity).toLocaleString('id-ID') }}</td>
                     <td class="py-4 text-right text-sm text-gray-900">Rp {{ Number(item.unit_price).toLocaleString('id-ID') }}</td>
                     <td class="py-4 text-right text-sm text-gray-900">Rp {{ Number(item.discount_amount).toLocaleString('id-ID') }}</td>
                     <td class="py-4 text-right text-sm font-medium text-gray-900">Rp {{ Number(item.subtotal).toLocaleString('id-ID') }}</td>

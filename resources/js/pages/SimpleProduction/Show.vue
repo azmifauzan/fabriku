@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft, BookOpen, Calendar, Factory, Sparkles, User } from 'lucide-vue-next';
 
@@ -146,7 +147,7 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                                     <div>
                                         <span class="block text-xs font-semibold text-gray-400">Jumlah</span>
                                         <span class="text-md font-bold text-indigo-600 dark:text-indigo-400"
-                                            >+{{ line.adjustment_quantity }} pcs</span
+                                            >+{{ formatNumber(line.adjustment_quantity) }} pcs</span
                                         >
                                     </div>
                                     <div>
@@ -198,7 +199,7 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                                     </div>
                                     <div class="shrink-0 text-right">
                                         <p class="text-sm font-bold text-red-600 dark:text-red-400">
-                                            -{{ usage.quantity }} {{ usage.material_receipt?.material?.unit }}
+                                            -{{ formatNumber(usage.quantity, 2) }} {{ usage.material_receipt?.material?.unit }}
                                         </p>
                                         <p class="text-gray-450 mt-1 text-xs font-semibold">
                                             {{ fmt(usage.material_receipt?.price_per_unit || 0) }} / {{ usage.material_receipt?.material?.unit }}

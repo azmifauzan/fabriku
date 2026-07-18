@@ -4,6 +4,7 @@ import PageHeader from '@/components/PageHeader.vue';
 import { useBusinessContext } from '@/composables/useBusinessContext';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Check, Edit, Eye, Play, Send, Trash2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -487,7 +488,7 @@ const markComplete = async (order: ProductionOrder) => {
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                        {{ order.preparation_order.output_quantity }} pcs
+                                        {{ formatNumber(order.preparation_order.output_quantity) }} pcs
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
                                         {{

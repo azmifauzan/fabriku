@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link, router } from '@inertiajs/vue3';
 
 interface Material {
@@ -168,7 +169,9 @@ const handleDelete = async () => {
 
                             <div class="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/30">
                                 <p class="mb-1 text-xs text-blue-600 dark:text-blue-400">Output Hasil</p>
-                                <p class="text-lg font-bold text-blue-700 dark:text-blue-300">{{ order.output_quantity }} {{ order.output_unit }}</p>
+                                <p class="text-lg font-bold text-blue-700 dark:text-blue-300">
+                                    {{ formatNumber(order.output_quantity) }} {{ order.output_unit }}
+                                </p>
                             </div>
                         </div>
 
@@ -220,7 +223,7 @@ const handleDelete = async () => {
                                             {{ material.material_name }}
                                         </td>
                                         <td class="px-4 py-3 text-right font-mono text-sm text-gray-700 dark:text-gray-300">
-                                            {{ material.quantity }}
+                                            {{ formatNumber(material.quantity, 2) }}
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                                             {{ material.unit }}
@@ -292,7 +295,7 @@ const handleDelete = async () => {
                                             </span>
                                         </td>
                                         <td class="px-4 py-3 text-right font-mono text-sm text-gray-700 dark:text-gray-300">
-                                            {{ po.quantity_requested }}
+                                            {{ formatNumber(po.quantity_requested) }}
                                         </td>
                                         <td class="px-4 py-3 text-right">
                                             <Link

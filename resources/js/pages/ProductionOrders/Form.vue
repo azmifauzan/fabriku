@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useBusinessContext } from '@/composables/useBusinessContext';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -129,7 +130,7 @@ const isEditing = !!props.productionOrder?.id;
                                         >
                                             <option value="0" disabled>-- Pilih Hasil {{ preparationLabel }} --</option>
                                             <option v-for="po in preparationOrders" :key="po.id" :value="po.id">
-                                                {{ po.order_number }} - {{ po.pattern?.name || 'N/A' }} ({{ po.output_quantity }} pcs)
+                                                {{ po.order_number }} - {{ po.pattern?.name || 'N/A' }} ({{ formatNumber(po.output_quantity) }} pcs)
                                             </option>
                                         </select>
                                         <p v-if="form.errors.preparation_order_id" class="mt-1 text-sm text-red-600">
@@ -152,7 +153,7 @@ const isEditing = !!props.productionOrder?.id;
                                             <div>
                                                 <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Output Quantity</p>
                                                 <p class="text-lg font-bold text-green-600 dark:text-green-400">
-                                                    {{ selectedPreparationOrder.output_quantity }} pcs
+                                                    {{ formatNumber(selectedPreparationOrder.output_quantity) }} pcs
                                                 </p>
                                             </div>
                                         </div>

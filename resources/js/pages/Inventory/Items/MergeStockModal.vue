@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatNumber } from '@/lib/utils';
 import { useForm } from '@inertiajs/vue3';
 import { X } from 'lucide-vue-next';
 import { watch } from 'vue';
@@ -112,7 +113,7 @@ const close = () => {
                                     >
                                         <option :value="null" disabled>Pilih item tujuan</option>
                                         <option v-for="candidate in candidates" :key="candidate.id" :value="candidate.id">
-                                            {{ candidate.sku }} — stok saat ini: {{ candidate.current_quantity }}
+                                            {{ candidate.sku }} — stok saat ini: {{ formatNumber(candidate.current_quantity) }}
                                         </option>
                                     </select>
                                     <p v-if="form.errors.destination_item_id" class="mt-1 text-xs text-red-600">
@@ -139,7 +140,9 @@ const close = () => {
                                 </div>
 
                                 <div>
-                                    <label for="merge_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300"> Catatan Tambahan </label>
+                                    <label for="merge_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Catatan Tambahan
+                                    </label>
                                     <textarea
                                         id="merge_notes"
                                         v-model="form.notes"
