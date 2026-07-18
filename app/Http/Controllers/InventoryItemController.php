@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MergeInventoryItemRequest;
 use App\Http\Requests\StoreInventoryItemRequest;
 use App\Http\Requests\TransferInventoryItemRequest;
 use App\Http\Requests\UpdateInventoryItemRequest;
@@ -108,10 +109,22 @@ class InventoryItemController extends Controller
             $location->available_capacity = $location->available_capacity;
         });
 
+        $mergeCandidateQuery = InventoryItem::query()
+            ->whereKeyNot($item->id)
+            ->where('reserved_quantity', 0);
+
+        foreach (InventoryService::MERGE_COMPATIBILITY_FIELDS as $field) {
+            if ($field === 'tenant_id') {
+                continue; // already enforced by TenantScope
+            }
+            $mergeCandidateQuery->where($field, $item->getAttribute($field));
+        }
+
         return Inertia::render('Inventory/Items/Show', [
             'item' => $item,
             'adjustmentTypes' => StockAdjustment::getAdjustmentTypes(),
             'locations' => $locations,
+            'mergeCandidates' => $mergeCandidateQuery->get(['id', 'sku', 'product_name', 'current_quantity']),
         ]);
     }
 
@@ -340,6 +353,26 @@ class InventoryItemController extends Controller
         }
 
         return back()->with('success', 'Stock berhasil dipindah ke '.count($created).' lokasi.');
+    }
+
+    public function merge(MergeInventoryItemRequest $request, InventoryItem $item)
+    {
+        $destination = InventoryItem::findOrFail($request->validated('destination_item_id'));
+
+        try {
+            $destination = $this->inventoryService->mergeStock(
+                $item,
+                $destination,
+                $request->validated('reason'),
+                $request->validated('notes'),
+            );
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return redirect()
+            ->route('inventory.items.show', $destination)
+            ->with('success', 'Item berhasil digabungkan ke SKU '.$destination->sku.'.');
     }
 
     // QR Code features

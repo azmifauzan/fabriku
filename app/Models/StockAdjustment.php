@@ -31,6 +31,8 @@ class StockAdjustment extends Model
 
     public const TYPE_TRANSFER = 'transfer';
 
+    public const TYPE_MERGE = 'merge';
+
     protected $fillable = [
         'tenant_id',
         'inventory_item_id',
@@ -119,6 +121,7 @@ class StockAdjustment extends Model
             self::TYPE_PURCHASE => 'Pembelian',
             self::TYPE_PRODUCTION_ENTRY => 'Hasil Produksi',
             self::TYPE_TRANSFER => 'Transfer Lokasi',
+            self::TYPE_MERGE => 'Penggabungan Item',
             default => ucfirst($this->adjustment_type),
         };
     }
@@ -135,6 +138,7 @@ class StockAdjustment extends Model
             self::TYPE_PURCHASE => 'Pembelian',
             self::TYPE_PRODUCTION_ENTRY => 'Hasil Produksi',
             self::TYPE_TRANSFER => 'Transfer Lokasi',
+            self::TYPE_MERGE => 'Penggabungan Item',
         ];
     }
 }

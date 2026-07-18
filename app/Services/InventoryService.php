@@ -10,9 +10,21 @@ use App\Models\ProductionOrder;
 use App\Models\StockAdjustment;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class InventoryService
 {
+    /**
+     * Fields that must match exactly for two items to be merge-compatible.
+     * Shared with InventoryItemController::show() so the merge-candidate list
+     * never suggests an item that mergeStock() would then reject.
+     */
+    public const MERGE_COMPATIBILITY_FIELDS = [
+        'tenant_id', 'location_id', 'product_name', 'product_code', 'category_id',
+        'production_order_id', 'source_type', 'unit_cost', 'selling_price',
+        'quality_grade', 'status', 'expired_date',
+    ];
+
     /**
      * Get inventory dashboard statistics
      */
@@ -130,6 +142,79 @@ class InventoryService
             }
 
             return $createdItems;
+        });
+    }
+
+    /**
+     * Merge all stock from one item into another compatible item in the same rack.
+     */
+    public function mergeStock(InventoryItem $source, InventoryItem $destination, string $reason, ?string $notes = null): InventoryItem
+    {
+        return DB::transaction(function () use ($source, $destination, $reason, $notes) {
+            $lockedItems = InventoryItem::whereIn('id', [$source->id, $destination->id])
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            $source = $lockedItems->get($source->id);
+            $destination = $lockedItems->get($destination->id);
+
+            if (! $source || ! $destination) {
+                throw new \Exception('Item sumber atau tujuan sudah tidak tersedia.');
+            }
+
+            if ($source->id === $destination->id) {
+                throw new \Exception('Item sumber dan tujuan harus berbeda.');
+            }
+
+            if ($source->reserved_quantity > 0 || $destination->reserved_quantity > 0) {
+                throw new \Exception('Item dengan stok terreservasi tidak dapat digabungkan.');
+            }
+
+            if ($source->current_quantity <= 0) {
+                throw new \Exception('Item sumber tidak memiliki stok untuk digabungkan.');
+            }
+
+            foreach (self::MERGE_COMPATIBILITY_FIELDS as $field) {
+                if ((string) $source->getAttribute($field) !== (string) $destination->getAttribute($field)) {
+                    throw new \Exception('Item tidak kompatibel untuk digabungkan. Pastikan produk, rak, harga, grade, status, dan sumber stok sama.');
+                }
+            }
+
+            $quantity = $source->current_quantity;
+            $sourceBefore = $source->current_quantity;
+            $destinationBefore = $destination->current_quantity;
+            $batchId = (string) Str::uuid();
+
+            $source->decrement('current_quantity', $quantity);
+            $destination->increment('current_quantity', $quantity);
+
+            StockAdjustment::create([
+                'inventory_item_id' => $source->id,
+                'adjustment_type' => StockAdjustment::TYPE_MERGE,
+                'batch_id' => $batchId,
+                'quantity_before' => $sourceBefore,
+                'quantity_after' => 0,
+                'adjustment_quantity' => -$quantity,
+                'reason' => $reason,
+                'notes' => $notes,
+            ]);
+
+            StockAdjustment::create([
+                'inventory_item_id' => $destination->id,
+                'adjustment_type' => StockAdjustment::TYPE_MERGE,
+                'batch_id' => $batchId,
+                'quantity_before' => $destinationBefore,
+                'quantity_after' => $destinationBefore + $quantity,
+                'adjustment_quantity' => $quantity,
+                'reason' => $reason,
+                'notes' => $notes,
+            ]);
+
+            $source->delete();
+
+            return $destination->fresh();
         });
     }
 
