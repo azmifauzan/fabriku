@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { History, RefreshCw } from 'lucide-vue-next';
+import { GitMerge, History, RefreshCw } from 'lucide-vue-next';
 import { ref } from 'vue';
 import AdjustStockModal from './AdjustStockModal.vue';
+import MergeStockModal from './MergeStockModal.vue';
 import TransferStockModal from './TransferStockModal.vue';
 
 interface Pattern {
@@ -63,10 +64,18 @@ interface Item {
     production_order?: ProductionOrder;
 }
 
+interface MergeCandidate {
+    id: number;
+    sku: string;
+    product_name: string;
+    current_quantity: number;
+}
+
 interface Props {
     item: Item;
     adjustmentTypes?: Record<string, string>;
     locations?: InventoryLocation[];
+    mergeCandidates?: MergeCandidate[];
 }
 
 const props = defineProps<Props>();
@@ -83,6 +92,7 @@ const adjustmentTypes = props.adjustmentTypes || {
 
 const showAdjustModal = ref(false);
 const showTransferModal = ref(false);
+const showMergeModal = ref(false);
 
 const statusBadgeClass = (status: string) => {
     const classes: Record<string, string> = {
@@ -167,6 +177,14 @@ const productionUnit = () => {
                         >
                             <RefreshCw class="h-4 w-4" />
                             Adjust Stock
+                        </button>
+                        <button
+                            v-if="mergeCandidates && mergeCandidates.length > 0"
+                            @click="showMergeModal = true"
+                            class="inline-flex items-center gap-2 rounded-lg border border-teal-300 bg-teal-50 px-3 py-2 text-sm font-semibold text-teal-700 shadow-sm transition-all hover:bg-teal-100 sm:px-4 sm:py-2.5 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-400 dark:hover:bg-teal-900/50"
+                        >
+                            <GitMerge class="h-4 w-4" />
+                            Gabung Item
                         </button>
                         <Link
                             :href="`/inventory/items/${item.id}/edit`"
@@ -346,5 +364,8 @@ const productionUnit = () => {
 
         <!-- Transfer Stock Modal -->
         <TransferStockModal :show="showTransferModal" :item="item" :locations="locations" @close="showTransferModal = false" />
+
+        <!-- Merge Stock Modal -->
+        <MergeStockModal :show="showMergeModal" :item="item" :candidates="mergeCandidates" @close="showMergeModal = false" />
     </AppLayout>
 </template>

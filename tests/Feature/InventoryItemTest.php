@@ -822,3 +822,208 @@ it('flashes a friendly error instead of a 500 when the transfer service throws',
     $response->assertRedirect();
     $response->assertSessionHas('error', 'Stok tidak cukup untuk dipindah.');
 });
+
+it('can merge two compatible items in the same rack', function () {
+    $compatible = [
+        'product_name' => 'Kaos Polos M',
+        'product_code' => 'PC-KAOS-M',
+        'quality_grade' => 'A',
+        'unit_cost' => 15000,
+        'selling_price' => 25000,
+        'status' => 'available',
+        'expired_date' => null,
+        'reserved_quantity' => 0,
+    ];
+
+    $source = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([...$compatible, 'current_quantity' => 40]);
+
+    $destination = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([...$compatible, 'current_quantity' => 10]);
+
+    $response = $this->post("/inventory/items/{$source->id}/merge", [
+        'destination_item_id' => $destination->id,
+        'reason' => 'Konsolidasi rak',
+    ]);
+
+    $response->assertRedirect(route('inventory.items.show', $destination));
+
+    $this->assertSoftDeleted('inventory_items', ['id' => $source->id]);
+
+    $destination->refresh();
+    expect($destination->current_quantity)->toBe(50);
+
+    $this->assertDatabaseHas('stock_adjustments', [
+        'inventory_item_id' => $source->id,
+        'adjustment_type' => 'merge',
+        'quantity_before' => 40,
+        'quantity_after' => 0,
+        'adjustment_quantity' => -40,
+    ]);
+
+    $this->assertDatabaseHas('stock_adjustments', [
+        'inventory_item_id' => $destination->id,
+        'adjustment_type' => 'merge',
+        'quantity_before' => 10,
+        'quantity_after' => 50,
+        'adjustment_quantity' => 40,
+    ]);
+});
+
+it('rejects merge between items that differ on a compatibility field', function () {
+    $source = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create(['product_name' => 'Kaos Polos M', 'unit_cost' => 15000, 'current_quantity' => 40, 'reserved_quantity' => 0]);
+
+    $destination = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create(['product_name' => 'Kaos Polos M', 'unit_cost' => 18000, 'current_quantity' => 10, 'reserved_quantity' => 0]);
+
+    $response = $this->post("/inventory/items/{$source->id}/merge", [
+        'destination_item_id' => $destination->id,
+        'reason' => 'Konsolidasi rak',
+    ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error');
+
+    $source->refresh();
+    $destination->refresh();
+    expect($source->current_quantity)->toBe(40);
+    expect($destination->current_quantity)->toBe(10);
+});
+
+it('rejects merge when source or destination has reserved stock', function () {
+    $compatible = [
+        'product_name' => 'Kaos Polos M',
+        'unit_cost' => 15000,
+        'selling_price' => 25000,
+    ];
+
+    $source = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([...$compatible, 'current_quantity' => 40, 'reserved_quantity' => 5]);
+
+    $destination = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([...$compatible, 'current_quantity' => 10, 'reserved_quantity' => 0]);
+
+    $response = $this->post("/inventory/items/{$source->id}/merge", [
+        'destination_item_id' => $destination->id,
+        'reason' => 'Konsolidasi rak',
+    ]);
+
+    $response->assertSessionHas('error');
+});
+
+it('rejects merge into itself', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create(['current_quantity' => 40, 'reserved_quantity' => 0]);
+
+    $response = $this->post("/inventory/items/{$item->id}/merge", [
+        'destination_item_id' => $item->id,
+        'reason' => 'Konsolidasi rak',
+    ]);
+
+    $response->assertSessionHasErrors(['destination_item_id']);
+});
+
+it('cannot merge into another tenant item', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create(['current_quantity' => 40, 'reserved_quantity' => 0]);
+
+    $otherTenant = Tenant::factory()->create();
+    $otherLocation = InventoryLocation::factory()->for($otherTenant)->create();
+    $otherItem = InventoryItem::factory()
+        ->for($otherTenant)
+        ->for($otherLocation, 'inventoryLocation')
+        ->create(['current_quantity' => 10, 'reserved_quantity' => 0]);
+
+    $response = $this->post("/inventory/items/{$item->id}/merge", [
+        'destination_item_id' => $otherItem->id,
+        'reason' => 'Cross tenant attempt',
+    ]);
+
+    $response->assertSessionHasErrors(['destination_item_id']);
+});
+
+it('only lists merge candidates that are actually compatible', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'product_name' => 'Kaos Polos M',
+            'product_code' => 'PC-KAOS-M',
+            'unit_cost' => 15000,
+            'selling_price' => 25000,
+            'quality_grade' => 'A',
+            'status' => 'available',
+            'expired_date' => null,
+            'current_quantity' => 40,
+            'reserved_quantity' => 0,
+        ]);
+
+    $compatible = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'product_name' => 'Kaos Polos M',
+            'product_code' => 'PC-KAOS-M',
+            'unit_cost' => 15000,
+            'selling_price' => 25000,
+            'quality_grade' => 'A',
+            'status' => 'available',
+            'expired_date' => null,
+            'current_quantity' => 10,
+            'reserved_quantity' => 0,
+        ]);
+
+    // Same product/rack but different unit_cost - must NOT be offered as a candidate.
+    $incompatible = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create([
+            'product_name' => 'Kaos Polos M',
+            'product_code' => 'PC-KAOS-M',
+            'unit_cost' => 18000,
+            'selling_price' => 25000,
+            'quality_grade' => 'A',
+            'status' => 'available',
+            'expired_date' => null,
+            'current_quantity' => 10,
+            'reserved_quantity' => 0,
+        ]);
+
+    $response = $this->get("/inventory/items/{$item->id}");
+
+    $response->assertInertia(fn (AssertableInertia $page) => $page->component('Inventory/Items/Show')
+        ->where('mergeCandidates', function ($candidates) use ($compatible, $incompatible) {
+            $ids = collect($candidates)->pluck('id');
+
+            return $ids->contains($compatible->id) && ! $ids->contains($incompatible->id);
+        })
+    );
+});
