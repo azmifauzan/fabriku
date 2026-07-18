@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { AlertCircle, ArrowLeft, BookOpen, Factory, Plus, Sparkles, Trash2 } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
@@ -193,7 +194,7 @@ const submitForm = () => {
                                 >
                                     <option :value="null" disabled>-- Pilih Produk Jadi --</option>
                                     <option v-for="item in inventoryItems" :key="item.id" :value="item.id">
-                                        {{ item.product_name }} ({{ item.sku }}) - Stok: {{ item.current_quantity }}
+                                        {{ item.product_name }} ({{ item.sku }}) - Stok: {{ formatNumber(item.current_quantity) }}
                                     </option>
                                 </select>
                                 <p v-if="form.errors.inventory_item_id" class="mt-1 text-xs font-medium text-red-500">
@@ -354,7 +355,7 @@ const submitForm = () => {
                                     >
                                         <option :value="null" disabled>-- Pilih Bahan Baku --</option>
                                         <option v-for="mat in materials" :key="mat.id" :value="mat.id">
-                                            {{ mat.name }} ({{ mat.code }}) - Stok: {{ mat.stock_quantity }} {{ mat.unit }}
+                                            {{ mat.name }} ({{ mat.code }}) - Stok: {{ formatNumber(mat.stock_quantity, 2) }} {{ mat.unit }}
                                         </option>
                                     </select>
                                 </div>

@@ -317,7 +317,7 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 text-right text-sm text-gray-900 dark:text-gray-100">
-                                                {{ item.quantity }}
+                                                {{ Number(item.quantity).toLocaleString('id-ID') }}
                                             </td>
                                             <td class="px-6 py-4 text-right text-sm text-gray-900 dark:text-gray-100">
                                                 Rp {{ Number(item.unit_price).toLocaleString('id-ID') }}
@@ -461,7 +461,7 @@
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Quantity</dt>
                                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                            {{ salesOrder.items.reduce((sum, item) => sum + item.quantity, 0) }}
+                                            {{ Number(salesOrder.items.reduce((sum, item) => sum + item.quantity, 0)).toLocaleString('id-ID') }}
                                         </dd>
                                     </div>
                                     <div>

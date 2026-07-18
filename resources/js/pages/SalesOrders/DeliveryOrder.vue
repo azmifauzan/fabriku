@@ -45,7 +45,7 @@
                         </p>
                         <p class="text-xs text-gray-500">{{ item.inventory_item?.sku || item.service?.code }}</p>
                     </div>
-                    <p class="shrink-0 font-semibold text-gray-900">{{ item.quantity }} pcs</p>
+                    <p class="shrink-0 font-semibold text-gray-900">{{ formatNumber(item.quantity) }} pcs</p>
                 </div>
             </div>
         </div>
@@ -68,7 +68,7 @@
                         <p class="font-medium">{{ item.inventory_item?.product_name || item.inventory_item?.pattern?.name || item.service?.name }}</p>
                     </td>
                     <td class="py-4 text-sm text-gray-500">{{ item.inventory_item?.sku || item.service?.code }}</td>
-                    <td class="py-4 text-right text-sm font-medium text-gray-900">{{ item.quantity }} pcs</td>
+                    <td class="py-4 text-right text-sm font-medium text-gray-900">{{ formatNumber(item.quantity) }} pcs</td>
                     <td class="py-4 pl-6 text-sm text-gray-500">{{ item.notes || '' }}</td>
                 </tr>
             </tbody>
@@ -79,7 +79,9 @@
             <div class="w-full sm:w-1/3">
                 <div class="flex justify-between border-t-2 border-gray-300 py-3">
                     <span class="font-bold text-gray-900">Total Qty</span>
-                    <span class="font-bold text-gray-900">{{ salesOrder.items.reduce((sum, item) => sum + item.quantity, 0) }} pcs</span>
+                    <span class="font-bold text-gray-900">
+                        {{ formatNumber(salesOrder.items.reduce((sum, item) => sum + item.quantity, 0)) }} pcs
+                    </span>
                 </div>
             </div>
         </div>
@@ -140,6 +142,8 @@
 </template>
 
 <script setup lang="ts">
+import { formatNumber } from '@/lib/utils';
+
 defineProps({
     salesOrder: Object,
     settings: Object,

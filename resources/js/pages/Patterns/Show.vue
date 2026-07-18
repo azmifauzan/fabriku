@@ -96,7 +96,7 @@
                                                 {{ order.preparation_date ? new Date(order.preparation_date).toLocaleDateString('id-ID') : '-' }}
                                             </td>
                                             <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                                {{ order.quantity }}
+                                                {{ formatNumber(order.quantity) }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span
@@ -158,6 +158,7 @@
 <script setup lang="ts">
 import { useBusinessContext } from '@/composables/useBusinessContext';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 

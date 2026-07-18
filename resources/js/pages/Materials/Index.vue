@@ -186,7 +186,9 @@ const closeRestockModal = () => {
                                 </div>
                                 <div class="ml-5">
                                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Stok Menipis</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.low_stock_materials }}</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                                        {{ stats.low_stock_materials.toLocaleString('id-ID') }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -207,7 +209,9 @@ const closeRestockModal = () => {
                                 </div>
                                 <div class="ml-5">
                                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Stok Habis</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ stats.out_of_stock_materials }}</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                                        {{ stats.out_of_stock_materials.toLocaleString('id-ID') }}
+                                    </p>
                                 </div>
                             </div>
                         </div>

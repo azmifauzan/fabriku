@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Edit, Eye, Search, X } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -262,7 +263,7 @@ const statusLabels: Record<string, string> = {
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900 dark:text-gray-100">
-                                            {{ order.output_quantity }} {{ order.output_unit }}
+                                            {{ formatNumber(order.output_quantity) }} {{ order.output_unit }}
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">

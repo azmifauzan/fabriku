@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
 import { AlertTriangle, Archive, Box, ChevronDown, ChevronUp, LayoutGrid, Package } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -143,7 +144,7 @@ const getProgressBarColor = (percentage: number) => {
                                 <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                     <span v-if="location.is_unlimited">Kapasitas Unlimited</span>
                                     <span v-else>
-                                        {{ location.used_capacity }} / {{ location.capacity }} items
+                                        {{ formatNumber(location.used_capacity) }} / {{ formatNumber(location.capacity) }} items
                                         <span :class="['ml-1 font-medium', getCapacityColor(location.percentage)]">
                                             ({{ location.percentage }}%)
                                         </span>
@@ -208,8 +209,10 @@ const getProgressBarColor = (percentage: number) => {
                                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.sku }}</p>
                                     </div>
                                     <div class="shrink-0 text-right text-sm">
-                                        <p class="font-medium text-gray-900 dark:text-white">{{ item.quantity }}</p>
-                                        <p v-if="item.reserved > 0" class="text-xs text-yellow-600 dark:text-yellow-400">{{ item.reserved }} resv</p>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ formatNumber(item.quantity) }}</p>
+                                        <p v-if="item.reserved > 0" class="text-xs text-yellow-600 dark:text-yellow-400">
+                                            {{ formatNumber(item.reserved) }} resv
+                                        </p>
                                     </div>
                                 </Link>
                             </div>

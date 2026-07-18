@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
 import { GitMerge, History, RefreshCw } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -242,7 +243,7 @@ const productionUnit = () => {
                                     <div>
                                         <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Target Produksi</p>
                                         <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ item.target_quantity }} {{ productionUnit() }}
+                                            {{ formatNumber(item.target_quantity) }} {{ productionUnit() }}
                                         </p>
                                     </div>
                                     <div>
@@ -333,21 +334,27 @@ const productionUnit = () => {
                                     <div class="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
                                         <dt class="text-sm font-medium text-blue-700 dark:text-blue-400">Current Stock</dt>
                                         <dd class="mt-1 flex items-baseline">
-                                            <span class="text-3xl font-bold text-blue-900 dark:text-blue-200">{{ item.current_stock }}</span>
+                                            <span class="text-3xl font-bold text-blue-900 dark:text-blue-200">{{
+                                                formatNumber(item.current_stock)
+                                            }}</span>
                                             <span class="ml-2 text-sm text-blue-700 dark:text-blue-400">{{ productionUnit() }}</span>
                                         </dd>
                                     </div>
                                     <div class="rounded-lg bg-yellow-50 p-4 dark:bg-yellow-900/20">
                                         <dt class="text-sm font-medium text-yellow-700 dark:text-yellow-400">Reserved</dt>
                                         <dd class="mt-1 flex items-baseline">
-                                            <span class="text-3xl font-bold text-yellow-900 dark:text-yellow-200">{{ item.reserved_stock }}</span>
+                                            <span class="text-3xl font-bold text-yellow-900 dark:text-yellow-200">{{
+                                                formatNumber(item.reserved_stock)
+                                            }}</span>
                                             <span class="ml-2 text-sm text-yellow-700 dark:text-yellow-400">{{ productionUnit() }}</span>
                                         </dd>
                                     </div>
                                     <div class="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
                                         <dt class="text-sm font-medium text-green-700 dark:text-green-400">Available</dt>
                                         <dd class="mt-1 flex items-baseline">
-                                            <span class="text-3xl font-bold text-green-900 dark:text-green-200">{{ availableStock() }}</span>
+                                            <span class="text-3xl font-bold text-green-900 dark:text-green-200">{{
+                                                formatNumber(availableStock())
+                                            }}</span>
                                             <span class="ml-2 text-sm text-green-700 dark:text-green-400">{{ productionUnit() }}</span>
                                         </dd>
                                     </div>

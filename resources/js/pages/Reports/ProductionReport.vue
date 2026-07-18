@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, router } from '@inertiajs/vue3';
 import { Download, FileBarChart, FileSpreadsheet, Filter } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -162,21 +163,21 @@ const exportReport = (format: 'pdf' | 'excel') => {
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Orders</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ summary.total_orders }}
+                            {{ formatNumber(summary.total_orders) }}
                         </dd>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ summary.completed_orders }} completed</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ formatNumber(summary.completed_orders) }} completed</p>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Output</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ summary.total_output }}
+                            {{ formatNumber(summary.total_output) }}
                         </dd>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ summary.in_progress_orders }} in progress</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ formatNumber(summary.in_progress_orders) }} in progress</p>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status Summary</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ summary.completed_orders }}/{{ summary.total_orders }}
+                            {{ formatNumber(summary.completed_orders) }}/{{ formatNumber(summary.total_orders) }}
                         </dd>
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Completion rate</p>
                     </div>
@@ -322,7 +323,7 @@ const exportReport = (format: 'pdf' | 'excel') => {
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white">
-                                        {{ order.output_quantity }}
+                                        {{ formatNumber(order.output_quantity) }}
                                     </td>
                                     <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white">
                                         {{ formatCurrency(order.material_cost) }}

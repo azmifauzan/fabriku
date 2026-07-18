@@ -2,6 +2,7 @@
 import FormField from '@/components/FormField.vue';
 import FormSection from '@/components/FormSection.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 const props = defineProps<{
@@ -203,7 +204,7 @@ const isEditing = !!props.order?.id;
                                             >
                                                 <option :value="null">Pilih Material</option>
                                                 <option v-for="mat in materials" :key="mat.id" :value="mat.id">
-                                                    {{ mat.name }} (Total Stok: {{ mat.stock_quantity }} {{ mat.unit }})
+                                                    {{ mat.name }} (Total Stok: {{ formatNumber(mat.stock_quantity, 2) }} {{ mat.unit }})
                                                 </option>
                                             </select>
                                         </div>
@@ -271,7 +272,12 @@ const isEditing = !!props.order?.id;
                                                         <div>
                                                             <span class="block text-xs text-gray-500 dark:text-gray-400">Sisa Stok Batch</span>
                                                             <span class="font-bold text-indigo-600 dark:text-indigo-400">
-                                                                {{ getSelectedBatch(material.material_id, material.batch_id).remaining_quantity }}
+                                                                {{
+                                                                    formatNumber(
+                                                                        getSelectedBatch(material.material_id, material.batch_id).remaining_quantity,
+                                                                        2,
+                                                                    )
+                                                                }}
                                                                 {{ material.unit }}
                                                             </span>
                                                         </div>

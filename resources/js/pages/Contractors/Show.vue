@@ -158,7 +158,7 @@
                                             {{ order.pattern?.name || '-' }}
                                         </td>
                                         <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                            {{ order.quantity_ordered }}
+                                            {{ formatNumber(order.quantity_ordered) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span
@@ -195,6 +195,7 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 

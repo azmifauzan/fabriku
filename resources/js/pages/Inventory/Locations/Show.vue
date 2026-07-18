@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
 
 interface InventoryItem {
@@ -101,7 +102,10 @@ const capacityPercentage = () => {
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Kapasitas</dt>
                                         <dd class="mt-2">
                                             <div class="mb-2 flex items-center justify-between text-sm text-gray-900 dark:text-gray-100">
-                                                <span>{{ location.current_capacity || 0 }} / {{ location.capacity }} items</span>
+                                                <span
+                                                    >{{ formatNumber(location.current_capacity || 0) }} /
+                                                    {{ formatNumber(location.capacity) }} items</span
+                                                >
                                                 <span class="font-medium">{{ capacityPercentage() }}%</span>
                                             </div>
                                             <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
@@ -164,7 +168,7 @@ const capacityPercentage = () => {
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Kapasitas Tersedia</dt>
                                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                            {{ location.available_capacity || '-' }}
+                                            {{ location.available_capacity != null ? formatNumber(location.available_capacity) : '-' }}
                                         </dd>
                                     </div>
                                 </dl>
@@ -211,7 +215,7 @@ const capacityPercentage = () => {
                                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.sku }}</p>
                                 <div class="mt-1 flex items-center gap-2">
                                     <span class="text-xs text-gray-600 dark:text-gray-400"
-                                        >Stok: <strong>{{ item.current_stock }}</strong></span
+                                        >Stok: <strong>{{ formatNumber(item.current_stock) }}</strong></span
                                     >
                                     <span class="text-xs text-gray-400">·</span>
                                     <span class="text-xs text-gray-600 capitalize dark:text-gray-400">{{ item.status }}</span>
@@ -275,7 +279,7 @@ const capacityPercentage = () => {
                                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.sku }}</p>
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">
-                                        {{ item.current_stock }}
+                                        {{ formatNumber(item.current_stock) }}
                                     </td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">
                                         {{ item.status }}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 
@@ -115,9 +116,11 @@ const formatRupiah = (value: number) => 'Rp ' + Number(value).toLocaleString('id
                                     <p class="font-medium text-gray-900 dark:text-gray-100">{{ line.inventory_item?.product_name }}</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ line.inventory_item?.sku }}</p>
                                 </td>
-                                <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ line.quantity_before }}</td>
-                                <td class="px-4 py-3 text-right font-medium text-green-600 dark:text-green-400">+{{ line.adjustment_quantity }}</td>
-                                <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ line.quantity_after }}</td>
+                                <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ formatNumber(line.quantity_before) }}</td>
+                                <td class="px-4 py-3 text-right font-medium text-green-600 dark:text-green-400">
+                                    +{{ formatNumber(line.adjustment_quantity) }}
+                                </td>
+                                <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ formatNumber(line.quantity_after) }}</td>
                                 <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ formatRupiah(line.unit_cost ?? 0) }}</td>
                                 <td class="px-4 py-3 text-right font-medium text-gray-900 dark:text-gray-100">
                                     {{ formatRupiah(line.adjustment_quantity * (line.unit_cost ?? 0)) }}

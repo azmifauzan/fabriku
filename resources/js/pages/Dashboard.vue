@@ -3,7 +3,7 @@ import QrScanner from '@/components/QrScanner.vue';
 import { useBusinessContext } from '@/composables/useBusinessContext';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { AlertTriangle, Box, ClipboardList, Factory, Layers, Package, ShoppingCart, TrendingUp } from 'lucide-vue-next';
+import { AlertTriangle, Box, ClipboardList, Factory, Layers, Package, QrCode, ShoppingCart, Sparkles, TrendingUp } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const { term } = useBusinessContext();
@@ -150,30 +150,39 @@ const getStatusBadgeClass = (status: string) => {
     <AppLayout>
         <Head title="Dashboard" />
 
-        <div class="px-6 py-6">
+        <div class="min-h-screen bg-gray-50/60 px-4 py-5 sm:px-6 sm:py-6 dark:bg-gray-900/40">
             <div class="mx-auto max-w-7xl space-y-6">
                 <!-- Welcome Message -->
-                <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Fabriku</h2>
-                                <p class="mt-1 text-gray-600 dark:text-gray-400">Ringkasan bisnis dan aktivitas terkini</p>
+                <div
+                    class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-purple-700 p-6 text-white shadow-lg shadow-indigo-900/10 sm:p-8"
+                >
+                    <div class="absolute -top-20 -right-14 h-64 w-64 rounded-full bg-white/10 blur-2xl"></div>
+                    <div class="absolute -bottom-28 left-1/3 h-56 w-56 rounded-full bg-purple-400/20 blur-3xl"></div>
+                    <div class="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                        <div class="max-w-2xl">
+                            <div
+                                class="mb-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-indigo-50 backdrop-blur"
+                            >
+                                <Sparkles :size="14" /> Ringkasan bisnis bulan ini
                             </div>
+                            <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Selamat datang di Dashboard Fabriku</h2>
+                            <p class="mt-2 text-sm leading-6 text-indigo-100 sm:text-base">
+                                Pantau penjualan, produksi, dan kesehatan stok dalam satu tampilan yang ringkas.
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+                            <Link
+                                href="/sales-orders/create"
+                                class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-50"
+                            >
+                                <ShoppingCart :size="17" /> Pesanan Baru
+                            </Link>
                             <QrScanner v-slot="{ startScanning }">
                                 <button
                                     @click="startScanning"
-                                    class="inline-flex items-center gap-2 rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition-all hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
                                 >
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-                                        />
-                                    </svg>
-                                    Scan QR Code
+                                    <QrCode :size="17" /> Scan QR
                                 </button>
                             </QrScanner>
                         </div>
@@ -181,9 +190,11 @@ const getStatusBadgeClass = (status: string) => {
                 </div>
 
                 <!-- Stats Grid -->
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     <!-- Total Materials -->
-                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                    <div
+                        class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-800"
+                    >
                         <div class="p-6">
                             <div class="flex items-center gap-4">
                                 <div class="flex-shrink-0 rounded-lg bg-indigo-500 p-3">
@@ -192,10 +203,10 @@ const getStatusBadgeClass = (status: string) => {
                                 <div class="min-w-0 flex-1">
                                     <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Total {{ materialLabel }}</dt>
                                     <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                                        {{ stats.total_materials }}
+                                        {{ formatNumber(stats.total_materials) }}
                                     </dd>
                                     <p v-if="stats.low_stock_materials > 0" class="mt-1 text-xs text-red-600 dark:text-red-400">
-                                        {{ stats.low_stock_materials }} low stock
+                                        {{ formatNumber(stats.low_stock_materials) }} low stock
                                     </p>
                                 </div>
                             </div>
@@ -203,7 +214,9 @@ const getStatusBadgeClass = (status: string) => {
                     </div>
 
                     <!-- Total Inventory -->
-                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                    <div
+                        class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-800"
+                    >
                         <div class="p-6">
                             <div class="flex items-center gap-4">
                                 <div class="flex-shrink-0 rounded-lg bg-green-500 p-3">
@@ -212,10 +225,10 @@ const getStatusBadgeClass = (status: string) => {
                                 <div class="min-w-0 flex-1">
                                     <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Total Inventory</dt>
                                     <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                                        {{ stats.total_inventory }}
+                                        {{ formatNumber(stats.total_inventory) }}
                                     </dd>
                                     <p v-if="stats.low_stock_inventory > 0" class="mt-1 text-xs text-red-600 dark:text-red-400">
-                                        {{ stats.low_stock_inventory }} low stock
+                                        {{ formatNumber(stats.low_stock_inventory) }} low stock
                                     </p>
                                 </div>
                             </div>
@@ -223,7 +236,9 @@ const getStatusBadgeClass = (status: string) => {
                     </div>
 
                     <!-- Sales This Month -->
-                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                    <div
+                        class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-800"
+                    >
                         <div class="p-6">
                             <div class="flex items-center gap-4">
                                 <div class="flex-shrink-0 rounded-lg bg-blue-500 p-3">
@@ -234,14 +249,16 @@ const getStatusBadgeClass = (status: string) => {
                                     <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
                                         {{ formatCurrency(stats.total_sales_month) }}
                                     </dd>
-                                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">{{ stats.total_sales_count }} orders</p>
+                                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">{{ formatNumber(stats.total_sales_count) }} orders</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Pending Production -->
-                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                    <div
+                        class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-800"
+                    >
                         <div class="p-6">
                             <div class="flex items-center gap-4">
                                 <div class="flex-shrink-0 rounded-lg bg-yellow-500 p-3">
@@ -250,16 +267,20 @@ const getStatusBadgeClass = (status: string) => {
                                 <div class="min-w-0 flex-1">
                                     <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">Produksi Aktif</dt>
                                     <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                                        {{ stats.pending_production }}
+                                        {{ formatNumber(stats.pending_production) }}
                                     </dd>
-                                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">{{ stats.pending_preparation }} preparation</p>
+                                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                                        {{ formatNumber(stats.pending_preparation) }} preparation
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Realized Revenue -->
-                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                    <div
+                        class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-800"
+                    >
                         <div class="p-6">
                             <div class="flex items-center gap-4">
                                 <div class="flex-shrink-0 rounded-lg bg-green-600 p-3">
@@ -277,7 +298,9 @@ const getStatusBadgeClass = (status: string) => {
                     </div>
 
                     <!-- Outstanding Receivables -->
-                    <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                    <div
+                        class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-800"
+                    >
                         <div class="p-6">
                             <div class="flex items-center gap-4">
                                 <div class="flex-shrink-0 rounded-lg bg-red-500 p-3">
@@ -378,7 +401,9 @@ const getStatusBadgeClass = (status: string) => {
 
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <!-- Total Items -->
-                        <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div
+                            class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-800"
+                        >
                             <div class="p-6">
                                 <div class="flex items-center gap-3">
                                     <div class="flex-shrink-0 rounded-lg bg-blue-100 p-2 dark:bg-blue-900">
@@ -395,7 +420,9 @@ const getStatusBadgeClass = (status: string) => {
                         </div>
 
                         <!-- Total Quantity -->
-                        <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div
+                            class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-800"
+                        >
                             <div class="p-6">
                                 <div class="flex items-center gap-3">
                                     <div class="flex-shrink-0 rounded-lg bg-green-100 p-2 dark:bg-green-900">
@@ -415,7 +442,9 @@ const getStatusBadgeClass = (status: string) => {
                         </div>
 
                         <!-- Available Stock -->
-                        <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div
+                            class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-800"
+                        >
                             <div class="p-6">
                                 <div class="flex items-center gap-3">
                                     <div class="flex-shrink-0 rounded-lg bg-purple-100 p-2 dark:bg-purple-900">
@@ -433,7 +462,9 @@ const getStatusBadgeClass = (status: string) => {
                         </div>
 
                         <!-- Total Value -->
-                        <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
+                        <div
+                            class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-800"
+                        >
                             <div class="p-6">
                                 <div class="flex items-center gap-3">
                                     <div class="flex-shrink-0 rounded-lg bg-indigo-100 p-2 dark:bg-indigo-900">
@@ -483,7 +514,7 @@ const getStatusBadgeClass = (status: string) => {
                                     <div>
                                         <dt class="text-sm font-medium text-yellow-800 dark:text-yellow-300">Low Stock</dt>
                                         <dd class="mt-1 text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                                            {{ inventorySummary.low_stock_count }}
+                                            {{ formatNumber(inventorySummary.low_stock_count) }}
                                         </dd>
                                         <p class="mt-1 text-xs text-yellow-700 dark:text-yellow-400">Perlu restock segera</p>
                                     </div>
@@ -501,7 +532,7 @@ const getStatusBadgeClass = (status: string) => {
                                     <div>
                                         <dt class="text-sm font-medium text-red-800 dark:text-red-300">Out of Stock</dt>
                                         <dd class="mt-1 text-3xl font-bold text-red-600 dark:text-red-400">
-                                            {{ inventorySummary.out_of_stock_count }}
+                                            {{ formatNumber(inventorySummary.out_of_stock_count) }}
                                         </dd>
                                         <p class="mt-1 text-xs text-red-700 dark:text-red-400">Stock habis</p>
                                     </div>
@@ -529,9 +560,9 @@ const getStatusBadgeClass = (status: string) => {
                                         {{ formatCurrency(materialStockSummary.total_stock_value) }}
                                     </dd>
                                     <p class="mt-1 text-sm text-purple-200">
-                                        {{ materialStockSummary.total_items }} jenis material
+                                        {{ formatNumber(materialStockSummary.total_items) }} jenis material
                                         <span v-if="materialStockSummary.low_stock_count > 0" class="text-yellow-200">
-                                            ({{ materialStockSummary.low_stock_count }} low stock)
+                                            ({{ formatNumber(materialStockSummary.low_stock_count) }} low stock)
                                         </span>
                                     </p>
                                 </div>
@@ -653,9 +684,9 @@ const getStatusBadgeClass = (status: string) => {
 
                             <div class="mt-4">
                                 <div class="flex items-end justify-between text-sm">
-                                    <span class="text-gray-500 dark:text-gray-400">{{ location.item_count }} items</span>
+                                    <span class="text-gray-500 dark:text-gray-400">{{ formatNumber(location.item_count) }} items</span>
                                     <span v-if="!location.is_unlimited" class="text-gray-900 dark:text-white">
-                                        {{ location.used_capacity }} / {{ location.capacity }}
+                                        {{ formatNumber(location.used_capacity) }} / {{ formatNumber(location.capacity) }}
                                     </span>
                                 </div>
                                 <div
@@ -705,9 +736,11 @@ const getStatusBadgeClass = (status: string) => {
                                     </div>
                                     <div class="ml-4 text-right">
                                         <p class="text-sm font-semibold text-red-600 dark:text-red-400">
-                                            {{ material.current_stock }} {{ material.unit }}
+                                            {{ formatNumber(material.current_stock, 2) }} {{ material.unit }}
                                         </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Min: {{ material.reorder_point }} {{ material.unit }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            Min: {{ formatNumber(material.reorder_point, 2) }} {{ material.unit }}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -740,9 +773,9 @@ const getStatusBadgeClass = (status: string) => {
                                     </div>
                                     <div class="ml-4 text-right">
                                         <p class="text-sm font-semibold text-red-600 dark:text-red-400">
-                                            {{ item.current_stock - item.reserved_stock }} pcs
+                                            {{ formatNumber(item.current_stock - item.reserved_stock) }} pcs
                                         </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Min: {{ item.minimum_stock }} pcs</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Min: {{ formatNumber(item.minimum_stock) }} pcs</p>
                                     </div>
                                 </div>
                             </div>
