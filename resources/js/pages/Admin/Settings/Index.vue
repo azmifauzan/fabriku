@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { update } from '@/actions/App/Http/Controllers/Admin/AdminSettingController';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AdminLayout from '@/layouts/AdminLayout.vue';

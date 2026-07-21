@@ -21,7 +21,6 @@ const form = useForm({
     proof: null as File | null,
 });
 
-const isTrial = computed(() => props.tenant.subscription_plan === 'trial');
 const isExpired = computed(() => {
     if (!props.tenant.subscription_expires_at) return false;
     return new Date(props.tenant.subscription_expires_at) < new Date(props.server_time);

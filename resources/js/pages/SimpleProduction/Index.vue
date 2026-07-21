@@ -192,8 +192,9 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                                             ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm'
                                             : 'dark:bg-gray-850 border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800',
                                     ]"
-                                    v-html="link.label"
-                                />
+                                >
+                                    <span v-html="link.label" />
+                                </Link>
                                 <span
                                     v-else
                                     class="rounded-lg border border-gray-100 bg-gray-50 px-3.5 py-1.5 text-xs font-bold text-gray-400 dark:border-gray-800 dark:bg-gray-900/50"

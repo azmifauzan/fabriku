@@ -66,11 +66,6 @@ const getBatchesForMaterial = (materialId: number) => {
     return material?.receipts || [];
 };
 
-const getSelectedMaterial = (materialId: number | null) => {
-    if (!materialId) return null;
-    return props.materials.find((m) => m.id === materialId);
-};
-
 const getSelectedBatch = (materialId: number, batchId: number | null) => {
     if (!materialId || !batchId) return null;
     const batches = getBatchesForMaterial(materialId);

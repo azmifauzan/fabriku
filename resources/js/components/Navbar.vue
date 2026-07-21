@@ -2,7 +2,7 @@
 import { useDarkMode } from '@/composables/useDarkMode';
 import { Link, usePage } from '@inertiajs/vue3';
 import { AlertCircle, ArrowUpCircle, ChevronDown, Clock, LogOut, Menu, MessageCircle, Moon, Sun, User } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 defineProps<{
     user: {
@@ -18,6 +18,19 @@ const emit = defineEmits<{
 
 const { isDark, toggleDark } = useDarkMode();
 const userMenuOpen = ref(false);
+const userMenuDesktopRef = ref<HTMLElement | null>(null);
+const userMenuMobileRef = ref<HTMLElement | null>(null);
+
+const handleClickOutsideUserMenu = (event: MouseEvent) => {
+    const target = event.target as Node;
+    if (userMenuDesktopRef.value?.contains(target) || userMenuMobileRef.value?.contains(target)) {
+        return;
+    }
+    userMenuOpen.value = false;
+};
+
+onMounted(() => document.addEventListener('click', handleClickOutsideUserMenu));
+onBeforeUnmount(() => document.removeEventListener('click', handleClickOutsideUserMenu));
 
 const page = usePage();
 const tenant = computed(() => page.props.tenant as any);
@@ -147,7 +160,7 @@ const companyInitials = computed(() => {
                 </button>
 
                 <!-- User Info - Desktop -->
-                <div v-if="user" class="relative hidden sm:flex">
+                <div v-if="user" ref="userMenuDesktopRef" class="relative hidden sm:flex">
                     <button
                         @click="userMenuOpen = !userMenuOpen"
                         class="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-1.5 transition-colors hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600"
@@ -163,7 +176,6 @@ const companyInitials = computed(() => {
                     <!-- Dropdown Menu -->
                     <div
                         v-show="userMenuOpen"
-                        @click.away="userMenuOpen = false"
                         class="absolute top-full right-0 mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800"
                     >
                         <div class="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
@@ -196,7 +208,7 @@ const companyInitials = computed(() => {
                 </div>
 
                 <!-- User Info - Mobile (Icon Only) -->
-                <div v-if="user" class="relative flex items-center gap-2 sm:hidden">
+                <div v-if="user" ref="userMenuMobileRef" class="relative flex items-center gap-2 sm:hidden">
                     <button @click="userMenuOpen = !userMenuOpen" class="rounded-lg bg-gray-50 p-2.5 dark:bg-gray-700" aria-label="User menu">
                         <User :size="18" class="text-gray-600 dark:text-gray-300" />
                     </button>
@@ -204,7 +216,6 @@ const companyInitials = computed(() => {
                     <!-- Mobile Dropdown Menu -->
                     <div
                         v-show="userMenuOpen"
-                        @click.away="userMenuOpen = false"
                         class="absolute top-full right-0 mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800"
                     >
                         <div class="border-b border-gray-200 px-4 py-3 dark:border-gray-700">

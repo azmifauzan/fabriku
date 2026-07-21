@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 
-const props = defineProps({
+defineProps({
     permissions: Object,
 });
 

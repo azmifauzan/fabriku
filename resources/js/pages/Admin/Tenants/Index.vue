@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Plus, Search } from 'lucide-vue-next';
@@ -186,8 +186,9 @@ const clearFilters = () => {
                                         ? 'bg-purple-600 text-white'
                                         : 'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
                                 ]"
-                                v-html="link.label"
-                            />
+                            >
+                                <span v-html="link.label" />
+                            </Link>
                             <span
                                 v-else
                                 :class="[

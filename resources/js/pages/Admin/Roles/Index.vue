@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Plus } from 'lucide-vue-next';

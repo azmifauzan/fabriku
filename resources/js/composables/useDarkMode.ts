@@ -9,7 +9,7 @@ export function useDarkMode() {
 
         try {
             localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light');
-        } catch (e) {
+        } catch {
             // ignore
         }
     };
@@ -19,7 +19,7 @@ export function useDarkMode() {
         try {
             const savedTheme = localStorage.getItem(STORAGE_KEY);
             isDark.value = savedTheme === 'dark';
-        } catch (e) {
+        } catch {
             isDark.value = false;
         }
 

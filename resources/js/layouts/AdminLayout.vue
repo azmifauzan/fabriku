@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { Activity, Building2, ChevronDown, CreditCard, FileText, LayoutDashboard, LogOut, Menu, Settings, Shield, Users, X } from 'lucide-vue-next';
 import { computed, ref } from 'vue';

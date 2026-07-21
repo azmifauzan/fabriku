@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { approve as approveAction, reject as rejectAction } from '@/actions/App/Http/Controllers/Admin/AdminPaymentController';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AdminLayout from '@/layouts/AdminLayout.vue';

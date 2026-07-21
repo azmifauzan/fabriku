@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft, Edit, Shield, Users } from 'lucide-vue-next';
@@ -145,7 +145,7 @@ defineProps({
     </AdminLayout>
 </template>
 
-<script>
+<script lang="ts">
 export default {
     methods: {
         groupPermissionsByModule(permissions) {

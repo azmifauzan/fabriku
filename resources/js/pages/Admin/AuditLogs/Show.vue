@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { Activity, ArrowLeft, Building2, Calendar, User } from 'lucide-vue-next';
 
-const props = defineProps({
+defineProps({
     log: Object,
 });
 
