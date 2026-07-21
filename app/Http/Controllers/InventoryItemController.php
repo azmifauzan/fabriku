@@ -352,7 +352,15 @@ class InventoryItemController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('success', 'Stock berhasil dipindah ke '.count($created).' lokasi.');
+        $success = 'Stock berhasil dipindah ke '.count($created).' lokasi.';
+
+        // Full transfer soft-deletes the source item (InventoryService::transferStock),
+        // so redirecting back() to its now-trashed show page would 404.
+        if ($item->refresh()->trashed()) {
+            return redirect()->route('inventory.items.index')->with('success', $success);
+        }
+
+        return back()->with('success', $success);
     }
 
     public function merge(MergeInventoryItemRequest $request, InventoryItem $item)

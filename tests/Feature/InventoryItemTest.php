@@ -493,7 +493,9 @@ it('soft deletes the source item when all available stock is transferred and res
         'reason' => 'Move all',
     ]);
 
-    $response->assertRedirect();
+    // Source item is soft-deleted, so redirecting back() to its now-trashed
+    // show page would 404 on the next page load — must go to the index instead.
+    $response->assertRedirect(route('inventory.items.index'));
     $this->assertSoftDeleted('inventory_items', ['id' => $item->id]);
 });
 
