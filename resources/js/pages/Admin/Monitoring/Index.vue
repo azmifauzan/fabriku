@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import {
     deleteJob as deleteJobAction,
     flushJobs as flushJobsAction,

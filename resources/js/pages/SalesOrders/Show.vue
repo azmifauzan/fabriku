@@ -504,7 +504,7 @@ import { ref } from 'vue';
 import PaymentUpdateModal from './PaymentUpdateModal.vue';
 import StatusUpdateModal from './StatusUpdateModal.vue';
 
-const props = defineProps<{
+defineProps<{
     salesOrder: Record<string, any>;
     allowedTransitions: string[];
 }>();

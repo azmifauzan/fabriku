@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowLeft, CreditCard, Edit, Power, PowerOff } from 'lucide-vue-next';

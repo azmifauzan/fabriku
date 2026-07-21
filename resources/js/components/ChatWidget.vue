@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useDarkMode } from '@/composables/useDarkMode';
 import { Bot, Loader2, MessageCircle, Minus, RotateCcw, Send, X } from 'lucide-vue-next';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
@@ -18,8 +17,6 @@ interface UsageStats {
     remaining: number;
     plan: string;
 }
-
-const { isDark } = useDarkMode();
 
 const isOpen = ref(false);
 const isMinimized = ref(false);

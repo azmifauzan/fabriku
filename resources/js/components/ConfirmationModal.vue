@@ -10,7 +10,7 @@ interface Props {
     variant?: 'danger' | 'warning' | 'info';
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
     title: 'Konfirmasi',
     confirmText: 'Ya, Lanjutkan',
     cancelText: 'Batal',

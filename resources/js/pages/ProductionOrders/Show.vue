@@ -43,8 +43,8 @@ const props = defineProps<{
     order: ProductionOrder;
 }>();
 
-const { term, termLower } = useBusinessContext();
-const { confirm, confirmDelete, showSuccess } = useSweetAlert();
+const { term } = useBusinessContext();
+const { confirm, showSuccess } = useSweetAlert();
 
 const productionOrderLabel = computed(() => 'Production Order');
 const patternLabel = computed(() => term('pattern', 'Pattern'));

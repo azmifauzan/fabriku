@@ -111,7 +111,7 @@ import Modal from '@/components/Modal.vue';
 import axios from 'axios';
 import { reactive } from 'vue';
 
-const props = defineProps({
+defineProps({
     show: Boolean,
 });
 

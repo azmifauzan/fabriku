@@ -83,16 +83,6 @@ const close = () => {
     emit('close');
 };
 
-// Start camera when modal is shown
-const onShow = () => {
-    // logic handled by parent or watch if needed, simple approach:
-    startCamera();
-};
-
-// Watch prop to start/stop
-// Using Modal's slots or life cycle might be tricky if Modal doesn't emit 'show'.
-// We will just expose a method or rely on the parent mounting this component only when shown
-// or use a watcher.
 import { watch } from 'vue';
 watch(
     () => props.show,

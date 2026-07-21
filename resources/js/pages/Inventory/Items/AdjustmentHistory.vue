@@ -47,7 +47,7 @@ interface AdjustmentTypes {
     [key: string]: string;
 }
 
-const props = defineProps<{
+defineProps<{
     item: Item;
     adjustments: Adjustment[];
     adjustmentTypes: AdjustmentTypes;

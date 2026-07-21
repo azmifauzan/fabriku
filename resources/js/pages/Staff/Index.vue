@@ -301,8 +301,9 @@ const isAdmin = computed(() => (page.props.auth as any)?.user?.role === 'admin')
                                               ? 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
                                               : 'cursor-not-allowed text-gray-400 dark:text-gray-600',
                                     ]"
-                                    v-html="link.label"
-                                />
+                                >
+                                    <span v-html="link.label" />
+                                </Link>
                             </nav>
                         </div>
                     </div>
