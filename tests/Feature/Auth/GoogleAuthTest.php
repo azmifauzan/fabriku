@@ -8,7 +8,7 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 
 function fakeGoogleUser(array $attributes = []): SocialiteUser
 {
-    return SocialiteUser::fake($attributes);
+    return SocialiteUser::fake(array_merge(['email_verified' => true], $attributes));
 }
 
 function mockGoogleProvider(SocialiteUser $user): void
@@ -102,5 +102,32 @@ describe('Google OAuth', function () {
         expect($user->email_verified_at)->not->toBeNull();
 
         $this->assertAuthenticatedAs($user);
+    });
+
+    it('refuses to auto-link an existing account when Google has not verified the email', function () {
+        $tenant = Tenant::factory()->create();
+        $user = User::factory()->create([
+            'tenant_id' => $tenant->id,
+            'google_id' => null,
+            'email' => 'victim@example.com',
+            'email_verified_at' => null,
+        ]);
+
+        mockGoogleProvider(fakeGoogleUser([
+            'id' => 'g-attacker',
+            'email' => 'victim@example.com',
+            'name' => 'Attacker',
+            'email_verified' => false,
+        ]));
+
+        $this->get(route('google.callback'))
+            ->assertRedirect(route('login'))
+            ->assertSessionHasErrors('email');
+
+        $user->refresh();
+        expect($user->google_id)->toBeNull();
+        expect($user->email_verified_at)->toBeNull();
+
+        $this->assertGuest();
     });
 });

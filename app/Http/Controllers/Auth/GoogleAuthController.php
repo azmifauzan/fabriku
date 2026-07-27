@@ -27,6 +27,17 @@ class GoogleAuthController extends Controller
     {
         $googleUser = Socialite::driver('google')->user();
 
+        $raw = $googleUser->getRaw();
+        $emailVerified = filter_var($raw['email_verified'] ?? $raw['verified_email'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        if (! $emailVerified) {
+            // Only a Google-verified email is trustworthy enough to log in, auto-link an
+            // existing account, or seed email_verified_at for a new tenant below.
+            return redirect()->route('login')->withErrors([
+                'email' => 'Google belum memverifikasi email ini. Silakan gunakan akun Google dengan email terverifikasi.',
+            ]);
+        }
+
         $user = User::where('google_id', $googleUser->getId())->first();
 
         if (! $user) {
