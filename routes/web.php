@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminTenantController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -126,6 +127,12 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [LoginController::class, 'store']);
     Route::get('register', [RegisterController::class, 'create'])->name('register');
     Route::post('register', [RegisterController::class, 'store']);
+
+    // Google OAuth Routes
+    Route::get('auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
+    Route::get('auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
+    Route::get('register/google/complete', [GoogleAuthController::class, 'showComplete'])->name('google.complete');
+    Route::post('register/google/complete', [GoogleAuthController::class, 'storeComplete'])->name('google.complete.store');
 
     // Password Reset Routes
     Route::get('forgot-password', [PasswordResetController::class, 'create'])

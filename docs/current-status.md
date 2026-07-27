@@ -12,12 +12,14 @@ Dokumen ini merangkum kondisi aktual codebase Fabriku per Juli 2026. Diturunkan 
 - AI: integrasi ke OpenAI Chat Completions API tersedia di backend (`App\Services\Assistant\OpenAIService`) namun **tidak aktif di UI** (ChatWidget disembunyikan).
 - Telegram: bot dua arah — webhook penerimaan + push notifikasi keluar.
 - Tests: 30+ feature test files (Pest 4), 3 browser test files, 0 unit test meaningful.
+- Halaman error 4xx/5xx custom bertema Fabriku (`resources/views/errors/{400,401,403,404,405,419,422,429,500,502,503,504}.blade.php`, layout bersama `errors/layout.blade.php`). Homepage (`Welcome.vue` + `resources/views/app.blade.php`) punya `<meta name="description">` statis (server-rendered, tanpa perlu JS) untuk lolos review Google OAuth consent screen ("app doesn't explain its purpose").
 
 ## Modul Aktif
 
 | Modul | Status | Catatan |
 |---|---|---|
 | Auth tenant (register, login, verifikasi email, reset password) | aktif | trial 30 hari otomatis pada register |
+| Auth tenant — Google OAuth (login/register) | aktif | tombol "Lanjutkan dengan Google" di atas form Login/Register (`GoogleAuthButton.vue`); email baru → form lengkapi bisnis (`Auth/CompleteGoogleRegistration.vue`) lalu buat trial tenant; email existing tanpa `google_id` → auto-link; lihat `GoogleAuthController` + `TenantOnboardingService` |
 | Auth admin (login, dashboard, monitoring) | aktif | guard terpisah, password reset reuse notification |
 | Tenant management (admin) | aktif | CRUD tenant, suspend/activate |
 | User management (admin) | aktif | reset password, manage user lintas tenant |
@@ -100,6 +102,7 @@ Migrasi tunggal per modul:
 - `inventory_item_categories` + add `category_id` ke inventory_items
 - Patch migrations: tambah staff_user, tambah `shipped` status SO, fix unique constraints jadi per-tenant (staff.code, contractors.code, sales_orders.order_number, inventory_items.sku, inventory_locations.code), tambah kolom audit log
 - `2026_06_10_*`: tabel `services` (code unique per tenant) + alter `sales_order_items` (`inventory_item_id` → nullable, tambah `service_id` FK `RESTRICT`); tabel `service_consumables` (mapping service→inventory item, unique `service_id`+`inventory_item_id`) + kolom `sales_order_items.served_by` (FK `staff`, nullOnDelete)
+- `2026_07_27_*`: kolom `users.google_id` (nullable, unique) untuk login/register Google OAuth
 
 ## Konfigurasi Kategori Bisnis
 
@@ -138,7 +141,7 @@ Plan A (Retail: Purchase Receipt, Quick Checkout, Dashboard Retail, Purchase Rep
 
 - `tests/Feature/`: 30+ file, dominan happy-path CRUD + observer test untuk SalesOrder.
 - `tests/Feature/Integration/`: 9 file user-journey end-to-end per modul + multi-kategori; termasuk `RetailWorkflowTest.php` (purchase receipt → purchase report → quick checkout), `HomemadeWorkflowTest.php` (material receipt → simple production → quick checkout), dan `ServiceWorkflowTest.php` (CRUD layanan → quick checkout campur jasa+produk → cross-tenant guard → delete guard → onboarding register). `ServiceEnhancementsTest.php` cover laporan layanan, staff assignment (`served_by`), dan consumable auto-deduct.
-- **Suite hijau penuh**: 60 passed, 1 skipped (Juni 2026). ±100 test feature lama yang sempat gagal di sqlite sudah diperbaiki (test rot, bukan bug produk): default factory `UserFactory` jadi `role=admin` (route ber-permission), `MaterialTypeFactory` di-scope tenant, migration `customers_code_unique` pakai `Schema::getIndexes()` (driver-agnostik, bukan `information_schema`), payload integration test diselaraskan ke kontrak API/observer terkini, atribut master data usang (`category`/`product_type`/`planned_quantity`) dibuang. Dua bug produk ikut diperbaiki saat proses ini: tenant suspended (`is_active=false`) kini diblokir di `EnsureTenantContext`; double-reservation stok di `SalesOrderController::update` (bulk delete item lewati observer) → ganti `->get()->each->delete()` + reorder agar observer fire sekali.
+- **Suite hijau penuh**: 439 passed, 6 skipped (Juli 2026, termasuk `tests/Feature/Auth/GoogleAuthTest.php` — redirect, auto-register email baru, login via `google_id`, auto-link email existing). ±100 test feature lama yang sempat gagal di sqlite sudah diperbaiki (test rot, bukan bug produk): default factory `UserFactory` jadi `role=admin` (route ber-permission), `MaterialTypeFactory` di-scope tenant, migration `customers_code_unique` pakai `Schema::getIndexes()` (driver-agnostik, bukan `information_schema`), payload integration test diselaraskan ke kontrak API/observer terkini, atribut master data usang (`category`/`product_type`/`planned_quantity`) dibuang. Dua bug produk ikut diperbaiki saat proses ini: tenant suspended (`is_active=false`) kini diblokir di `EnsureTenantContext`; double-reservation stok di `SalesOrderController::update` (bulk delete item lewati observer) → ganti `->get()->each->delete()` + reorder agar observer fire sekali.
 - `tests/Browser/ApplicationFlowTest.php`: 1 file browser test (Pest 4).
 - `tests/Unit/`: hanya `ExampleTest.php` (kosong) — tidak ada unit test domain.
 - Setup: `RefreshDatabase` otomatis untuk Feature via `tests/Pest.php`.

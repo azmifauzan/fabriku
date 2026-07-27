@@ -2,24 +2,21 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Events\TenantRegistered;
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
-use App\Models\InventoryItemCategory;
-use App\Models\InventoryLocation;
-use App\Models\Tenant;
 use App\Models\User;
+use App\Services\TenantOnboardingService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class RegisterController extends Controller
 {
+    public function __construct(private readonly TenantOnboardingService $onboarding) {}
+
     public function create(): Response
     {
         $categories = collect(config('business.enabled_categories'))
@@ -48,102 +45,15 @@ class RegisterController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        /** @var Tenant $tenant */
-        $tenant = null;
         /** @var User $user */
-        $user = null;
-
-        DB::transaction(function () use ($validated, &$tenant, &$user) {
-            // Always create trial account - 30 days free
-            $expiresAt = now()->addDays(30);
-
-            // Create tenant
-            $tenant = Tenant::create([
-                'name' => $validated['business_name'],
-                'business_category' => $validated['business_category'],
-                'subscription_plan' => 'trial',
-                'subscription_expires_at' => $expiresAt,
-                'is_active' => true,
-            ]);
-
-            // Create admin user for the tenant
-            $user = User::create([
-                'tenant_id' => $tenant->id,
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => $validated['password'],
-                'role' => 'admin',
-                'is_active' => true,
-            ]);
-
-            // Auto-create default data for POS-first categories
-            if ($validated['business_category'] === 'retail') {
-                $this->seedRetailDefaults($tenant);
-            }
-
-            if ($validated['business_category'] === 'service') {
-                $this->seedServiceDefaults($tenant);
-            }
-        });
+        $user = $this->onboarding->register($validated);
 
         // Trigger verification email
         event(new Registered($user));
-
-        // Notify admin via Telegram
-        event(new TenantRegistered($tenant, $user));
 
         // Auto-login the user
         Auth::login($user);
 
         return redirect()->route('verification.notice');
-    }
-
-    private function seedRetailDefaults(Tenant $tenant): void
-    {
-        InventoryLocation::create([
-            'tenant_id' => $tenant->id,
-            'code' => 'TOKO-UTAMA',
-            'name' => 'Toko Utama',
-            'is_active' => true,
-        ]);
-
-        Customer::create([
-            'tenant_id' => $tenant->id,
-            'code' => 'WALK-IN',
-            'name' => 'Walk-in Customer',
-            'is_active' => true,
-        ]);
-
-        InventoryItemCategory::firstOrCreate(
-            ['tenant_id' => $tenant->id, 'name' => 'Umum'],
-            ['description' => 'Produk umum']
-        );
-
-        InventoryItemCategory::firstOrCreate(
-            ['tenant_id' => $tenant->id, 'name' => 'Best Seller'],
-            ['description' => 'Produk terlaris']
-        );
-    }
-
-    private function seedServiceDefaults(Tenant $tenant): void
-    {
-        InventoryLocation::create([
-            'tenant_id' => $tenant->id,
-            'code' => 'TEMPAT-USAHA',
-            'name' => 'Tempat Usaha',
-            'is_active' => true,
-        ]);
-
-        Customer::create([
-            'tenant_id' => $tenant->id,
-            'code' => 'WALK-IN',
-            'name' => 'Walk-in Customer',
-            'is_active' => true,
-        ]);
-
-        InventoryItemCategory::firstOrCreate(
-            ['tenant_id' => $tenant->id, 'name' => 'Produk & Sparepart'],
-            ['description' => 'Produk fisik pendamping layanan']
-        );
     }
 }
