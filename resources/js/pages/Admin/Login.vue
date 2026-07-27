@@ -139,6 +139,12 @@ const submit = () => {
             <div class="text-center">
                 <a href="/" class="text-sm text-purple-200 transition hover:text-white"> ← Back to main site </a>
             </div>
+
+            <div class="text-center text-xs text-purple-300">
+                <a href="/privasi" class="hover:text-white hover:underline">Kebijakan Privasi</a>
+                ·
+                <a href="/syarat-ketentuan" class="hover:text-white hover:underline">Syarat & Ketentuan</a>
+            </div>
         </div>
     </div>
 </template>

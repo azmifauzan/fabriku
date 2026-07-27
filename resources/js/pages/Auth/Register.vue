@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { Eye, EyeOff } from 'lucide-vue-next';
+import { Eye, EyeOff, Gift } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface Category {
@@ -238,7 +238,16 @@ const submit = () => {
 
                             <!-- Trial Info -->
                             <div class="text-center">
-                                <p class="text-xs text-gray-500">🎁 Gratis 30 hari tanpa kartu kredit • Akses penuh semua fitur</p>
+                                <p class="flex items-center justify-center gap-1.5 text-xs text-gray-500">
+                                    <Gift :size="14" /> Gratis 30 hari tanpa kartu kredit • Akses penuh semua fitur
+                                </p>
+                                <p class="mt-2 text-xs text-gray-500">
+                                    Dengan mendaftar, Anda menyetujui
+                                    <Link href="/syarat-ketentuan" class="font-medium text-indigo-600 hover:underline">Syarat & Ketentuan</Link>
+                                    dan
+                                    <Link href="/privasi" class="font-medium text-indigo-600 hover:underline">Kebijakan Privasi</Link>
+                                    kami.
+                                </p>
                             </div>
                         </form>
 

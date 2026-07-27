@@ -57,6 +57,9 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::get('/privasi', fn () => Inertia::render('Legal/Privacy'))->name('legal.privacy');
+Route::get('/syarat-ketentuan', fn () => Inertia::render('Legal/Terms'))->name('legal.terms');
+
 // ==========================================
 // ADMIN ROUTES
 // ==========================================
