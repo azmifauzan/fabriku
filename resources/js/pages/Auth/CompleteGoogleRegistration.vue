@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { storeComplete } from '@/actions/App/Http/Controllers/Auth/GoogleAuthController';
+import { businessCategoryIcons } from '@/lib/businessCategoryIcons';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Gift } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -116,7 +117,11 @@ const submit = () => {
                                         ]"
                                     >
                                         <div class="flex items-center gap-3">
-                                            <span class="text-2xl">{{ category.icon }}</span>
+                                            <span
+                                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600"
+                                            >
+                                                <component :is="businessCategoryIcons[key as string]" :size="18" />
+                                            </span>
                                             <div>
                                                 <p class="font-medium text-gray-900">{{ category.label }}</p>
                                                 <p class="text-xs text-gray-500">{{ category.description }}</p>
