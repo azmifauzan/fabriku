@@ -136,12 +136,12 @@ sudo docker compose exec fabriku tail -100 storage/logs/laravel.log
 curl -sS -o /dev/null -w "%{http_code}\n" http://localhost/
 
 # Hit dari luar via domain (APP_URL)
-curl -sS -o /dev/null -w "%{http_code}\n" https://fabriku.my.id/
+curl -sS -o /dev/null -w "%{http_code}\n" https://fabriku.web.id/
 ```
 
 Aplikasi dianggap **aman** bila:
 - `docker compose ps` → status `Up (healthy)`.
-- `curl` ke `https://fabriku.my.id/` return `200`.
+- `curl` ke `https://fabriku.web.id/` return `200`.
 - `storage/logs/laravel.log` tidak ada `ERROR`/exception baru sejak deploy (atau file belum ada sama sekali — berarti belum ada error).
 - Queue worker & scheduler (Supervisor di dalam container) tetap jalan — cek `sudo docker compose exec fabriku ps aux` (harus ada proses `artisan queue:work` dan `artisan schedule:work`).
 

@@ -142,7 +142,7 @@ class TelegramWebhookController extends Controller
         } else {
             $message = "📚 <b>Bantuan</b>\n\n".
                 "Untuk menggunakan Fabriku Assistant via Telegram, hubungkan akun Anda terlebih dahulu:\n\n".
-                "1️⃣ Login ke Fabriku di https://fabriku.my.id\n".
+                "1️⃣ Login ke Fabriku di https://fabriku.web.id\n".
                 "2️⃣ Buka Pengaturan → Telegram\n".
                 "3️⃣ Klik Hubungkan Telegram dan salin kode\n".
                 "4️⃣ Kirim kode ke sini dengan format:\n".
