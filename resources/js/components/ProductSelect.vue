@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronDown, Search } from 'lucide-vue-next';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref } from 'vue';
 import ProductThumbnail from '@/components/ProductThumbnail.vue';
 
 interface ProductOption {
@@ -24,27 +24,50 @@ const emit = defineEmits<{
 }>();
 
 const open = ref(false);
-const openUpward = ref(false);
 const search = ref('');
 const rootRef = ref<HTMLElement | null>(null);
 const searchInputRef = ref<HTMLInputElement | null>(null);
+const panelStyle = ref<Record<string, string>>({});
 
 const PANEL_HEIGHT_ESTIMATE = 320;
+const GAP = 4;
+
+// Dropdown is teleported to <body> and positioned fixed from the trigger's
+// bounding rect — a table wrapped in overflow-x-auto (desktop item table)
+// clips an absolutely-positioned descendant panel, silently hiding the list
+// behind a near-invisible inner scrollbar instead of the page scrollbar.
+const updatePosition = () => {
+    const rect = rootRef.value?.getBoundingClientRect();
+    if (!rect) return;
+
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const openUpward = spaceBelow < PANEL_HEIGHT_ESTIMATE && spaceAbove > spaceBelow;
+
+    panelStyle.value = {
+        left: `${rect.left}px`,
+        width: `${rect.width}px`,
+        ...(openUpward
+            ? { bottom: `${window.innerHeight - rect.top + GAP}px` }
+            : { top: `${rect.bottom + GAP}px` }),
+    };
+};
+
+const close = () => {
+    open.value = false;
+};
 
 const toggleOpen = async () => {
     if (open.value) {
-        open.value = false;
+        close();
         return;
     }
 
-    const rect = rootRef.value?.getBoundingClientRect();
-    if (rect) {
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const spaceAbove = rect.top;
-        openUpward.value = spaceBelow < PANEL_HEIGHT_ESTIMATE && spaceAbove > spaceBelow;
-    }
-
+    updatePosition();
     open.value = true;
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+
     await nextTick();
     searchInputRef.value?.focus({ preventScroll: true });
 };
@@ -63,18 +86,14 @@ const filteredItems = computed(() => {
 
 const select = (it: ProductOption) => {
     emit('update:modelValue', it.id);
-    open.value = false;
+    close();
     search.value = '';
 };
 
-const handleClickOutside = (event: MouseEvent) => {
-    if (!rootRef.value?.contains(event.target as Node)) {
-        open.value = false;
-    }
-};
-
-onMounted(() => document.addEventListener('click', handleClickOutside));
-onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside));
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', close, true);
+    window.removeEventListener('resize', close);
+});
 </script>
 
 <template>
@@ -92,36 +111,40 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
             <ChevronDown :size="16" class="shrink-0 text-gray-400" />
         </button>
 
-        <div
-            v-if="open"
-            class="absolute z-20 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700"
-            :class="openUpward ? 'bottom-full mb-1' : 'top-full mt-1'"
-        >
-            <div class="relative border-b border-gray-100 p-2 dark:border-gray-600">
-                <Search :size="14" class="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
-                <input
-                    ref="searchInputRef"
-                    v-model="search"
-                    type="text"
-                    placeholder="Cari produk..."
-                    class="w-full rounded-md border border-gray-200 py-1.5 pr-2 pl-7 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                />
-            </div>
-            <ul class="max-h-64 overflow-y-auto py-1">
-                <li
-                    v-for="it in filteredItems"
-                    :key="it.id"
-                    @click="select(it)"
-                    class="flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-indigo-50 dark:hover:bg-gray-600"
+        <Teleport to="body">
+            <div v-if="open" class="fixed inset-0 z-[100]">
+                <div class="fixed inset-0" @click="close"></div>
+                <div
+                    class="fixed rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700"
+                    :style="panelStyle"
                 >
-                    <ProductThumbnail :image-url="it.image_url" class="h-9 w-9 shrink-0" />
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{{ labelFor(it) }}</p>
-                        <p class="truncate text-xs text-gray-400">{{ it.sku }} · {{ availableStock(it) }} tersedia</p>
+                    <div class="relative border-b border-gray-100 p-2 dark:border-gray-600">
+                        <Search :size="14" class="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
+                        <input
+                            ref="searchInputRef"
+                            v-model="search"
+                            type="text"
+                            placeholder="Cari produk..."
+                            class="w-full rounded-md border border-gray-200 py-1.5 pr-2 pl-7 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                        />
                     </div>
-                </li>
-                <li v-if="filteredItems.length === 0" class="px-3 py-4 text-center text-sm text-gray-400">Produk tidak ditemukan</li>
-            </ul>
-        </div>
+                    <ul class="max-h-64 overflow-y-auto py-1">
+                        <li
+                            v-for="it in filteredItems"
+                            :key="it.id"
+                            @click="select(it)"
+                            class="flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-indigo-50 dark:hover:bg-gray-600"
+                        >
+                            <ProductThumbnail :image-url="it.image_url" class="h-9 w-9 shrink-0" />
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{{ labelFor(it) }}</p>
+                                <p class="truncate text-xs text-gray-400">{{ it.sku }} · {{ availableStock(it) }} tersedia</p>
+                            </div>
+                        </li>
+                        <li v-if="filteredItems.length === 0" class="px-3 py-4 text-center text-sm text-gray-400">Produk tidak ditemukan</li>
+                    </ul>
+                </div>
+            </div>
+        </Teleport>
     </div>
 </template>
