@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GoogleAuthButton from '@/components/GoogleAuthButton.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import { Form, Head, Link, usePage } from '@inertiajs/vue3';
 import { ChefHat, Eye, EyeOff, Home, Palette, RefreshCw, Scissors, Sparkles, Store, Target, Wrench } from 'lucide-vue-next';
@@ -70,6 +71,15 @@ watch(
                             <p class="text-xs font-black tracking-[0.16em] text-indigo-600 uppercase">Area anggota</p>
                             <h2 class="mt-2 text-3xl font-black tracking-tight text-gray-900">Selamat datang kembali.</h2>
                             <p class="mt-2 text-slate-500">Masuk untuk melanjutkan operasional bisnis Anda.</p>
+                        </div>
+
+                        <!-- Google Login -->
+                        <GoogleAuthButton label="Masuk dengan Google" />
+
+                        <div class="my-6 flex items-center gap-3">
+                            <div class="h-px flex-1 bg-gray-200"></div>
+                            <span class="text-xs font-semibold tracking-wide text-gray-400 uppercase">atau</span>
+                            <div class="h-px flex-1 bg-gray-200"></div>
                         </div>
 
                         <Form action="/login" method="post" class="space-y-4" v-slot="{ processing, errors }">

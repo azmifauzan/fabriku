@@ -125,6 +125,7 @@ php artisan trial:send-reminders            # email trial expiry (daily 09:00 vi
 - Setiap tenant pilih satu `business_category` saat register; menentukan terminologi & rules.
 - Auth pakai dua guard: `web` (User tenant) dan `admin` (AdminUser platform).
 - Middleware stack tenant: `auth → verified → tenant → subscription.check → permission:<slug>`.
+- Login/register tenant juga bisa via Google OAuth (`laravel/socialite`, credential `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`/`GOOGLE_REDIRECT_URI` di `.env`). Email baru diarahkan ke form lengkapi data bisnis sebelum tenant trial dibuat; email yang sudah terdaftar via password otomatis di-link.
 
 ## Dokumentasi
 

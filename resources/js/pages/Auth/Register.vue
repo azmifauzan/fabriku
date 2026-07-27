@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GoogleAuthButton from '@/components/GoogleAuthButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Eye, EyeOff, Gift } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -76,6 +77,15 @@ const submit = () => {
                             <p class="text-xs font-black tracking-[0.16em] text-indigo-600 uppercase">Buat ruang kerja</p>
                             <h2 class="mt-2 text-3xl font-black tracking-tight text-gray-900">Mulai dengan bisnis Anda.</h2>
                             <p class="mt-2 text-slate-500">Isi data dasar berikut. Pengaturan lain bisa dilengkapi nanti.</p>
+                        </div>
+
+                        <!-- Google Register -->
+                        <GoogleAuthButton label="Daftar dengan Google" />
+
+                        <div class="my-6 flex items-center gap-3">
+                            <div class="h-px flex-1 bg-gray-200"></div>
+                            <span class="text-xs font-semibold tracking-wide text-gray-400 uppercase">atau</span>
+                            <div class="h-px flex-1 bg-gray-200"></div>
                         </div>
 
                         <form @submit.prevent="submit" class="space-y-4">
