@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
+import { Eye, EyeOff } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 const form = useForm({
     email: '',
     password: '',
     remember: false,
 });
+
+const showPassword = ref(false);
 
 const submit = () => {
     form.post('/admin/login', {
@@ -60,16 +64,26 @@ const submit = () => {
                     <!-- Password -->
                     <div>
                         <label for="password" class="block text-sm font-medium text-purple-100"> Password </label>
-                        <div class="mt-1">
+                        <div class="relative mt-1">
                             <input
                                 id="password"
                                 v-model="form.password"
-                                type="password"
+                                :type="showPassword ? 'text' : 'password'"
                                 autocomplete="current-password"
                                 required
-                                class="block w-full appearance-none rounded-lg border border-purple-300/30 bg-white/10 px-4 py-3 text-white placeholder-purple-300 backdrop-blur-sm transition focus:border-transparent focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                                class="block w-full appearance-none rounded-lg border border-purple-300/30 bg-white/10 px-4 py-3 pr-12 text-white placeholder-purple-300 backdrop-blur-sm transition focus:border-transparent focus:ring-2 focus:ring-purple-400 focus:outline-none"
                                 placeholder="••••••••"
                             />
+                            <button
+                                type="button"
+                                @click="showPassword = !showPassword"
+                                class="absolute top-1/2 right-3 -translate-y-1/2 text-purple-300 transition-colors hover:text-white"
+                                :aria-label="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                                :aria-pressed="showPassword"
+                            >
+                                <Eye v-if="!showPassword" :size="20" />
+                                <EyeOff v-else :size="20" />
+                            </button>
                         </div>
                         <p v-if="form.errors.password" class="mt-2 text-sm text-red-300">
                             {{ form.errors.password }}
