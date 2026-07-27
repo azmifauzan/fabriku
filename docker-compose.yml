@@ -30,7 +30,7 @@ services:
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-tls}
-      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@fabriku.my.id}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@fabriku.web.id}
       - MAIL_FROM_NAME=${MAIL_FROM_NAME:-Fabriku}
       - FORCE_MIGRATE=${FORCE_MIGRATE:-false}
       - FABRIKU_S3_ACCESS_KEY=${FABRIKU_S3_ACCESS_KEY}

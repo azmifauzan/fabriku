@@ -229,7 +229,7 @@ class TelegramService
     {
         $message = "👋 <b>Selamat datang di Fabriku Assistant!</b>\n\n".
             "Untuk menghubungkan akun Telegram Anda dengan akun Fabriku, silakan:\n\n".
-            "1️⃣ Login ke aplikasi Fabriku di https://fabriku.my.id\n".
+            "1️⃣ Login ke aplikasi Fabriku di https://fabriku.web.id\n".
             "2️⃣ Buka menu <b>Pengaturan → Telegram</b>\n".
             "3️⃣ Klik tombol <b>Hubungkan Telegram</b>\n".
             "4️⃣ Salin kode yang muncul\n".
