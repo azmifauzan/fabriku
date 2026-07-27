@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronDown, Search } from 'lucide-vue-next';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import ProductThumbnail from '@/components/ProductThumbnail.vue';
 
 interface ProductOption {
@@ -24,8 +24,30 @@ const emit = defineEmits<{
 }>();
 
 const open = ref(false);
+const openUpward = ref(false);
 const search = ref('');
 const rootRef = ref<HTMLElement | null>(null);
+const searchInputRef = ref<HTMLInputElement | null>(null);
+
+const PANEL_HEIGHT_ESTIMATE = 320;
+
+const toggleOpen = async () => {
+    if (open.value) {
+        open.value = false;
+        return;
+    }
+
+    const rect = rootRef.value?.getBoundingClientRect();
+    if (rect) {
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        openUpward.value = spaceBelow < PANEL_HEIGHT_ESTIMATE && spaceAbove > spaceBelow;
+    }
+
+    open.value = true;
+    await nextTick();
+    searchInputRef.value?.focus({ preventScroll: true });
+};
 
 const selectedItem = computed(() => props.items.find((it) => it.id === props.modelValue) ?? null);
 
@@ -59,7 +81,7 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
     <div ref="rootRef" class="relative">
         <button
             type="button"
-            @click="open = !open"
+            @click="toggleOpen"
             class="flex w-full items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-left text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             :class="{ 'border-red-500': error }"
         >
@@ -72,14 +94,15 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 
         <div
             v-if="open"
-            class="absolute z-20 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700"
+            class="absolute z-20 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700"
+            :class="openUpward ? 'bottom-full mb-1' : 'top-full mt-1'"
         >
             <div class="relative border-b border-gray-100 p-2 dark:border-gray-600">
                 <Search :size="14" class="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
                 <input
+                    ref="searchInputRef"
                     v-model="search"
                     type="text"
-                    autofocus
                     placeholder="Cari produk..."
                     class="w-full rounded-md border border-gray-200 py-1.5 pr-2 pl-7 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                 />
