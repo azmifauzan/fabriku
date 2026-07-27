@@ -410,7 +410,7 @@ const industries = ['Retail', 'Garment', 'Makanan', 'Kerajinan', 'Kosmetik', 'Pr
         </main>
 
         <footer class="bg-white">
-            <div class="mx-auto grid max-w-[1440px] gap-8 px-5 py-10 sm:px-8 md:grid-cols-3 md:items-end lg:px-12">
+            <div class="mx-auto grid max-w-[1440px] gap-x-8 gap-y-3 px-5 py-10 sm:px-8 md:grid-cols-3 md:items-end lg:px-12">
                 <div>
                     <img src="/images/fabriku-word.png?v=2" alt="Fabriku" class="h-6 w-[120px] object-contain object-left" />
                     <p class="mt-4 max-w-xs text-sm font-medium text-slate-500">Operasional UMKM dalam satu alur yang bisa dipahami seluruh tim.</p>
@@ -420,10 +420,32 @@ const industries = ['Retail', 'Garment', 'Makanan', 'Kerajinan', 'Kosmetik', 'Pr
                     <a href="#harga" class="hover:underline">Harga</a>
                     <a href="#faq" class="hover:underline">FAQ</a>
                     <a href="https://github.com/azmifauzan/fabriku" target="_blank" rel="noopener noreferrer" class="hover:underline">GitHub</a>
+                </div>
+                <p class="text-sm font-medium text-slate-500 md:text-right">© 2026 Fabriku · Dibuat untuk UMKM Indonesia.</p>
+
+                <div class="hidden md:block" aria-hidden="true"></div>
+                <div class="flex flex-wrap gap-5 text-sm font-bold md:justify-center">
                     <Link href="/privasi" class="hover:underline">Privasi</Link>
                     <Link href="/syarat-ketentuan" class="hover:underline">Syarat & Ketentuan</Link>
                 </div>
-                <p class="text-sm font-medium text-slate-500 md:text-right">© 2026 Fabriku · Dibuat untuk UMKM Indonesia.</p>
+                <p class="text-xs font-medium text-slate-400 md:text-right">
+                    Design by
+                    <a
+                        href="https://satsetui.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-semibold text-slate-500 hover:text-indigo-600 hover:underline"
+                        >SatsetUI</a
+                    >
+                    and Managed by
+                    <a
+                        href="https://satsetops.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-semibold text-slate-500 hover:text-indigo-600 hover:underline"
+                        >SatsetOps</a
+                    >
+                </p>
             </div>
         </footer>
     </div>
