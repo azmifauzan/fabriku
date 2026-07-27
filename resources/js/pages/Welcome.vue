@@ -415,11 +415,13 @@ const industries = ['Retail', 'Garment', 'Makanan', 'Kerajinan', 'Kosmetik', 'Pr
                     <img src="/images/fabriku-word.png?v=2" alt="Fabriku" class="h-6 w-[120px] object-contain object-left" />
                     <p class="mt-4 max-w-xs text-sm font-medium text-slate-500">Operasional UMKM dalam satu alur yang bisa dipahami seluruh tim.</p>
                 </div>
-                <div class="flex gap-5 text-sm font-bold md:justify-center">
+                <div class="flex flex-wrap gap-5 text-sm font-bold md:justify-center">
                     <a href="#fitur" class="hover:underline">Modul</a>
                     <a href="#harga" class="hover:underline">Harga</a>
                     <a href="#faq" class="hover:underline">FAQ</a>
                     <a href="https://github.com/azmifauzan/fabriku" target="_blank" rel="noopener noreferrer" class="hover:underline">GitHub</a>
+                    <Link href="/privasi" class="hover:underline">Privasi</Link>
+                    <Link href="/syarat-ketentuan" class="hover:underline">Syarat & Ketentuan</Link>
                 </div>
                 <p class="text-sm font-medium text-slate-500 md:text-right">© 2026 Fabriku · Dibuat untuk UMKM Indonesia.</p>
             </div>

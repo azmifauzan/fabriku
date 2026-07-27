@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import { Form, Head, Link, usePage } from '@inertiajs/vue3';
-import { ChefHat, Eye, EyeOff, Home, Palette, Scissors, Sparkles, Store, Wrench } from 'lucide-vue-next';
+import { ChefHat, Eye, EyeOff, Home, Palette, RefreshCw, Scissors, Sparkles, Store, Target, Wrench } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 
 const form = reactive({
@@ -161,7 +161,7 @@ watch(
                                     class="flex items-center gap-2 text-gray-500 transition-colors hover:text-indigo-600"
                                     :class="{ 'text-indigo-600': showDemoCredentials }"
                                 >
-                                    <p class="text-sm font-semibold">🎯 Demo Credentials</p>
+                                    <p class="flex items-center gap-1.5 text-sm font-semibold"><Target :size="14" /> Demo Credentials</p>
                                     <svg
                                         class="h-4 w-4 transition-transform duration-300"
                                         :class="{ 'rotate-180': showDemoCredentials }"
@@ -184,8 +184,11 @@ watch(
                                 leave-to-class="max-h-0 opacity-0 transform -translate-y-2"
                             >
                                 <div v-show="showDemoCredentials" class="overflow-hidden">
-                                    <div class="mb-3 rounded-lg border border-indigo-100 bg-indigo-50 p-2 text-center text-xs text-indigo-700">
-                                        🔄 Data demo akan direset otomatis ke kondisi awal setiap 1 jam.
+                                    <div
+                                        class="mb-3 flex items-center justify-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50 p-2 text-center text-xs text-indigo-700"
+                                    >
+                                        <RefreshCw :size="12" />
+                                        Data demo akan direset otomatis ke kondisi awal setiap 1 jam.
                                     </div>
 
                                     <div class="space-y-1.5">
@@ -319,6 +322,11 @@ watch(
                                 <Link href="/register" class="font-semibold text-indigo-600 transition-colors hover:text-indigo-500">
                                     Daftar di sini
                                 </Link>
+                            </p>
+                            <p class="mt-3 text-xs text-gray-400">
+                                <Link href="/privasi" class="hover:underline">Kebijakan Privasi</Link>
+                                ·
+                                <Link href="/syarat-ketentuan" class="hover:underline">Syarat & Ketentuan</Link>
                             </p>
                         </div>
                     </div>
