@@ -108,7 +108,7 @@ class SalesOrderController extends Controller
             'inventoryItems' => InventoryItem::with(['inventoryLocation', 'productionOrder.preparationOrder.pattern'])
                 ->where('status', 'available')
                 ->whereColumn('current_quantity', '>', 'reserved_quantity')
-                ->get(['id', 'sku', 'production_order_id', 'location_id', 'current_quantity', 'reserved_quantity', 'selling_price', 'product_name', 'product_code']),
+                ->get(['id', 'sku', 'production_order_id', 'location_id', 'current_quantity', 'reserved_quantity', 'selling_price', 'product_name', 'product_code', 'image_path']),
         ]);
     }
 
@@ -211,7 +211,7 @@ class SalesOrderController extends Controller
             'inventoryItems' => InventoryItem::with(['inventoryLocation', 'productionOrder.preparationOrder.pattern'])
                 ->where('status', 'available')
                 ->whereColumn('current_quantity', '>', 'reserved_quantity')
-                ->get(['id', 'sku', 'production_order_id', 'location_id', 'current_quantity', 'reserved_quantity', 'selling_price', 'product_name', 'product_code']),
+                ->get(['id', 'sku', 'production_order_id', 'location_id', 'current_quantity', 'reserved_quantity', 'selling_price', 'product_name', 'product_code', 'image_path']),
         ]);
     }
 

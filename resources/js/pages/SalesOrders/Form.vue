@@ -169,20 +169,23 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Produk</label>
-                                <select
-                                    v-model="item.inventory_item_id"
-                                    @change="onInventoryItemChange(index)"
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    :class="{ 'border-red-500': form.errors[`items.${index}.inventory_item_id`] }"
-                                >
-                                    <option value="">Pilih Produk</option>
-                                    <option v-for="invItem in inventoryItems" :key="invItem.id" :value="invItem.id">
-                                        {{ invItem.product_name || invItem.pattern?.name || invItem.sku }} - {{ invItem.sku }} ({{
-                                            invItem.current_stock - invItem.reserved_stock
-                                        }}
-                                        available)
-                                    </option>
-                                </select>
+                                <div class="flex gap-2">
+                                    <ProductThumbnail :image-url="itemImageUrl(index)" class="h-10 w-10 shrink-0" />
+                                    <select
+                                        v-model="item.inventory_item_id"
+                                        @change="onInventoryItemChange(index)"
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                        :class="{ 'border-red-500': form.errors[`items.${index}.inventory_item_id`] }"
+                                    >
+                                        <option value="">Pilih Produk</option>
+                                        <option v-for="invItem in inventoryItems" :key="invItem.id" :value="invItem.id">
+                                            {{ invItem.product_name || invItem.pattern?.name || invItem.sku }} - {{ invItem.sku }} ({{
+                                                invItem.current_stock - invItem.reserved_stock
+                                            }}
+                                            available)
+                                        </option>
+                                    </select>
+                                </div>
                                 <p v-if="form.errors[`items.${index}.inventory_item_id`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
                                     {{ form.errors[`items.${index}.inventory_item_id`] }}
                                 </p>
@@ -287,20 +290,23 @@
                         <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                             <tr v-for="(item, index) in form.items" :key="index">
                                 <td class="px-4 py-3">
-                                    <select
-                                        v-model="item.inventory_item_id"
-                                        @change="onInventoryItemChange(index)"
-                                        class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                        :class="{ 'border-red-500': form.errors[`items.${index}.inventory_item_id`] }"
-                                    >
-                                        <option value="">Pilih Produk</option>
-                                        <option v-for="invItem in inventoryItems" :key="invItem.id" :value="invItem.id">
-                                            {{ invItem.product_name || invItem.pattern?.name || invItem.sku }} - {{ invItem.sku }} ({{
-                                                invItem.current_stock - invItem.reserved_stock
-                                            }}
-                                            available)
-                                        </option>
-                                    </select>
+                                    <div class="flex gap-2">
+                                        <ProductThumbnail :image-url="itemImageUrl(index)" class="h-10 w-10 shrink-0" />
+                                        <select
+                                            v-model="item.inventory_item_id"
+                                            @change="onInventoryItemChange(index)"
+                                            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                            :class="{ 'border-red-500': form.errors[`items.${index}.inventory_item_id`] }"
+                                        >
+                                            <option value="">Pilih Produk</option>
+                                            <option v-for="invItem in inventoryItems" :key="invItem.id" :value="invItem.id">
+                                                {{ invItem.product_name || invItem.pattern?.name || invItem.sku }} - {{ invItem.sku }} ({{
+                                                    invItem.current_stock - invItem.reserved_stock
+                                                }}
+                                                available)
+                                            </option>
+                                        </select>
+                                    </div>
                                     <p v-if="form.errors[`items.${index}.inventory_item_id`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
                                         {{ form.errors[`items.${index}.inventory_item_id`] }}
                                     </p>
@@ -523,6 +529,7 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
+import ProductThumbnail from '@/components/ProductThumbnail.vue';
 import QuickCustomerModal from './QuickCustomerModal.vue';
 
 const props = defineProps({
@@ -622,6 +629,11 @@ function calculateItemSubtotal(index) {
 function calculateTotals() {
     // This function is called when discount or tax changes
     // Computed properties automatically handle the recalculation
+}
+
+function itemImageUrl(index) {
+    const item = form.items[index];
+    return props.inventoryItems.find((inv) => inv.id === item.inventory_item_id)?.image_url ?? null;
 }
 
 function onInventoryItemChange(index) {
