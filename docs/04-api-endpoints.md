@@ -20,10 +20,16 @@ Production: https://app.fabriku.com
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/` | Landing page |
+| GET | `/privasi` | Kebijakan Privasi (static) |
+| GET | `/syarat-ketentuan` | Syarat & Ketentuan (static) |
 | GET | `/login` | Show login form |
 | POST | `/login` | Process login |
 | GET | `/register` | Show register form |
 | POST | `/register` | Process registration |
+| GET | `/auth/google/redirect` | Redirect ke Google OAuth consent screen |
+| GET | `/auth/google/callback` | Callback Google OAuth — login/auto-link/redirect ke lengkapi profil |
+| GET | `/register/google/complete` | Form lengkapi bisnis untuk akun Google baru |
+| POST | `/register/google/complete` | Buat trial tenant dari akun Google baru |
 | POST | `/logout` | Logout user |
 
 ### 2. Tenant Dashboard (Protected)
