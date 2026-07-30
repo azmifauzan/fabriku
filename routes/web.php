@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\AdminAuditLogController;
 use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\AdminBlogCategoryController;
+use App\Http\Controllers\Admin\AdminBlogController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminMonitoringController;
 use App\Http\Controllers\Admin\AdminPaymentController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
@@ -60,6 +63,8 @@ Route::get('/', function () {
 
 Route::get('/privasi', fn () => Inertia::render('Legal/Privacy'))->name('legal.privacy');
 Route::get('/syarat-ketentuan', fn () => Inertia::render('Legal/Terms'))->name('legal.terms');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
 
 // ==========================================
 // ADMIN ROUTES
@@ -92,6 +97,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Role Management
         Route::resource('roles', AdminRoleController::class);
+
+        // Blog
+        Route::resource('blog-categories', AdminBlogCategoryController::class)->except(['show', 'create', 'edit']);
+        Route::resource('blog', AdminBlogController::class)->except(['show']);
+        Route::post('blog-preview', [AdminBlogController::class, 'preview'])->name('blog-preview');
 
         // Payments
         Route::get('payments', [AdminPaymentController::class, 'index'])->name('payments.index');

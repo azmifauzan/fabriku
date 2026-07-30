@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Activity, Building2, ChevronDown, CreditCard, FileText, LayoutDashboard, LogOut, Menu, Settings, Shield, Users, X } from 'lucide-vue-next';
+import { Activity, Building2, ChevronDown, CreditCard, FileText, LayoutDashboard, LogOut, Menu, Newspaper, Settings, Shield, Users, X } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const page = usePage();
@@ -15,6 +15,7 @@ const navigation = [
     { name: 'Payments', href: '/admin/payments', icon: CreditCard },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Roles', href: '/admin/roles', icon: Shield },
+    { name: 'Blog', href: '/admin/blog', icon: Newspaper },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
     { name: 'Monitoring', href: '/admin/monitoring', icon: Activity },
     { name: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
