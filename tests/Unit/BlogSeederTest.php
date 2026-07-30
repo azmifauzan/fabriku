@@ -4,13 +4,13 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use Database\Seeders\BlogSeeder;
 
-it('seeds 6 published blog posts across 3 categories with tags', function () {
+it('seeds 9 published blog posts across 4 categories with tags', function () {
     $this->seed(BlogSeeder::class);
 
-    expect(BlogPost::count())->toBe(6);
-    expect(BlogPost::where('status', 'published')->count())->toBe(6);
+    expect(BlogPost::count())->toBe(9);
+    expect(BlogPost::where('status', 'published')->count())->toBe(9);
     expect(BlogPost::whereNull('published_at')->count())->toBe(0);
-    expect(BlogCategory::count())->toBe(3);
+    expect(BlogCategory::count())->toBe(4);
 
     BlogPost::with('tags', 'category', 'author')->get()->each(function (BlogPost $post) {
         expect($post->tags)->not->toBeEmpty();
@@ -18,13 +18,14 @@ it('seeds 6 published blog posts across 3 categories with tags', function () {
         expect($post->author)->not->toBeNull();
         expect($post->slug)->not->toBe('');
         expect($post->content_html)->toContain('<h2>');
+        expect(str_word_count(strip_tags($post->content_html)))->toBeGreaterThanOrEqual(500);
     });
 });
 
-it('is idempotent when seeded twice', function () {
+it('is idempotent and syncs updated content when seeded twice', function () {
     $this->seed(BlogSeeder::class);
     $this->seed(BlogSeeder::class);
 
-    expect(BlogPost::count())->toBe(6);
-    expect(BlogCategory::count())->toBe(3);
+    expect(BlogPost::count())->toBe(9);
+    expect(BlogCategory::count())->toBe(4);
 });
