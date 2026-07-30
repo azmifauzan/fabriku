@@ -91,6 +91,7 @@ const industries = ['Retail', 'Garment', 'Makanan', 'Kerajinan', 'Kosmetik', 'Pr
                     <a href="#fitur" class="underline-offset-8 hover:underline">Modul</a>
                     <a href="#harga" class="underline-offset-8 hover:underline">Harga</a>
                     <a href="#faq" class="underline-offset-8 hover:underline">FAQ</a>
+                    <Link href="/blog" class="underline-offset-8 hover:underline">Blog</Link>
                 </div>
 
                 <div class="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -419,6 +420,7 @@ const industries = ['Retail', 'Garment', 'Makanan', 'Kerajinan', 'Kosmetik', 'Pr
                     <a href="#fitur" class="hover:underline">Modul</a>
                     <a href="#harga" class="hover:underline">Harga</a>
                     <a href="#faq" class="hover:underline">FAQ</a>
+                    <Link href="/blog" class="hover:underline">Blog</Link>
                     <a href="https://github.com/azmifauzan/fabriku" target="_blank" rel="noopener noreferrer" class="hover:underline">GitHub</a>
                 </div>
                 <p class="text-sm font-medium text-slate-500 md:text-right">© 2026 Fabriku · Dibuat untuk UMKM Indonesia.</p>
