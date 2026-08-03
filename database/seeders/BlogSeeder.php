@@ -535,6 +535,169 @@ Aplikasi kasir yang tepat bukan yang paling banyak fiturnya, tapi yang paling pa
 Fabriku menyediakan pencatatan transaksi, stok, produksi, sampai laporan dalam satu sistem yang menyesuaikan kategori usaha — jadi UMKM pemula tidak perlu berlangganan beberapa aplikasi terpisah hanya untuk mencatat hal-hal dasar ini.
 MD,
             ],
+            [
+                'slug' => 'cara-mengelola-stok-kosmetik-agar-tidak-kadaluarsa',
+                'title' => 'Cara Mengelola Stok Produk Kosmetik agar Tidak Kadaluarsa Sebelum Terjual',
+                'category' => 'Manajemen Stok',
+                'tags' => ['Kosmetik', 'Stok Bahan Baku', 'UMKM'],
+                'days_ago' => 4,
+                'excerpt' => 'Kosmetik kadaluarsa bukan cuma kerugian modal, tapi juga risiko keamanan buat pelanggan. Ini cara mengelola stok kosmetik rumahan supaya tidak ada yang tertinggal sampai lewat tanggal aman pakai.',
+                'meta_title' => 'Cara Mengelola Stok Produk Kosmetik agar Tidak Kadaluarsa',
+                'meta_description' => 'Cara mengelola stok produk kosmetik rumahan agar tidak kadaluarsa: FEFO per batch, minimum stock per varian, dan cara memantau tanggal expired secara rutin.',
+                'content' => <<<'MD'
+Usaha kosmetik dan skincare rumahan punya satu risiko yang tidak dimiliki kebanyakan produk lain: barangnya dipakai langsung ke kulit dan wajah pelanggan. Kalau produk fashion yang telat terjual paling banter cuma ketinggalan tren, kosmetik yang terjual lewat tanggal aman pakai bisa berarti risiko iritasi, komplain, sampai masalah reputasi yang jauh lebih mahal daripada nilai stoknya sendiri.
+
+## Kenapa Stok Kosmetik Butuh Perhatian Ekstra Dibanding Produk Lain
+
+Kosmetik biasanya punya masa simpan yang jauh lebih pendek dibanding produk fashion atau kerajinan, apalagi untuk formula tanpa pengawet berat seperti skincare organik atau produk racikan sendiri. Selain itu, satu produk sering punya banyak varian — shade, ukuran kemasan, batch produksi — yang masing-masing punya tanggal kadaluarsa berbeda meski nama produknya sama. Kalau semua varian ini dianggap satu stok besar tanpa dipisah per batch, sangat mudah kehilangan jejak batch mana yang paling dekat kadaluarsa.
+
+## Cara Mengelola Stok Kosmetik agar Tidak Kadaluarsa
+
+### 1. Terapkan FEFO, Bukan Sekadar FIFO
+
+FEFO (First Expired, First Out) berarti produk dengan tanggal kadaluarsa paling dekat dikeluarkan lebih dulu, terlepas dari kapan produk itu masuk gudang. Ini beda dengan FIFO biasa yang hanya berdasarkan urutan masuk — untuk kosmetik, dua batch yang masuk di waktu berbeda bisa saja punya umur simpan yang berbeda jauh tergantung tanggal produksinya, jadi acuan yang benar adalah tanggal kadaluarsa, bukan tanggal terima.
+
+### 2. Catat Tanggal Kadaluarsa per Batch, Bukan per Produk
+
+Simpan tanggal kadaluarsa di level batch atau item, bukan hanya di level nama produk. Dua batch lipstik warna yang sama bisa punya tanggal kadaluarsa berbeda tergantung kapan diproduksi atau diterima dari supplier — kalau dicatat satu angka saja untuk semua stok, batch yang lebih tua gampang tersembunyi di balik batch baru.
+
+### 3. Buat Minimum Stock per Varian, Bukan per Kategori Produk
+
+Karena kosmetik biasanya punya banyak varian shade dan ukuran, tetapkan minimum stock untuk tiap varian secara terpisah. Varian warna yang kurang laku tidak perlu stok sebanyak varian best-seller — menyamaratakan minimum stock untuk semua varian sering berujung varian yang jarang laku justru menumpuk sampai kadaluarsa duluan.
+
+### 4. Review Tanggal Kadaluarsa Secara Rutin, Bukan Cuma Saat Stock Opname Tahunan
+
+Idealnya, produk dengan sisa masa simpan di bawah 2-3 bulan ditandai untuk diprioritaskan dijual, misalnya lewat promo atau bundling, sebelum benar-benar mendekati tanggal kadaluarsa. Kalau baru disadari saat sudah H-1 minggu dari expired, pilihan yang tersisa biasanya cuma dua: jual rugi besar-besaran atau buang total.
+
+## Contoh Sederhana Melacak Batch Kosmetik
+
+| Produk | Kode Batch | Tanggal Masuk | Kadaluarsa | Sisa Stok |
+|---|---|---|---|---|
+| Serum Vitamin C 30ml | SV-0124 | 2 Jan 2026 | 2 Jan 2027 | 15 |
+| Serum Vitamin C 30ml | SV-0524 | 10 Mei 2026 | 10 Mei 2027 | 40 |
+| Lipstik Matte No. 12 | LM-0324 | 5 Mar 2026 | 5 Sep 2026 | 8 |
+
+Dari tabel ini kelihatan jelas: meski total stok Serum Vitamin C ada 55 pcs, batch SV-0124 harus dijual duluan karena kadaluarsa lebih dekat. Lipstik Matte No. 12 malah butuh perhatian paling mendesak karena masa simpannya jauh lebih pendek dan sisa stoknya sedikit — kalau tidak diprioritaskan terjual bulan-bulan ini, risiko kadaluarsanya paling tinggi dari ketiga baris di atas.
+
+## Apa yang Terjadi kalau Kosmetik Kadaluarsa Tetap Terjual
+
+Selain risiko komplain dan iritasi pelanggan, menjual kosmetik yang sudah lewat tanggal aman pakai juga berisiko dari sisi legal, terutama untuk produk yang terdaftar BPOM. Reputasi yang rusak karena satu kejadian seperti ini biasanya jauh lebih sulit dipulihkan dibanding sekadar menanggung rugi modal dari stok yang harus dimusnahkan lebih awal.
+
+Fabriku mencatat tanggal kadaluarsa per item stok dan menandai status "expired" secara otomatis begitu tanggalnya lewat, jadi produk yang mendekati kadaluarsa bisa terdeteksi lebih awal sebelum jadi masalah di tangan pelanggan.
+MD,
+            ],
+            [
+                'slug' => 'cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi',
+                'title' => 'Cara Menghitung Harga Jasa Servis Kecil agar Tidak Rugi (Bengkel, Laundry, Reparasi)',
+                'category' => 'Keuangan',
+                'tags' => ['Jasa Servis', 'Keuangan UMKM', 'UMKM'],
+                'days_ago' => 2,
+                'excerpt' => 'Usaha jasa seperti bengkel atau reparasi elektronik sering asal pasang tarif tanpa hitung biaya sebenarnya. Ini cara menghitung harga jasa servis kecil supaya untung, bukan sekadar ramai order.',
+                'meta_title' => 'Cara Menghitung Harga Jasa Servis Kecil agar Tidak Rugi',
+                'meta_description' => 'Cara menghitung harga jasa servis kecil (bengkel, laundry, reparasi elektronik) agar tidak rugi: komponen biaya waktu, bahan pendukung, dan overhead alat.',
+                'content' => <<<'MD'
+Usaha jasa seperti bengkel motor, reparasi elektronik, atau laundry punya tantangan hitung-hitungan yang beda dari usaha yang jual barang. Tidak ada bahan baku yang diubah jadi produk, tidak ada stok barang jadi — yang ada cuma waktu kerja, bahan pendukung yang habis pakai, dan alat yang dipakai berulang kali. Karena tidak ada "HPP produk" yang jelas seperti usaha manufaktur, banyak pemilik usaha jasa menentukan tarif dari kebiasaan atau menyamakan dengan kompetitor, tanpa benar-benar tahu apakah tarif itu menutup biaya sebenarnya.
+
+## Kenapa Usaha Jasa Sering Salah Hitung Harga
+
+Kesalahan paling umum adalah hanya menghitung harga sparepart atau bahan pendukung yang terpakai, lalu menambahkan angka "ongkos jasa" yang sebenarnya ditebak, bukan dihitung dari waktu kerja dan biaya operasional yang sesungguhnya. Akibatnya, servis yang makan waktu lama justru dihargai sama dengan servis cepat, padahal biaya waktu kerjanya jauh berbeda.
+
+## Komponen Biaya yang Wajib Dihitung dalam Harga Jasa
+
+### 1. Waktu Kerja
+
+Hitung berapa lama rata-rata satu jenis servis dikerjakan, lalu kalikan dengan tarif per jam tenaga kerja (upah sendiri atau karyawan). Servis yang butuh 30 menit dan yang butuh 3 jam jelas tidak bisa dihargai dengan ongkos jasa yang sama.
+
+### 2. Bahan Pendukung atau Consumable
+
+Selain sparepart utama yang jelas terlihat di nota, banyak servis juga memakai bahan pendukung yang habis terpakai — pelumas, lem, deterjen, bahan pembersih. Bahan-bahan ini sering terlewat dari perhitungan karena nilainya kecil per transaksi, tapi kalau diakumulasi dalam sebulan jumlahnya bisa cukup berarti.
+
+### 3. Biaya Alat dan Overhead
+
+Alat yang dipakai berulang kali — kompresor, mesin cuci, solder — tetap mengalami penyusutan dan makan listrik setiap dipakai. Biaya ini perlu dialokasikan ke tiap transaksi servis, meski nilainya kecil per satu kali pakai.
+
+### 4. Margin Keuntungan
+
+Setelah tiga komponen di atas dijumlahkan, tambahkan margin yang jadi keuntungan usaha. Tanpa margin yang jelas, usaha jasa bisa terus beroperasi hanya menutup biaya, tanpa benar-benar menghasilkan laba yang bisa dipakai berkembang.
+
+## Contoh Perhitungan: Servis Ganti Oli dan Tune Up Motor
+
+Misalnya sebuah bengkel menghitung harga jasa tune up motor: waktu kerja 45 menit dengan tarif tenaga kerja Rp40.000/jam (setara Rp30.000), bahan pendukung seperti cairan pembersih karburator dan majun Rp10.000, biaya listrik dan penyusutan alat kompresor diperkirakan Rp5.000. Total biaya: Rp45.000.
+
+Kalau bengkel ingin margin 50%, harga jasa minimal yang masuk akal adalah Rp45.000 + (50% × Rp45.000) = Rp67.500, dibulatkan jadi Rp70.000 di luar harga sparepart yang diganti (oli, busi, dll dihitung terpisah sesuai harga beli). Kalau selama ini dipatok Rp50.000 rata dengan bengkel sebelah tanpa hitungan ini, marginnya jauh lebih tipis dari yang dikira, bahkan bisa nombok kalau servisnya ternyata makan waktu lebih lama dari biasanya.
+
+## Kesalahan Umum yang Bikin Usaha Jasa Rugi Diam-Diam
+
+Kesalahan paling sering: menyamakan tarif untuk semua tingkat kesulitan servis, padahal waktu dan bahan yang terpakai jauh berbeda. Kesalahan lain adalah tidak pernah meninjau ulang tarif meski harga bahan pendukung sudah naik, sehingga margin tergerus pelan-pelan tanpa disadari — mirip dengan kasus HPP produk yang tidak pernah dihitung ulang.
+
+## Kapan Tarif Jasa Perlu Ditinjau Ulang
+
+Tinjau ulang tarif setiap kali ada kenaikan signifikan pada harga bahan pendukung atau upah tenaga kerja. Untuk usaha yang bahan pendukungnya sering naik-turun harga, meninjau tarif tiap 2-3 bulan lebih aman daripada menunggu sampai terasa rugi baru disadari.
+
+Untuk kategori usaha jasa, Fabriku menyediakan katalog layanan tanpa perlu modul material atau produksi, lengkap dengan pemetaan bahan pendukung per layanan yang otomatis terpotong dari stok setiap kali transaksi servis selesai — jadi biaya bahan pendukung tidak lagi terlewat dari perhitungan.
+MD,
+            ],
+            [
+                'slug' => 'cara-mencatat-menagih-piutang-pelanggan-umkm',
+                'title' => 'Cara Mencatat dan Menagih Piutang Pelanggan UMKM agar Tidak Macet',
+                'category' => 'Keuangan',
+                'tags' => ['Piutang', 'Keuangan UMKM', 'UMKM'],
+                'days_ago' => 0,
+                'excerpt' => 'Omzet terlihat bagus di atas kertas, tapi kas menipis? Bisa jadi piutang yang menumpuk tanpa dipantau. Ini cara mencatat dan menagih piutang pelanggan UMKM tanpa merusak hubungan baik.',
+                'meta_title' => 'Cara Mencatat dan Menagih Piutang Pelanggan UMKM',
+                'meta_description' => 'Cara mencatat dan menagih piutang pelanggan UMKM agar tidak macet: kolom wajib pencatatan, jadwal tagih, dan cara menagih tanpa merusak hubungan pelanggan.',
+                'content' => <<<'MD'
+Salah satu jebakan paling umum di UMKM adalah merasa penjualan sedang bagus karena omzet tercatat tinggi, padahal sebagian besar dari angka itu masih berupa piutang yang belum benar-benar masuk ke kas. Semakin longgar syarat pembayaran diberikan ke pelanggan — DP, cicilan, tempo — semakin penting piutang ini dipantau ketat, karena di atas kertas terlihat untung, tapi uang tunainya belum tentu ada saat dibutuhkan.
+
+## Kenapa Piutang yang Tidak Dipantau Berbahaya buat Arus Kas
+
+Piutang pada dasarnya adalah uang usaha yang "dipinjamkan" ke pelanggan dalam bentuk barang atau jasa yang sudah diserahkan. Selama piutang belum tertagih, usaha tetap harus menanggung biaya operasional dari kas yang ada, meski sebagian pendapatan sudah "tercatat" sebagai omzet. Kalau piutang menumpuk tanpa jadwal tagih yang jelas, usaha bisa terjebak kekurangan kas justru di saat penjualan sedang ramai-ramainya.
+
+## Cara Mencatat Piutang Pelanggan dengan Rapi
+
+Kolom minimal yang wajib ada dalam catatan piutang:
+
+- **Nama pelanggan** — supaya jelas piutang siapa yang harus ditagih.
+- **Tanggal transaksi** — kapan barang/jasa diserahkan.
+- **Total tagihan** — nilai transaksi keseluruhan.
+- **Jumlah yang sudah dibayar** — termasuk DP atau cicilan yang sudah masuk.
+- **Sisa piutang** — total tagihan dikurangi yang sudah dibayar.
+- **Tanggal jatuh tempo** — batas waktu pelunasan yang disepakati.
+- **Status** — lunas, sebagian (partial), atau belum dibayar sama sekali.
+
+Kolom tanggal jatuh tempo dan status ini yang paling sering terlewat, padahal justru dua kolom inilah yang menentukan kapan sebuah piutang harus mulai ditagih.
+
+## Cara Menagih Piutang Tanpa Merusak Hubungan dengan Pelanggan
+
+### 1. Ingatkan Sebelum Jatuh Tempo, Bukan Sesudah
+
+Kirim pengingat 2-3 hari sebelum tanggal jatuh tempo, bukan menunggu sampai lewat baru menghubungi. Pengingat sebelum jatuh tempo terasa sebagai informasi biasa, sementara penagihan setelah telat cenderung terasa seperti komplain.
+
+### 2. Kelompokkan Piutang Berdasarkan Umur
+
+Pisahkan piutang yang baru jatuh tempo minggu ini, yang sudah telat 1-2 minggu, dan yang sudah telat lebih dari sebulan. Piutang yang sudah lama telat butuh pendekatan berbeda dan prioritas lebih tinggi dibanding yang baru saja lewat tanggal.
+
+### 3. Buat Kesepakatan Tertulis di Awal, Bukan Lisan Saja
+
+Kesepakatan syarat pembayaran — berapa DP, kapan pelunasan, konsekuensi kalau telat — sebaiknya dicatat tertulis (bisa lewat chat) sejak transaksi awal. Ini mengurangi kesalahpahaman saat proses penagihan berlangsung.
+
+## Contoh Kasus: Membaca Daftar Piutang untuk Prioritas Tagih
+
+| Pelanggan | Total Tagihan | Sudah Dibayar | Sisa Piutang | Jatuh Tempo | Status |
+|---|---|---|---|---|---|
+| Toko Mawar | Rp3.000.000 | Rp1.000.000 | Rp2.000.000 | 5 Agt | Sebagian |
+| Bu Sari | Rp750.000 | Rp0 | Rp750.000 | 20 Jul | Belum Bayar |
+| CV Berkah | Rp5.000.000 | Rp5.000.000 | Rp0 | 1 Agt | Lunas |
+
+Dari tabel ini, piutang Bu Sari yang paling mendesak ditagih karena sudah lewat jatuh tempo cukup lama, meski nilainya lebih kecil dari piutang Toko Mawar. Kalau hanya melihat nilai piutang terbesar tanpa memperhatikan tanggal jatuh tempo, penagihan bisa salah prioritas dan piutang yang sudah lama macet malah terlewat.
+
+## Kesalahan yang Sering Terjadi
+
+Kesalahan paling umum adalah tidak mencatat piutang sama sekali secara terpisah, melainkan mencampurnya dengan catatan omzet biasa — sehingga pemilik usaha baru sadar ada piutang menumpuk setelah kas benar-benar terasa seret. Kesalahan lain adalah menunda penagihan karena sungkan, padahal semakin lama ditunda, semakin besar kemungkinan piutang itu berubah jadi piutang macet yang sulit ditagih sama sekali.
+
+Fabriku mencatat setiap pembayaran sebagai entri di ledger pesanan, sehingga status pembayaran (lunas, sebagian, belum bayar) dan sisa piutang tiap pelanggan otomatis terlihat tanpa perlu rekap manual terpisah.
+MD,
+            ],
         ];
     }
 }
