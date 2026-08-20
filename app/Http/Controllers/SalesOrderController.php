@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InsufficientStockException;
 use App\Http\Requests\StorePaymentRequest;
 use App\Http\Requests\StoreSalesOrderRequest;
 use App\Http\Requests\UpdateSalesOrderRequest;
@@ -344,6 +345,9 @@ class SalesOrderController extends Controller
             }
 
             DB::commit();
+        } catch (InsufficientStockException $e) {
+            DB::rollBack();
+            abort(422, $e->getMessage());
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -523,63 +527,78 @@ class SalesOrderController extends Controller
             );
         }
 
-        DB::transaction(function () use ($validated, $customer, $tenantId) {
-            $subtotal = 0;
-            $items = [];
+        try {
+            DB::transaction(function () use ($validated, $customer, $tenantId) {
+                $subtotal = 0;
+                $items = [];
 
-            foreach ($validated['items'] as $line) {
-                $lineSubtotal = $line['quantity'] * $line['unit_price'];
-                $subtotal += $lineSubtotal;
-                $items[] = [
-                    'inventory_item_id' => $line['inventory_item_id'] ?? null,
-                    'service_id' => $line['service_id'] ?? null,
-                    'served_by' => $line['served_by'] ?? null,
-                    'quantity' => $line['quantity'],
-                    'unit_price' => $line['unit_price'],
-                    'discount_amount' => 0,
-                    'subtotal' => $lineSubtotal,
-                ];
-            }
-
-            $salesOrder = SalesOrder::create([
-                'tenant_id' => $tenantId,
-                'customer_id' => $customer->id,
-                'order_date' => now(),
-                'channel' => 'offline',
-                'status' => 'completed',
-                'subtotal' => $subtotal,
-                'discount_amount' => 0,
-                'discount_percentage' => 0,
-                'tax_amount' => 0,
-                'total_amount' => $subtotal,
-                'payment_method' => $validated['payment_method'],
-                'payment_status' => 'paid',
-                'paid_amount' => $subtotal,
-                'completed_date' => now(),
-            ]);
-
-            $salesOrder->items()->createMany($items);
-
-            // Deduct stock directly — observer only handles updates, not creates
-            foreach ($validated['items'] as $line) {
-                if (! empty($line['inventory_item_id'])) {
-                    $inventoryItem = InventoryItem::lockForUpdate()->find($line['inventory_item_id']);
-                    $inventoryItem?->deductStock((int) $line['quantity']);
+                foreach ($validated['items'] as $line) {
+                    $lineSubtotal = $line['quantity'] * $line['unit_price'];
+                    $subtotal += $lineSubtotal;
+                    $items[] = [
+                        'inventory_item_id' => $line['inventory_item_id'] ?? null,
+                        'service_id' => $line['service_id'] ?? null,
+                        'served_by' => $line['served_by'] ?? null,
+                        'quantity' => $line['quantity'],
+                        'unit_price' => $line['unit_price'],
+                        'discount_amount' => 0,
+                        'subtotal' => $lineSubtotal,
+                    ];
                 }
 
-                // Auto-deduct consumables yang ter-mapping ke layanan
-                if (! empty($line['service_id'])) {
-                    $consumables = ServiceConsumable::query()
-                        ->where('service_id', $line['service_id'])
-                        ->get();
+                $salesOrder = SalesOrder::create([
+                    'tenant_id' => $tenantId,
+                    'customer_id' => $customer->id,
+                    'order_date' => now(),
+                    'channel' => 'offline',
+                    'status' => 'completed',
+                    'subtotal' => $subtotal,
+                    'discount_amount' => 0,
+                    'discount_percentage' => 0,
+                    'tax_amount' => 0,
+                    'total_amount' => $subtotal,
+                    'payment_method' => $validated['payment_method'],
+                    'payment_status' => 'paid',
+                    'paid_amount' => $subtotal,
+                    'completed_date' => now(),
+                ]);
 
-                    foreach ($consumables as $consumable) {
-                        $item = InventoryItem::lockForUpdate()->find($consumable->inventory_item_id);
-                        $item?->deductStock($consumable->quantity * (int) $line['quantity']);
+                $salesOrder->items()->createMany($items);
+
+                // Deduct stock directly — observer only handles updates, not creates
+                foreach ($validated['items'] as $line) {
+                    if (! empty($line['inventory_item_id'])) {
+                        $inventoryItem = InventoryItem::lockForUpdate()->find($line['inventory_item_id']);
+
+                        if (! $inventoryItem?->deductStock((int) $line['quantity'])) {
+                            throw new InsufficientStockException(
+                                "Stok tidak cukup untuk item {$inventoryItem?->sku} (butuh {$line['quantity']})."
+                            );
+                        }
+                    }
+
+                    // Auto-deduct consumables yang ter-mapping ke layanan
+                    if (! empty($line['service_id'])) {
+                        $consumables = ServiceConsumable::query()
+                            ->where('service_id', $line['service_id'])
+                            ->get();
+
+                        foreach ($consumables as $consumable) {
+                            $item = InventoryItem::lockForUpdate()->find($consumable->inventory_item_id);
+                            $needed = $consumable->quantity * (int) $line['quantity'];
+
+                            if (! $item?->deductStock($needed)) {
+                                throw new InsufficientStockException(
+                                    "Stok bahan pendukung tidak cukup untuk item {$item?->sku} (butuh {$needed})."
+                                );
+                            }
+                        }
                     }
                 }
-            }
-        });
+            });
+        } catch (InsufficientStockException $e) {
+            abort(422, $e->getMessage());
+        }
 
         return redirect()->route('sales-orders.index')
             ->with('success', 'Transaksi berhasil dicatat.');
