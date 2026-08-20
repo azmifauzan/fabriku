@@ -246,6 +246,87 @@ test('releases reserved stock when transitioning shipped to cancelled', function
     expect($inventoryItem->reserved_quantity)->toBe(0);
 });
 
+test('blocks confirm instead of silently skipping reservation when stock is insufficient', function () {
+    // Reproduces the prod bug (item INV-GRM-0229): another order already
+    // reserved most of the stock, leaving less available than this order
+    // needs. Previously reserveStock() returned false and the Observer
+    // ignored it — the order silently became 'confirmed' with nothing
+    // actually reserved for it, corrupting the reservation pool for whoever
+    // completes later. It must now block the transition instead.
+    $inventoryItem = InventoryItem::factory()->create([
+        'tenant_id' => $this->tenant->id,
+        'current_quantity' => 5,
+        'reserved_quantity' => 3, // already reserved by another order
+        'status' => 'available',
+    ]);
+    // available_stock = 5 - 3 = 2, this order needs 10
+
+    $salesOrder = SalesOrder::factory()->create([
+        'tenant_id' => $this->tenant->id,
+        'status' => 'draft',
+    ]);
+
+    SalesOrderItem::factory()->create([
+        'sales_order_id' => $salesOrder->id,
+        'inventory_item_id' => $inventoryItem->id,
+        'quantity' => 10,
+    ]);
+
+    $response = $this->patch(route('sales-orders.update-status', $salesOrder), [
+        'status' => 'confirmed',
+    ]);
+
+    $response->assertStatus(422);
+
+    $salesOrder->refresh();
+    $inventoryItem->refresh();
+
+    expect($salesOrder->status)->toBe('draft');
+    expect($inventoryItem->reserved_quantity)->toBe(3);
+    expect($inventoryItem->current_quantity)->toBe(5);
+});
+
+test('blocks completion instead of silently no-oping when reserved/current cannot cover the order', function () {
+    // Reproduces the second half of the prod incident: an order that DID
+    // legitimately reserve stock, but by the time it completes another
+    // order's leak has eaten into the shared reserved_quantity pool, so
+    // there isn't enough left to release/deduct. Previously this failed
+    // silently and the order became 'completed' with no stock movement at
+    // all — must now block instead.
+    $inventoryItem = InventoryItem::factory()->create([
+        'tenant_id' => $this->tenant->id,
+        'current_quantity' => 14,
+        'reserved_quantity' => 10, // less than this order's own 20
+        'status' => 'available',
+    ]);
+
+    $salesOrder = SalesOrder::factory()->create([
+        'tenant_id' => $this->tenant->id,
+        'status' => 'confirmed',
+    ]);
+
+    SalesOrderItem::withoutEvents(function () use ($salesOrder, $inventoryItem) {
+        SalesOrderItem::factory()->create([
+            'sales_order_id' => $salesOrder->id,
+            'inventory_item_id' => $inventoryItem->id,
+            'quantity' => 20,
+        ]);
+    });
+
+    $response = $this->patch(route('sales-orders.update-status', $salesOrder), [
+        'status' => 'completed',
+    ]);
+
+    $response->assertStatus(422);
+
+    $salesOrder->refresh();
+    $inventoryItem->refresh();
+
+    expect($salesOrder->status)->toBe('confirmed');
+    expect($inventoryItem->reserved_quantity)->toBe(10);
+    expect($inventoryItem->current_quantity)->toBe(14);
+});
+
 // ─────────────────────────────────────────────────────────
 // Multi-tenant isolation
 // ─────────────────────────────────────────────────────────
