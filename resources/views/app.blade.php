@@ -6,10 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title inertia>{{ config('app.name', 'Fabriku') }} — Operasional UMKM dalam satu alur</title>
-        <meta name="description" content="Fabriku adalah aplikasi manajemen produksi dan penjualan untuk UMKM Indonesia (garment, makanan, kerajinan, kosmetik, retail, produksi rumahan, jasa): kelola bahan baku, produksi, stok, dan penjualan dalam satu alur.">
-        <meta property="og:title" content="Fabriku — Operasional UMKM dalam satu alur">
-        <meta property="og:description" content="Aplikasi manajemen produksi dan penjualan untuk UMKM Indonesia: bahan baku, produksi, stok, dan penjualan dalam satu alur.">
-        <meta property="og:type" content="website">
+        {{-- description/og tags are page-specific, rendered per-page via the SeoHead Vue component --}}
 
         <!-- Apply saved theme before app loads (prevents FOUC) -->
         <script>

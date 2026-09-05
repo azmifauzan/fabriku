@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { storeComplete } from '@/actions/App/Http/Controllers/Auth/GoogleAuthController';
+import SeoHead from '@/components/SeoHead.vue';
 import { businessCategoryIcons } from '@/lib/businessCategoryIcons';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import { Gift } from 'lucide-vue-next';
 import { ref } from 'vue';
 
@@ -37,7 +38,7 @@ const submit = () => {
 
 <template>
     <div class="auth-page relative min-h-screen overflow-hidden bg-slate-50 text-gray-800">
-        <Head title="Lengkapi Pendaftaran - Fabriku" />
+        <SeoHead title="Lengkapi Pendaftaran - Fabriku" :noindex="true" />
         <div class="blueprint absolute inset-0 opacity-50" aria-hidden="true"></div>
 
         <div class="relative mx-auto grid min-h-screen max-w-[1440px] lg:grid-cols-[0.72fr_1.28fr]">
