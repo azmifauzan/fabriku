@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import SeoHead from '@/components/SeoHead.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 
 defineProps<{
     posts: {
@@ -16,11 +17,16 @@ defineProps<{
     };
     categories: Array<{ name: string; slug: string }>;
     activeCategory: string | null;
+    canonical: string;
 }>();
 </script>
 
 <template>
-    <Head title="Blog" />
+    <SeoHead
+        title="Blog — Tips Operasional UMKM | Fabriku"
+        description="Tips dan panduan praktis untuk UMKM Indonesia: mengelola bahan baku, produksi, stok, penjualan, dan laporan keuangan."
+        :canonical="canonical"
+    />
     <PublicLayout>
         <div class="mx-auto max-w-5xl px-4 py-12">
             <h1 class="mb-6 text-3xl font-bold text-gray-900 dark:text-white">Blog</h1>

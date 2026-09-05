@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import GoogleAuthButton from '@/components/GoogleAuthButton.vue';
+import SeoHead from '@/components/SeoHead.vue';
 import { useSweetAlert } from '@/composables/useSweetAlert';
-import { Form, Head, Link, usePage } from '@inertiajs/vue3';
+import { Form, Link, usePage } from '@inertiajs/vue3';
 import { ChefHat, Eye, EyeOff, Home, Palette, RefreshCw, Scissors, Sparkles, Store, Target, Wrench } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 
@@ -36,7 +37,7 @@ watch(
 
 <template>
     <div class="auth-page relative min-h-screen overflow-hidden bg-slate-50 text-gray-800">
-        <Head title="Masuk - Fabriku" />
+        <SeoHead title="Masuk - Fabriku" :noindex="true" />
         <div class="blueprint absolute inset-0 opacity-50" aria-hidden="true"></div>
 
         <div class="relative mx-auto grid min-h-screen max-w-[1440px] lg:grid-cols-[0.88fr_1.12fr]">

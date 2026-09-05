@@ -38,6 +38,7 @@ use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SimpleProductionController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TelegramController;
@@ -58,11 +59,13 @@ Route::get('/', function () {
             'pro_price_monthly' => $settings['pro_price_monthly'] ?? 35000,
             'pro_price_yearly' => $settings['pro_price_yearly'] ?? 350000,
         ],
+        'canonical' => url()->current(),
     ]);
 })->name('home');
 
-Route::get('/privasi', fn () => Inertia::render('Legal/Privacy'))->name('legal.privacy');
-Route::get('/syarat-ketentuan', fn () => Inertia::render('Legal/Terms'))->name('legal.terms');
+Route::get('/privasi', fn () => Inertia::render('Legal/Privacy', ['canonical' => url()->current()]))->name('legal.privacy');
+Route::get('/syarat-ketentuan', fn () => Inertia::render('Legal/Terms', ['canonical' => url()->current()]))->name('legal.terms');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
 

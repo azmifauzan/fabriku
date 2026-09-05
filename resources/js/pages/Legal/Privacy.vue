@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import SeoHead from '@/components/SeoHead.vue';
 import LegalLayout from '@/layouts/LegalLayout.vue';
-import { Head } from '@inertiajs/vue3';
+
+defineProps<{ canonical: string }>();
 </script>
 
 <template>
-    <Head title="Kebijakan Privasi — Fabriku" />
+    <SeoHead title="Kebijakan Privasi — Fabriku" :canonical="canonical" />
 
     <LegalLayout title="Kebijakan Privasi" updated="27 Juli 2026">
         <section>

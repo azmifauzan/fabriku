@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import FAQ from '@/components/Landing/FAQ.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import SeoHead from '@/components/SeoHead.vue';
+import { faqs } from '@/data/faq';
+import { Link } from '@inertiajs/vue3';
 import { ArrowDown, ArrowRight, BarChart3, Boxes, Check, CircleDollarSign, Factory, PackageCheck, ScanLine, Truck } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 type PlanFeature = {
     name: string;
@@ -15,14 +18,57 @@ const props = withDefaults(
             membership_price_monthly: number;
             membership_price_yearly: number;
         };
+        canonical?: string;
     }>(),
     {
         settings: () => ({
             membership_price_monthly: 25000,
             membership_price_yearly: 250000,
         }),
+        canonical: undefined,
     },
 );
+
+const description =
+    'Fabriku adalah aplikasi manajemen produksi dan penjualan untuk UMKM Indonesia (garment, makanan, kerajinan, kosmetik, retail, produksi rumahan, jasa): kelola bahan baku, produksi, stok, dan penjualan dalam satu alur.';
+
+const ogImage = computed(() => new URL('/images/fabriku-word.png', props.canonical ?? 'https://fabriku.web.id').toString());
+
+const jsonLd = computed(() => {
+    const origin = props.canonical ?? 'https://fabriku.web.id';
+
+    return [
+        {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Fabriku',
+            url: origin,
+            logo: new URL('/images/fabriku-logo-only.png', origin).toString(),
+        },
+        {
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'Fabriku',
+            applicationCategory: 'BusinessApplication',
+            operatingSystem: 'Web',
+            description,
+            offers: {
+                '@type': 'Offer',
+                price: String(props.settings.membership_price_monthly),
+                priceCurrency: 'IDR',
+            },
+        },
+        {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faqs.map((faq) => ({
+                '@type': 'Question',
+                name: faq.question,
+                acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+            })),
+        },
+    ];
+});
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('id-ID', {
@@ -76,7 +122,13 @@ const industries = ['Retail', 'Garment', 'Makanan', 'Kerajinan', 'Kosmetik', 'Pr
 </script>
 
 <template>
-    <Head title="Fabriku — Operasional UMKM dalam satu alur" />
+    <SeoHead
+        title="Fabriku — Operasional UMKM dalam satu alur"
+        :description="description"
+        :canonical="canonical"
+        :og-image="ogImage"
+        :json-ld="jsonLd"
+    />
 
     <div class="landing min-h-screen overflow-hidden bg-slate-50 text-gray-800 selection:bg-indigo-600 selection:text-white">
         <nav class="relative z-50 border-b border-gray-200 bg-white/95 backdrop-blur">

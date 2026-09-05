@@ -1,26 +1,66 @@
 <script setup lang="ts">
+import SeoHead from '@/components/SeoHead.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     post: {
         title: string;
         content_html: string;
+        excerpt: string | null;
         featured_image_url: string | null;
         published_at: string | null;
+        updated_at: string | null;
         meta_title: string;
         meta_description: string | null;
         category: { name: string; slug: string } | null;
         tags: Array<{ name: string; slug: string }>;
         author_name: string;
+        canonical: string;
     };
 }>();
+
+const ogImage = computed(() => props.post.featured_image_url ?? new URL('/images/fabriku-word.png', props.post.canonical).toString());
+
+const jsonLd = computed(() => [
+    {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: props.post.title,
+        description: props.post.meta_description ?? props.post.excerpt ?? undefined,
+        image: ogImage.value,
+        datePublished: props.post.published_at ?? undefined,
+        dateModified: props.post.updated_at ?? props.post.published_at ?? undefined,
+        author: { '@type': 'Person', name: props.post.author_name },
+        publisher: {
+            '@type': 'Organization',
+            name: 'Fabriku',
+            logo: { '@type': 'ImageObject', url: new URL('/images/fabriku-logo-only.png', props.post.canonical).toString() },
+        },
+        mainEntityOfPage: { '@type': 'WebPage', '@id': props.post.canonical },
+    },
+    {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Beranda', item: new URL('/', props.post.canonical).toString() },
+            { '@type': 'ListItem', position: 2, name: 'Blog', item: new URL('/blog', props.post.canonical).toString() },
+            { '@type': 'ListItem', position: 3, name: props.post.title, item: props.post.canonical },
+        ],
+    },
+]);
 </script>
 
 <template>
-    <Head :title="post.meta_title">
-        <meta v-if="post.meta_description" name="description" :content="post.meta_description" />
-    </Head>
+    <SeoHead
+        :title="post.meta_title"
+        :description="post.meta_description"
+        :canonical="post.canonical"
+        :og-image="ogImage"
+        og-type="article"
+        :json-ld="jsonLd"
+    />
     <PublicLayout>
         <article class="mx-auto max-w-3xl px-4 py-12">
             <p v-if="post.category" class="mb-2 text-sm font-medium text-indigo-600">{{ post.category.name }}</p>

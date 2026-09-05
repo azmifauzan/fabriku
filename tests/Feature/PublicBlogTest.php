@@ -29,6 +29,7 @@ it('shows a published post with rendered html content', function () {
     $response->assertOk()->assertInertia(fn ($page) => $page
         ->component('Blog/Show')
         ->where('post.content_html', "<h1>Halo Dunia</h1>\n")
+        ->where('post.canonical', url('/blog/contoh-post'))
     );
 });
 
@@ -54,7 +55,11 @@ it('filters the index by category', function () {
 
     $response = $this->get(route('blog.index', ['category' => 'tips-umkm']));
 
-    $response->assertInertia(fn ($page) => $page->has('posts.data', 1)->where('posts.data.0.title', 'A'));
+    $response->assertInertia(fn ($page) => $page
+        ->has('posts.data', 1)
+        ->where('posts.data.0.title', 'A')
+        ->where('canonical', url('/blog'))
+    );
 });
 
 it('filters the index by tag', function () {
@@ -65,7 +70,11 @@ it('filters the index by tag', function () {
 
     $response = $this->get(route('blog.index', ['tag' => 'retail']));
 
-    $response->assertInertia(fn ($page) => $page->has('posts.data', 1)->where('posts.data.0.title', 'A'));
+    $response->assertInertia(fn ($page) => $page
+        ->has('posts.data', 1)
+        ->where('posts.data.0.title', 'A')
+        ->where('canonical', url('/blog'))
+    );
 });
 
 it('does not overwrite published_at when an unrelated field is edited later', function () {
