@@ -698,6 +698,151 @@ Kesalahan paling umum adalah tidak mencatat piutang sama sekali secara terpisah,
 Fabriku mencatat setiap pembayaran sebagai entri di ledger pesanan, sehingga status pembayaran (lunas, sebagian, belum bayar) dan sisa piutang tiap pelanggan otomatis terlihat tanpa perlu rekap manual terpisah.
 MD,
             ],
+            [
+                'slug' => 'cara-menentukan-harga-jual-produk-kerajinan-handmade',
+                'title' => 'Cara Menentukan Harga Jual Produk Kerajinan Tangan Handmade agar Untung',
+                'category' => 'Keuangan',
+                'tags' => ['Kerajinan', 'Harga Jual', 'UMKM'],
+                'days_ago' => 2,
+                'excerpt' => 'Harga jual produk handmade yang cuma "ikut-ikutan" harga kompetitor sering bikin pengrajin rugi tanpa sadar, karena jam kerja dan skill tidak pernah dihitung sebagai biaya.',
+                'meta_title' => 'Cara Menentukan Harga Jual Produk Kerajinan Handmade',
+                'meta_description' => 'Cara menentukan harga jual produk kerajinan tangan handmade agar untung: komponen biaya yang wajib dihitung, rumus sederhana, dan contoh perhitungannya.',
+                'content' => <<<'MD'
+Banyak pengrajin menentukan harga jual produk handmade dengan cara yang sama: lihat harga produk sejenis di marketplace, lalu pasang harga sedikit di bawahnya supaya "lebih laku". Cara ini terasa aman di awal, tapi sering berujung rugi diam-diam karena biaya yang sebenarnya dikeluarkan — terutama jam kerja dan skill — tidak pernah masuk hitungan.
+
+## Kenapa Produk Handmade Sering Salah Harga
+
+Beda dari produk pabrikan yang biaya produksinya relatif tetap dan bisa dihitung per unit dengan mudah, produk kerajinan tangan punya variabel yang lebih personal: waktu pengerjaan berbeda-beda tergantung kerumitan desain, bahan yang dipakai kadang sisa atau tidak standar, dan skill yang dibutuhkan tidak selalu bisa disamakan dengan upah buruh pabrik biasa. Karena sulit dihitung, banyak pengrajin akhirnya melewatkan komponen ini sama sekali dan hanya menghitung harga bahan baku saja.
+
+## Komponen Biaya yang Wajib Dihitung
+
+1. **Biaya bahan baku** — termasuk bahan sisa yang dipakai, karena bahan sisa tetap punya nilai meski didapat gratis atau murah dari sisa produksi lain.
+2. **Waktu pengerjaan (jam kerja)** — hitung berapa jam yang dibutuhkan untuk satu produk, lalu kalikan dengan upah per jam yang wajar, bukan Rp0 hanya karena "dikerjakan sendiri".
+3. **Tingkat kerumitan/skill** — desain yang butuh keahlian lebih tinggi atau proses lebih rumit pantas dihargai lebih dari produk yang pengerjaannya sederhana.
+4. **Biaya alat dan penyusutan** — jarum, lem tembak, mesin jahit kecil, atau alat lain yang aus dipakai berulang kali tetap merupakan biaya, meski tidak terasa langsung per produk.
+5. **Kemasan dan biaya kegagalan** — termasuk produk yang gagal di tengah proses dan bahannya tidak bisa dipakai lagi, karena biaya itu sebenarnya ditanggung oleh produk yang berhasil terjual.
+
+## Rumus Sederhana Menghitung Harga Jual
+
+**Harga Jual = (Biaya Bahan + Upah Waktu Kerja + Overhead) + Margin Keuntungan**
+
+Contoh: seorang pengrajin membuat satu gelang manik-manik dengan biaya bahan Rp8.000, waktu pengerjaan 45 menit dengan upah yang ditetapkan Rp20.000/jam (setara Rp15.000 untuk 45 menit), dan overhead alat diperkirakan Rp2.000 per produk. Total biaya produksi: Rp8.000 + Rp15.000 + Rp2.000 = Rp25.000.
+
+Kalau pengrajin ingin margin 40%, harga jual minimal adalah Rp25.000 + (40% × Rp25.000) = **Rp35.000**. Bandingkan dengan kalau harga hanya ditentukan dari "harga bahan plus sedikit untung" tanpa menghitung waktu kerja — misalnya dijual Rp15.000 karena dikira sudah untung dari modal bahan Rp8.000. Padahal setelah dihitung lengkap, harga segitu justru menombok waktu kerja sebesar Rp17.000 per gelang, yang berarti setiap gelang terjual justru mengurangi "gaji" yang seharusnya didapat pengrajin.
+
+## Kerajinan Tangan Boleh Dihargai Lebih dari Sekadar HPP
+
+Berbeda dari produk pabrikan yang harga jualnya cenderung mepet dengan HPP karena bersaing di volume, produk handmade punya nilai tambah dari keunikan, cerita di balik pembuatannya, dan edisi terbatas yang tidak bisa ditiru massal. Nilai tambah ini sah untuk dimasukkan ke margin yang lebih tinggi dari sekadar "HPP plus untung tipis" — asal tetap berangkat dari perhitungan biaya yang akurat, bukan tebakan.
+
+## Kesalahan Umum Menentukan Harga Produk Handmade
+
+Kesalahan paling sering adalah menghargai jam kerja sendiri sebagai Rp0 karena dianggap "hobi" atau "dikerjakan pas senggang", padahal waktu itu bisa dipakai untuk hal lain yang menghasilkan. Kesalahan lain adalah ikut-ikutan harga kompetitor tanpa tahu apakah kompetitor itu sendiri sudah menghitung biayanya dengan benar — bisa jadi kompetitor juga sama-sama rugi tanpa sadar, dan mengikuti harganya berarti ikut menjebak diri sendiri di harga yang tidak sehat.
+
+Sebelum menentukan harga jual, ada baiknya juga menata dulu bagaimana [bahan baku kerajinan yang tidak standar](/blog/cara-mengelola-bahan-baku-kerajinan-tidak-standar) — seperti sisa kain, manik lepasan, atau potongan kayu — dicatat dan dihitung nilainya, karena tanpa itu komponen biaya bahan di atas hanya jadi perkiraan kasar. Untuk pembahasan HPP yang lebih mendalam di luar konteks kerajinan tangan, lihat juga [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm).
+
+Fabriku mendukung pencatatan HPP per produk untuk usaha kerajinan, termasuk batch kecil dan produksi custom order, sehingga harga jual bisa ditentukan dari data biaya yang sebenarnya, bukan sekadar mengikuti harga pasar.
+MD,
+            ],
+            [
+                'slug' => 'cara-mengelola-bahan-baku-kerajinan-tidak-standar',
+                'title' => 'Cara Mengelola Bahan Baku Kerajinan yang Tidak Standar (Sisa Kain, Manik, Kayu)',
+                'category' => 'Manajemen Stok',
+                'tags' => ['Kerajinan', 'Stok Bahan Baku', 'UMKM'],
+                'days_ago' => 4,
+                'excerpt' => 'Bahan baku kerajinan jarang seragam seperti di pabrik — sisa kain, manik lepasan, potongan kayu sering bikin bingung dicatat pakai sistem stok biasa. Ini cara mengelolanya.',
+                'meta_title' => 'Cara Mengelola Bahan Baku Kerajinan yang Tidak Standar',
+                'meta_description' => 'Cara mengelola bahan baku kerajinan yang tidak standar seperti sisa kain, manik lepasan, dan potongan kayu, supaya tidak hilang atau tercecer di gudang.',
+                'content' => <<<'MD'
+Usaha kerajinan tangan punya masalah stok yang khas: bahan bakunya sering tidak seragam. Sisa kain dari proyek sebelumnya, manik-manik lepasan dengan warna campur, potongan kayu sisa gergaji — semua ini sulit dicatat dengan cara stok biasa yang biasanya mengasumsikan satu bahan punya satu satuan dan satu harga yang konsisten.
+
+## Kenapa Bahan Kerajinan Susah Dicatat dengan Cara Biasa
+
+Sistem pencatatan stok konvensional biasanya berasumsi: satu jenis bahan, satu satuan ukur, kuantitas yang jelas. Masalahnya, bahan kerajinan sering melanggar semua asumsi itu sekaligus. Sisa kain bisa berukuran tidak beraturan, manik-manik lepasan datang dalam campuran warna dan ukuran dalam satu wadah, dan potongan kayu sisa punya bentuk yang tidak identik satu sama lain. Kalau dipaksa dicatat dengan cara yang sama seperti bahan baku pabrik biasa, hasilnya justru pencatatan yang tidak akurat dan akhirnya ditinggalkan karena dianggap merepotkan.
+
+## Cara Praktis Mengelola Bahan Baku Tidak Standar
+
+### 1. Kelompokkan per Jenis dengan Satuan yang Masuk Akal
+
+Jangan paksa semua bahan pakai satuan yang sama. Sisa kain bisa dicatat per lembar atau per perkiraan ukuran (kecil/sedang/besar), manik-manik bisa dicatat per wadah atau per gram, potongan kayu per pcs dengan catatan ukuran perkiraan. Yang penting satuannya konsisten untuk jenis bahan yang sama, bukan dipaksa seragam antar jenis bahan yang berbeda karakter.
+
+### 2. Catat Bahan Sisa sebagai Item Terpisah, Jangan Dibuang ke "Sisa Gudang"
+
+Sisa produksi sebelumnya sering ditumpuk begitu saja di sudut gudang tanpa dicatat, dengan anggapan "nanti juga kepakai". Padahal untuk usaha kerajinan, sisa ini justru sering jadi bahan baku produk lain — potongan kain sisa jadi bahan tempel untuk produk campuran, misalnya. Catat sisa ini sebagai item stok sendiri, lengkap dengan perkiraan jumlah dan dari proyek mana asalnya.
+
+### 3. Beri Kode atau Label per Batch Warna/Motif
+
+Karena bahan kerajinan sering tidak bisa di-restock identik — warna manik dari supplier bisa sedikit berbeda tiap kedatangan, motif kain bisa habis dan tidak tersedia lagi — beri label batch yang jelas. Ini penting supaya saat membuat produk yang butuh kombinasi warna/motif konsisten, pengrajin tahu persis batch mana yang tersisa dan cukup untuk berapa produk.
+
+### 4. Pisahkan Bahan "Siap Pakai" dari Bahan "Perlu Diproses Dulu"
+
+Kayu mentah yang belum dipotong beda statusnya dari kayu yang sudah jadi potongan siap rakit. Kalau dicampur dalam satu catatan stok yang sama, sulit tahu berapa sebenarnya bahan yang benar-benar siap dipakai untuk produksi hari itu.
+
+### 5. Lakukan Stock Opname Lebih Sering dari Bahan Standar
+
+Karena ukurannya kecil dan mudah tercecer atau terselip, bahan seperti manik-manik dan potongan kecil kayu lebih rawan "hilang" tanpa disadari dibanding bahan baku dalam ukuran besar. Cek fisik lebih sering — misalnya tiap minggu — membantu menangkap selisih sebelum menumpuk jadi besar.
+
+## Contoh Kasus: Pengrajin Aksesoris Manik-Manik
+
+Seorang pengrajin gelang dan kalung biasanya menerima manik dalam bungkusan campuran warna dari supplier. Tanpa pencatatan per batch, begitu satu bungkusan habis dan diganti bungkusan baru dengan corak warna sedikit berbeda, pengrajin baru sadar setelah produk selesai dibuat bahwa warnanya tidak konsisten dengan produk sebelumnya — sesuatu yang bisa jadi masalah kalau pelanggan memesan produk kembar atau set yang seragam.
+
+Dengan pencatatan per batch, pengrajin bisa langsung tahu batch mana yang masih tersisa dan cukup dipakai untuk pesanan yang butuh keseragaman warna, tanpa harus membongkar semua stok manik secara fisik satu per satu.
+
+## Kesalahan yang Sering Terjadi
+
+Kesalahan paling umum: sisa bahan kecil dianggap "tidak berharga" dan dibuang atau dicampur begitu saja tanpa dicatat, padahal justru sisa-sisa inilah yang sering jadi bahan produk kombinasi atau edisi terbatas yang punya nilai jual sendiri. Kesalahan lain adalah menyamaratakan semua bahan dalam satu catatan umum "bahan kerajinan" tanpa rincian jenis, sehingga sulit tahu stok riil per jenis bahan saat dibutuhkan mendadak.
+
+Sebelum bahan-bahan ini sampai jadi produk jadi, ada baiknya juga membaca [cara menentukan harga jual produk kerajinan handmade](/blog/cara-menentukan-harga-jual-produk-kerajinan-handmade) supaya biaya bahan yang sudah dicatat rapi ini benar-benar dipakai saat menghitung harga jual, bukan sekadar arsip stok yang tidak pernah dianalisis lagi.
+
+Fabriku memungkinkan kategori bisnis kerajinan mencatat bahan baku dengan atribut fleksibel seperti warna, ukuran, dan nomor batch per item, jadi bahan yang tidak standar tetap bisa dilacak dengan rapi tanpa dipaksa masuk format pencatatan pabrik biasa.
+MD,
+            ],
+            [
+                'slug' => 'cara-kelola-stok-retur-barang-umkm-retail',
+                'title' => 'Cara Mengelola Stok Retur Barang UMKM Retail agar Tidak Bikin Selisih',
+                'category' => 'Manajemen Stok',
+                'tags' => ['Retail', 'Retur Barang', 'UMKM'],
+                'days_ago' => 6,
+                'excerpt' => 'Retur barang sering dianggap urusan kecil dan dicatat asal-asalan, padahal ini salah satu penyebab paling umum selisih stok fisik dan stok di sistem untuk UMKM retail.',
+                'meta_title' => 'Cara Mengelola Stok Retur Barang UMKM Retail',
+                'meta_description' => 'Cara mengelola stok retur barang UMKM retail agar tidak bikin selisih: jenis retur yang perlu dibedakan, langkah pencatatan, dan kesalahan yang sering terjadi.',
+                'content' => <<<'MD'
+Di toko retail, retur barang dari pelanggan hampir pasti terjadi — entah karena salah ukuran, produk cacat, atau sekadar berubah pikiran. Masalahnya, retur sering dianggap urusan administratif kecil yang dicatat seadanya, atau bahkan tidak dicatat sama sekali. Padahal retur yang tidak tercatat rapi adalah salah satu penyebab paling umum selisih antara stok fisik di rak dan stok yang tertulis di sistem.
+
+## Kenapa Retur Sering Bikin Stok Berantakan
+
+Masalah utamanya bukan retur itu sendiri, tapi bagaimana retur diperlakukan setelah diterima. Barang yang diretur sering langsung dikembalikan ke rak tanpa dicek ulang kondisinya, atau sebaliknya, disisihkan begitu saja tanpa update apa pun di catatan stok — sehingga sistem masih menganggap barang itu "terjual" padahal sebenarnya sudah kembali ke tangan toko.
+
+## Jenis Retur yang Perlu Dibedakan
+
+Tidak semua retur sama, dan perlakuannya terhadap stok pun harus berbeda:
+
+- **Retur barang baik (salah pesan/ukuran)** — barang masih dalam kondisi layak jual, bisa dikembalikan ke stok jual seperti biasa.
+- **Retur barang rusak/cacat** — barang tidak layak dijual kembali dalam kondisi normal, harus dipisahkan ke kategori stok berbeda, bukan dicampur dengan stok jual.
+- **Retur tukar ukuran/varian** — sebenarnya dua transaksi sekaligus: barang lama masuk sebagai retur, barang baru keluar sebagai penjualan pengganti. Kalau dicatat sebagai satu transaksi campur aduk, sulit dilacak riwayatnya.
+
+## Cara Mencatat Retur agar Stok Tetap Akurat
+
+1. **Catat alasan retur** setiap kali terjadi — ini bukan cuma untuk stok, tapi juga data berharga untuk tahu produk mana yang paling sering bermasalah.
+2. **Cek kondisi fisik barang saat retur diterima**, jangan asumsikan otomatis masih baik hanya karena pelanggan bilang begitu.
+3. **Kembalikan ke stok jual hanya kalau kondisinya benar-benar layak**, dengan pengecekan yang sama seperti barang baru datang dari supplier.
+4. **Pisahkan barang rusak ke kategori stok tersendiri** (misalnya status "rusak" atau "damaged"), supaya tidak ikut ditawarkan ke pelanggan berikutnya secara tidak sengaja.
+5. **Kaitkan retur dengan pesanan asalnya**, bukan dicatat sebagai transaksi stok berdiri sendiri, supaya riwayat lengkap satu pesanan — dari terjual sampai retur — tetap bisa ditelusuri.
+
+## Contoh Kasus: Retur yang Tidak Dipisahkan Kondisinya
+
+Sebuah toko pakaian menerima retur kaos yang kancingnya lepas. Karena buru-buru, staf langsung menaruhnya kembali ke rak stok normal tanpa mencatat kondisi rusaknya. Dua minggu kemudian, kaos itu terjual lagi ke pelanggan baru, yang kemudian komplain karena barang cacat — dan toko harus menerima retur kedua kalinya, kali ini disertai keluhan yang lebih besar karena pelanggan merasa dikirimi barang rusak.
+
+Kalau sejak awal retur kaos itu dipisahkan ke kategori "rusak" dan tidak ikut ditawarkan sebagai stok jual biasa, masalah ini bisa dihindari sepenuhnya — cukup dengan satu langkah tambahan saat retur pertama diterima.
+
+## Kesalahan yang Sering Terjadi
+
+Kesalahan paling umum adalah retur barang rusak langsung masuk lagi ke rak jual tanpa pengecekan, seperti contoh di atas. Kesalahan lain adalah tidak mengaitkan retur dengan pesanan asalnya, sehingga toko kehilangan data penting: produk apa yang paling sering diretur, dan apakah polanya berkaitan dengan kualitas produk, kesalahan deskripsi, atau masalah lain yang bisa diperbaiki dari sumbernya.
+
+Retur yang dikelola rapi juga berkaitan dengan bagaimana [pesanan dari berbagai channel dikelola](/blog/cara-mengelola-pesanan-online-offline-sekaligus) — retur dari pembeli marketplace, misalnya, perlu jelas alurnya sampai kembali ke stok pusat toko, bukan hanya tercatat di sisi marketplace saja. Kalau toko masih mempertimbangkan sistem kasir yang bisa menangani ini, [tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula) bisa jadi acuan awal.
+
+Fabriku mencatat status inventory per item — termasuk status "rusak" yang terpisah dari stok yang tersedia untuk dijual — sehingga retur barang cacat tidak akan tercampur atau tidak sengaja ditawarkan lagi ke pelanggan berikutnya.
+MD,
+            ],
         ];
     }
 }
