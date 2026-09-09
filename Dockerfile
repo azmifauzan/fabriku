@@ -69,7 +69,7 @@ RUN cp .env.example .env && php artisan key:generate \
     && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views \
     && touch database/database.sqlite \
     && php artisan wayfinder:generate --with-form \
-    && npm run build
+    && npm run build:ssr
 
 # ============================================
 # Stage 3: Final production image
@@ -91,6 +91,11 @@ RUN install-php-extensions pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip red
 
 # Copy composer binary from official image
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Inertia SSR needs only the node binary, not npm. php:8.4-apache and
+# node:24-bookworm-slim share the same Debian base, so copying the binary is
+# smaller and simpler than installing nodejs from a package repo.
+COPY --from=node:24-bookworm-slim /usr/local/bin/node /usr/local/bin/node
 
 ENV TZ="Asia/Jakarta"
 
@@ -122,6 +127,9 @@ COPY --chown=www-data:www-data . .
 
 # Copy built assets from node-builder
 COPY --from=node-builder --chown=www-data:www-data /app/public/build ./public/build
+
+# SSR bundle consumed by `php artisan inertia:start-ssr` (see supervisord.conf)
+COPY --from=node-builder --chown=www-data:www-data /app/bootstrap/ssr ./bootstrap/ssr
 
 # Copy vendor from composer-builder
 COPY --from=composer-builder --chown=www-data:www-data /app/vendor ./vendor

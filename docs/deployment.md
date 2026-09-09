@@ -143,7 +143,40 @@ Aplikasi dianggap **aman** bila:
 - `docker compose ps` → status `Up (healthy)`.
 - `curl` ke `https://fabriku.web.id/` return `200`.
 - `storage/logs/laravel.log` tidak ada `ERROR`/exception baru sejak deploy (atau file belum ada sama sekali — berarti belum ada error).
-- Queue worker & scheduler (Supervisor di dalam container) tetap jalan — cek `sudo docker compose exec fabriku ps aux` (harus ada proses `artisan queue:work` dan `artisan schedule:work`).
+- Queue worker, scheduler, & SSR (Supervisor di dalam container) tetap jalan — cek `sudo docker compose exec fabriku ps aux` (harus ada proses `artisan queue:work`, `artisan schedule:work`, dan `artisan inertia:start-ssr`).
+
+## Verifikasi SSR pasca-deploy
+
+Sejak SSR aktif, seluruh HTML yang dibaca crawler non-JS (Bing, Ubersuggest/Ahrefs,
+preview link WhatsApp/Facebook/Twitter, crawler AI) datang dari proses
+`inertia:start-ssr`. Kalau proses itu mati, situs **tetap jalan** — Laravel diam-diam
+fallback ke render klien — tapi setiap halaman kembali jadi shell kosong tanpa
+`<h1>`, tanpa meta description, tanpa canonical, tanpa Open Graph, dan semua judul
+halaman jadi sama. Tidak ada error yang terlihat, jadi wajib dicek manual tiap deploy:
+
+```bash
+# Proses SSR hidup
+sudo docker compose exec fabriku pgrep -af "inertia:start-ssr"
+
+# HTML server sudah lengkap (semua harus >= 1, bukan 0)
+curl -s https://fabriku.web.id/ | grep -c '<h1'
+curl -s https://fabriku.web.id/ | grep -c 'rel="canonical"'
+curl -s https://fabriku.web.id/blog | grep -c '<h1'
+
+# Log SSR kalau ada yang aneh
+sudo docker compose exec fabriku tail -50 /var/log/supervisor/inertia-ssr.log
+```
+
+Nol pada salah satu `grep -c` berarti SSR mati atau bundle-nya tidak terpakai.
+
+Catatan: `supervisorctl` tidak bisa dipakai di container ini — `docker/supervisord.conf`
+belum punya section `[unix_http_server]`/`[supervisorctl]`. Pakai `pgrep` seperti di atas.
+
+Kalau bundle SSR gagal di-load, penyebab paling mungkin adalah dependency yang tidak
+ikut ter-bundle. `vite.config.ts` menyetel `ssr.noExternal: true` supaya seluruh
+dependency masuk ke `bootstrap/ssr/ssr.js` — image produksi hanya membawa binary
+`node`, tanpa `node_modules`. Menghapus opsi itu akan membuat SSR mati dengan
+`ERR_MODULE_NOT_FOUND` di log.
 
 ### Rollback
 
