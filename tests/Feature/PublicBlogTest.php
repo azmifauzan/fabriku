@@ -98,3 +98,45 @@ it('does not overwrite published_at when an unrelated field is edited later', fu
     expect($post->fresh()->published_at->equalTo($publishedAt))->toBeTrue();
     expect($this->get(route('blog.show', $post->fresh()->slug))->status())->toBe(200);
 });
+
+it('marks category-filtered blog listings as noindex', function () {
+    $category = BlogCategory::factory()->create(['slug' => 'tips-umkm']);
+    BlogPost::factory()->published()->create(['blog_category_id' => $category->id]);
+
+    $this->get(route('blog.index', ['category' => 'tips-umkm']))
+        ->assertInertia(fn ($page) => $page
+            ->where('noindex', true)
+            ->where('canonical', url('/blog'))
+        );
+});
+
+it('marks tag-filtered blog listings as noindex', function () {
+    $tag = BlogTag::factory()->create(['slug' => 'retail']);
+    BlogPost::factory()->published()->create()->tags()->attach($tag->id);
+
+    $this->get(route('blog.index', ['tag' => 'retail']))
+        ->assertInertia(fn ($page) => $page->where('noindex', true));
+});
+
+it('keeps the unfiltered blog listing indexable', function () {
+    BlogPost::factory()->published()->create();
+
+    $this->get(route('blog.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('noindex', false)
+            ->where('canonical', url('/blog'))
+        );
+});
+
+it('canonicalizes page 1 to the bare listing but page 2 to itself', function () {
+    BlogPost::factory()->published()->count(13)->create();
+
+    $this->get(route('blog.index', ['page' => 1]))
+        ->assertInertia(fn ($page) => $page->where('canonical', url('/blog')));
+
+    $this->get(route('blog.index', ['page' => 2]))
+        ->assertInertia(fn ($page) => $page
+            ->where('canonical', url('/blog?page=2'))
+            ->where('noindex', false)
+        );
+});

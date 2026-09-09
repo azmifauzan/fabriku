@@ -19,14 +19,20 @@ class BlogController extends Controller
             ->paginate(12)
             ->withQueryString();
 
+        $isFiltered = $request->filled('category') || $request->filled('tag');
+        $page = (int) $request->query('page', 1);
+
         return Inertia::render('Blog/Index', [
             'posts' => $posts,
             'categories' => BlogCategory::orderBy('name')->get(['name', 'slug']),
             'activeCategory' => $request->category,
             'activeTag' => $request->tag,
-            // url()->current() drops the query string, so filtered views (?category=/?tag=)
-            // all canonicalize back to the bare /blog listing instead of being indexed as duplicates.
-            'canonical' => url('/blog'),
+            // Filter views collapse onto the bare listing; real pagination pages own
+            // their canonical so page 2+ never claims to be page 1.
+            'canonical' => $isFiltered || $page <= 1 ? url('/blog') : url('/blog?page='.$page),
+            // Canonical alone does not stop Google from spending crawl budget on the
+            // unbounded tag x page combinations — 13 of 17 unindexed URLs were these.
+            'noindex' => $isFiltered,
         ]);
     }
 
