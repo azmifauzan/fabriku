@@ -18,6 +18,7 @@ defineProps<{
     categories: Array<{ name: string; slug: string }>;
     activeCategory: string | null;
     canonical: string;
+    noindex: boolean;
 }>();
 </script>
 
@@ -26,6 +27,7 @@ defineProps<{
         title="Blog — Tips Operasional UMKM | Fabriku"
         description="Tips dan panduan praktis untuk UMKM Indonesia: mengelola bahan baku, produksi, stok, penjualan, dan laporan keuangan."
         :canonical="canonical"
+        :noindex="noindex"
     />
     <PublicLayout>
         <div class="mx-auto max-w-5xl px-4 py-12">
