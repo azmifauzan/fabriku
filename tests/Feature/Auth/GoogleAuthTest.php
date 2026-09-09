@@ -35,7 +35,7 @@ describe('Google OAuth', function () {
             'name' => 'New Bie',
         ]));
 
-        $this->get(route('google.callback'))
+        $this->get(route('google.callback', ['code' => 'fake-oauth-code']))
             ->assertRedirect(route('google.complete'));
 
         expect(User::where('email', 'newbie@example.com')->exists())->toBeFalse();
@@ -73,7 +73,7 @@ describe('Google OAuth', function () {
             'name' => 'Known User',
         ]));
 
-        $this->get(route('google.callback'))
+        $this->get(route('google.callback', ['code' => 'fake-oauth-code']))
             ->assertRedirect(route('dashboard'));
 
         $this->assertAuthenticatedAs($user);
@@ -94,7 +94,7 @@ describe('Google OAuth', function () {
             'name' => 'Link Me',
         ]));
 
-        $this->get(route('google.callback'))
+        $this->get(route('google.callback', ['code' => 'fake-oauth-code']))
             ->assertRedirect(route('dashboard'));
 
         $user->refresh();
@@ -120,7 +120,7 @@ describe('Google OAuth', function () {
             'email_verified' => false,
         ]));
 
-        $this->get(route('google.callback'))
+        $this->get(route('google.callback', ['code' => 'fake-oauth-code']))
             ->assertRedirect(route('login'))
             ->assertSessionHasErrors('email');
 
@@ -130,4 +130,11 @@ describe('Google OAuth', function () {
 
         $this->assertGuest();
     });
+});
+
+it('redirects to login instead of throwing when the google callback has no authorization code', function () {
+    $response = $this->get(route('google.callback'));
+
+    $response->assertRedirect(route('login'));
+    $response->assertSessionHasErrors('email');
 });
