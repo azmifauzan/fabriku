@@ -24,6 +24,11 @@ export default defineConfig({
             formVariants: true,
         }),
     ],
+    // Bundle every dependency into bootstrap/ssr so the runtime image needs only
+    // the node binary — no node_modules is shipped to production.
+    ssr: {
+        noExternal: true,
+    },
     server: {
         host: '127.0.0.1',
         port: 5173,
