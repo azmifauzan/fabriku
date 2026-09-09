@@ -48,7 +48,7 @@
 
 ## Fase 1 — Perbaikan sinyal crawl
 
-### Task 1: `/auth/google/callback` berhenti mengembalikan 500
+### Task 1: `/auth/google/callback` berhenti mengembalikan 500 — SELESAI (7ad576b)
 
 GSC melaporkan `https://fabriku.web.id/auth/google/callback` sebagai satu-satunya "Error server (5xx)". Terverifikasi: `curl` ke URL itu → 500. `Socialite::driver('google')->user()` melempar exception ketika Google tidak mengirim parameter `code` — yang selalu terjadi saat crawler membuka URL itu langsung.
 
@@ -61,7 +61,7 @@ GSC melaporkan `https://fabriku.web.id/auth/google/callback` sebagai satu-satuny
 - Consumes: route bernama `google.callback` (`GET /auth/google/callback`) dan `login`, keduanya sudah ada di `routes/web.php`.
 - Produces: tidak ada API baru. `callback()` tetap `RedirectResponse`.
 
-- [ ] **Step 1: Tulis test yang gagal**
+- [x] **Step 1: Tulis test yang gagal**
 
 Tambahkan di akhir `tests/Feature/GoogleAuthTest.php`:
 
@@ -74,12 +74,12 @@ it('redirects to login instead of throwing when the google callback has no autho
 });
 ```
 
-- [ ] **Step 2: Jalankan test, pastikan gagal**
+- [x] **Step 2: Jalankan test, pastikan gagal**
 
 Run: `php artisan test --compact --filter="no authorization code"`
 Expected: FAIL — exception dari Socialite (`InvalidStateException` atau HTTP client error), bukan redirect.
 
-- [ ] **Step 3: Tambahkan guard di controller**
+- [x] **Step 3: Tambahkan guard di controller**
 
 Di `app/Http/Controllers/Auth/GoogleAuthController.php`, ubah awal `callback()`:
 
@@ -109,12 +109,12 @@ Di `app/Http/Controllers/Auth/GoogleAuthController.php`, ubah awal `callback()`:
 
 Baris `$raw = $googleUser->getRaw();` dan seterusnya tidak berubah. Hapus baris lama `$googleUser = Socialite::driver('google')->user();` yang berdiri sendiri.
 
-- [ ] **Step 4: Jalankan test, pastikan lolos**
+- [x] **Step 4: Jalankan test, pastikan lolos**
 
 Run: `php artisan test --compact --filter=GoogleAuth`
 Expected: PASS — test baru dan seluruh test GoogleAuth lama.
 
-- [ ] **Step 5: Tutup `/auth/` dari crawler**
+- [x] **Step 5: Tutup `/auth/` dari crawler**
 
 Ganti isi `public/robots.txt` menjadi:
 
@@ -127,7 +127,7 @@ Disallow: /register
 Sitemap: https://fabriku.web.id/sitemap.xml
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -137,7 +137,7 @@ git commit -m "fix(seo): stop 500 on google callback without code, disallow /aut
 
 ---
 
-### Task 2: `lang` dokumen jadi `id`
+### Task 2: `lang` dokumen jadi `id` — SELESAI (c4f461f)
 
 `app.blade.php` merender `lang="{{ str_replace('_', '-', app()->getLocale()) }}"`. `config/app.php:81` memakai `env('APP_LOCALE', 'en')` dan `.env.example` menyetel `APP_LOCALE=en`, sehingga produksi menyajikan konten 100% Bahasa Indonesia dengan `<html lang="en">` (terverifikasi live).
 
@@ -152,7 +152,7 @@ Perbaikannya menyentuh default di `config/app.php`, bukan hanya `.env` — supay
 - Consumes: `app()->getLocale()`.
 - Produces: tidak ada.
 
-- [ ] **Step 1: Tulis test yang gagal**
+- [x] **Step 1: Tulis test yang gagal**
 
 Buat `tests/Feature/LocaleTest.php`:
 
@@ -169,12 +169,12 @@ it('renders the document language as Indonesian', function () {
 
 `phpunit.xml` tidak menyetel `APP_LOCALE`, jadi test ini membaca konfigurasi yang sama dengan aplikasi — `.env` lokal yang masih `en` akan membuatnya gagal, dan itu memang yang diinginkan.
 
-- [ ] **Step 2: Jalankan test, pastikan gagal**
+- [x] **Step 2: Jalankan test, pastikan gagal**
 
 Run: `php artisan test --compact --filter=LocaleTest`
 Expected: FAIL — HTML berisi `<html lang="en"`.
 
-- [ ] **Step 3: Ubah default konfigurasi dan contoh env**
+- [x] **Step 3: Ubah default konfigurasi dan contoh env**
 
 Di `config/app.php` baris 81:
 
@@ -186,16 +186,16 @@ Di `.env.example`, ganti `APP_LOCALE=en` menjadi `APP_LOCALE=id`.
 
 `APP_FALLBACK_LOCALE` dan `APP_FAKER_LOCALE` biarkan apa adanya — factory tidak boleh ikut berubah.
 
-- [ ] **Step 4: Samakan `.env` lokal**
+- [x] **Step 4: Samakan `.env` lokal**
 
 Ubah `APP_LOCALE=en` menjadi `APP_LOCALE=id` di `.env` lokal (file ini tidak masuk git).
 
-- [ ] **Step 5: Jalankan test, pastikan lolos**
+- [x] **Step 5: Jalankan test, pastikan lolos**
 
 Run: `php artisan test --compact`
 Expected: PASS seluruhnya. Jalankan suite penuh, bukan hanya filter — perubahan locale bisa menggeser format tanggal/angka di test lain.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -203,13 +203,13 @@ git add config/app.php .env.example tests/Feature/LocaleTest.php
 git commit -m "fix(seo): serve Indonesian content as lang=id"
 ```
 
-- [ ] **Step 7: Catat langkah manual**
+- [x] **Step 7: Catat langkah manual**
 
 `.env` produksi tidak ada di repo dan saat ini memuat `APP_LOCALE=en`, yang menimpa default baru. Tambahkan ke catatan deploy: set `APP_LOCALE=id` di `.env` produksi sebelum recreate container, lalu `php artisan config:cache`.
 
 ---
 
-### Task 3: View blog terfilter jadi `noindex`, canonical paginasi menunjuk ke dirinya sendiri
+### Task 3: View blog terfilter jadi `noindex`, canonical paginasi menunjuk ke dirinya sendiri — SELESAI (8a74e86)
 
 Dari 17 URL tidak terindeks di GSC, 13 adalah URL filter blog (`/blog?tag=…&page=1`, `/blog?category=…&page=1`, `/blog?page=1`). Canonical sudah menunjuk ke `/blog` bare, tapi canonical tidak menghentikan crawl — Google terus menghabiskan anggaran crawl pada kombinasi tag × page sementara artikel asli menganggur di "crawled, currently not indexed".
 
@@ -226,7 +226,7 @@ Aturan yang dituju:
 - Consumes: prop Inertia `canonical` yang sudah ada di `Blog/Index.vue`, dan prop `noindex` di `SeoHead.vue` (sudah ada, `boolean`, default `false`).
 - Produces: prop Inertia baru `noindex: bool` pada komponen `Blog/Index`.
 
-- [ ] **Step 1: Tulis test yang gagal**
+- [x] **Step 1: Tulis test yang gagal**
 
 Tambahkan di `tests/Feature/PublicBlogTest.php`:
 
@@ -274,12 +274,12 @@ it('canonicalizes page 1 to the bare listing but page 2 to itself', function () 
 });
 ```
 
-- [ ] **Step 2: Jalankan test, pastikan gagal**
+- [x] **Step 2: Jalankan test, pastikan gagal**
 
 Run: `php artisan test --compact --filter=PublicBlogTest`
 Expected: FAIL — prop `noindex` tidak ada; canonical untuk `page=2` masih `url('/blog')`.
 
-- [ ] **Step 3: Implementasi di controller**
+- [x] **Step 3: Implementasi di controller**
 
 Ganti method `index()` di `app/Http/Controllers/BlogController.php`:
 
@@ -312,7 +312,7 @@ Ganti method `index()` di `app/Http/Controllers/BlogController.php`:
     }
 ```
 
-- [ ] **Step 4: Teruskan prop ke `SeoHead`**
+- [x] **Step 4: Teruskan prop ke `SeoHead`**
 
 Di `resources/js/pages/Blog/Index.vue`, tambahkan `noindex: boolean;` ke `defineProps`, lalu ikat ke komponen:
 
@@ -345,12 +345,12 @@ defineProps<{
     />
 ```
 
-- [ ] **Step 5: Jalankan test, pastikan lolos**
+- [x] **Step 5: Jalankan test, pastikan lolos**
 
 Run: `php artisan test --compact --filter=PublicBlogTest`
 Expected: PASS, termasuk dua test canonical lama (`filters the index by category` / `by tag`) yang masih menuntut `canonical === url('/blog')`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -445,7 +445,7 @@ git commit -m "fix(seo): drop always-now lastmod from static sitemap entries"
 
 ## Fase 2 — Aktifkan SSR di produksi
 
-### Task 5: Bangun dan jalankan bundle SSR di image Docker
+### Task 5: Bangun dan jalankan bundle SSR di image Docker — SELESAI (8a93b78)
 
 Ini akar dari empat dari lima isu Ubersuggest (19/19 halaman: duplicate `<title>`, no meta description, no H1, low word count) dan penyebab HTML server tidak memuat satu pun canonical/OG/JSON-LD meski `SeoHead.vue` benar.
 
@@ -464,7 +464,7 @@ Prasyarat: verifikasi lokal dulu (Step 1–3) sebelum menyentuh Dockerfile. Kala
 - Consumes: `resources/js/ssr.ts` (sudah ada), `config/inertia.php` `ssr.url = http://127.0.0.1:13714` (sudah ada).
 - Produces: `bootstrap/ssr/ssr.mjs` di dalam image; proses supervisord bernama `inertia-ssr` yang listen di `127.0.0.1:13714`.
 
-- [ ] **Step 1: Bangun bundle SSR secara lokal**
+- [x] **Step 1: Bangun bundle SSR secara lokal**
 
 Run:
 ```bash
@@ -473,7 +473,7 @@ ls -la bootstrap/ssr/
 ```
 Expected: `bootstrap/ssr/ssr.mjs` ada. Kalau build gagal, perbaiki dulu sebelum lanjut — jangan bawa kegagalan ini ke Dockerfile.
 
-- [ ] **Step 2: Jalankan server SSR dan buktikan HTML server sudah lengkap**
+- [x] **Step 2: Jalankan server SSR dan buktikan HTML server sudah lengkap**
 
 Di satu terminal:
 ```bash
@@ -490,7 +490,7 @@ Expected: `<h1` ditemukan minimal 1 kali, dan keempat pola meta muncul. Bandingk
 
 Kalau `inertia:start-ssr` melempar error untuk halaman tertentu, catat nama komponennya dan perbaiki akses browser API di komponen itu sebelum melanjutkan.
 
-- [ ] **Step 3: Verifikasi halaman blog juga penuh**
+- [x] **Step 3: Verifikasi halaman blog juga penuh**
 
 Run:
 ```bash
@@ -498,7 +498,7 @@ curl -s http://127.0.0.1:8123/blog | grep -c '<h1'
 ```
 Expected: minimal 1. Hentikan `inertia:start-ssr` dan `php artisan serve` setelah ini.
 
-- [ ] **Step 4: Bangun bundle SSR di image**
+- [x] **Step 4: Bangun bundle SSR di image**
 
 Di `Dockerfile`, pada stage `node-builder`, ganti `&& npm run build` menjadi `&& npm run build:ssr` (baris 72):
 
@@ -510,7 +510,7 @@ RUN cp .env.example .env && php artisan key:generate \
     && npm run build:ssr
 ```
 
-- [ ] **Step 5: Sediakan binary node dan bundle di stage runtime**
+- [x] **Step 5: Sediakan binary node dan bundle di stage runtime**
 
 Di `Dockerfile` stage 3, tepat setelah baris `COPY --from=composer:2 /usr/bin/composer /usr/bin/composer`, tambahkan:
 
@@ -528,7 +528,7 @@ Lalu, tepat setelah baris `COPY --from=node-builder --chown=www-data:www-data /a
 COPY --from=node-builder --chown=www-data:www-data /app/bootstrap/ssr ./bootstrap/ssr
 ```
 
-- [ ] **Step 6: Jalankan server SSR lewat supervisord**
+- [x] **Step 6: Jalankan server SSR lewat supervisord**
 
 Tambahkan di akhir `docker/supervisord.conf`:
 
@@ -548,7 +548,7 @@ startretries=10
 
 `priority=20` menempatkannya di antara apache (10) dan queue worker (30). Kalau proses ini mati, Laravel diam-diam kembali ke render klien — situs tetap hidup, hanya SEO-nya yang mundur ke kondisi hari ini. Karena itu `autorestart=true` wajib.
 
-- [ ] **Step 7: Build image dan verifikasi di dalam container**
+- [x] **Step 7: Build image dan verifikasi di dalam container**
 
 ```bash
 TAG="$(date +%d%m%y)-ssr1"
@@ -564,7 +564,7 @@ Kalau `<h1` nol tapi status `RUNNING`, cek log: `docker exec fabriku-ssr-check t
 
 Bersihkan: `docker rm -f fabriku-ssr-check`.
 
-- [ ] **Step 8: Catat verifikasi di dokumen deploy**
+- [x] **Step 8: Catat verifikasi di dokumen deploy**
 
 Tambahkan bagian ini ke `docs/deployment.md`:
 
@@ -585,7 +585,7 @@ Nol pada perintah kedua atau ketiga berarti SSR mati dan seluruh meta SEO hilang
 dari HTML server.
 ```
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add Dockerfile docker/supervisord.conf docs/deployment.md
@@ -849,3 +849,17 @@ Di `docs/seo-keyword-strategy.md`, tandai keyword #4, #5, #9, #12 sebagai terbit
 - **Backlink** (GSC: 0, Ubersuggest: 8, DA 3). Di luar cakupan kode — roadmap ada di `docs/seo-keyword-strategy.md` bagian 5.
 - **`featured_image_url` adalah signed URL S3 sementara** (TTL ~25 menit). Ditangguhkan di audit #1; belum ada bukti preview sosialnya rusak. Tinjau ulang kalau muncul laporan gambar preview kosong.
 - **`cluster: true` di `resources/js/ssr.ts`** menjalankan satu worker SSR per CPU. Di VPS kecil ini bisa boros memori. Biarkan dulu; ubah ke `false` hanya kalau pemakaian memori container naik tajam setelah Task 5.
+
+
+---
+
+## Deviasi saat eksekusi (2026-09-09)
+
+Task 1, 2, 3, dan 5 sudah dikerjakan. Empat hal berbeda dari rencana:
+
+1. **Path test Google salah di plan.** File sebenarnya `tests/Feature/Auth/GoogleAuthTest.php`, bukan `tests/Feature/GoogleAuthTest.php`.
+2. **Empat test callback lama ikut berubah.** Guard `! $request->filled('code')` membuat test lama yang memanggil `route('google.callback')` polos jadi ikut ter-redirect. Keempatnya kini mengirim `['code' => 'fake-oauth-code']`, sesuai perilaku redirect Google yang sebenarnya.
+3. **`vite.config.ts` perlu `ssr: { noExternal: true }`** — tidak ada di rencana. Build SSR default meng-externalize dependency, jadi `bootstrap/ssr/ssr.js` mengimpor `@inertiajs/vue3` saat runtime dan proses SSR mati dengan `ERR_MODULE_NOT_FOUND` di container yang tidak membawa `node_modules`. Ketahuan di Task 5 Step 7 (build image pertama). Dengan `noExternal`, seluruh dependency masuk ke `ssr.js` (2,0 MB) dan runtime cukup binary `node`.
+4. **`supervisorctl` tidak bisa dipakai** di image ini — `docker/supervisord.conf` tidak punya section `[unix_http_server]`/`[supervisorctl]` (kondisi lama, bukan akibat perubahan ini). Verifikasi di `docs/deployment.md` memakai `pgrep -af "inertia:start-ssr"`. Menambahkan section itu akan membuat `supervisorctl status/restart` bisa dipakai untuk keempat program — di luar cakupan perubahan ini, tapi layak digarap terpisah.
+
+Belum dikerjakan: Task 4 (MEDIUM — `lastmod` sitemap), Task 6 (deploy + verifikasi), Task 7 dan 8 (konten).
