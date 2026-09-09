@@ -25,7 +25,23 @@ class GoogleAuthController extends Controller
 
     public function callback(Request $request): RedirectResponse
     {
-        $googleUser = Socialite::driver('google')->user();
+        // Crawlers and stray visitors hit this URL with no ?code=, which used to throw
+        // and surface as a 500 — GSC flagged it as the domain's only server error.
+        if (! $request->filled('code')) {
+            return redirect()->route('login')->withErrors([
+                'email' => 'Login dengan Google tidak selesai. Silakan coba lagi.',
+            ]);
+        }
+
+        try {
+            $googleUser = Socialite::driver('google')->user();
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Login dengan Google gagal. Silakan coba lagi.',
+            ]);
+        }
 
         $raw = $googleUser->getRaw();
         $emailVerified = filter_var($raw['email_verified'] ?? $raw['verified_email'] ?? false, FILTER_VALIDATE_BOOLEAN);

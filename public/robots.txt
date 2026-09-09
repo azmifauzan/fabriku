@@ -1,4 +1,6 @@
 User-agent: *
-Disallow:
+Disallow: /auth/
+Disallow: /login
+Disallow: /register
 
 Sitemap: https://fabriku.web.id/sitemap.xml
