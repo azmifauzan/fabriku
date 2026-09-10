@@ -361,7 +361,7 @@ git commit -m "fix(seo): noindex filtered blog listings, self-canonical paginate
 
 ---
 
-### Task 4: Sitemap berhenti mengklaim halaman statis berubah tiap detik
+### Task 4: Sitemap berhenti mengklaim halaman statis berubah tiap detik — SELESAI (bddf4c8)
 
 `SitemapController::index()` memakai `now()` sebagai `lastmod` untuk `/`, `/blog`, `/privasi`, `/syarat-ketentuan`. Setiap kali Google mengambil sitemap, keempat URL itu mengaku baru saja berubah. Google belajar mengabaikan `lastmod` untuk domain yang berperilaku begitu — termasuk `lastmod` artikel blog yang justru akurat (`updated_at`).
 
@@ -376,7 +376,7 @@ git commit -m "fix(seo): noindex filtered blog listings, self-canonical paginate
 - Consumes: view `sitemap` dengan variabel `$urls`.
 - Produces: setiap elemen `$urls` kini `array{loc: string, priority: string, lastmod?: \Illuminate\Support\Carbon}` — kunci `lastmod` boleh tidak ada.
 
-- [ ] **Step 1: Tulis test yang gagal**
+- [x] **Step 1: Tulis test yang gagal**
 
 Tambahkan di `tests/Feature/SitemapTest.php`:
 
@@ -391,12 +391,12 @@ it('emits lastmod only for blog posts, never for static pages', function () {
 });
 ```
 
-- [ ] **Step 2: Jalankan test, pastikan gagal**
+- [x] **Step 2: Jalankan test, pastikan gagal**
 
 Run: `php artisan test --compact --filter=SitemapTest`
 Expected: FAIL — `<lastmod>` ditemukan 6 kali, bukan 2.
 
-- [ ] **Step 3: Hilangkan `lastmod` dari entri statis**
+- [x] **Step 3: Hilangkan `lastmod` dari entri statis**
 
 Di `app/Http/Controllers/SitemapController.php`, ganti collection statis:
 
@@ -414,7 +414,7 @@ Di `app/Http/Controllers/SitemapController.php`, ganti collection statis:
 
 Bagian `BlogPost::where(...)` di bawahnya tidak berubah — tetap mengirim `'lastmod' => $post->updated_at`.
 
-- [ ] **Step 4: Buat blade toleran terhadap `lastmod` yang hilang**
+- [x] **Step 4: Buat blade toleran terhadap `lastmod` yang hilang**
 
 Di `resources/views/sitemap.blade.php`, ganti baris `<lastmod>`:
 
@@ -428,12 +428,12 @@ Di `resources/views/sitemap.blade.php`, ganti baris `<lastmod>`:
     </url>
 ```
 
-- [ ] **Step 5: Jalankan test, pastikan lolos**
+- [x] **Step 5: Jalankan test, pastikan lolos**
 
 Run: `php artisan test --compact --filter=SitemapTest`
 Expected: PASS, termasuk test lama yang memeriksa draft tidak ikut terdaftar.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -862,4 +862,6 @@ Task 1, 2, 3, dan 5 sudah dikerjakan. Empat hal berbeda dari rencana:
 3. **`vite.config.ts` perlu `ssr: { noExternal: true }`** — tidak ada di rencana. Build SSR default meng-externalize dependency, jadi `bootstrap/ssr/ssr.js` mengimpor `@inertiajs/vue3` saat runtime dan proses SSR mati dengan `ERR_MODULE_NOT_FOUND` di container yang tidak membawa `node_modules`. Ketahuan di Task 5 Step 7 (build image pertama). Dengan `noExternal`, seluruh dependency masuk ke `ssr.js` (2,0 MB) dan runtime cukup binary `node`.
 4. **`supervisorctl` tidak bisa dipakai** di image ini — `docker/supervisord.conf` tidak punya section `[unix_http_server]`/`[supervisorctl]` (kondisi lama, bukan akibat perubahan ini). Verifikasi di `docs/deployment.md` memakai `pgrep -af "inertia:start-ssr"`. Menambahkan section itu akan membuat `supervisorctl status/restart` bisa dipakai untuk keempat program — di luar cakupan perubahan ini, tapi layak digarap terpisah.
 
-Belum dikerjakan: Task 4 (MEDIUM — `lastmod` sitemap), Task 6 (deploy + verifikasi), Task 7 dan 8 (konten).
+Task 4 dikerjakan terpisah pada 2026-09-10 (`bddf4c8`), tanpa deviasi dari rencana — 481 pass setelahnya.
+
+Belum dikerjakan: Task 6 (deploy + verifikasi), Task 7 dan 8 (konten).
