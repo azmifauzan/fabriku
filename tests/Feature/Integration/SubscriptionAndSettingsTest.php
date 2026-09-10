@@ -82,7 +82,7 @@ describe('Subscription Management Integration', function () {
         $response = $this->actingAs($this->user)
             ->post(route('subscription.store'), [
                 'plan_type' => 'yearly',
-                'amount' => 350000,
+                'amount' => 250000,
                 'proof' => UploadedFile::fake()->image('bukti-transfer.jpg'),
             ]);
 
@@ -91,7 +91,7 @@ describe('Subscription Management Integration', function () {
         $payment = SubscriptionPayment::where('tenant_id', $this->tenant->id)->first();
 
         expect($payment)->not->toBeNull();
-        expect((float) $payment->amount)->toBe(350000.0);
+        expect((float) $payment->amount)->toBe(250000.0);
         expect($payment->plan_type)->toBe('yearly');
         expect($payment->duration_months)->toBe(12);
     });

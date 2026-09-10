@@ -48,4 +48,12 @@ return [
         'max_tokens' => env('OPENAI_MAX_TOKENS', 1024),
     ],
 
+    'sumopod' => [
+        'base_url' => env('SUMOPOD_BASE_URL', 'https://api-pay.sumopod.com'),
+        'api_key' => env('SUMOPOD_API_KEY', ''),
+        'environment' => env('SUMOPOD_ENVIRONMENT', 'live'),
+        'internal_secret' => env('FABRIKU_INTERNAL_WEBHOOK_SECRET', env('SUMOPOD_INTERNAL_WEBHOOK_SECRET', '')),
+        'redirect_url' => env('SUMOPOD_REDIRECT_URL'),
+    ],
+
 ];
