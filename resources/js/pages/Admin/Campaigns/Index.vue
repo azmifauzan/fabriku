@@ -2,6 +2,7 @@
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
+import axios from 'axios';
 import {
     Activity,
     AlertCircle,
@@ -125,60 +126,27 @@ const llmTestResult = ref<{
     preview?: string;
 } | null>(null);
 
-const getCsrfToken = (): string => {
-    // 1. Read XSRF-TOKEN cookie (Laravel standard encrypted cookie)
-    const xsrfMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
-    if (xsrfMatch) {
-        return decodeURIComponent(xsrfMatch[1]);
-    }
-    // 2. Fallback to meta tag
-    return (
-        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
-        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ||
-        ''
-    );
-};
-
 const testLlmConnection = async () => {
     testingLlm.value = true;
     llmTestResult.value = null;
 
     try {
-        const csrfToken = getCsrfToken();
-        const response = await fetch('/admin/campaigns/test-llm', {
-            method: 'POST',
+        const plainMetaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        const response = await axios.post('/admin/campaigns/test-llm', {
+            llm_base_url: settingsForm.llm_base_url,
+            llm_api_key: settingsForm.llm_api_key,
+            llm_model: settingsForm.llm_model,
+        }, {
             headers: {
-                'Content-Type': 'application/json',
                 Accept: 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-XSRF-TOKEN': csrfToken,
-                'X-CSRF-TOKEN': csrfToken,
+                ...(plainMetaToken ? { 'X-CSRF-TOKEN': plainMetaToken } : {}),
             },
-            credentials: 'same-origin',
-            body: JSON.stringify({
-                llm_base_url: settingsForm.llm_base_url,
-                llm_api_key: settingsForm.llm_api_key,
-                llm_model: settingsForm.llm_model,
-            }),
+            timeout: 60000,
         });
 
-        const contentType = response.headers.get('content-type') || '';
-        let data: any = null;
-
-        if (contentType.includes('application/json')) {
-            data = await response.json();
-        } else {
-            const rawText = await response.text();
-            let errorMessage = `Server mengembalikan status HTTP ${response.status}.`;
-            if (response.status === 419) {
-                errorMessage = 'Sesi CSRF telah kedaluwarsa. Silakan refresh halaman browser.';
-            } else if (response.status === 401 || response.status === 302) {
-                errorMessage = 'Sesi login telah berakhir. Silakan login kembali ke admin panel.';
-            } else if (response.status === 504 || response.status === 408) {
-                errorMessage = 'Request timeout saat menghubungi endpoint LLM. Periksa kembali URL dan koneksi AI.';
-            }
-            throw new Error(errorMessage);
-        }
+        const data = response.data;
 
         llmTestResult.value = {
             tested: true,
@@ -195,13 +163,21 @@ const testLlmConnection = async () => {
             showError('Koneksi Gagal!', data.message);
         }
     } catch (e: any) {
+        const errorMsg =
+            e.response?.data?.message ||
+            (e.response?.status === 419 ? 'Sesi CSRF telah kedaluwarsa. Silakan refresh halaman browser.' : null) ||
+            (e.response?.status === 401 ? 'Sesi login telah berakhir. Silakan login kembali ke admin panel.' : null) ||
+            (e.response?.status === 504 ? 'Request timeout saat menghubungi endpoint LLM.' : null) ||
+            e.message ||
+            'Gagal menghubungi server.';
+
         llmTestResult.value = {
             tested: true,
             success: false,
-            message: e.message || 'Gagal menghubungi server.',
+            message: errorMsg,
             latency_ms: 0,
         };
-        showError('Gagal!', e.message || 'Terjadi kesalahan jaringan.');
+        showError('Gagal!', errorMsg);
     } finally {
         testingLlm.value = false;
     }
@@ -218,22 +194,15 @@ const openPreview = async (logId: number) => {
     previewData.value = null;
 
     try {
-        const res = await fetch(`/admin/campaigns/${logId}`, {
+        const response = await axios.get(`/admin/campaigns/${logId}`, {
             headers: {
                 Accept: 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
             },
-            credentials: 'same-origin',
         });
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-            const data = await res.json();
-            previewData.value = data;
-        } else {
-            throw new Error('Gagal memuat pratinjau.');
-        }
+        previewData.value = response.data;
     } catch (e: any) {
-        showError('Gagal!', e.message || 'Tidak dapat memuat konten email.');
+        showError('Gagal!', e.response?.data?.message || 'Tidak dapat memuat konten email.');
         previewModalOpen.value = false;
     } finally {
         previewLoading.value = false;
