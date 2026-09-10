@@ -17,3 +17,12 @@ it('includes published posts and static pages but excludes drafts', function () 
     expect($body)->toContain(route('blog.show', $published->slug));
     expect($body)->not->toContain('post-draft');
 });
+
+it('emits lastmod only for blog posts, never for static pages', function () {
+    BlogPost::factory()->published()->count(2)->create();
+
+    $body = $this->get('/sitemap.xml')->getContent();
+
+    expect(substr_count($body, '<loc>'))->toBe(6);      // 4 static + 2 posts
+    expect(substr_count($body, '<lastmod>'))->toBe(2);  // posts only
+});

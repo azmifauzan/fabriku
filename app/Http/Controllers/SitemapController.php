@@ -10,10 +10,13 @@ class SitemapController extends Controller
     public function index(): Response
     {
         $urls = collect([
-            ['loc' => route('home'), 'lastmod' => now(), 'priority' => '1.0'],
-            ['loc' => route('blog.index'), 'lastmod' => now(), 'priority' => '0.8'],
-            ['loc' => route('legal.privacy'), 'lastmod' => now(), 'priority' => '0.3'],
-            ['loc' => route('legal.terms'), 'lastmod' => now(), 'priority' => '0.3'],
+            // No lastmod for static pages on purpose: emitting now() on every request
+            // trains Google to ignore lastmod for this domain, including the accurate
+            // updated_at values on blog posts below.
+            ['loc' => route('home'), 'priority' => '1.0'],
+            ['loc' => route('blog.index'), 'priority' => '0.8'],
+            ['loc' => route('legal.privacy'), 'priority' => '0.3'],
+            ['loc' => route('legal.terms'), 'priority' => '0.3'],
         ])->concat(
             // Only canonical post URLs — category/tag filter views are excluded on purpose,
             // their canonical points back to /blog so they must not appear here too.
