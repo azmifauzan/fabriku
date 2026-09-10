@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAuditLogController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminBlogCategoryController;
 use App\Http\Controllers\Admin\AdminBlogController;
+use App\Http\Controllers\Admin\AdminCampaignController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminMonitoringController;
 use App\Http\Controllers\Admin\AdminPaymentController;
@@ -127,6 +128,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('monitoring/jobs/flush', [AdminMonitoringController::class, 'flushJobs'])->name('monitoring.jobs.flush');
         Route::post('monitoring/run-command', [AdminMonitoringController::class, 'runCommand'])->name('monitoring.run-command');
         Route::post('monitoring/test-telegram', [AdminMonitoringController::class, 'testTelegram'])->name('monitoring.test-telegram');
+
+        // Email Campaigns & LLM Settings
+        Route::get('campaigns', [AdminCampaignController::class, 'index'])->name('campaigns.index');
+        Route::post('campaigns/settings', [AdminCampaignController::class, 'updateSettings'])->name('campaigns.settings.update');
+        Route::post('campaigns/test-llm', [AdminCampaignController::class, 'testLlm'])->name('campaigns.test-llm');
+        Route::post('campaigns/send-test-email', [AdminCampaignController::class, 'sendTestEmail'])->name('campaigns.send-test-email');
+        Route::post('campaigns/send-batch', [AdminCampaignController::class, 'sendBatchNow'])->name('campaigns.send-batch');
+        Route::get('campaigns/{id}', [AdminCampaignController::class, 'show'])->name('campaigns.show');
+        Route::post('campaigns/{id}/resend', [AdminCampaignController::class, 'resend'])->name('campaigns.resend');
     });
 });
 

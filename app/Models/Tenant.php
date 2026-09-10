@@ -11,6 +11,36 @@ class Tenant extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const DEMO_EMAILS = [
+        'admin@konveksi.com',
+        'admin@kuemama.com',
+        'admin@crafty.com',
+        'admin@glowbeauty.com',
+        'admin@tokoserbaada.com',
+        'admin@homemade.com',
+        'admin@bengkel.com',
+    ];
+
+    public const DEMO_DOMAINS = [
+        'konveksi.com',
+        'kuemama.com',
+        'crafty.com',
+        'glowbeauty.com',
+        'tokoserbaada.com',
+        'homemade.com',
+        'bengkel.com',
+    ];
+
+    public const DEMO_NAMES = [
+        'Konveksi Fabriku',
+        'Kue Mama Homemade',
+        'Crafty Handmade',
+        'Glow Beauty Lab',
+        'Toko Serba Ada',
+        'Dapur Coklat Rumahan',
+        'Bengkel Motor Maju Jaya',
+    ];
+
     protected $fillable = [
         'name',
         'slug',
@@ -81,5 +111,47 @@ class Tenant extends Model
         $config = $this->getCategoryConfig();
 
         return $config['label'] ?? ucfirst($this->business_category);
+    }
+
+    /**
+     * Check if tenant is a demo tenant
+     */
+    public function isDemo(): bool
+    {
+        if (in_array($this->name, self::DEMO_NAMES, true)) {
+            return true;
+        }
+
+        if (stripos((string) $this->name, 'demo') !== false) {
+            return true;
+        }
+
+        if ($this->relationLoaded('users')) {
+            return $this->users->contains(fn ($u) => $u->isDemo());
+        }
+
+        return $this->users()->where(function ($q) {
+            $q->whereIn('email', self::DEMO_EMAILS)
+                ->orWhere('email', 'like', '%demo%');
+            foreach (self::DEMO_DOMAINS as $domain) {
+                $q->orWhere('email', 'like', "%@{$domain}");
+            }
+        })->exists();
+    }
+
+    /**
+     * Scope a query to exclude demo tenants
+     */
+    public function scopeWithoutDemo($query)
+    {
+        return $query->whereNotIn('name', self::DEMO_NAMES)
+            ->where('name', 'not like', '%demo%')
+            ->whereDoesntHave('users', function ($uq) {
+                $uq->whereIn('email', self::DEMO_EMAILS)
+                    ->orWhere('email', 'like', '%demo%');
+                foreach (self::DEMO_DOMAINS as $domain) {
+                    $uq->orWhere('email', 'like', "%@{$domain}");
+                }
+            });
     }
 }

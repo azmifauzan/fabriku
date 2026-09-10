@@ -24,3 +24,16 @@ Schedule::command('trial:send-reminders')
     ->onFailure(function () {
         Log::error('Scheduled trial:send-reminders failed');
     });
+
+// Send weekly campaign emails to tenant admins every Monday at 10:00 WIB
+Schedule::command('campaign:send-weekly')
+    ->weeklyOn(1, '10:00')
+    ->timezone('Asia/Jakarta')
+    ->withoutOverlapping()
+    ->onSuccess(function () {
+        Log::info('Scheduled campaign:send-weekly completed successfully');
+    })
+    ->onFailure(function () {
+        Log::error('Scheduled campaign:send-weekly failed');
+    });
+
