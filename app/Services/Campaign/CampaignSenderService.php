@@ -9,6 +9,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 class CampaignSenderService
@@ -66,20 +67,30 @@ class CampaignSenderService
                 continue;
             }
 
-            // Find admin user for this tenant
+            // Find active admin user for this tenant who has not unsubscribed
             $adminUser = $tenant->users()
                 ->where('role', 'admin')
                 ->where('is_active', true)
                 ->whereNotNull('email')
+                ->whereNull('campaign_unsubscribed_at')
                 ->first();
 
             if (! $adminUser || empty($adminUser->email)) {
+                $unsubscribedAdmin = $tenant->users()
+                    ->where('role', 'admin')
+                    ->where('is_active', true)
+                    ->whereNotNull('campaign_unsubscribed_at')
+                    ->first();
+
                 $skippedCount++;
                 $details[] = [
                     'tenant_id' => $tenant->id,
                     'tenant_name' => $tenant->name,
+                    'recipient' => $unsubscribedAdmin?->email,
                     'status' => 'skipped',
-                    'reason' => 'Tenant tidak memiliki user admin aktif dengan email valid.',
+                    'reason' => $unsubscribedAdmin
+                        ? 'User admin telah berhenti berlangganan (unsubscribed) dari campaign email.'
+                        : 'Tenant tidak memiliki user admin aktif dengan email valid.',
                 ];
                 continue;
             }
@@ -106,12 +117,15 @@ class CampaignSenderService
             $subject = $campaignData['subject'] ?? "Tips & Fitur Fabriku: {$feature['name']}";
             $previewText = Str::limit($campaignData['intro'] ?? '', 150);
 
+            $unsubscribeUrl = URL::signedRoute('campaign.unsubscribe', ['user' => $adminUser->id]);
+
             try {
                 // Render HTML content for logging and preview
                 $renderedHtml = view('emails.feature-campaign', [
                     'tenant' => $tenant,
                     'adminUser' => $adminUser,
                     'campaignData' => $campaignData,
+                    'unsubscribeUrl' => $unsubscribeUrl,
                 ])->render();
             } catch (\Throwable $e) {
                 $renderedHtml = '<p>' . htmlspecialchars($campaignData['intro'] ?? '') . '</p>';
@@ -132,7 +146,7 @@ class CampaignSenderService
 
             try {
                 // Send email
-                Mail::to($adminUser->email)->send(new FeatureCampaignEmail($tenant, $adminUser, $campaignData));
+                Mail::to($adminUser->email)->send(new FeatureCampaignEmail($tenant, $adminUser, $campaignData, $unsubscribeUrl));
 
                 // Log successfully sent campaign
                 CampaignLog::create([
@@ -252,14 +266,18 @@ class CampaignSenderService
         $subject = "[TEST] " . ($campaignData['subject'] ?? $selectedFeature['name']);
         $campaignData['subject'] = $subject;
 
+        $testUnsubscribeUrl = url('/');
+
         try {
             $renderedHtml = view('emails.feature-campaign', [
                 'tenant' => $mockTenant,
                 'adminUser' => $mockUser,
                 'campaignData' => $campaignData,
+                'unsubscribeUrl' => $testUnsubscribeUrl,
             ])->render();
 
-            Mail::to($targetEmail)->send(new FeatureCampaignEmail($mockTenant, $mockUser, $campaignData));
+            // Send immediately (synchronous) so test results are verified in real time with provider
+            Mail::to($targetEmail)->sendNow(new FeatureCampaignEmail($mockTenant, $mockUser, $campaignData, $testUnsubscribeUrl));
 
             // Record test log
             CampaignLog::create([
@@ -287,6 +305,24 @@ class CampaignSenderService
                 'feature' => $selectedFeature['name'],
             ];
         } catch (\Throwable $e) {
+            CampaignLog::create([
+                'batch_id' => 'test_' . now()->format('Ymd_His'),
+                'tenant_id' => null,
+                'user_id' => null,
+                'recipient_email' => $targetEmail,
+                'recipient_name' => 'Admin Penguji (Test)',
+                'business_category' => $category,
+                'feature_key' => $selectedFeature['key'] ?? null,
+                'feature_name' => $selectedFeature['name'],
+                'subject' => $subject,
+                'preview_text' => Str::limit($campaignData['intro'] ?? '', 150),
+                'content_html' => $renderedHtml ?? '',
+                'prompt_used' => $campaignData['prompt_used'] ?? null,
+                'llm_model_used' => $campaignData['llm_used'] ?? null,
+                'status' => 'failed',
+                'error_message' => $e->getMessage(),
+            ]);
+
             return [
                 'success' => false,
                 'message' => 'Gagal mengirim email uji coba: ' . $e->getMessage(),

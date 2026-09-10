@@ -117,7 +117,7 @@ test('admin can send sample test email', function () {
 
     $response->assertRedirect()->assertSessionHas('success');
 
-    Mail::assertQueued(FeatureCampaignEmail::class, function ($mail) {
+    Mail::assertSent(FeatureCampaignEmail::class, function ($mail) {
         return $mail->hasTo('tester@example.com');
     });
 
@@ -244,4 +244,121 @@ test('demo tenants and demo admin users are excluded from campaign emails', func
     expect(CampaignLog::where('recipient_email', $demoUser->email)->exists())->toBeFalse();
     expect(CampaignLog::where('recipient_email', $realUser->email)->exists())->toBeTrue();
 });
+
+test('campaign email contains signed unsubscribe link and List-Unsubscribe header', function () {
+    $tenant = Tenant::factory()->create([
+        'name' => 'Kue Enak Mandiri',
+        'is_active' => true,
+    ]);
+
+    $user = User::factory()->create([
+        'tenant_id' => $tenant->id,
+        'email' => 'owner@kueenak.com',
+        'role' => 'admin',
+        'is_active' => true,
+    ]);
+
+    $mailable = new FeatureCampaignEmail($tenant, $user, [
+        'subject' => 'Tips Kue Enak',
+        'intro' => 'Tingkatkan omset kue Anda.',
+    ]);
+
+    expect($mailable->unsubscribeUrl)->toContain('/campaign/unsubscribe/' . $user->id);
+    expect($mailable->unsubscribeUrl)->toContain('signature=');
+
+    $rendered = $mailable->render();
+    expect($rendered)->toContain('/campaign/unsubscribe/' . $user->id);
+    expect($rendered)->toContain('berhenti berlangganan');
+});
+
+test('user can unsubscribe using valid signed link and is excluded from future campaigns', function () {
+    Mail::fake();
+
+    $tenant = Tenant::factory()->create([
+        'name' => 'Sentosa Abadi',
+        'is_active' => true,
+    ]);
+
+    $user = User::factory()->create([
+        'tenant_id' => $tenant->id,
+        'email' => 'admin@sentosaabadi.com',
+        'role' => 'admin',
+        'is_active' => true,
+        'campaign_unsubscribed_at' => null,
+    ]);
+
+    // Generate valid signed unsubscribe URL
+    $signedUrl = URL::signedRoute('campaign.unsubscribe', ['user' => $user->id]);
+
+    // Visit unsubscribe page
+    $response = $this->get($signedUrl);
+    $response->assertOk()
+        ->assertViewIs('campaign.unsubscribed')
+        ->assertSee('Berhenti Berlangganan');
+
+    $user->refresh();
+    expect($user->isCampaignUnsubscribed())->toBeTrue();
+    expect($user->campaign_unsubscribed_at)->not->toBeNull();
+
+    // Trigger scheduled command - user should be skipped
+    Artisan::call('campaign:send-weekly');
+
+    Mail::assertNotQueued(FeatureCampaignEmail::class, function ($mail) use ($user) {
+        return $mail->hasTo($user->email);
+    });
+
+    expect(CampaignLog::where('recipient_email', $user->email)->exists())->toBeFalse();
+});
+
+test('invalid signature on unsubscribe route returns 403', function () {
+    $user = User::factory()->create([
+        'email' => 'someone@example.com',
+        'role' => 'admin',
+    ]);
+
+    // Access without valid signature
+    $response = $this->get(route('campaign.unsubscribe', ['user' => $user->id]));
+    $response->assertStatus(403);
+
+    expect($user->fresh()->isCampaignUnsubscribed())->toBeFalse();
+});
+
+test('user can resubscribe using signed link', function () {
+    $tenant = Tenant::factory()->create();
+    $user = User::factory()->create([
+        'tenant_id' => $tenant->id,
+        'email' => 'resub@example.com',
+        'role' => 'admin',
+        'campaign_unsubscribed_at' => now(),
+    ]);
+
+    expect($user->isCampaignUnsubscribed())->toBeTrue();
+
+    $resubscribeUrl = URL::signedRoute('campaign.resubscribe', ['user' => $user->id]);
+    $response = $this->post($resubscribeUrl);
+
+    $response->assertOk()
+        ->assertViewIs('campaign.resubscribed')
+        ->assertSee('Berhasil Berlangganan Kembali');
+
+    expect($user->fresh()->isCampaignUnsubscribed())->toBeFalse();
+    expect($user->fresh()->campaign_unsubscribed_at)->toBeNull();
+});
+
+test('RFC 8058 one-click unsubscribe POST request unsubscribes user', function () {
+    $user = User::factory()->create([
+        'email' => 'oneclick@example.com',
+        'role' => 'admin',
+        'campaign_unsubscribed_at' => null,
+    ]);
+
+    $signedUrl = URL::signedRoute('campaign.unsubscribe.post', ['user' => $user->id]);
+    $response = $this->postJson($signedUrl);
+
+    $response->assertOk()
+        ->assertJson(['success' => true]);
+
+    expect($user->fresh()->isCampaignUnsubscribed())->toBeTrue();
+});
+
 

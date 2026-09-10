@@ -22,6 +22,7 @@ import {
     Sliders,
     Sparkles,
     Trash2,
+    UserX,
     X,
 } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -43,6 +44,7 @@ const props = defineProps<{
         total_sent: number;
         total_failed: number;
         tenants_reached: number;
+        total_unsubscribed?: number;
         last_sent_at: string | null;
     };
     settings: {
@@ -374,7 +376,7 @@ const formatDate = (dateString: string | null) => {
         <!-- ==================================================== -->
         <div v-if="activeTab === 'tracking'" class="space-y-6">
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <div class="flex items-center justify-between">
                         <div>
@@ -407,6 +409,18 @@ const formatDate = (dateString: string | null) => {
                         </div>
                         <div class="rounded-lg bg-indigo-50 p-3 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
                             <Building2 class="h-6 w-6" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Unsubscribed</p>
+                            <p class="mt-1 text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.total_unsubscribed ?? 0 }}</p>
+                        </div>
+                        <div class="rounded-lg bg-amber-50 p-3 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                            <UserX class="h-6 w-6" />
                         </div>
                     </div>
                 </div>

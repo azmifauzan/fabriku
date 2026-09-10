@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\CampaignLog;
 use App\Models\SystemSetting;
+use App\Models\User;
 use App\Services\Campaign\CampaignLlmService;
 use App\Services\Campaign\CampaignSenderService;
 use App\Services\Campaign\FabrikuFeatureCatalog;
@@ -61,6 +62,7 @@ class AdminCampaignController extends Controller
             'total_sent' => CampaignLog::where('status', 'sent')->count(),
             'total_failed' => CampaignLog::where('status', 'failed')->count(),
             'tenants_reached' => CampaignLog::where('status', 'sent')->whereNotNull('tenant_id')->distinct('tenant_id')->count('tenant_id'),
+            'total_unsubscribed' => User::whereNotNull('campaign_unsubscribed_at')->count(),
             'last_sent_at' => CampaignLog::where('status', 'sent')->latest('sent_at')->value('sent_at'),
         ];
 

@@ -37,6 +37,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'telegram_connect_token_expires_at',
         'is_active',
         'last_login_at',
+        'campaign_unsubscribed_at',
     ];
 
     /**
@@ -62,6 +63,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
             'telegram_connect_token_expires_at' => 'datetime',
+            'campaign_unsubscribed_at' => 'datetime',
         ];
     }
 
@@ -233,5 +235,29 @@ class User extends Authenticatable implements MustVerifyEmail
             'telegram_connect_token' => null,
             'telegram_connect_token_expires_at' => null,
         ]);
+    }
+
+    /**
+     * Determine whether user has unsubscribed from campaign emails
+     */
+    public function isCampaignUnsubscribed(): bool
+    {
+        return $this->campaign_unsubscribed_at !== null;
+    }
+
+    /**
+     * Unsubscribe user from campaign emails
+     */
+    public function unsubscribeCampaign(): void
+    {
+        $this->forceFill(['campaign_unsubscribed_at' => now()])->save();
+    }
+
+    /**
+     * Resubscribe user to campaign emails
+     */
+    public function resubscribeCampaign(): void
+    {
+        $this->forceFill(['campaign_unsubscribed_at' => null])->save();
     }
 }
