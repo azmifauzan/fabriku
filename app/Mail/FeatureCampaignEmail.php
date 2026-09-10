@@ -10,11 +10,12 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Headers;
+use Illuminate\Support\Facades\URL;
 
 class FeatureCampaignEmail extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable;
 
     /**
      * Create a new message instance.
@@ -24,8 +25,13 @@ class FeatureCampaignEmail extends Mailable implements ShouldQueue
     public function __construct(
         public Tenant $tenant,
         public User $adminUser,
-        public array $campaignData
-    ) {}
+        public array $campaignData,
+        public ?string $unsubscribeUrl = null
+    ) {
+        $this->unsubscribeUrl ??= $adminUser->id > 0
+            ? URL::signedRoute('campaign.unsubscribe', ['user' => $adminUser->id])
+            : url('/');
+    }
 
     /**
      * Get the message envelope.
@@ -38,12 +44,32 @@ class FeatureCampaignEmail extends Mailable implements ShouldQueue
     }
 
     /**
+     * Get the message headers.
+     */
+    public function headers(): Headers
+    {
+        if ($this->unsubscribeUrl) {
+            return new Headers(
+                text: [
+                    'List-Unsubscribe' => '<' . $this->unsubscribeUrl . '>',
+                    'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+                ],
+            );
+        }
+
+        return new Headers;
+    }
+
+    /**
      * Get the message content definition.
      */
     public function content(): Content
     {
         return new Content(
             view: 'emails.feature-campaign',
+            with: [
+                'unsubscribeUrl' => $this->unsubscribeUrl,
+            ],
         );
     }
 

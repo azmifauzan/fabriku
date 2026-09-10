@@ -280,7 +280,13 @@
         <div class="footer">
             <p><strong>Fabriku</strong> — Platform Operasional & Produksi Bisnis Anda</p>
             <p>Email ini dikirimkan khusus kepada Admin terdaftar pada <strong>{{ $tenant->name }}</strong>.</p>
-            <p>&copy; {{ date('Y') }} Fabriku. All rights reserved.</p>
+            @if(!empty($unsubscribeUrl))
+                <p style="margin-top: 14px; font-size: 11px; color: #94a3b8; line-height: 1.5;">
+                    Jika Anda tidak ingin menerima tips mingguan & update fitur ini lagi, silakan 
+                    <a href="{{ $unsubscribeUrl }}" style="color: #64748b; text-decoration: underline;">berhenti berlangganan (unsubscribe)</a>.
+                </p>
+            @endif
+            <p style="margin-top: 10px;">&copy; {{ date('Y') }} Fabriku. All rights reserved.</p>
         </div>
     </div>
 </body>

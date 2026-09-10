@@ -19,6 +19,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CampaignUnsubscribeController;
 use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
@@ -69,6 +70,11 @@ Route::get('/syarat-ketentuan', fn () => Inertia::render('Legal/Terms', ['canoni
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
+
+// Email Campaign Unsubscribe Routes (Signed URLs)
+Route::get('/campaign/unsubscribe/{user}', [CampaignUnsubscribeController::class, 'unsubscribe'])->name('campaign.unsubscribe');
+Route::post('/campaign/unsubscribe/{user}', [CampaignUnsubscribeController::class, 'handleUnsubscribe'])->name('campaign.unsubscribe.post');
+Route::post('/campaign/resubscribe/{user}', [CampaignUnsubscribeController::class, 'resubscribe'])->name('campaign.resubscribe');
 
 // ==========================================
 // ADMIN ROUTES
