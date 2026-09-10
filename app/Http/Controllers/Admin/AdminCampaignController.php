@@ -130,20 +130,28 @@ class AdminCampaignController extends Controller
      */
     public function testLlm(Request $request): JsonResponse
     {
-        $override = [];
-        if ($request->filled('llm_base_url')) {
-            $override['llm_base_url'] = $request->llm_base_url;
-        }
-        if ($request->filled('llm_api_key')) {
-            $override['llm_api_key'] = $request->llm_api_key;
-        }
-        if ($request->filled('llm_model')) {
-            $override['llm_model'] = $request->llm_model;
-        }
+        try {
+            $override = [];
+            if ($request->filled('llm_base_url')) {
+                $override['llm_base_url'] = $request->llm_base_url;
+            }
+            if ($request->filled('llm_api_key')) {
+                $override['llm_api_key'] = $request->llm_api_key;
+            }
+            if ($request->filled('llm_model')) {
+                $override['llm_model'] = $request->llm_model;
+            }
 
-        $result = $this->llmService->testConnection($override);
+            $result = $this->llmService->testConnection($override);
 
-        return response()->json($result);
+            return response()->json($result);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage(),
+                'latency_ms' => 0,
+            ]);
+        }
     }
 
     /**

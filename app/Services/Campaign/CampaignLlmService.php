@@ -19,7 +19,20 @@ class CampaignLlmService
             ?? SystemSetting::get('llm_base_url', null)
             ?? config('services.openai.base_url', 'https://api.openai.com/v1');
 
-        return rtrim((string) $url, '/');
+        $url = trim((string) $url);
+        $url = rtrim($url, '/');
+
+        // If user accidentally pasted the full endpoint (/chat/completions), strip it
+        $url = preg_replace('/\/chat\/completions$/i', '', $url);
+        $url = rtrim((string) $url, '/');
+
+        // If URL doesn't have a path (e.g. https://ai.sumopod.com), append /v1 standard
+        $parsedPath = parse_url($url, PHP_URL_PATH);
+        if (empty($parsedPath) || $parsedPath === '/') {
+            $url .= '/v1';
+        }
+
+        return rtrim($url, '/');
     }
 
     /**
@@ -125,11 +138,12 @@ class CampaignLlmService
             $latency = (int) round((microtime(true) - $startTime) * 1000);
 
             if (! $response->successful()) {
-                $errorBody = $response->json('error.message') ?? $response->body();
+                $rawError = $response->json('error.message') ?? strip_tags($response->body());
+                $cleanMsg = trim(preg_replace('/\s+/', ' ', (string) $rawError));
 
                 return [
                     'success' => false,
-                    'message' => "HTTP {$response->status()}: " . substr($errorBody, 0, 300),
+                    'message' => "HTTP {$response->status()}: " . substr($cleanMsg, 0, 200),
                     'latency_ms' => $latency,
                     'model' => $model,
                 ];

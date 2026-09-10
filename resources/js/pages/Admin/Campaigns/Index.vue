@@ -125,17 +125,36 @@ const llmTestResult = ref<{
     preview?: string;
 } | null>(null);
 
+const getCsrfToken = (): string => {
+    // 1. Read XSRF-TOKEN cookie (Laravel standard encrypted cookie)
+    const xsrfMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+    if (xsrfMatch) {
+        return decodeURIComponent(xsrfMatch[1]);
+    }
+    // 2. Fallback to meta tag
+    return (
+        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ||
+        ''
+    );
+};
+
 const testLlmConnection = async () => {
     testingLlm.value = true;
     llmTestResult.value = null;
 
     try {
+        const csrfToken = getCsrfToken();
         const response = await fetch('/admin/campaigns/test-llm', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-XSRF-TOKEN': csrfToken,
+                'X-CSRF-TOKEN': csrfToken,
             },
+            credentials: 'same-origin',
             body: JSON.stringify({
                 llm_base_url: settingsForm.llm_base_url,
                 llm_api_key: settingsForm.llm_api_key,
@@ -143,12 +162,29 @@ const testLlmConnection = async () => {
             }),
         });
 
-        const data = await response.json();
+        const contentType = response.headers.get('content-type') || '';
+        let data: any = null;
+
+        if (contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            const rawText = await response.text();
+            let errorMessage = `Server mengembalikan status HTTP ${response.status}.`;
+            if (response.status === 419) {
+                errorMessage = 'Sesi CSRF telah kedaluwarsa. Silakan refresh halaman browser.';
+            } else if (response.status === 401 || response.status === 302) {
+                errorMessage = 'Sesi login telah berakhir. Silakan login kembali ke admin panel.';
+            } else if (response.status === 504 || response.status === 408) {
+                errorMessage = 'Request timeout saat menghubungi endpoint LLM. Periksa kembali URL dan koneksi AI.';
+            }
+            throw new Error(errorMessage);
+        }
+
         llmTestResult.value = {
             tested: true,
             success: data.success,
             message: data.message,
-            latency_ms: data.latency_ms,
+            latency_ms: data.latency_ms ?? 0,
             model: data.model,
             preview: data.response_preview,
         };
@@ -165,7 +201,7 @@ const testLlmConnection = async () => {
             message: e.message || 'Gagal menghubungi server.',
             latency_ms: 0,
         };
-        showError('Gagal!', 'Terjadi kesalahan jaringan.');
+        showError('Gagal!', e.message || 'Terjadi kesalahan jaringan.');
     } finally {
         testingLlm.value = false;
     }
@@ -182,11 +218,22 @@ const openPreview = async (logId: number) => {
     previewData.value = null;
 
     try {
-        const res = await fetch(`/admin/campaigns/${logId}`);
-        const data = await res.json();
-        previewData.value = data;
-    } catch (e) {
-        showError('Gagal!', 'Tidak dapat memuat konten email.');
+        const res = await fetch(`/admin/campaigns/${logId}`, {
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+        });
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            const data = await res.json();
+            previewData.value = data;
+        } else {
+            throw new Error('Gagal memuat pratinjau.');
+        }
+    } catch (e: any) {
+        showError('Gagal!', e.message || 'Tidak dapat memuat konten email.');
         previewModalOpen.value = false;
     } finally {
         previewLoading.value = false;
