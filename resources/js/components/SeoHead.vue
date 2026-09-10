@@ -43,6 +43,6 @@ const schemas = computed(() => {
         <meta v-if="ogImage" head-key="og:image" property="og:image" :content="ogImage" />
         <meta head-key="twitter:card" name="twitter:card" :content="ogImage ? 'summary_large_image' : 'summary'" />
 
-        <script v-for="(schema, index) in schemas" :key="index" type="application/ld+json">{{ schema }}</script>
+        <component :is="'script'" v-for="(schema, index) in schemas" :key="index" type="application/ld+json">{{ schema }}</component>
     </Head>
 </template>
