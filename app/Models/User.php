@@ -81,6 +81,28 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Check if user is a demo user
+     */
+    public function isDemo(): bool
+    {
+        if (in_array($this->email, Tenant::DEMO_EMAILS, true)) {
+            return true;
+        }
+
+        if (stripos((string) $this->email, 'demo') !== false) {
+            return true;
+        }
+
+        foreach (Tenant::DEMO_DOMAINS as $domain) {
+            if (str_ends_with((string) $this->email, "@{$domain}")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Get the roles for the user
      */
     public function roles(): BelongsToMany
