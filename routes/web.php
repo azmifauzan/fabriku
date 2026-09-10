@@ -351,3 +351,6 @@ if (app()->environment('local', 'testing')) {
         abort(404);
     });
 }
+
+Route::post('internal/webhooks/sumopod', \App\Http\Controllers\InternalSumopodWebhookController::class)
+    ->name('internal.webhook.sumopod');
