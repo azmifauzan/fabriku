@@ -21,8 +21,15 @@ const navigation = [
     { name: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
 ];
 
-const isActive = (href) => {
-    return window.location.pathname.startsWith(href);
+const isActive = (href: string) => {
+    const currentPath = (page.url || (typeof window !== 'undefined' ? window.location.pathname : '')).split('?')[0].replace(/\/$/, '') || '/';
+    const targetPath = href.replace(/\/$/, '') || '/';
+
+    if (targetPath === '/admin') {
+        return currentPath === '/admin';
+    }
+
+    return currentPath === targetPath || currentPath.startsWith(`${targetPath}/`) || currentPath.startsWith(`${targetPath}-`);
 };
 
 const logout = () => {
