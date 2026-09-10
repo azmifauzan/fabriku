@@ -652,7 +652,7 @@ Setelah 2–4 minggu, catat di dokumen yang sama: jumlah URL terindeks/tidak ter
 
 ## Fase 4 — Konten dan internal linking
 
-### Task 7: Internal link antar-artikel
+### Task 7: Internal link antar-artikel — SELESAI (b4b4f80)
 
 `docs/seo-keyword-strategy.md` mencatat internal linking sebagai nol: tidak ada satu pun artikel di `BlogSeeder.php` yang menautkan ke artikel lain. GSC juga melaporkan tautan internal 0. Internal link adalah sinyal otoritas topikal yang gratis dan sekaligus jalur penemuan crawl.
 
@@ -664,7 +664,7 @@ Setelah 2–4 minggu, catat di dokumen yang sama: jumlah URL terindeks/tidak ter
 - Consumes: `BlogPost::$content` (Markdown), dirender ke `content_html` oleh model.
 - Produces: tidak ada API baru.
 
-- [ ] **Step 1: Tulis test yang gagal**
+- [x] **Step 1: Tulis test yang gagal**
 
 Buat `tests/Feature/BlogInternalLinkTest.php`:
 
@@ -687,12 +687,12 @@ it('gives every seeded post at least one link to another post', function () {
 });
 ```
 
-- [ ] **Step 2: Jalankan test, pastikan gagal**
+- [x] **Step 2: Jalankan test, pastikan gagal**
 
 Run: `php artisan test --compact --filter=BlogInternalLink`
 Expected: FAIL — daftar slug berisi semua artikel yang ada.
 
-- [ ] **Step 3: Sisipkan 2–3 link per artikel**
+- [x] **Step 3: Sisipkan 2–3 link per artikel**
 
 Di `database/seeders/BlogSeeder.php`, sunting heredoc `content` setiap artikel dan tambahkan link Markdown ke artikel terkait secara alami di dalam kalimat, bukan sebagai daftar "baca juga" yang ditempel di akhir. Pasangan yang relevan:
 
@@ -720,12 +720,12 @@ Angka HPP baru berguna kalau stok bahan bakunya sendiri tercatat rapi — kalau 
 
 Anchor text memakai frasa deskriptif, bukan "klik di sini" atau URL telanjang.
 
-- [ ] **Step 4: Jalankan test, pastikan lolos**
+- [x] **Step 4: Jalankan test, pastikan lolos**
 
 Run: `php artisan test --compact --filter=BlogInternalLink`
 Expected: PASS.
 
-- [ ] **Step 5: Periksa hasil render**
+- [x] **Step 5: Periksa hasil render**
 
 ```bash
 php artisan db:seed --class=BlogSeeder
@@ -734,7 +734,7 @@ curl -s http://127.0.0.1:8123/blog/cara-menghitung-hpp-produk-umkm | grep -o 'hr
 ```
 Expected: minimal dua href artikel yang berbeda. Hentikan server setelahnya.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -744,7 +744,7 @@ git commit -m "feat(blog): cross-link related posts for topical authority and cr
 
 ---
 
-### Task 8: Empat artikel baru dari daftar prioritas keyword
+### Task 8: Empat artikel baru dari daftar prioritas keyword — SELESAI (d593d36)
 
 `docs/seo-keyword-strategy.md` memberi peringkat 15 keyword. Nomor 1, 2, dan 3 sudah terbit (`cara-menentukan-harga-jual-produk-kerajinan-handmade`, `cara-mengelola-bahan-baku-kerajinan-tidak-standar`, `cara-kelola-stok-retur-barang-umkm-retail`). Batch berikutnya mengambil dua High yang tersisa dan dua bagian bawah funnel.
 
@@ -763,7 +763,7 @@ git commit -m "feat(blog): cross-link related posts for topical authority and cr
 - Consumes: bentuk array dari `BlogSeeder::posts()` — `array{slug, title, category, tags, days_ago, excerpt, meta_title, meta_description, content}`.
 - Produces: tidak ada API baru.
 
-- [ ] **Step 1: Tulis test yang gagal**
+- [x] **Step 1: Tulis test yang gagal**
 
 Tambahkan di `tests/Feature/BlogInternalLinkTest.php`:
 
@@ -790,12 +790,12 @@ it('publishes the next keyword batch', function () {
 });
 ```
 
-- [ ] **Step 2: Jalankan test, pastikan gagal**
+- [x] **Step 2: Jalankan test, pastikan gagal**
 
 Run: `php artisan test --compact --filter="next keyword batch"`
 Expected: FAIL — "missing post: cara-stok-opname-toko-retail-tanpa-tutup-toko".
 
-- [ ] **Step 3: Tulis keempat artikel**
+- [x] **Step 3: Tulis keempat artikel**
 
 Tambahkan empat entri di array `BlogSeeder::posts()`, mengikuti persis bentuk entri yang sudah ada (heredoc `<<<'MD'`, `days_ago` menurun untuk artikel yang lebih baru — pakai 4, 3, 2, 1).
 
@@ -814,12 +814,12 @@ Sudut yang harus dibahas per artikel, supaya tidak berebut keyword dengan artike
 - **`kapan-usaha-rumahan-butuh-sistem-pencatatan`** — gejala konkret (lebih dari satu orang mencatat, stok "hilang" berulang, pesanan lewat karena tercecer di chat, tidak bisa menjawab produk mana yang paling untung), bukan ukuran omzet. Tautkan ke `cara-mencatat-produksi-harian-umkm-kuliner-rumahan` dan `cara-menghitung-hpp-produk-umkm`.
 - **`aplikasi-pencatatan-umkm-vs-excel-kapan-pindah`** — jujur soal di mana Excel masih menang (murah, fleksibel, tidak perlu belajar), di mana ia rontok (banyak pengguna sekaligus, riwayat perubahan, stok real-time, rumus yang rusak diam-diam), dan bagaimana pindah tanpa kehilangan data. Tautkan ke `tips-memilih-aplikasi-kasir-umkm-pemula` dan `kapan-usaha-rumahan-butuh-sistem-pencatatan`.
 
-- [ ] **Step 4: Jalankan test, pastikan lolos**
+- [x] **Step 4: Jalankan test, pastikan lolos**
 
 Run: `php artisan test --compact --filter=BlogInternalLink`
 Expected: PASS untuk kedua test — batch keyword baru dan syarat internal link.
 
-- [ ] **Step 5: Periksa render dan sitemap**
+- [x] **Step 5: Periksa render dan sitemap**
 
 ```bash
 php artisan db:seed --class=BlogSeeder
@@ -829,7 +829,7 @@ curl -s http://127.0.0.1:8123/blog/kapan-usaha-rumahan-butuh-sistem-pencatatan |
 ```
 Expected: `1` untuk keduanya. Hentikan server setelahnya.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -837,7 +837,7 @@ git add database/seeders/BlogSeeder.php tests/Feature/BlogInternalLinkTest.php
 git commit -m "feat(blog): add 4 posts for retail opname, maklun, and Excel-migration keywords"
 ```
 
-- [ ] **Step 7: Perbarui dokumen strategi**
+- [x] **Step 7: Perbarui dokumen strategi**
 
 Di `docs/seo-keyword-strategy.md`, tandai keyword #4, #5, #9, #12 sebagai terbit dan catat tanggalnya. Commit bersama perubahan di atas.
 
@@ -864,4 +864,10 @@ Task 1, 2, 3, dan 5 sudah dikerjakan. Empat hal berbeda dari rencana:
 
 Task 4 dikerjakan terpisah pada 2026-09-10 (`bddf4c8`), tanpa deviasi dari rencana — 481 pass setelahnya.
 
-Belum dikerjakan: Task 6 (deploy + verifikasi), Task 7 dan 8 (konten).
+Task 7 dan 8 dikerjakan pada 2026-09-10, dua deviasi:
+1. Kategori "Tips Bisnis" untuk keyword #9 dan #12 tidak ada di `BlogSeeder.php` (hanya 4 kategori nyata: Manajemen Stok/Produksi/Penjualan/Keuangan). Keduanya diterbitkan dengan kategori **Produksi**.
+2. `tests/Unit/BlogSeederTest.php` — test lama di luar cakupan plan — hardcode jumlah post `15`, jadi ikut gagal begitu Task 8 menambah 4 post. Diupdate ke `19`; assertion `<h2>` dan `>=500 kata` per post tetap dipertahankan, keduanya juga jadi bukti tambahan bahwa 4 artikel baru memenuhi syarat word-count dari audit.
+
+483 pass setelah kedua task.
+
+Belum dikerjakan: Task 6 (deploy + verifikasi GSC/Ubersuggest pasca-SSR).
