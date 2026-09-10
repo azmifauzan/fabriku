@@ -124,6 +124,8 @@ Cara paling praktis untuk mulai: lihat catatan pemakaian 1-2 bulan terakhir, hit
 Selama jumlah bahan masih sedikit dan transaksinya jarang, catatan manual di buku atau spreadsheet masih bisa jalan. Tapi begitu jenis bahan mulai banyak, ada lebih dari satu orang yang mencatat, atau sudah beberapa kali kejadian stok "hilang" tanpa sebab jelas, itu tanda saatnya pindah ke sistem yang mencatat otomatis setiap pergerakan stok.
 
 Fabriku punya modul stok bahan baku dengan pencatatan FIFO/FEFO otomatis dan notifikasi saat stok mendekati batas minimum, jadi kamu tidak perlu lagi menghitung manual atau was-was lupa cek gudang.
+
+Kalau usahamu bergerak di konveksi, pola kerugian dari stok bahan baku biasanya lebih spesifik lagi — lihat [5 kesalahan mengelola stok bahan baku yang bikin UMKM konveksi rugi](/blog/kesalahan-mengelola-stok-bahan-baku-umkm-konveksi). Dan begitu stok bahan sudah tercatat rapi, langkah berikutnya adalah memastikan harga jual produk juga dihitung dari angka yang benar, bukan tebakan — baca [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm).
 MD,
             ],
             [
@@ -171,6 +173,8 @@ Risiko paling besar justru dari kesalahan kelima: data stok yang hanya ada di ke
 Kelima kesalahan di atas punya akar masalah yang sama: stok tidak dicatat secara sistematis per item, per lokasi, dan per orang yang bertanggung jawab. Solusinya bukan sekadar rajin mencatat, tapi mencatat dengan cara yang bisa diakses dan dipahami siapa saja di tim — bukan hanya satu orang.
 
 Fitur multi-rack di Fabriku memungkinkan setiap gulungan kain atau batch aksesoris dicatat sebagai item terpisah dengan lokasi rak masing-masing, jadi sisa stok per roll dan riwayat pemakaiannya tetap jelas meski dicek oleh siapa pun, kapan pun.
+
+Kelima kesalahan di atas berlaku juga untuk bahan baku UMKM di luar konveksi — pola dasarnya sama, lihat [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi). Kalau kesalahan kelima (data stok hanya ada di kepala satu orang) terasa familiar, itu biasanya tanda sudah waktunya lihat [kapan usaha butuh aplikasi pencatatan produksi](/blog/aplikasi-pencatatan-produksi-usaha-kecil-menengah), bukan cuma stoknya saja yang dibenahi.
 MD,
             ],
             [
@@ -223,6 +227,8 @@ Belum lagi risiko salah catat: progress yang disampaikan lewat chat gampang camp
 Dengan aplikasi yang mencatat status produksi secara terpusat, waktu yang tadinya habis untuk "menagih laporan" bisa dipakai untuk hal lain yang lebih produktif — dan datanya pun lebih bisa diandalkan karena dicatat langsung di sumbernya, bukan diteruskan berlapis-lapis lewat obrolan.
 
 Modul produksi Fabriku dirancang khusus untuk alur ini: setiap tahapan produksi tercatat, stok bahan baku terpotong otomatis, dan hasil produksi langsung masuk ke stok barang jadi tanpa input berulang.
+
+Untuk usaha kuliner rumahan yang skalanya masih kecil, kebutuhan pencatatan produksinya sedikit berbeda dan lebih sederhana — lihat [cara mencatat produksi harian UMKM kuliner rumahan](/blog/cara-mencatat-produksi-harian-umkm-kuliner-rumahan) untuk pendekatan yang lebih ringan.
 MD,
             ],
             [
@@ -274,6 +280,8 @@ Dari total tersebut, HPP per toples dihitung dengan membagi total biaya dengan j
 Tanpa catatan seperti ini, angka HPP biasanya hanya ditebak berdasarkan "kira-kira", yang rawan meleset terutama saat harga bahan baku naik-turun. Dengan catatan bahan yang konsisten di setiap produksi, pemilik usaha bisa dengan cepat tahu kapan harga jual perlu disesuaikan supaya margin tetap aman, tanpa harus menunggu sampai akhir bulan baru sadar untung tipis.
 
 Untuk kategori usaha rumahan, Fabriku menyediakan alur pencatatan produksi sederhana yang tidak mengharuskan pencatatan berlapis seperti pabrik besar, cukup input bahan dan hasil jadi, dan laporan HPP-nya terhitung sendiri.
+
+Kalau ingin memahami perhitungan HPP lebih dalam di luar konteks dapur rumahan — termasuk komponen overhead dan tenaga kerja yang lebih kompleks — lihat juga [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm).
 MD,
             ],
             [
@@ -334,6 +342,8 @@ Untuk usaha yang baru mulai, rekap mingguan biasanya cukup untuk mulai melihat p
 Yang lebih penting dari frekuensi adalah konsistensi. Laporan yang dibuat rutin walau formatnya sederhana jauh lebih berguna dibanding laporan detail yang hanya dibuat sesekali saat sempat. Kebiasaan mencatat setiap transaksi di hari yang sama juga mengurangi risiko lupa atau salah ingat detail transaksi, yang sering terjadi kalau pencatatan ditunda sampai akhir hari atau akhir minggu.
 
 Fabriku mencatat setiap pesanan langsung sebagai data penjualan, sehingga laporan seperti ini tidak perlu disusun manual — tinggal dilihat dan dianalisis.
+
+Setelah laporan dasar ini rutin dibuat, langkah selanjutnya adalah membacanya lebih dalam — lihat [5 metrik laporan penjualan yang wajib dipantau UMKM setiap bulan](/blog/metrik-laporan-penjualan-wajib-dipantau-umkm). Kolom status pembayaran di atas juga berkaitan erat dengan [cara mencatat dan menagih piutang pelanggan UMKM](/blog/cara-mencatat-menagih-piutang-pelanggan-umkm) — transaksi yang belum lunas hari ini adalah piutang yang perlu ditagih besok.
 MD,
             ],
             [
@@ -383,6 +393,8 @@ Di saat yang sama, piutang dari pembayaran cicilan reseller ikut naik sebanding 
 Dari sini, keputusan yang lebih tepat bukan sekadar "kejar omzet lebih tinggi lagi", tapi mengevaluasi ulang harga atau syarat pembayaran untuk channel reseller, sambil mendorong channel offline yang marginnya lebih sehat. Keputusan seperti ini hanya bisa diambil kalau laporan penjualan dibaca lebih dalam dari sekadar angka total di baris paling bawah.
 
 Laporan Fabriku sudah memecah data penjualan berdasarkan channel dan status pembayaran secara otomatis, jadi metrik-metrik ini bisa langsung dilihat tanpa harus menyusun ulang dari data mentah setiap bulan.
+
+Kelima metrik ini baru bisa dipantau kalau laporan dasarnya sudah rapi sejak awal — lihat [cara membuat laporan penjualan UMKM sederhana](/blog/cara-membuat-laporan-penjualan-umkm-sederhana) kalau belum punya strukturnya. Metrik pertama soal omzet juga akan lebih bermakna kalau dibandingkan dengan biaya produksi sebenarnya — baca [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm).
 MD,
             ],
             [
@@ -435,6 +447,8 @@ Dari empat komponen HPP, overhead paling sering diabaikan karena tidak sejelas b
 Cara praktis mengestimasi overhead tanpa perlu hitungan akuntansi rumit: jumlahkan total biaya listrik, gas, dan penyusutan alat dalam sebulan, lalu bagi dengan jumlah total unit yang diproduksi bulan itu untuk dapat estimasi overhead per unit. Angka ini tidak perlu presisi sampai rupiah terakhir — yang penting ada, supaya HPP tidak terlihat lebih murah dari kenyataan hanya karena satu komponen biaya terlewat begitu saja.
 
 Modul produksi dan stok bahan baku Fabriku mencatat biaya per bahan secara otomatis dari setiap pembelian, sehingga perhitungan HPP bisa mengikuti harga bahan yang aktual, bukan asumsi harga lama yang sudah berubah.
+
+Untuk produk yang lebih personal seperti kerajinan tangan, komponen biayanya sedikit berbeda dan skill jadi faktor tambahan — lihat [cara menentukan harga jual produk kerajinan handmade](/blog/cara-menentukan-harga-jual-produk-kerajinan-handmade). Untuk usaha jasa yang tidak punya produk fisik sama sekali, logikanya mirip tapi komponennya berbeda — baca [cara menghitung harga jasa servis kecil agar tidak rugi](/blog/cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi).
 MD,
             ],
             [
@@ -482,6 +496,8 @@ Kesalahan paling umum adalah membuka channel baru tanpa lebih dulu memastikan al
 Kesalahan lain adalah tidak membedakan harga atau ongkos antar channel dalam pencatatan, sehingga semua penjualan terlihat setara padahal marginnya berbeda jauh. Baru disadari belakangan, biasanya setelah beberapa bulan, bahwa channel yang paling ramai justru bukan yang paling menguntungkan.
 
 Fabriku mencatat channel penjualan (offline, online, marketplace, reseller) di setiap pesanan, dengan stok yang sama-sama terpotong dari satu sumber data pusat — jadi tidak ada lagi risiko barang yang sama ditawarkan dua kali ke pembeli berbeda.
+
+Kalau belum punya sistem kasir yang bisa menangani banyak channel sekaligus, [7 tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula) bisa jadi acuan sebelum memutuskan. Multi-channel juga berarti lebih banyak kemungkinan retur dari berbagai sumber — lihat [cara mengelola stok retur barang UMKM retail](/blog/cara-kelola-stok-retur-barang-umkm-retail) supaya retur dari channel mana pun tetap tercatat rapi.
 MD,
             ],
             [
@@ -533,6 +549,8 @@ Satu hal yang jarang dipikirkan di awal: bagaimana kalau nanti usaha berkembang 
 Aplikasi kasir yang tepat bukan yang paling banyak fiturnya, tapi yang paling pas dengan cara usaha kamu berjalan sehari-hari. Mulai dari kebutuhan riil, bukan dari daftar fitur yang terlihat keren tapi belum tentu dipakai.
 
 Fabriku menyediakan pencatatan transaksi, stok, produksi, sampai laporan dalam satu sistem yang menyesuaikan kategori usaha — jadi UMKM pemula tidak perlu berlangganan beberapa aplikasi terpisah hanya untuk mencatat hal-hal dasar ini.
+
+Kalau usahamu juga punya proses produksi, bukan cuma jual-beli barang jadi, pertimbangan yang perlu dicek sedikit berbeda — lihat [aplikasi pencatatan produksi usaha kecil menengah](/blog/aplikasi-pencatatan-produksi-usaha-kecil-menengah) untuk kebutuhan yang lebih spesifik itu.
 MD,
             ],
             [
@@ -584,6 +602,8 @@ Dari tabel ini kelihatan jelas: meski total stok Serum Vitamin C ada 55 pcs, bat
 Selain risiko komplain dan iritasi pelanggan, menjual kosmetik yang sudah lewat tanggal aman pakai juga berisiko dari sisi legal, terutama untuk produk yang terdaftar BPOM. Reputasi yang rusak karena satu kejadian seperti ini biasanya jauh lebih sulit dipulihkan dibanding sekadar menanggung rugi modal dari stok yang harus dimusnahkan lebih awal.
 
 Fabriku mencatat tanggal kadaluarsa per item stok dan menandai status "expired" secara otomatis begitu tanggalnya lewat, jadi produk yang mendekati kadaluarsa bisa terdeteksi lebih awal sebelum jadi masalah di tangan pelanggan.
+
+Prinsip dasar pengelolaan stok di atas — minimum stock per varian, pencatatan yang konsisten, stock opname rutin — berlaku juga untuk bahan baku UMKM secara umum. Kalau ingin melihat gambaran lebih lengkap, baca [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi).
 MD,
             ],
             [
@@ -635,6 +655,8 @@ Kesalahan paling sering: menyamakan tarif untuk semua tingkat kesulitan servis, 
 Tinjau ulang tarif setiap kali ada kenaikan signifikan pada harga bahan pendukung atau upah tenaga kerja. Untuk usaha yang bahan pendukungnya sering naik-turun harga, meninjau tarif tiap 2-3 bulan lebih aman daripada menunggu sampai terasa rugi baru disadari.
 
 Untuk kategori usaha jasa, Fabriku menyediakan katalog layanan tanpa perlu modul material atau produksi, lengkap dengan pemetaan bahan pendukung per layanan yang otomatis terpotong dari stok setiap kali transaksi servis selesai — jadi biaya bahan pendukung tidak lagi terlewat dari perhitungan.
+
+Logika menghitung komponen biaya di atas sebenarnya sama dengan cara menghitung HPP produk fisik, hanya komponennya yang berbeda — lihat [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm) untuk pembahasan yang lebih umum.
 MD,
             ],
             [
@@ -696,6 +718,8 @@ Dari tabel ini, piutang Bu Sari yang paling mendesak ditagih karena sudah lewat 
 Kesalahan paling umum adalah tidak mencatat piutang sama sekali secara terpisah, melainkan mencampurnya dengan catatan omzet biasa — sehingga pemilik usaha baru sadar ada piutang menumpuk setelah kas benar-benar terasa seret. Kesalahan lain adalah menunda penagihan karena sungkan, padahal semakin lama ditunda, semakin besar kemungkinan piutang itu berubah jadi piutang macet yang sulit ditagih sama sekali.
 
 Fabriku mencatat setiap pembayaran sebagai entri di ledger pesanan, sehingga status pembayaran (lunas, sebagian, belum bayar) dan sisa piutang tiap pelanggan otomatis terlihat tanpa perlu rekap manual terpisah.
+
+Piutang yang menumpuk sering lebih terasa di usaha yang jualan lewat banyak channel sekaligus, karena syarat pembayaran tiap channel bisa berbeda — lihat [cara mengelola pesanan online dan offline sekaligus](/blog/cara-mengelola-pesanan-online-offline-sekaligus) untuk gambaran lebih lengkap soal ini.
 MD,
             ],
             [
