@@ -55,30 +55,9 @@ class AdminPaymentController extends Controller
         ]);
     }
 
-    public function approve(SubscriptionPayment $payment)
+    public function approve(SubscriptionPayment $payment, \App\Services\Subscription\SubscriptionService $subscriptionService)
     {
-        $payment->load('tenant');
-
-        DB::transaction(function () use ($payment) {
-            // Update Payment
-            $payment->update([
-                'status' => 'approved',
-                'admin_id' => auth()->id(),
-            ]);
-
-            // Update Tenant
-            $tenant = $payment->tenant;
-
-            $currentExpiry = $tenant->subscription_expires_at && $tenant->subscription_expires_at->isFuture()
-                ? $tenant->subscription_expires_at
-                : now();
-
-            $tenant->update([
-                'subscription_plan' => 'full',
-                'subscription_expires_at' => $currentExpiry->addMonths($payment->duration_months),
-                'is_active' => true,
-            ]);
-        });
+        $subscriptionService->activateSubscription($payment, auth()->id());
 
         return redirect()->back()->with('success', 'Pembayaran disetujui. Subscription tenant diperpanjang.');
     }

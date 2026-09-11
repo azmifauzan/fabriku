@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\PaymentProofUploaded;
 use App\Models\SubscriptionPayment;
 use App\Models\SystemSetting;
+use App\Services\Payment\SumopodService;
+use App\Services\Subscription\SubscriptionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -14,7 +15,6 @@ class SubscriptionController extends Controller
     {
         $tenant = auth()->user()->tenant;
         $settings = SystemSetting::getAllForTenant(null);
-
         $pendingPayment = SubscriptionPayment::where('tenant_id', $tenant->id)
             ->where('status', 'pending')
             ->latest()
@@ -33,29 +33,47 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, SubscriptionService $subscriptionService, SumopodService $sumopodService)
     {
         $request->validate([
             'plan_type' => 'required|in:monthly,yearly',
-            'proof' => 'required|image|max:2048', // 2MB max
-            'amount' => 'required|numeric',
+            'payment_method' => 'required|in:sumopod',
         ]);
 
+        // Server-calculated pricing — do not trust client-submitted amount
+        $serverAmount = $subscriptionService->getPlanPrice($request->plan_type);
+        $durationMonths = $subscriptionService->getPlanDurationMonths($request->plan_type);
         $tenantId = auth()->user()->tenant_id;
-        $path = $request->file('proof')->store("tenants/{$tenantId}/payment-proofs", config('filesystems.uploads_disk', 'fabriku_s3'));
 
         $payment = SubscriptionPayment::create([
             'tenant_id' => $tenantId,
-            'amount' => $request->amount,
-            'proof_path' => $path,
+            'amount' => $serverAmount,
+            'proof_path' => null,
             'status' => 'pending',
             'plan_type' => $request->plan_type,
-            'duration_months' => $request->plan_type === 'yearly' ? 12 : 1,
+            'duration_months' => $durationMonths,
+            'payment_method' => 'sumopod',
+            'provider' => 'sumopod',
         ]);
 
-        // Notify admin via Telegram
-        event(new PaymentProofUploaded($payment));
+        $orderId = 'FAB-SUB-'.$payment->id;
+        $payment->update(['provider_order_id' => $orderId]);
+        $sumopodPayment = $sumopodService->createPayment([
+            'order_id' => $orderId,
+            'amount' => $serverAmount,
+            'success_return_url' => route('subscription.index'),
+            'cancel_return_url' => route('subscription.index'),
+        ]);
 
-        return redirect()->back()->with('success', 'Bukti pembayaran berhasil diupload. Mohon tunggu verifikasi admin.');
+        $payment->update([
+            'provider_payment_id' => $sumopodPayment['payment_id'],
+            'payment_url' => $sumopodPayment['payment_link_url'],
+        ]);
+
+        if ($request->wantsJson() || $request->header('X-Inertia')) {
+            return Inertia::location($sumopodPayment['payment_link_url']);
+        }
+
+        return redirect()->away($sumopodPayment['payment_link_url']);
     }
 }
