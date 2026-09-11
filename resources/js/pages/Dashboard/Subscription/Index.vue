@@ -13,12 +13,12 @@ const props = defineProps<{
     server_time: string;
 }>();
 
-const { showSuccess, showError } = useSweetAlert();
+const { showError } = useSweetAlert();
 
 const form = useForm({
     plan_type: 'monthly', // monthly, yearly
+    payment_method: 'sumopod',
     amount: props.settings.membership_price_monthly || 25000,
-    proof: null as File | null,
 });
 
 const isExpired = computed(() => {
@@ -38,12 +38,8 @@ const handlePlanChange = () => {
 const submit = () => {
     form.post(store(), {
         preserveScroll: true,
-        onSuccess: () => {
-            form.reset('proof');
-            showSuccess('Berhasil!', 'Bukti pembayaran berhasil dikirim. Menunggu konfirmasi admin.');
-        },
         onError: () => {
-            showError('Gagal!', 'Terjadi kesalahan saat mengirim bukti pembayaran');
+            showError('Gagal!', 'Pembayaran belum dapat diproses. Silakan coba lagi.');
         },
     });
 };
@@ -128,41 +124,26 @@ const formatDate = (date: string) => {
                             <div>
                                 <h4 class="font-bold text-yellow-800">Pembayaran Sedang Diproses</h4>
                                 <p class="text-sm text-yellow-700">
-                                    Kami sedang memverifikasi bukti pembayaran Anda senilai
-                                    <strong>{{ formatCurrency(pendingPayment.amount) }}</strong
-                                    >. Mohon tunggu maksimal 1x24 jam.
+                                    Pembayaran QRIS senilai <strong>{{ formatCurrency(pendingPayment.amount) }}</strong> belum selesai.
                                 </p>
+                                <a
+                                    v-if="pendingPayment.payment_url"
+                                    :href="pendingPayment.payment_url"
+                                    class="mt-3 inline-flex min-h-11 items-center rounded-lg bg-yellow-800 px-4 py-2 text-sm font-semibold text-white hover:bg-yellow-900 focus:ring-2 focus:ring-yellow-700 focus:ring-offset-2 focus:outline-none"
+                                >
+                                    Lanjutkan pembayaran QRIS
+                                </a>
                             </div>
                         </div>
                     </div>
 
                     <div v-else class="grid grid-cols-1 gap-8 md:grid-cols-2">
-                        <!-- Info Rekening -->
                         <div>
                             <h4 class="mb-3 font-medium text-gray-700">Info Pembayaran</h4>
 
-                            <!-- Multiple Bank Accounts -->
-                            <div v-if="settings.bank_accounts && settings.bank_accounts.length > 0" class="space-y-3">
-                                <div
-                                    v-for="(bank, index) in settings.bank_accounts"
-                                    :key="index"
-                                    class="rounded-xl border border-indigo-100 bg-indigo-50 p-4"
-                                >
-                                    <p class="mb-1 text-sm text-gray-500">Bank Transfer</p>
-                                    <p class="text-xl font-bold text-indigo-900">{{ bank.bank_name }}</p>
-                                    <p class="my-2 font-mono text-2xl select-all">{{ bank.account_number }}</p>
-                                    <p class="text-sm text-gray-600">a.n {{ bank.account_holder }}</p>
-                                </div>
-                            </div>
-                            <!-- Fallback for old single bank format -->
-                            <div v-else-if="settings.bank_name" class="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
-                                <p class="mb-1 text-sm text-gray-500">Bank Transfer</p>
-                                <p class="text-xl font-bold text-indigo-900">{{ settings.bank_name }}</p>
-                                <p class="my-2 font-mono text-2xl select-all">{{ settings.account_number }}</p>
-                                <p class="text-sm text-gray-600">a.n {{ settings.account_holder }}</p>
-                            </div>
-                            <div v-else class="rounded-xl border border-gray-200 bg-gray-50 p-4 text-gray-500">
-                                <p>Rekening pembayaran belum dikonfigurasi. Silakan hubungi admin.</p>
+                            <div class="rounded-xl border border-purple-200 bg-purple-50 p-4 text-purple-950">
+                                <p class="font-semibold">QRIS via SumoPod</p>
+                                <p class="mt-1 text-sm">Setelah melanjutkan, pindai QRIS dan status membership akan diperbarui otomatis.</p>
                             </div>
 
                             <div class="mt-4 space-y-2">
@@ -192,11 +173,10 @@ const formatDate = (date: string) => {
                             </div>
                         </div>
 
-                        <!-- Upload Form -->
                         <div>
                             <form @submit.prevent="submit" class="space-y-4">
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Total Transfer</label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Total Pembayaran</label>
                                     <input
                                         type="text"
                                         :value="formatCurrency(form.amount)"
@@ -205,23 +185,12 @@ const formatDate = (date: string) => {
                                     />
                                 </div>
 
-                                <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Upload Bukti Transfer</label>
-                                    <input
-                                        type="file"
-                                        @input="form.proof = ($event.target as HTMLInputElement).files?.[0] || null"
-                                        accept="image/*"
-                                        class="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 file:mr-4 file:rounded-md file:border-0 file:bg-purple-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-purple-700 hover:file:bg-purple-100 focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:file:bg-purple-900/30 dark:file:text-purple-400 dark:hover:file:bg-purple-900/50"
-                                    />
-                                    <p v-if="form.errors.proof" class="mt-1 text-sm text-red-600">{{ form.errors.proof }}</p>
-                                </div>
-
                                 <button
                                     type="submit"
                                     :disabled="form.processing"
-                                    class="flex w-full justify-center rounded-lg border border-transparent bg-purple-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-purple-600 dark:hover:bg-purple-700"
+                                    class="flex min-h-11 w-full justify-center rounded-lg border border-transparent bg-purple-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-purple-600 dark:hover:bg-purple-700"
                                 >
-                                    {{ form.processing ? 'Mengupload...' : 'Konfirmasi Pembayaran' }}
+                                    {{ form.processing ? 'Memproses...' : 'Bayar dengan QRIS SumoPod' }}
                                 </button>
                             </form>
                         </div>
@@ -269,7 +238,7 @@ const formatDate = (date: string) => {
                                             :class="{
                                                 'bg-yellow-100 text-yellow-800': item.status === 'pending',
                                                 'bg-green-100 text-green-800': item.status === 'approved',
-                                                'bg-red-100 text-red-800': item.status === 'rejected',
+                                                'bg-red-100 text-red-800': ['rejected', 'failed', 'expired'].includes(item.status),
                                             }"
                                         >
                                             {{ item.status }}

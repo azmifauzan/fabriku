@@ -16,6 +16,14 @@ class SubscriptionPayment extends Model
         'rejection_reason',
         'plan_type',
         'duration_months',
+        'payment_method',
+        'provider',
+        'provider_order_id',
+        'provider_payment_id',
+        'payment_url',
+        'provider_payload',
+        'event_id',
+        'paid_at',
     ];
 
     protected $appends = ['proof_url'];
@@ -25,6 +33,8 @@ class SubscriptionPayment extends Model
         return [
             'amount' => 'decimal:2',
             'duration_months' => 'integer',
+            'provider_payload' => 'array',
+            'paid_at' => 'datetime',
         ];
     }
 

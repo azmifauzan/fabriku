@@ -1,12 +1,9 @@
 <?php
 
 use App\Models\Material;
-use App\Models\SubscriptionPayment;
 use App\Models\SystemSetting;
 use App\Models\Tenant;
 use App\Models\User;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 describe('Subscription Management Integration', function () {
     beforeEach(function () {
@@ -54,53 +51,22 @@ describe('Subscription Management Integration', function () {
             ->assertSee('Subscription');
     });
 
-    it('handles monthly subscription payment submission with proof', function () {
-        Storage::fake(config('filesystems.uploads_disk', 'fabriku_s3'));
-
-        $response = $this->actingAs($this->user)
+    it('rejects manual subscription payments', function () {
+        $this->actingAs($this->user)
             ->post(route('subscription.store'), [
                 'plan_type' => 'monthly',
-                'amount' => 25000,
-                'proof' => UploadedFile::fake()->image('bukti-transfer.jpg'),
-            ]);
+                'payment_method' => 'manual',
+            ])
+            ->assertSessionHasErrors('payment_method');
 
-        $response->assertRedirect();
-
-        $payment = SubscriptionPayment::where('tenant_id', $this->tenant->id)->first();
-
-        expect($payment)->not->toBeNull();
-        expect((float) $payment->amount)->toBe(25000.0);
-        expect($payment->status)->toBe('pending');
-        expect($payment->plan_type)->toBe('monthly');
-        expect($payment->duration_months)->toBe(1);
-        expect($payment->proof_path)->not->toBeNull();
-    });
-
-    it('handles yearly subscription payment submission', function () {
-        Storage::fake(config('filesystems.uploads_disk', 'fabriku_s3'));
-
-        $response = $this->actingAs($this->user)
-            ->post(route('subscription.store'), [
-                'plan_type' => 'yearly',
-                'amount' => 350000,
-                'proof' => UploadedFile::fake()->image('bukti-transfer.jpg'),
-            ]);
-
-        $response->assertRedirect();
-
-        $payment = SubscriptionPayment::where('tenant_id', $this->tenant->id)->first();
-
-        expect($payment)->not->toBeNull();
-        expect((float) $payment->amount)->toBe(350000.0);
-        expect($payment->plan_type)->toBe('yearly');
-        expect($payment->duration_months)->toBe(12);
+        $this->assertDatabaseCount('subscription_payments', 0);
     });
 
     it('validates subscription payment required fields', function () {
         $response = $this->actingAs($this->user)
             ->post(route('subscription.store'), []);
 
-        $response->assertSessionHasErrors(['plan_type', 'proof', 'amount']);
+        $response->assertSessionHasErrors(['plan_type', 'payment_method']);
     });
 
     it('allows viewing pages in read-only mode when expired', function () {
