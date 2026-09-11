@@ -65,27 +65,28 @@ class InternalSumopodWebhookController extends Controller
         $eventType = $payload['event_type'] ?? null;
         $data = $payload['data'] ?? [];
 
-        if (! $eventType || ! isset($data['order_id'], $data['payment_id'])) {
+        if (! is_string($eventType) || ! in_array($eventType, ['payment.completed', 'payment.failed', 'payment.expired'], true)
+            || ! is_string($data['order_id'] ?? null) || ! is_string($data['payment_id'] ?? null)
+            || ! is_int($data['amount'] ?? null) || $data['amount'] <= 0) {
             return response()->json(['error' => 'Missing payload fields'], 422);
         }
 
         $orderId = $data['order_id'];
         $paymentId = $data['payment_id'];
-        $amount = (int) ($data['amount'] ?? 0);
+        $amount = $data['amount'];
 
         // 3. Match prefix FAB-SUB-{reference}
         if (! str_starts_with($orderId, 'FAB-SUB-')) {
             return response()->json(['error' => 'Invalid order prefix for Fabriku'], 400);
         }
 
-        $reference = substr($orderId, strlen('FAB-SUB-'));
-
         // 4. Transaction & row lock
-        return DB::transaction(function () use ($reference, $orderId, $paymentId, $amount, $eventType, $payload, $webhookId, $subscriptionService): JsonResponse {
+        return DB::transaction(function () use ($orderId, $paymentId, $amount, $eventType, $payload, $webhookId, $subscriptionService): JsonResponse {
             /** @var SubscriptionPayment|null $payment */
             $payment = SubscriptionPayment::query()
-                ->where('id', is_numeric($reference) ? (int) $reference : 0)
-                ->orWhere('provider_order_id', $orderId)
+                ->where('payment_method', 'sumopod')
+                ->where('provider', 'sumopod')
+                ->where('provider_order_id', $orderId)
                 ->lockForUpdate()
                 ->first();
 

@@ -52,6 +52,11 @@ class SumopodService
         }
 
         $data = $response->json();
+        if (! is_array($data)
+            || ! is_string($data['payment_id'] ?? null) || $data['payment_id'] === ''
+            || ! is_string($data['payment_link_url'] ?? null) || $data['payment_link_url'] === '') {
+            throw new RuntimeException('Respons payment Sumopod tidak valid.');
+        }
 
         return [
             'payment_id' => $data['payment_id'],
