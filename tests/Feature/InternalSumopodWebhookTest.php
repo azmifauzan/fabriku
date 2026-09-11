@@ -230,3 +230,26 @@ test('internal sumopod webhook marks payment failed on payment.failed', function
     expect($payment->status)->toBe('failed');
     expect($this->tenant->fresh()->is_active)->toBeFalse();
 });
+
+test('internal sumopod webhook cannot mutate a manual payment', function () {
+    $payment = SubscriptionPayment::create([
+        'tenant_id' => $this->tenant->id,
+        'amount' => 25000,
+        'status' => 'pending',
+        'plan_type' => 'monthly',
+        'duration_months' => 1,
+        'payment_method' => 'manual',
+        'provider_order_id' => 'FAB-SUB-MANUAL',
+    ]);
+    $payload = [
+        'event_type' => 'payment.failed',
+        'data' => ['payment_id' => 'pay-manual', 'order_id' => 'FAB-SUB-MANUAL', 'amount' => 25000],
+    ];
+    $rawBody = json_encode($payload);
+    $headers = generateFabrikuHeaders($this->internalSecret, 'msg_fab_manual', time(), 'live', $rawBody);
+
+    $this->call('POST', '/internal/webhooks/sumopod', [], [], [], $this->transformHeadersToServerVars($headers), $rawBody)
+        ->assertStatus(404);
+
+    expect($payment->fresh()->status)->toBe('pending');
+});
