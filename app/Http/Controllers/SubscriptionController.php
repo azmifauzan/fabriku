@@ -68,6 +68,11 @@ class SubscriptionController extends Controller
         $payment->update([
             'provider_payment_id' => $sumopodPayment['payment_id'],
             'payment_url' => $sumopodPayment['payment_link_url'],
+            // SumoPod's own gross amount at creation time (differs from `amount` when
+            // "charge fee to customer" is on) — the webhook is verified against this, not
+            // `amount`, since that setting can make them diverge legitimately.
+            'provider_amount' => $sumopodPayment['amount'] ?? null,
+            'provider_fee' => $sumopodPayment['fee'] ?? null,
         ]);
 
         if ($request->wantsJson() || $request->header('X-Inertia')) {

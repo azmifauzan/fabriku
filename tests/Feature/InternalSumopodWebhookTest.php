@@ -178,6 +178,82 @@ test('internal sumopod webhook rejects amount mismatch with 422 in fabriku', fun
     expect($this->tenant->fresh()->is_active)->toBeFalse();
 });
 
+test('internal sumopod webhook accepts gross amount when charge-fee-to-customer diverges from net amount', function () {
+    // `amount` is the net/business amount (25000); `provider_amount` is SumoPod's own gross
+    // amount captured at payment-creation time (25475, when "charge fee to customer" is on).
+    $payment = SubscriptionPayment::create([
+        'tenant_id' => $this->tenant->id,
+        'amount' => 25000,
+        'provider_amount' => 25475,
+        'provider_fee' => 475,
+        'status' => 'pending',
+        'plan_type' => 'monthly',
+        'duration_months' => 1,
+        'payment_method' => 'sumopod',
+        'provider' => 'sumopod',
+        'provider_order_id' => 'FAB-SUB-107',
+        'provider_payment_id' => 'pay-fab-uuid-007',
+    ]);
+
+    $payload = [
+        'event_type' => 'payment.completed',
+        'data' => [
+            'payment_id' => 'pay-fab-uuid-007',
+            'order_id' => 'FAB-SUB-107',
+            'amount' => 25475,
+            'fee' => 475,
+            'net_amount' => 25000,
+            'status' => 'completed',
+        ],
+    ];
+
+    $rawBody = json_encode($payload);
+    $headers = generateFabrikuHeaders($this->internalSecret, 'msg_fab_007', time(), 'live', $rawBody);
+
+    $this->call('POST', '/internal/webhooks/sumopod', [], [], [], $this->transformHeadersToServerVars($headers), $rawBody)
+        ->assertStatus(200)
+        ->assertJson(['ok' => true, 'status' => 'approved']);
+
+    $payment->refresh();
+    expect($payment->status)->toBe('approved');
+});
+
+test('internal sumopod webhook still rejects a tampered amount when provider_amount is set', function () {
+    $payment = SubscriptionPayment::create([
+        'tenant_id' => $this->tenant->id,
+        'amount' => 25000,
+        'provider_amount' => 25475,
+        'provider_fee' => 475,
+        'status' => 'pending',
+        'plan_type' => 'monthly',
+        'duration_months' => 1,
+        'payment_method' => 'sumopod',
+        'provider' => 'sumopod',
+        'provider_order_id' => 'FAB-SUB-108',
+        'provider_payment_id' => 'pay-fab-uuid-008',
+    ]);
+
+    $payload = [
+        'event_type' => 'payment.completed',
+        'data' => [
+            'payment_id' => 'pay-fab-uuid-008',
+            'order_id' => 'FAB-SUB-108',
+            'amount' => 999999, // tampered, matches neither amount nor provider_amount
+            'status' => 'completed',
+        ],
+    ];
+
+    $rawBody = json_encode($payload);
+    $headers = generateFabrikuHeaders($this->internalSecret, 'msg_fab_008', time(), 'live', $rawBody);
+
+    $this->call('POST', '/internal/webhooks/sumopod', [], [], [], $this->transformHeadersToServerVars($headers), $rawBody)
+        ->assertStatus(422)
+        ->assertJson(['error' => 'Amount mismatch']);
+
+    $payment->refresh();
+    expect($payment->status)->toBe('pending');
+});
+
 test('internal sumopod webhook rejects environment mismatch with 403 in fabriku', function () {
     $payload = [
         'event_type' => 'payment.completed',

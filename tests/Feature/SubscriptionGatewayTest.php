@@ -32,6 +32,8 @@ class SubscriptionGatewayTest extends TestCase
                 'payment_id' => 'pay-fab-gateway-123',
                 'payment_link_url' => 'https://pay.sumopod.com/checkout/123',
                 'status' => 'pending',
+                'amount' => 25175,
+                'fee' => 175,
             ]);
 
         $this->app->instance(SumopodService::class, $mockSumopod);
@@ -50,6 +52,8 @@ class SubscriptionGatewayTest extends TestCase
             'payment_method' => 'sumopod',
             'provider' => 'sumopod',
             'provider_payment_id' => 'pay-fab-gateway-123',
+            'provider_amount' => 25175,
+            'provider_fee' => 175,
             'status' => 'pending',
         ]);
     }
