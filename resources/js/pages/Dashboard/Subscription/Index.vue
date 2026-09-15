@@ -142,7 +142,7 @@ const formatDate = (date: string) => {
                             <h4 class="mb-3 font-medium text-gray-700">Info Pembayaran</h4>
 
                             <div class="rounded-xl border border-purple-200 bg-purple-50 p-4 text-purple-950">
-                                <p class="font-semibold">QRIS via SumoPod</p>
+                                <p class="font-semibold">QRIS</p>
                                 <p class="mt-1 text-sm">Setelah melanjutkan, pindai QRIS dan status membership akan diperbarui otomatis.</p>
                             </div>
 
@@ -190,7 +190,7 @@ const formatDate = (date: string) => {
                                     :disabled="form.processing"
                                     class="flex min-h-11 w-full justify-center rounded-lg border border-transparent bg-purple-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-purple-600 dark:hover:bg-purple-700"
                                 >
-                                    {{ form.processing ? 'Memproses...' : 'Bayar dengan QRIS SumoPod' }}
+                                    {{ form.processing ? 'Memproses...' : 'Bayar dengan QRIS' }}
                                 </button>
                             </form>
                         </div>
