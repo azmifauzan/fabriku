@@ -106,10 +106,14 @@ class InternalSumopodWebhookController extends Controller
                 return response()->json(['error' => 'Payment ID mismatch'], 422);
             }
 
-            // 5. Compare amount strictly against payment amount
-            if ($amount !== (int) $payment->amount) {
+            // 5. Compare amount strictly against SumoPod's own creation-time gross amount
+            // (falls back to `amount` for payments created before this was captured). Never
+            // compare against `amount` alone: SumoPod's "charge fee to customer" setting
+            // makes the webhook's gross amount legitimately exceed the net `amount`.
+            $expectedAmount = $payment->provider_amount ?? (int) $payment->amount;
+            if ($amount !== $expectedAmount) {
                 Log::error('Fabriku sumopod webhook: amount mismatch', [
-                    'expected' => (int) $payment->amount,
+                    'expected' => $expectedAmount,
                     'received' => $amount,
                 ]);
 

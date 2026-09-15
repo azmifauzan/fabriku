@@ -22,7 +22,7 @@ class SumopodService
      * Create a payment link for a subscription.
      *
      * @param  array{order_id: string, amount: int, success_return_url?: string, cancel_return_url?: string}  $params
-     * @return array{payment_id: string, payment_link_url: string, status: string}
+     * @return array{payment_id: string, payment_link_url: string, status: string, amount: ?int, fee: ?int}
      */
     public function createPayment(array $params): array
     {
@@ -62,6 +62,8 @@ class SumopodService
             'payment_id' => $data['payment_id'],
             'payment_link_url' => $data['payment_link_url'],
             'status' => $data['status'] ?? 'pending',
+            'amount' => is_int($data['amount'] ?? null) ? $data['amount'] : null,
+            'fee' => is_int($data['fee'] ?? null) ? $data['fee'] : null,
         ];
     }
 }

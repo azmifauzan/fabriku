@@ -20,6 +20,8 @@ class SubscriptionPayment extends Model
         'provider',
         'provider_order_id',
         'provider_payment_id',
+        'provider_amount',
+        'provider_fee',
         'payment_url',
         'provider_payload',
         'event_id',
@@ -32,6 +34,8 @@ class SubscriptionPayment extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'provider_amount' => 'integer',
+            'provider_fee' => 'integer',
             'duration_months' => 'integer',
             'provider_payload' => 'array',
             'paid_at' => 'datetime',
