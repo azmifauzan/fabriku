@@ -163,5 +163,5 @@ This project has Laravel Boost (`laravel/boost`) installed. When available, pref
 ## Demo accounts (dev)
 
 Tenant users (`/login`): `admin@konveksi.com`, `admin@kuemama.com`, `admin@crafty.com`, `admin@glowbeauty.com`, `admin@tokoserbaada.com` (retail), `admin@homemade.com` (homemade/produksi rumahan), `admin@bengkel.com` (service/jasa) — all password `password`.
-Super admin (`/admin/login`): `admin@fabriku.com` / `password`.
+Super admin (`/admin/login`): `admin@fabriku.id` / `password`.
 Demo data auto-resets hourly via scheduler.
