@@ -24,10 +24,10 @@ const props = withDefaults(
 
 const description = 'Fabriku membantu UMKM mengelola bahan baku, produksi, stok, penjualan, dan laporan dalam satu aplikasi berbasis web.';
 
-const ogImage = computed(() => new URL('/images/fabriku-word.png', props.canonical ?? 'https://fabriku.web.id').toString());
+const ogImage = computed(() => new URL('/images/fabriku-word.png', props.canonical ?? 'https://fabriku.id').toString());
 
 const jsonLd = computed(() => {
-    const origin = props.canonical ?? 'https://fabriku.web.id';
+    const origin = props.canonical ?? 'https://fabriku.id';
 
     return [
         {

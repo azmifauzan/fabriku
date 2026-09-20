@@ -136,12 +136,12 @@ sudo docker compose exec fabriku tail -100 storage/logs/laravel.log
 curl -sS -o /dev/null -w "%{http_code}\n" http://localhost/
 
 # Hit dari luar via domain (APP_URL)
-curl -sS -o /dev/null -w "%{http_code}\n" https://fabriku.web.id/
+curl -sS -o /dev/null -w "%{http_code}\n" https://fabriku.id/
 ```
 
 Aplikasi dianggap **aman** bila:
 - `docker compose ps` → status `Up (healthy)`.
-- `curl` ke `https://fabriku.web.id/` return `200`.
+- `curl` ke `https://fabriku.id/` return `200`.
 - `storage/logs/laravel.log` tidak ada `ERROR`/exception baru sejak deploy (atau file belum ada sama sekali — berarti belum ada error).
 - Queue worker, scheduler, & SSR (Supervisor di dalam container) tetap jalan — cek `sudo docker compose exec fabriku ps aux` (harus ada proses `artisan queue:work`, `artisan schedule:work`, dan `artisan inertia:start-ssr`).
 
@@ -159,9 +159,9 @@ halaman jadi sama. Tidak ada error yang terlihat, jadi wajib dicek manual tiap d
 sudo docker compose exec fabriku pgrep -af "inertia:start-ssr"
 
 # HTML server sudah lengkap (semua harus >= 1, bukan 0)
-curl -s https://fabriku.web.id/ | grep -c '<h1'
-curl -s https://fabriku.web.id/ | grep -c 'rel="canonical"'
-curl -s https://fabriku.web.id/blog | grep -c '<h1'
+curl -s https://fabriku.id/ | grep -c '<h1'
+curl -s https://fabriku.id/ | grep -c 'rel="canonical"'
+curl -s https://fabriku.id/blog | grep -c '<h1'
 
 # Log SSR kalau ada yang aneh
 sudo docker compose exec fabriku tail -50 /var/log/supervisor/inertia-ssr.log

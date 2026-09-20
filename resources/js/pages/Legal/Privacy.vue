@@ -13,7 +13,7 @@ defineProps<{ canonical: string }>();
             <h2>1. Pendahuluan</h2>
             <p>
                 Kebijakan Privasi ini menjelaskan bagaimana Fabriku ("kami") mengumpulkan, menggunakan, menyimpan, dan melindungi data Anda saat
-                menggunakan aplikasi manajemen produksi dan penjualan Fabriku di fabriku.web.id. Dengan menggunakan Fabriku, Anda menyetujui praktik
+                menggunakan aplikasi manajemen produksi dan penjualan Fabriku di fabriku.id. Dengan menggunakan Fabriku, Anda menyetujui praktik
                 yang dijelaskan di halaman ini.
             </p>
         </section>
@@ -109,7 +109,7 @@ defineProps<{ canonical: string }>();
             <h2>10. Kontak</h2>
             <p>
                 Pertanyaan seputar privasi dan data Anda dapat disampaikan ke
-                <a href="mailto:hello@fabriku.web.id">hello@fabriku.web.id</a>.
+                <a href="mailto:hello@fabriku.id">hello@fabriku.id</a>.
             </p>
         </section>
     </LegalLayout>

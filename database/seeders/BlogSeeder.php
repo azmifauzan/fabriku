@@ -22,7 +22,7 @@ class BlogSeeder extends Seeder
     {
         $this->call(AdminUserSeeder::class);
 
-        $author = AdminUser::where('email', 'admin@fabriku.web.id')->firstOrFail();
+        $author = AdminUser::where('email', 'admin@fabriku.id')->firstOrFail();
 
         $categories = collect([
             'Manajemen Stok' => 'manajemen-stok',
