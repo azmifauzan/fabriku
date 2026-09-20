@@ -28,6 +28,14 @@ const schemas = computed(() => {
     const list = Array.isArray(props.jsonLd) ? props.jsonLd : [props.jsonLd];
     return list.map((schema) => JSON.stringify(schema).replace(/</g, '\\u003c'));
 });
+
+// GA4 Enhanced Measurement's history-change detection handles page_view on
+// Inertia's client-side navigations between public pages, so gtag only needs
+// initializing once (head-key keeps it from re-running on every navigation).
+const gaMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined;
+const gaInitScript = gaMeasurementId
+    ? `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaMeasurementId}');`
+    : '';
 </script>
 
 <template>
@@ -44,5 +52,8 @@ const schemas = computed(() => {
         <meta head-key="twitter:card" name="twitter:card" :content="ogImage ? 'summary_large_image' : 'summary'" />
 
         <component :is="'script'" v-for="(schema, index) in schemas" :key="index" type="application/ld+json">{{ schema }}</component>
+
+        <component v-if="gaMeasurementId" :is="'script'" head-key="ga4-src" async :src="`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`" />
+        <component v-if="gaMeasurementId" :is="'script'" head-key="ga4-init">{{ gaInitScript }}</component>
     </Head>
 </template>
