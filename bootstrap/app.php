@@ -47,6 +47,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (HttpException $e, Request $request) {
             if ($e->getStatusCode() === 419) {
+                if ($request->header('X-Inertia')) {
+                    return redirect()->route('login')
+                        ->with('error', 'Sesi Anda telah berakhir. Silakan masuk kembali.');
+                }
+
                 if ($request->expectsJson() || $request->ajax()) {
                     return response()->json([
                         'success' => false,
