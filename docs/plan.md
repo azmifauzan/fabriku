@@ -1,5 +1,7 @@
 # Enhancement Plans
 
+> Ekspansi website usaha untuk produk dan jasa, integrasi Satsetui/Repliz, paket pelanggan, dan posisi merek ada di [folder rencana Website Usaha](new-plan/README.md). Semua masih rancangan, bukan status fitur saat ini.
+
 > **Status (Juni 2026)**: Plan A (Retail), Plan B (Homemade), dan Plan C (Service/Jasa — termasuk laporan layanan, staff assignment, consumable auto-deduct) **selesai dan dipindah** ke `docs/current-status.md`. Sales Order CRITICAL #1-3 (Update Status, fix observer `shipped`, edit dikunci ke `draft`) dan HIGH (catatan pembayaran via tabel `payments` + refund saat cancel) **selesai**. Sales Order MEDIUM #1-3 (jatuh tempo/overdue, shipping_cost aktif, auto invoice number) **selesai**. LOW backlog dari `docs/code-review.md` (rename `print()`→`invoice()`, standarisasi `paginate()`, unit test domain logic, refactor query `InventoryItemController`) **selesai**. Suite test lengkap hijau (377 passed, 6 skipped). Sisa backlog di dokumen ini scope-nya lintas kategori / out-of-scope, bukan technical debt.
 
 ---
