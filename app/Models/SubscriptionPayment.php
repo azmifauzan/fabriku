@@ -16,6 +16,12 @@ class SubscriptionPayment extends Model
         'rejection_reason',
         'plan_type',
         'duration_months',
+        'kind',
+        'billing_cycle',
+        'period_start',
+        'period_end',
+        'core_amount',
+        'pro_amount',
         'payment_method',
         'provider',
         'provider_order_id',
@@ -34,9 +40,13 @@ class SubscriptionPayment extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'core_amount' => 'decimal:2',
+            'pro_amount' => 'decimal:2',
             'provider_amount' => 'integer',
             'provider_fee' => 'integer',
             'duration_months' => 'integer',
+            'period_start' => 'datetime',
+            'period_end' => 'datetime',
             'provider_payload' => 'array',
             'paid_at' => 'datetime',
         ];

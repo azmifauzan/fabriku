@@ -21,6 +21,7 @@ class TenantFactory extends Factory
             'name' => fake()->company(),
             'business_category' => fake()->randomElement(['garment', 'food']),
             'subscription_plan' => 'trial',
+            'plan_code' => 'trial',
             'subscription_expires_at' => now()->addDays(30),
             'is_active' => true,
         ];
@@ -39,6 +40,25 @@ class TenantFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'is_active' => true,
             'subscription_expires_at' => now()->subDays(1),
+        ]);
+    }
+
+    public function core(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'plan_code' => 'core',
+            'subscription_plan' => 'full',
+            'subscription_expires_at' => now()->addMonth(),
+        ]);
+    }
+
+    public function pro(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'plan_code' => 'core',
+            'subscription_plan' => 'full',
+            'subscription_expires_at' => now()->addMonth(),
+            'pro_expires_at' => now()->addMonth(),
         ]);
     }
 }
