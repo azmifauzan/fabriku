@@ -21,7 +21,8 @@
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.11",
         "league/flysystem-aws-s3-v3": "3.0",
-        "maatwebsite/excel": "^3.1"
+        "maatwebsite/excel": "^3.1",
+        "symfony/html-sanitizer": "*"
     },
     "require-dev": {
         "laravel/boost": "^1.8",

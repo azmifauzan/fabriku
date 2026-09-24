@@ -72,6 +72,7 @@ return [
                 'require_storage_temp' => false,
                 'enable_purchase_module' => false,
                 'enable_service_module' => false,
+                'enable_business_site' => true,
             ],
         ],
 
@@ -130,6 +131,7 @@ return [
                 'shelf_life_alert_days' => 7, // Alert 7 hari sebelum expired
                 'enable_purchase_module' => false,
                 'enable_service_module' => false,
+                'enable_business_site' => true,
             ],
         ],
 
@@ -183,6 +185,7 @@ return [
                 'require_storage_temp' => false,
                 'enable_purchase_module' => false,
                 'enable_service_module' => false,
+                'enable_business_site' => true,
             ],
         ],
 
@@ -227,6 +230,7 @@ return [
                 'enable_sales_module' => true,
                 'enable_purchase_module' => true,
                 'enable_service_module' => false,
+                'enable_business_site' => true,
                 'track_batch_number' => false,
                 'track_expired_date' => true,
             ],
@@ -286,6 +290,7 @@ return [
                 'require_bpom' => true, // Khusus Indonesia
                 'enable_purchase_module' => false,
                 'enable_service_module' => false,
+                'enable_business_site' => true,
             ],
         ],
 
@@ -335,6 +340,7 @@ return [
                 'enable_sales_module' => true,
                 'enable_purchase_module' => false,
                 'enable_service_module' => false,
+                'enable_business_site' => true,
                 'track_batch_number' => true,
                 'track_expired_date' => true,
             ],
@@ -381,6 +387,7 @@ return [
                 'enable_sales_module' => true,
                 'enable_purchase_module' => true,
                 'enable_service_module' => true,
+                'enable_business_site' => true,
                 'track_batch_number' => false,
                 'track_expired_date' => false,
             ],

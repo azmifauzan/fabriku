@@ -54,6 +54,10 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'main_domain' => env('APP_MAIN_DOMAIN', 'fabriku.id'),
+
+    'storefront_domain' => env('STOREFRONT_DOMAIN', 'fabriku.biz.id'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
