@@ -123,4 +123,29 @@ HTML;
         $this->assertStringContainsString('Dibuat dengan Fabriku', $html);
         $this->assertStringContainsString('Laporkan situs', $html);
     }
+
+    public function test_theme_renderer_deduplicates_unstyled_navigation_slots(): void
+    {
+        $tenant = Tenant::factory()->create(['name' => 'D Garment']);
+        $site = BusinessSite::factory()->create([
+            'tenant_id' => $tenant->id,
+            'slug' => 'd-garment',
+            'mode' => 'produk',
+            'profile' => ['name' => 'D Garment'],
+        ]);
+        $themeVersion = SiteThemeVersion::create([
+            'tenant_id' => $tenant->id,
+            'business_site_id' => $site->id,
+            'source' => 'catalog',
+            'version' => 1,
+            'theme' => [
+                'shell_html' => '<header data-fb-shell="header"><div data-fb-slot="nav"></div><div data-fb-slot="nav"></div></header>',
+            ],
+            'sections' => [],
+        ]);
+
+        $html = app(ThemeRenderer::class)->render($site, $themeVersion, ['page' => 'home', 'errors' => new ViewErrorBag]);
+
+        $this->assertSame(1, substr_count($html, 'aria-label="Navigasi toko"'));
+    }
 }

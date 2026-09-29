@@ -210,13 +210,31 @@ HTML;
             'map',
         ];
 
+        preg_match_all(
+            '/<([a-zA-Z0-9]+)[^>]*data-fb-slot="nav"[^>]*>.*?<\/\1>|<([a-zA-Z0-9]+)[^>]*data-fb-slot="nav"[^>]*\/>/is',
+            $html,
+            $navMatches
+        );
+        $navSlotCount = count($navMatches[0] ?? []);
+        $hasResponsiveNav = collect($navMatches[0] ?? [])->contains(
+            fn (string $slot) => preg_match('/\b(?:hidden|(?:sm|md|lg|xl|2xl):(?:hidden|flex|block))\b/i', $slot) === 1
+        );
+        $navSlotIndex = 0;
+
         return preg_replace_callback(
             '/<([a-zA-Z0-9]+)[^>]*data-fb-slot="([a-zA-Z0-9_-]+)"[^>]*>.*?<\/\1>|<([a-zA-Z0-9]+)[^>]*data-fb-slot="([a-zA-Z0-9_-]+)"[^>]*\/>/is',
-            function ($matches) use ($allowedSlots, $context) {
+            function ($matches) use ($allowedSlots, $context, $navSlotCount, $hasResponsiveNav, &$navSlotIndex) {
                 $slotName = ! empty($matches[2]) ? $matches[2] : (! empty($matches[4]) ? $matches[4] : '');
 
                 if (! in_array($slotName, $allowedSlots, true)) {
                     return '';
+                }
+
+                if ($slotName === 'nav') {
+                    $navSlotIndex++;
+                    if ($navSlotCount > 1 && ! $hasResponsiveNav && $navSlotIndex > 1) {
+                        return '';
+                    }
                 }
 
                 return $this->renderSlot($slotName, $context);
