@@ -15,6 +15,7 @@ class ResolveStorefront
      */
     public function handle(Request $request, Closure $next): Response
     {
+        Storefront::clear();
         $host = strtolower(trim(explode(':', $request->getHost())[0]));
         $storefrontDomain = strtolower(config('app.storefront_domain', 'fabriku.biz.id'));
         $mainDomain = strtolower(config('app.main_domain', 'fabriku.id'));
@@ -30,8 +31,6 @@ class ResolveStorefront
             $slug = substr($host, 0, -strlen('.'.$storefrontDomain));
         } elseif (str_ends_with($host, '.localhost')) {
             $slug = substr($host, 0, -strlen('.localhost'));
-        } elseif ($request->header('X-Storefront-Slug')) {
-            $slug = $request->header('X-Storefront-Slug');
         }
 
         $site = null;
@@ -58,6 +57,14 @@ class ResolveStorefront
             abort(403, 'Situs ini telah dinonaktifkan.');
         }
 
+        if (! $site->isPublished()) {
+            abort(404, 'Toko tidak ditemukan.');
+        }
+
+        if ($site->custom_domain && $site->domain_status === 'active' && $host !== $site->custom_domain) {
+            return redirect()->away('https://'.$site->custom_domain.$request->getRequestUri(), 301);
+        }
+
         // 5. Check tenant existence
         $tenant = $site->tenant;
         if (! $tenant) {
@@ -74,10 +81,11 @@ class ResolveStorefront
 
         $response = $next($request);
 
-        // 7. Public cache header (60 seconds) for successful GET responses
+        // Storefront pages can include session-backed forms and CSRF tokens.
         if ($request->isMethod('GET') && $response->isSuccessful()) {
-            $response->headers->set('Cache-Control', 'public, max-age=60');
+            $response->headers->set('Cache-Control', 'private, no-store, no-cache, must-revalidate');
         }
+        $response->headers->set('Content-Security-Policy', "default-src 'none'; script-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
 
         return $response;
     }

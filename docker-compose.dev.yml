@@ -16,6 +16,10 @@ services:
       - APP_DEBUG=${APP_DEBUG:-true}
       - APP_KEY=${APP_KEY}
       - APP_URL=${APP_URL:-http://localhost:8000}
+      - STOREFRONT_DOMAIN=${STOREFRONT_DOMAIN:-fabriku.biz.id}
+      - CLOUDFLARE_TOKEN=${CLOUDFLARE_TOKEN:-}
+      - CLOUDFLARE_ZONE_ID=${CLOUDFLARE_ZONE_ID:-}
+      - CLOUDFLARE_CNAME_TARGET=${CLOUDFLARE_CNAME_TARGET:-sites.fabriku.biz.id}
       - DB_CONNECTION=pgsql
       - DB_HOST=db
       - DB_PORT=5432

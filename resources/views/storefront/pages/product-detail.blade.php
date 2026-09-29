@@ -57,6 +57,15 @@
             @endif
 
             <div class="mt-auto pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+                @if($status !== 'Habis' && $price > 0 && $site->canAcceptOrders())
+                    <form method="POST" action="/keranjang" class="flex-1 flex gap-2">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <label for="product-quantity" class="sr-only">Jumlah</label>
+                        <input id="product-quantity" name="quantity" type="number" min="1" max="50" value="1" class="w-16 rounded-lg border border-slate-400 px-2 text-center">
+                        <button type="submit" class="flex-1 py-3 px-4 rounded-[var(--fb-radius)] bg-[var(--fb-primary)] text-white font-semibold text-sm focus-visible:outline-2 focus-visible:outline-offset-2">Tambah ke keranjang</button>
+                    </form>
+                @endif
                 <a href="{{ $waUrl }}" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 px-6 rounded-[var(--fb-radius)] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-center text-sm transition shadow-sm flex items-center justify-center gap-2">
                     <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
                         <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.698.055-1.131-.082-.279-.088-.636-.217-1.096-.416-1.954-.844-3.228-2.825-3.326-2.955-.098-.13-1.042-1.385-1.042-2.641 0-1.256.657-1.874.89-2.12.234-.247.512-.309.683-.309.171 0 .343.002.493.009.158.008.371-.06.58.441.217.519.742 1.808.808 1.94.066.133.11.288.022.463-.088.176-.133.287-.263.441-.13.155-.274.346-.391.464-.13.13-.266.272-.115.531.152.259.676 1.112 1.452 1.802.999.889 1.841 1.165 2.1 1.294.26.13.412.115.565-.06.153-.175.657-.765.832-1.028.175-.262.35-.219.589-.13.24.088 1.528.72 1.79.851.262.13.437.195.502.306.066.111.066.645-.078 1.05z"/>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Activity, Building2, ChevronDown, CreditCard, FileText, LayoutDashboard, LogOut, Mail, Menu, Newspaper, Settings, Shield, Users, X } from 'lucide-vue-next';
+import { Activity, Building2, ChevronDown, CreditCard, FileText, Globe2, LayoutDashboard, LogOut, Mail, Menu, Newspaper, Settings, Shield, Users, X } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const page = usePage();
@@ -12,6 +12,7 @@ const userMenuOpen = ref(false);
 const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Tenants', href: '/admin/tenants', icon: Building2 },
+    { name: 'Website', href: '/admin/websites', icon: Globe2 },
     { name: 'Payments', href: '/admin/payments', icon: CreditCard },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Roles', href: '/admin/roles', icon: Shield },

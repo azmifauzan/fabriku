@@ -22,7 +22,6 @@ class HtmlSanitizerService
             ->allowAttribute('data-fb-image', '*')
             ->allowAttribute('data-fb-link', '*')
             ->allowAttribute('class', '*')
-            ->allowAttribute('style', '*')
             ->allowAttribute('id', '*')
             ->allowAttribute('target', ['a'])
             ->allowAttribute('rel', ['a'])

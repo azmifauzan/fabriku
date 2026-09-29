@@ -37,6 +37,7 @@ class SalesOrder extends Model
         'completed_date',
         'notes',
         'shipping_address',
+        'storefront_checkout_key',
     ];
 
     protected function casts(): array
@@ -62,7 +63,7 @@ class SalesOrder extends Model
 
         static::creating(function (self $salesOrder) {
             if (empty($salesOrder->order_number)) {
-                $salesOrder->order_number = self::generateOrderNumber();
+                $salesOrder->order_number = self::generateOrderNumber($salesOrder->tenant_id);
             }
         });
 
@@ -93,12 +94,16 @@ class SalesOrder extends Model
         return $this->hasMany(Payment::class);
     }
 
-    public static function generateOrderNumber(): string
+    public static function generateOrderNumber(?int $tenantId = null): string
     {
+        $tenantId ??= auth()->user()?->tenant_id;
+        if (! $tenantId) {
+            throw new \InvalidArgumentException('Tenant wajib untuk nomor pesanan.');
+        }
         $year = now()->year;
         $lastOrder = self::withoutGlobalScope(TenantScope::class)
             ->withTrashed()
-            ->where('tenant_id', auth()->user()->tenant_id)
+            ->where('tenant_id', $tenantId)
             ->whereYear('created_at', $year)
             ->latest('id')
             ->first();

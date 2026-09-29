@@ -15,6 +15,7 @@ import {
     ShoppingBag,
     ShoppingCart,
     Warehouse,
+    Globe2,
     X,
 } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -101,6 +102,12 @@ const allMenuItems = computed(() => {
             name: 'Dashboard',
             href: retail || hasSimpleProduction ? '/dashboard?view=stats' : '/dashboard',
             icon: Home,
+            permission: null,
+        },
+        {
+            name: 'Website Usaha',
+            href: '/website',
+            icon: Globe2,
             permission: null,
         },
         {

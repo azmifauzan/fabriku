@@ -67,6 +67,8 @@ class SiteProduct extends Model
     public function getStartingPrice(): float
     {
         $minPrice = $this->inventoryItems()
+            ->where('status', 'available')
+            ->whereColumn('current_quantity', '>', 'reserved_quantity')
             ->whereNotNull('selling_price')
             ->where('selling_price', '>', 0)
             ->min('selling_price');
@@ -80,6 +82,8 @@ class SiteProduct extends Model
     public function hasPriceVariation(): bool
     {
         $prices = $this->inventoryItems()
+            ->where('status', 'available')
+            ->whereColumn('current_quantity', '>', 'reserved_quantity')
             ->whereNotNull('selling_price')
             ->distinct()
             ->pluck('selling_price');
@@ -92,7 +96,7 @@ class SiteProduct extends Model
      */
     public function getTotalAvailableStock(): float
     {
-        $items = $this->inventoryItems()->get();
+        $items = $this->inventoryItems()->where('status', 'available')->get();
 
         return (float) $items->sum(function ($item) {
             return max(0, (float) $item->current_quantity - (float) $item->reserved_quantity);

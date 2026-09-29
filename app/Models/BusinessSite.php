@@ -24,6 +24,7 @@ class BusinessSite extends Model
         'profile',
         'seo',
         'status',
+        'setup_completed_at',
         'published_at',
     ];
 
@@ -33,6 +34,7 @@ class BusinessSite extends Model
             'profile' => 'array',
             'seo' => 'array',
             'published_at' => 'datetime',
+            'setup_completed_at' => 'datetime',
         ];
     }
 
