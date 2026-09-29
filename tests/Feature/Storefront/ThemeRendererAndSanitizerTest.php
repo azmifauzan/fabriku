@@ -122,6 +122,8 @@ HTML;
         // Check footer attribution
         $this->assertStringContainsString('Dibuat dengan Fabriku', $html);
         $this->assertStringContainsString('Laporkan situs', $html);
+        $this->assertStringContainsString('hidden md:flex items-center', $html);
+        $this->assertStringContainsString('md:hidden overflow-x-auto', $html);
     }
 
     public function test_theme_renderer_deduplicates_unstyled_navigation_slots(): void
