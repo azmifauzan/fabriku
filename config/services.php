@@ -56,4 +56,10 @@ return [
         'redirect_url' => env('SUMOPOD_REDIRECT_URL'),
     ],
 
+    'cloudflare_storefront' => [
+        'token' => env('CLOUDFLARE_TOKEN'),
+        'zone_id' => env('CLOUDFLARE_ZONE_ID'),
+        'cname_target' => env('CLOUDFLARE_CNAME_TARGET', 'sites.fabriku.biz.id'),
+    ],
+
 ];

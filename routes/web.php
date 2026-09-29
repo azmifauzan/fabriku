@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\Admin\AdminTenantController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminWebsiteController;
 use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\GoogleAuthController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\CampaignUnsubscribeController;
 use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InternalSumopodWebhookController;
 use App\Http\Controllers\InventoryItemCategoryController;
 use App\Http\Controllers\InventoryItemController;
 use App\Http\Controllers\InventoryLocationController;
@@ -44,6 +46,9 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TelegramController;
+use App\Http\Controllers\WebsiteController;
+use App\Http\Controllers\WebsiteDomainController;
+use App\Http\Controllers\WebsiteLeadController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Route;
@@ -95,6 +100,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['auth:admin', AdminMiddleware::class])->group(function () {
         // Dashboard
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('websites', [AdminWebsiteController::class, 'index'])->name('websites.index');
+        Route::post('websites/{site}/status', [AdminWebsiteController::class, 'status'])->name('websites.status');
+        Route::post('website-reports/{report}/status', [AdminWebsiteController::class, 'report'])->name('website-reports.status');
 
         // Tenant Management
         Route::resource('tenants', AdminTenantController::class);
@@ -193,6 +201,19 @@ Route::post('logout', [LoginController::class, 'destroy'])
 // Protected Routes
 Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/website', [WebsiteController::class, 'index'])->name('website.index');
+    Route::post('/website', [WebsiteController::class, 'save'])->name('website.save');
+    Route::post('/website/theme', [WebsiteController::class, 'theme'])->name('website.theme');
+    Route::post('/website/theme/{version}/restore', [WebsiteController::class, 'restoreTheme'])->name('website.theme.restore');
+    Route::post('/website/publish', [WebsiteController::class, 'publish'])->name('website.publish');
+    Route::post('/website/setup/complete', [WebsiteController::class, 'completeSetup'])->name('website.setup.complete');
+    Route::post('/website/products', [WebsiteController::class, 'product'])->name('website.products');
+    Route::post('/website/services/{service}', [WebsiteController::class, 'service'])->name('website.services');
+    Route::post('/website/recipients', [WebsiteController::class, 'recipients'])->name('website.recipients');
+    Route::post('/website/leads/{lead}/status', [WebsiteLeadController::class, 'update'])->name('website.leads.status');
+    Route::post('/website/leads/{lead}/convert', [WebsiteLeadController::class, 'convert'])->name('website.leads.convert');
+    Route::post('/website/domain', [WebsiteDomainController::class, 'save'])->name('website.domain');
+    Route::post('/website/domain/sync', [WebsiteDomainController::class, 'sync'])->name('website.domain.sync');
 
     // Material Management
     Route::resource('materials', MaterialController::class)
@@ -352,5 +373,5 @@ if (app()->environment('local', 'testing')) {
     });
 }
 
-Route::post('internal/webhooks/sumopod', \App\Http\Controllers\InternalSumopodWebhookController::class)
+Route::post('internal/webhooks/sumopod', InternalSumopodWebhookController::class)
     ->name('internal.webhook.sumopod');

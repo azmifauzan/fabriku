@@ -5,6 +5,7 @@ namespace App\Services\Storefront;
 use App\Models\BusinessSite;
 use App\Models\SiteThemeVersion;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Vite;
 
 class ThemeRenderer
 {
@@ -35,9 +36,9 @@ class ThemeRenderer
         $cssBlock = $this->generateCssBlock($cssVars);
 
         // 2. Resolve Shell (Header & Footer) and sanitize
-        $shell = $this->resolveShell($site, $themeVersion, $context);
-        $headerHtml = $this->sanitizer->sanitize($shell['header']);
-        $footerHtml = $this->sanitizer->sanitize($shell['footer']);
+        $shell = $this->resolveShell($site, $themeVersion);
+        $headerHtml = $this->replaceSlots($this->sanitizer->sanitize($shell['header']), $context);
+        $footerHtml = $this->replaceSlots($this->sanitizer->sanitize($shell['footer']), $context);
 
         // 3. Resolve Main Body Content and sanitize
         if ($page === 'home') {
@@ -45,12 +46,21 @@ class ThemeRenderer
         } else {
             $rawContent = $context['page_content'] ?? '';
         }
-        $mainContent = $this->sanitizer->sanitize($rawContent);
+        // Non-home pages are trusted Blade views. Sanitizing them strips CSRF-backed forms.
+        $mainContent = $rawContent;
 
         // 4. Assemble HTML document
         $title = e($context['title'] ?? ($site->profile['name'] ?? $site->tenant->name ?? 'Toko Online'));
-        $description = e($site->profile['description'] ?? 'Selamat datang di toko resmi kami.');
+        $description = e($site->seo['description'] ?? $site->profile['description'] ?? 'Selamat datang di toko resmi kami.');
         $cssPath = $themeVersion?->css_path;
+        $stylesheet = app()->environment('testing') ? '' : '<link rel="stylesheet" href="'.e(Vite::asset('resources/css/storefront.css')).'">';
+        $canonical = e($site->getStorefrontUrl().match ($page) {
+            'products' => '/produk', 'services' => '/layanan', 'cart' => '/keranjang',
+            'product_detail' => '/produk/'.($context['product']->slug ?? ''),
+            'service_detail' => '/layanan/'.($context['service']->slug ?? ''),
+            'privacy' => '/privasi', 'report' => '/lapor',
+            default => '/',
+        });
 
         return <<<HTML
 <!DOCTYPE html>
@@ -60,7 +70,11 @@ class ThemeRenderer
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{$title}</title>
     <meta name="description" content="{$description}">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta property="og:title" content="{$title}">
+    <meta property="og:description" content="{$description}">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="{$canonical}">
+    {$stylesheet}
     {$cssBlock}
     {$this->renderOptionalCssLink($cssPath)}
 </head>
@@ -95,8 +109,8 @@ HTML;
             // Replace text, image, link variables
             $replaced = $this->replaceVariables($rawHtml, $section['variables'] ?? []);
 
-            // Replace slots
-            $replaced = $this->replaceSlots($replaced, $context);
+            // Sanitize merchant HTML before inserting trusted, server-rendered slots.
+            $replaced = $this->replaceSlots($this->sanitizer->sanitize($replaced), $context);
 
             $html .= "\n<!-- Section: {$sectionType} -->\n".$replaced."\n";
         }
@@ -130,8 +144,13 @@ HTML;
     protected function generateCssBlock(array $vars): string
     {
         $cssLines = [];
+        $colorKeys = ['--fb-primary', '--fb-accent', '--fb-bg', '--fb-surface', '--fb-text'];
         foreach ($vars as $key => $val) {
-            $cssLines[] = "        {$key}: {$val};";
+            if (in_array($key, $colorKeys, true) && is_string($val) && preg_match('/^#[0-9a-fA-F]{6}$/', $val)) {
+                $cssLines[] = "        {$key}: {$val};";
+            } elseif ($key === '--fb-radius' && is_string($val) && preg_match('/^(?:0|\d+(?:\.\d+)?(?:px|rem))$/', $val)) {
+                $cssLines[] = "        {$key}: {$val};";
+            }
         }
 
         return "<style>\n    :root {\n".implode("\n", $cssLines)."\n    }\n</style>";
@@ -139,7 +158,7 @@ HTML;
 
     protected function renderOptionalCssLink(?string $cssPath): string
     {
-        if (! $cssPath) {
+        if (! $cssPath || ! str_starts_with($cssPath, '/') || str_starts_with($cssPath, '//') || str_contains($cssPath, '..')) {
             return '';
         }
 
@@ -149,7 +168,7 @@ HTML;
     /**
      * Resolve header and footer shell.
      */
-    protected function resolveShell(BusinessSite $site, ?SiteThemeVersion $themeVersion, array $context): array
+    protected function resolveShell(BusinessSite $site, ?SiteThemeVersion $themeVersion): array
     {
         $shellHtml = $themeVersion?->theme['shell_html'] ?? $this->getDefaultShellHtml($site);
 
@@ -170,8 +189,8 @@ HTML;
         }
 
         return [
-            'header' => $this->replaceSlots($header, $context),
-            'footer' => $this->replaceSlots($footer, $context),
+            'header' => $header,
+            'footer' => $footer,
         ];
     }
 
@@ -284,6 +303,7 @@ HTML;
             <div data-fb-slot="cart-button"></div>
         </div>
     </div>
+    <div class="md:hidden overflow-x-auto border-t border-slate-200 px-4 py-3" data-fb-slot="nav"></div>
 </header>
 HTML;
     }
@@ -304,6 +324,8 @@ HTML;
                 Dibuat dengan Fabriku
             </a>
             <span class="text-slate-300">&bull;</span>
+            <a href="/privasi" class="text-slate-600 hover:underline">Privasi</a>
+            <span class="text-slate-300">&bull;</span>
             <a href="/lapor" class="text-slate-400 hover:text-slate-600 transition">
                 Laporkan situs
             </a>
@@ -316,11 +338,13 @@ HTML;
     /**
      * Fallback sections when no custom sections exist yet.
      */
-    protected function getDefaultSections(BusinessSite $site): array
+    public function getDefaultSections(BusinessSite $site): array
     {
         $mode = $site->mode ?? 'produk';
         $siteName = $site->profile['name'] ?? $site->tenant->name ?? 'Usaha Kami';
         $headline = $site->profile['description'] ?? 'Selamat Datang di Katalog Resmi Kami';
+        $safeSiteName = e($siteName);
+        $safeHeadline = e($headline);
 
         $sections = [];
 
@@ -337,8 +361,8 @@ HTML;
             'html' => <<<HTML
 <section data-fb-section="hero" class="py-16 md:py-24 bg-gradient-to-b from-[var(--fb-surface)] to-[var(--fb-bg)] border-b border-slate-100">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-        <h1 data-fb-text="hero-title" class="text-3xl md:text-5xl font-extrabold tracking-tight text-[var(--fb-text)] mb-4">{$siteName}</h1>
-        <p data-fb-text="hero-subtitle" class="text-base md:text-xl text-slate-600 max-w-2xl mx-auto mb-8">{$headline}</p>
+        <h1 data-fb-text="hero-title" class="text-3xl md:text-5xl font-extrabold tracking-tight text-[var(--fb-text)] mb-4">{$safeSiteName}</h1>
+        <p data-fb-text="hero-subtitle" class="text-base md:text-xl text-slate-600 max-w-2xl mx-auto mb-8">{$safeHeadline}</p>
         <div class="flex flex-wrap items-center justify-center gap-4">
             <div data-fb-slot="whatsapp-button"></div>
         </div>
@@ -417,6 +441,29 @@ HTML
 </section>
 HTML
         ];
+
+        return $sections;
+    }
+
+    public function sectionsForPreset(BusinessSite $site, string $preset): array
+    {
+        $sections = $this->getDefaultSections($site);
+        if ($preset === 'etalase') {
+            $sections[0]['html'] = <<<'HTML'
+<section data-fb-section="hero" class="bg-[var(--fb-primary)] py-16 text-white md:py-24">
+    <div class="mx-auto grid max-w-7xl items-center gap-10 px-4 md:grid-cols-2 md:px-8">
+        <div><p class="mb-4 text-sm font-semibold uppercase tracking-widest">Pilihan usaha lokal</p><h1 data-fb-text="hero-title" class="text-4xl font-bold tracking-tight md:text-6xl">Usaha Kami</h1><p data-fb-text="hero-subtitle" class="mt-5 max-w-xl text-lg">Kenali pilihan kami.</p><div class="mt-7" data-fb-slot="whatsapp-button"></div></div>
+        <div class="rounded-2xl border border-white/30 bg-white/10 p-8"><p class="text-sm uppercase tracking-widest">Langsung dari kami</p><p class="mt-5 text-2xl font-semibold">Temukan yang tepat untuk kebutuhan Anda.</p></div>
+    </div>
+</section>
+HTML;
+        } elseif ($preset === 'studio') {
+            $sections[0]['html'] = <<<'HTML'
+<section data-fb-section="hero" class="border-b border-slate-200 bg-[var(--fb-bg)] py-16 md:py-28">
+    <div class="mx-auto max-w-5xl px-4 md:px-8"><div class="mb-8 h-1 w-16 bg-[var(--fb-accent)]"></div><p class="mb-5 text-sm font-semibold uppercase tracking-widest text-[var(--fb-primary)]">Website resmi</p><h1 data-fb-text="hero-title" class="max-w-4xl text-4xl font-semibold tracking-tight text-[var(--fb-text)] md:text-7xl">Usaha Kami</h1><p data-fb-text="hero-subtitle" class="mt-7 max-w-2xl text-lg text-slate-600">Cerita dan layanan kami.</p><div class="mt-8" data-fb-slot="whatsapp-button"></div></div>
+</section>
+HTML;
+        }
 
         return $sections;
     }

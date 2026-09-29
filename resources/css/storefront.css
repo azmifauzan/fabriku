@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+@source '../views/storefront/**/*.blade.php';
+@source '../../app/Services/Storefront/ThemeRenderer.php';
+
+:root { color-scheme: light; }
+body { margin: 0; }
+button, input, select, textarea { font: inherit; }
+:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }

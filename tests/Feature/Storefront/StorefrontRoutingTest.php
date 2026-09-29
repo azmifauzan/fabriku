@@ -22,7 +22,7 @@ class StorefrontRoutingTest extends TestCase
         $responseWww->assertRedirect('https://fabriku.id');
     }
 
-    public function test_subdomain_resolves_storefront_with_cache_header(): void
+    public function test_subdomain_resolves_storefront_with_private_no_store_header(): void
     {
         $tenant = Tenant::factory()->create(['name' => 'Toko Sepatu Berkah']);
         $site = BusinessSite::factory()->create([
@@ -38,7 +38,7 @@ class StorefrontRoutingTest extends TestCase
         $response = $this->get('http://sepatu-berkah.fabriku.biz.id/');
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'text/html; charset=UTF-8');
-        $response->assertHeader('Cache-Control', 'max-age=60, public');
+        $response->assertHeader('Cache-Control', 'must-revalidate, no-cache, no-store, private');
         $response->assertSee('Toko Sepatu Berkah');
     }
 
@@ -114,6 +114,18 @@ class StorefrontRoutingTest extends TestCase
 
         $response = $this->get('http://toko-nakal.fabriku.biz.id/');
         $response->assertStatus(403);
+    }
+
+    public function test_draft_site_is_not_publicly_accessible(): void
+    {
+        $tenant = Tenant::factory()->create();
+        BusinessSite::factory()->draft()->create([
+            'tenant_id' => $tenant->id,
+            'slug' => 'toko-draft',
+        ]);
+
+        $this->get('http://toko-draft.fabriku.biz.id/')
+            ->assertStatus(404);
     }
 
     public function test_robots_txt_and_sitemap(): void

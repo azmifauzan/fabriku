@@ -8,6 +8,7 @@ use App\Models\Tenant;
 use App\Services\Storefront\HtmlSanitizerService;
 use App\Services\Storefront\ThemeRenderer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\ViewErrorBag;
 use Tests\TestCase;
 
 class ThemeRendererAndSanitizerTest extends TestCase
@@ -82,7 +83,7 @@ HTML;
                     'variables' => [
                         'hero-title' => 'Kue Tradisional Terbaik',
                     ],
-                    'html' => '<section data-fb-section="hero"><h1 data-fb-text="hero-title">Default Title</h1><div data-fb-slot="whatsapp-button"></div></section>',
+                    'html' => '<section data-fb-section="hero"><h1 data-fb-text="hero-title">Default Title</h1><div data-fb-slot="whatsapp-button"></div><div data-fb-slot="lead-form"></div><form action="/phishing"><input name="password"></form></section>',
                 ],
                 [
                     'id' => 'sec-hidden',
@@ -95,7 +96,10 @@ HTML;
         ]);
 
         $renderer = app(ThemeRenderer::class);
-        $html = $renderer->render($site, $themeVersion, ['page' => 'home']);
+        $html = $renderer->render($site, $themeVersion, [
+            'page' => 'home',
+            'errors' => new ViewErrorBag,
+        ]);
 
         // Check CSS variables injection
         $this->assertStringContainsString('--fb-primary: #b91c1c;', $html);
@@ -112,6 +116,8 @@ HTML;
         // Check slot replacement (whatsapp-button slot)
         $this->assertStringContainsString('wa.me/6281234567890', $html);
         $this->assertStringContainsString('Hubungi via WhatsApp', $html);
+        $this->assertStringContainsString('action="/prospek"', $html);
+        $this->assertStringNotContainsString('/phishing', $html);
 
         // Check footer attribution
         $this->assertStringContainsString('Dibuat dengan Fabriku', $html);

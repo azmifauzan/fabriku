@@ -94,6 +94,8 @@ return [
         'cdn',
         'static',
         'assets',
+        'fallback',
+        'sites',
         'fabriku',
         'satsetui',
         'repliz',

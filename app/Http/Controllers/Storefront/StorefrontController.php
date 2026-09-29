@@ -3,15 +3,23 @@
 namespace App\Http\Controllers\Storefront;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\NotifyStorefrontRequest;
 use App\Models\BusinessSite;
+use App\Models\Lead;
+use App\Models\Scopes\TenantScope;
+use App\Models\SiteReport;
 use App\Models\Tenant;
 use App\Services\Storefront\Storefront;
 use App\Services\Storefront\ThemeRenderer;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 
 class StorefrontController extends Controller
 {
+    private const LEAD_CONSENT_TEXT = 'Saya bersedia dihubungi oleh pihak toko terkait penawaran layanan ini sesuai dengan UU Perlindungan Data Pribadi (UU No. 27/2022).';
+
     protected function getSite(): BusinessSite
     {
         $site = Storefront::currentSite();
@@ -37,14 +45,14 @@ class StorefrontController extends Controller
         $site = $this->getSite();
         $tenant = $this->getTenant();
 
-        $products = Storefront::for($tenant)->products()->get();
-        $services = Storefront::for($tenant)->services()->get();
+        $products = $site->mode === 'jasa' ? collect() : Storefront::for($tenant)->products()->get();
+        $services = $site->mode === 'produk' ? collect() : Storefront::for($tenant)->services()->get();
 
         $html = $renderer->render($site, $site->activeThemeVersion, [
             'page' => 'home',
             'products' => $products,
             'services' => $services,
-            'title' => $site->profile['name'] ?? $tenant->name ?? 'Toko Kami',
+            'title' => $site->seo['title'] ?? $site->profile['name'] ?? $tenant->name ?? 'Toko Kami',
         ]);
 
         return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
@@ -80,6 +88,9 @@ class StorefrontController extends Controller
     public function productDetail(Request $request, ThemeRenderer $renderer, string $slug): Response
     {
         $site = $this->getSite();
+        if ($site->mode === 'jasa') {
+            abort(404);
+        }
         $tenant = $this->getTenant();
 
         $product = Storefront::for($tenant)->products()->where('slug', $slug)->firstOrFail();
@@ -130,6 +141,9 @@ class StorefrontController extends Controller
     public function serviceDetail(Request $request, ThemeRenderer $renderer, string $slug): Response
     {
         $site = $this->getSite();
+        if ($site->mode === 'produk') {
+            abort(404);
+        }
         $tenant = $this->getTenant();
 
         $service = Storefront::for($tenant)->services()->where('slug', $slug)->firstOrFail();
@@ -153,12 +167,16 @@ class StorefrontController extends Controller
     public function cart(Request $request, ThemeRenderer $renderer): Response
     {
         $site = $this->getSite();
+        if ($site->mode === 'jasa') {
+            abort(404);
+        }
         $tenant = $this->getTenant();
 
         $siteName = $site->profile['name'] ?? $tenant->name ?? 'Toko';
 
         $pageContent = view('storefront.pages.cart', [
             'site' => $site,
+            'lines' => CartController::lines($request, $tenant->id),
         ])->render();
 
         $html = $renderer->render($site, $site->activeThemeVersion, [
@@ -170,6 +188,96 @@ class StorefrontController extends Controller
         return response($html)
             ->header('Content-Type', 'text/html; charset=UTF-8')
             ->header('X-Robots-Tag', 'noindex, nofollow');
+    }
+
+    public function submitLead(Request $request): RedirectResponse
+    {
+        $site = $this->getSite();
+        $tenant = $this->getTenant();
+        abort_unless($site->mode !== 'produk' && $site->canAcceptOrders(), 404);
+
+        if ($request->filled('_hp_site_lead')) {
+            return back()->with('success', 'Permintaan Anda terkirim. Tim toko akan menghubungi Anda.');
+        }
+
+        $data = $request->validate([
+            'idempotency_key' => ['required', 'uuid'],
+            'service_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('services', 'id')
+                    ->where('tenant_id', $tenant->id)
+                    ->where('is_public', true)
+                    ->where('is_active', true),
+            ],
+            'name' => ['required', 'string', 'max:150'],
+            'phone' => ['required', 'string', 'max:32', 'regex:/^[0-9+().\-\s]{7,32}$/'],
+            'message' => ['nullable', 'string', 'max:2000'],
+            'consent' => ['required', 'accepted'],
+        ]);
+
+        $lead = Lead::withoutGlobalScope(TenantScope::class)->firstOrCreate(
+            [
+                'tenant_id' => $tenant->id,
+                'idempotency_key' => $data['idempotency_key'],
+            ],
+            [
+                'business_site_id' => $site->id,
+                'service_id' => $data['service_id'] ?? null,
+                'source' => 'website',
+                'name' => $data['name'],
+                'phone' => $data['phone'],
+                'message' => $data['message'] ?? null,
+                'consent_at' => now(),
+                'consent_text' => self::LEAD_CONSENT_TEXT,
+                'status' => 'new',
+            ]
+        );
+        if ($lead->wasRecentlyCreated) {
+            NotifyStorefrontRequest::dispatch($site->id, 'lead', $lead->id)->afterCommit();
+        }
+
+        return back()->with('success', 'Permintaan Anda terkirim. Tim toko akan menghubungi Anda melalui WhatsApp.');
+    }
+
+    public function privacy(ThemeRenderer $renderer): Response
+    {
+        $site = $this->getSite();
+        $html = $renderer->render($site, $site->activeThemeVersion, [
+            'page' => 'privacy',
+            'page_content' => view('storefront.pages.privacy', ['site' => $site])->render(),
+            'title' => 'Privasi - '.($site->profile['name'] ?? 'Website Usaha'),
+        ]);
+
+        return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
+    }
+
+    public function report(ThemeRenderer $renderer): Response
+    {
+        $site = $this->getSite();
+        $html = $renderer->render($site, $site->activeThemeVersion, [
+            'page' => 'report',
+            'page_content' => view('storefront.pages.report')->render(),
+            'title' => 'Laporkan situs',
+        ]);
+
+        return response($html)->header('Content-Type', 'text/html; charset=UTF-8')->header('X-Robots-Tag', 'noindex, nofollow');
+    }
+
+    public function submitReport(Request $request): RedirectResponse
+    {
+        $site = $this->getSite();
+        if ($request->filled('_hp_site_report')) {
+            return back()->with('success', 'Laporan diterima.');
+        }
+        $data = $request->validate([
+            'category' => ['required', Rule::in(['penipuan', 'barang_terlarang', 'privasi', 'lainnya'])],
+            'details' => ['required', 'string', 'min:10', 'max:3000'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
+        ]);
+        SiteReport::create(['business_site_id' => $site->id, 'tenant_id' => $site->tenant_id, ...$data]);
+
+        return back()->with('success', 'Laporan diterima. Tim Fabriku akan meninjaunya.');
     }
 
     public function robots(Request $request): Response

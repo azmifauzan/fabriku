@@ -2,6 +2,25 @@
 
 Status: rencana kerja final, diputuskan bersama pemilik produk pada 23 September 2026. Target rilis: **31 Oktober 2026**. Dokumen lain di folder ini adalah lampiran riset/detail; bila bertentangan, dokumen ini yang berlaku.
 
+## 0. Status implementasi — audit kode 29 September 2026
+
+Status ini membedakan fondasi kode dari alur produk yang benar-benar selesai. Persiapan vendor, domain, kontrak, dan rekrutmen pilot tidak bisa dipastikan dari source code. Repo Satsetui dibaca tanpa mengubah worktree yang sudah memiliki perubahan lokal.
+
+| Fase/jalur | Status | Yang sudah terverifikasi | Yang masih tersisa |
+|---|---|---|---|
+| Minggu 0 — persiapan | Selesai untuk storefront | Zona `fabriku.biz.id` aktif; Cloudflare for SaaS/Custom Hostnames API aktif; Origin CA untuk apex/wildcard dipasang; vhost Nginx tambahan lolos `nginx -t`; wildcard DNS, target CNAME, dan fallback origin aktif; image `290926-2` sehat | Mode SSL/TLS zona belum dapat dibaca API token (403/9109), jadi domain pelanggan tetap perlu satu uji custom hostname nyata sebelum pilot. Persiapan Repliz di luar cakupan MVP ini |
+| Minggu 1 — Fabriku | Selesai di repo, belum diverifikasi di produksi | Paket/kuota dasar dan `usage_events`; `business_sites`, host resolver, katalog produk/layanan, renderer Blade dan sanitizer, CSS hasil build lokal, pembatasan CSS tema dan CSP; pengelola situs dan tiga preset lokal; tes billing/routing/isolasi tenant | Cache publik ditunda karena sesi/CSRF; editor section bebas belum ada. Tiga preset lokal bukan pengganti 12 template/API Satsetui yang direncanakan |
+| Minggu 1 — Satsetui | Belum terintegrasi dengan Fabriku | Generator halaman dan Social Kit mandiri milik pengguna Satsetui sudah ada | Belum ditemukan API generasi khusus Fabriku, autentikasi service account, kontrak `fabriku-site-v1`, maupun pemakaian kredit atas nama akun layanan. `FABRIKU_INTERNAL_WEBHOOK_*` yang ada dipakai untuk routing webhook Sumopod, bukan API generasi |
+| Minggu 2 — Website Usaha/Fabriku | MVP di repo selesai, rilis belum | Keranjang dan checkout stok/harga dari server menjadi sales order draft, idempotensi; prospek jasa dengan consent/rate limit; inbox pesanan/prospek, WhatsApp staf, konversi prospek, penerima email/Telegram, editor profil/SEO/preset, versi/restore tema, publikasi, laporan situs dan suspend admin; 36 tes storefront lulus | Uji end-to-end produksi, delivery email/Telegram nyata, dan tenant pilot. Penulisan AI, editor section bebas, dan API Satsetui belum ada |
+| Minggu 2 — Satsetui | Aset dasar ada, integrasi belum | Social Kit dapat dibuat melalui akun Satsetui dan diekspor sebagai ZIP gambar PNG atau PDF LinkedIn | Belum ada ekspor/API JPG sesuai alur Fabriku, profil `social-kit-v1`, 12 template katalog khusus Fabriku, atau impor otomatis ke Fabriku |
+| Minggu 3 — Pusat Sosial dasar | Belum dimulai di Fabriku | Belum ada kode koneksi akun sosial Fabriku yang terverifikasi | OAuth tenant, sinkronisasi, statistik, inbox komentar, balasan, konversi komentar/DM, dan alarm kapasitas |
+| Minggu 4 — Pusat Sosial/domain | Domain Fabriku aktif; domain pelanggan siap diuji; sosial ditunda | Pendaftaran custom hostname lewat API Cloudflare, record TXT/CNAME, pemeriksaan DNS/status sertifikat sebelum aktivasi, redirect subdomain ke domain aktif; fallback origin publik berstatus `active` | Satu uji custom hostname domain pelanggan dan mode TLS zona masih perlu konfirmasi; kalender/composer, antrean posting, polling status, serta inbox DM ditunda |
+| Minggu 5 — billing/peluncuran | Fondasi billing ada; paket Pro belum end-to-end | Konfigurasi Core/Pro, masa aktif Pro, ledger pemakaian, dan kolom pembayaran dasar | Checkout/prorata Pro, tagihan gabungan, lifecycle pembatalan/retensi, halaman harga/fitur Website Usaha dan Pusat Sosial, serta runbook peluncuran |
+
+Keputusan audit: status “selesai di repo” tidak sama dengan “siap dijual”. Social media dan harga paket tetap mengikuti rencana lama tetapi tidak menjadi syarat deploy Website Usaha awal. Integrasi Satsetui masih menjadi pekerjaan terpisah, bukan klaim fitur saat ini.
+
+Verifikasi 29 September 2026: suite penuh `php artisan test` — **538 passed, 6 skipped (2.420 assertions)**; Pint `--test` untuk file PHP yang berubah — **lulus**.
+
 ## 1. Ringkasan
 
 Fabriku menambah dua kemampuan untuk tenant:
