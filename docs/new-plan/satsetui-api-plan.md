@@ -1,25 +1,27 @@
-# Rencana API Satsetui untuk Fabriku dan integrator lain
+# Rencana API umum Satsetui untuk integrator (fase lanjutan)
 
 Status: rancangan kontrak, 23 September 2026. Endpoint di bawah **belum tersedia**. Dokumen ini adalah handoff implementasi untuk repo `/home/fauzan/dev/satsetui`; spesifikasi OpenAPI dan panduan publik nantinya menjadi milik repo Satsetui.
+
+Catatan keputusan terbaru: dokumen ini menjadi **rancangan API umum fase berikutnya**, bukan kontrak alur merchant Fabriku. Untuk kategori privat Fabriku, akun baru/kredit gratis sesuai kebijakan Satsetui, verifikasi sekali akun lama, login langsung ke wizard setelah tertaut, editor/top-up Satsetui, tiket ekspor, dan `fabriku-site-v1`, ikuti [rencana integrasi Satsetui–Storefront](satsetui-storefront-integration-plan.md). Profil `business-site-theme-v1` di bawah adalah usulan generik lama, **bukan** profil impor Fabriku. Endpoint publik belum tersedia.
 
 Dokumen terkait: [MVP Fabriku](commerce-mvp-plan.md), [paket dan migrasi pelanggan](website-usaha-pricing-plan.md), dan [branding serta SEO Fabriku](brand-seo-expansion-plan.md).
 
 ## Tujuan dan batas produk
 
-Satsetui membuka kemampuan generasi desain melalui API yang sama untuk Fabriku dan integrator eksternal. Fabriku adalah satu pelanggan API dengan satu akun layanan, satu wallet kredit Satsetui, dan satu atau lebih kunci server-to-server. Pengguna Fabriku tidak perlu akun Satsetui. Integrator lain memakai akun Satsetui dan kunci API masing-masing, lalu mengelola pengguna akhir mereka sendiri.
+Satsetui kelak membuka kemampuan generasi desain melalui API untuk integrator eksternal. Alur merchant Fabriku didahulukan dan berbeda: akun Satsetui pengguna dibuat bila email belum ada, atau ditautkan setelah verifikasi sekali bila sudah ada. Pengguna memakai kredit/top-up dan editor Satsetui sendiri. Integrator lain kelak memakai akun Satsetui dan kunci API masing-masing.
 
-Satsetui tidak perlu mengetahui `tenant_id` internal Fabriku, menerima password pengguna akhir, atau menjadi mesin toko/pembayaran. Integrator mengirim `client_reference` untuk korelasi internalnya; Satsetui hanya mengembalikan artefak desain. Billing kredit tetap terjadi di Satsetui pada akun pemilik kunci. Fabriku boleh membungkus biaya itu dalam satu langganannya.
+Untuk API umum kelak, integrator mengirim `client_reference` untuk korelasi internalnya; Satsetui mengembalikan artefak desain dan menagih akun pemilik kunci. Ini tidak menetapkan model identitas merchant Fabriku. Alur Fabriku memerlukan referensi tenant/site terikat tiket dan user terhubung, tanpa menerima password pengguna atau menjadi mesin toko/pembayaran.
 
 ## Kondisi kode dan celah yang harus ditutup
 
 `GenerationController::generate()` sekarang mengambil `Auth::user()` dari sesi web dan memanggil `GenerationService::startGeneration()`. `startGeneration()` membuat proyek/generasi serta menagih kredit, tetapi alur website HTML/CSS tidak selesai hanya dengan POST tersebut: UI memicu kelanjutannya lewat stream atau endpoint background. Ada job `ProcessTemplateGeneration` yang dapat menjadi dasar eksekusi tanpa browser. Route generasi yang diperiksa berada di grup `auth` dan `verified` pada `routes/web.php`. Karena itu API partner tidak boleh sekadar mengekspos controller web yang ada dengan autentikasi baru; ia perlu membuat dan menjadwalkan pekerjaan secara atomik, lalu memberi status yang bisa dipoll.
 
-Request wizard yang ada mendukung kategori `e-commerce` dan `landing-page`, tetapi `blueprint.outputFormat` hanya menerima `html-css`. Satsetui juga sudah memiliki jalur `generateSocialKit` dengan parameter topik/platform/jumlah slide dan ekspor visual, tetapi belum menjadi API partner headless untuk aset per posting. HTML/CSS visual tidak otomatis menjadi tema yang aman dan dapat diedit di Fabriku. API perlu tiga profil artefak:
+Request wizard yang ada mendukung kategori `e-commerce` dan `landing-page`, tetapi `blueprint.outputFormat` hanya menerima `html-css`. Satsetui juga sudah memiliki jalur `generateSocialKit` dengan parameter topik/platform/jumlah slide dan ekspor visual, tetapi belum menjadi API partner headless untuk aset per posting. HTML/CSS visual tidak otomatis menjadi tema yang aman untuk diterbitkan di Fabriku; penyuntingan desain tetap di Satsetui. API umum kelak dapat mempertimbangkan profil artefak berikut:
 
 | Profil | Pengguna | Hasil |
 |---|---|---|
 | `website-html-v1` | Integrator yang ingin desain HTML/CSS | Paket HTML/CSS tersanitasi dan metadata halaman; tidak berisi checkout fungsional |
-| `business-site-theme-v1` | Fabriku dan integrator website usaha | Manifest JSON tervalidasi berisi token desain, section terurut, copy, referensi aset, dan slot komponen produk/jasa; tidak berisi JS sewenang-wenang |
+| `business-site-theme-v1` | Usulan untuk integrator website usaha selain Fabriku | Manifest JSON tervalidasi berisi token desain, section terurut, copy, referensi aset, dan slot komponen produk/jasa; tidak berisi JS sewenang-wenang |
 | `social-kit-v1` | Integrator pembuat konten sosial | Aset gambar individual, urutan slide, dimensi/format, metadata dan caption draf bila generator sudah mendukungnya; bukan unggahan otomatis |
 
 Kedua profil terstruktur merupakan pengembangan baru, bukan klaim bahwa generator saat ini sudah mengeluarkan JSON tema atau caption yang siap dipakai. Kontrak section awal cukup `hero`, `value-props`, `featured-products`, `service-list`, `about`, `contact`, dan `footer`; hanya section yang dibutuhkan brief yang muncul. `featured-products` dan `service-list` adalah slot data integrator, bukan daftar harga/stok dari prompt. Checkout produk dan formulir prospek jasa dibangun oleh aplikasi pemakai API. Profil tema menerima `site_mode: products|services|mixed` agar landing page jasa dan toko berbagi renderer/kontrak.
@@ -35,7 +37,7 @@ Base path: `/api/v1`. JSON UTF-8, HTTPS, `Authorization: Bearer <api_key>`, `X-R
 | `GET /generations/{id}` | Ambil status, progres ringkas, kredit final, error aman | `200`, hanya milik pemilik kunci |
 | `GET /generations/{id}/artifacts` | Ambil manifest/daftar artefak setelah selesai | `200` atau `409` jika belum selesai; URL unduh bertanda tangan dan pendek umur bila diperlukan |
 
-Tidak perlu endpoint create-user-per-merchant pada v1. Satu akun layanan Fabriku cukup, dan pembukuan per tenant berlangsung di Fabriku. Jika kelak integrator memerlukan sub-wallet atau sub-account, desainlah setelah ada kebutuhan nyata, bukan sebagai prasyarat peluncuran API.
+Provisioning dan penautan user Fabriku bukan bagian endpoint generasi publik di bawah; keduanya memakai kontrak partner terpisah pada [rencana integrasi storefront](satsetui-storefront-integration-plan.md). Jangan mengasumsikan wallet akun layanan Fabriku untuk kategori ini.
 
 Contoh permintaan untuk profil website usaha (bentuk akhir harus dibakukan dalam OpenAPI):
 
@@ -122,9 +124,9 @@ Daftar minimum: `invalid_request` (422), `unauthorized` (401), `forbidden` (403)
 ## Rencana implementasi di repo Satsetui
 
 1. Jadikan `ProcessTemplateGeneration` atau service orkestrasi yang ada sebagai jalur headless resmi untuk website satu dan banyak halaman, dan hubungkan pipeline Social Kit yang ada ke runner headless serupa. Uji start → queue → terminal tanpa membuka stream browser, termasuk kegagalan layout, timeout, ekspor gambar, dan refund. Hindari pipeline kedua yang berbeda perilaku dari UI.
-2. Tambahkan model/kunci API milik akun Satsetui dengan scope minimum `generation:create` dan `generation:read`, hash kunci, rotasi, pencabutan, rate limit, serta audit `client_reference` dan request ID. Akun layanan Fabriku adalah pemilik kredit; integrator lain punya akun/kunci sendiri.
+2. Untuk API umum kelak, tambahkan model/kunci API milik akun Satsetui dengan scope minimum `generation:create` dan `generation:read`, hash kunci, rotasi, pencabutan, rate limit, serta audit `client_reference` dan request ID. Jangan gunakan model akun layanan ini untuk kredit kategori Fabriku; kredit kategori itu milik user Satsetui yang tertaut.
 3. Buat controller dan request API v1 yang memanggil service domain yang sama dengan web, bukan menyalin logika charge dan generasi. Tambahkan idempotensi persisten sebelum charge.
-4. Tambahkan generator/validator `business-site-theme-v1` untuk produk, jasa, dan gabungan; simpan manifest sebagai artefak versi. Uji section tidak dikenal dan kode aktif ditolak. Tambahkan adapter `social-kit-v1` yang mengekspos gambar per slide; caption draf hanya jika benar-benar diimplementasikan. `website-html-v1` dapat memakai hasil HTML/CSS yang ada setelah endpoint artefaknya aman.
+4. Setelah `fabriku-site-v1` stabil, nilai apakah profil generik `business-site-theme-v1` memang diperlukan oleh integrator lain; jangan membuat adapter kedua sebelum ada kebutuhan nyata. Tambahkan adapter `social-kit-v1` yang mengekspos gambar per slide hanya saat fase sosial dibuka; caption draf hanya jika benar-benar diimplementasikan. `website-html-v1` dapat memakai hasil HTML/CSS yang ada setelah endpoint artefaknya aman.
 5. Tambahkan dokumentasi publik di repo Satsetui: `docs/api/README.md`, `docs/api/openapi.yaml`, panduan autentikasi/rotasi kunci, quickstart cURL/PHP/JavaScript, ketiga profil output dan skema tema/Social Kit, billing/refund, idempotensi, polling/webhook, status/error, batas pemakaian, changelog, dan kebijakan versi. Contoh harus memakai kredensial palsu yang jelas.
 6. Jalankan pilot Fabriku lebih dulu, lalu satu integrator eksternal non-Fabriku untuk membuktikan API tidak mengandung asumsi khusus Fabriku. Baru setelah itu buka pendaftaran API lebih luas.
 
@@ -133,7 +135,7 @@ Daftar minimum: `invalid_request` (422), `unauthorized` (401), `forbidden` (403)
 - Dua klien API dengan akun berbeda tidak dapat melihat generation, kredit, atau artefak satu sama lain.
 - Sepuluh retry `POST` dengan kunci idempotensi yang sama menghasilkan satu generation dan satu charge.
 - Website satu halaman dan banyak halaman mencapai status terminal melalui worker tanpa SSE/browser; gagal/timeout tidak meninggalkan saldo terpotong tanpa status yang dapat diaudit.
-- Fabriku dapat mengimpor `business-site-theme-v1`, mengeditnya secara lokal, dan menerbitkan website mode produk, jasa, maupun gabungan tanpa dependensi runtime ke Satsetui untuk setiap page view.
+- Integrator yang memilih profil terstruktur dapat mengimpor artefaknya tanpa dependensi runtime ke Satsetui pada setiap page view. Fabriku memakai `fabriku-site-v1` dan kriteria penerimaan pada [rencana integrasi storefront](satsetui-storefront-integration-plan.md), bukan profil generik ini.
 - Fabriku dapat menerima slide individual `social-kit-v1`, menampilkannya sebagai draf, dan mengekspor/menjadwalkannya setelah review; retry generasi tidak memotong kredit dua kali.
 - OpenAPI dan contoh quickstart lolos contract test; status dan error yang terdokumentasi cocok dengan respons nyata.
 

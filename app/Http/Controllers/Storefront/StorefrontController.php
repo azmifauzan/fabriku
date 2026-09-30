@@ -7,6 +7,7 @@ use App\Jobs\NotifyStorefrontRequest;
 use App\Models\BusinessSite;
 use App\Models\Lead;
 use App\Models\Scopes\TenantScope;
+use App\Models\SiteContentPage;
 use App\Models\SiteReport;
 use App\Models\Tenant;
 use App\Services\Storefront\Storefront;
@@ -53,6 +54,28 @@ class StorefrontController extends Controller
             'products' => $products,
             'services' => $services,
             'title' => $site->seo['title'] ?? $site->profile['name'] ?? $tenant->name ?? 'Toko Kami',
+        ]);
+
+        return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
+    }
+
+    public function contentPage(string $slug, ThemeRenderer $renderer): Response
+    {
+        $site = $this->getSite();
+        $page = SiteContentPage::query()
+            ->where('business_site_id', $site->id)
+            ->where('slug', $slug)
+            ->where('is_published', true)
+            ->firstOrFail();
+
+        $html = $renderer->render($site, $site->activeThemeVersion, [
+            'page' => 'content_page',
+            'page_content' => $page->html,
+            'page_css' => $page->css,
+            'content_page' => $page,
+            'title' => $page->title,
+            'seo_title' => $page->seo_title ?: $page->title,
+            'seo_description' => $page->seo_description ?: ($site->seo['description'] ?? $site->profile['description'] ?? ''),
         ]);
 
         return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
@@ -307,6 +330,7 @@ class StorefrontController extends Controller
         $baseUrl = rtrim($site->getStorefrontUrl(), '/');
         $products = Storefront::for($tenant)->products()->get();
         $services = Storefront::for($tenant)->services()->get();
+        $contentPages = $site->contentPages()->where('is_published', true)->get();
 
         $urls = [];
         $urls[] = ['loc' => $baseUrl.'/', 'priority' => '1.0'];
@@ -325,6 +349,10 @@ class StorefrontController extends Controller
                     $urls[] = ['loc' => $baseUrl."/layanan/{$s->slug}", 'priority' => '0.7'];
                 }
             }
+        }
+
+        foreach ($contentPages as $page) {
+            $urls[] = ['loc' => $baseUrl.'/halaman/'.$page->slug, 'priority' => '0.6'];
         }
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';

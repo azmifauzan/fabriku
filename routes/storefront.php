@@ -19,6 +19,7 @@ Route::get('/produk', [StorefrontController::class, 'products'])->name('storefro
 Route::get('/produk/{slug}', [StorefrontController::class, 'productDetail'])->name('storefront.product.detail');
 Route::get('/layanan', [StorefrontController::class, 'services'])->name('storefront.services');
 Route::get('/layanan/{slug}', [StorefrontController::class, 'serviceDetail'])->name('storefront.service.detail');
+Route::get('/halaman/{slug}', [StorefrontController::class, 'contentPage'])->name('storefront.content-page');
 Route::get('/keranjang', [StorefrontController::class, 'cart'])->name('storefront.cart');
 Route::post('/keranjang', [CartController::class, 'add'])->middleware('throttle:30,1')->name('storefront.cart.add');
 Route::post('/keranjang/ubah', [CartController::class, 'update'])->middleware('throttle:30,1')->name('storefront.cart.update');

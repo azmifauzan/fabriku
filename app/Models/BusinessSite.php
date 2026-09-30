@@ -21,6 +21,7 @@ class BusinessSite extends Model
         'cloudflare_hostname_id',
         'domain_status',
         'active_theme_version_id',
+        'draft_theme_version_id',
         'profile',
         'seo',
         'status',
@@ -48,9 +49,19 @@ class BusinessSite extends Model
         return $this->belongsTo(SiteThemeVersion::class, 'active_theme_version_id');
     }
 
+    public function draftThemeVersion(): BelongsTo
+    {
+        return $this->belongsTo(SiteThemeVersion::class, 'draft_theme_version_id');
+    }
+
     public function themeVersions(): HasMany
     {
         return $this->hasMany(SiteThemeVersion::class);
+    }
+
+    public function contentPages(): HasMany
+    {
+        return $this->hasMany(SiteContentPage::class)->orderBy('sort')->orderBy('title');
     }
 
     public function products(): HasMany
