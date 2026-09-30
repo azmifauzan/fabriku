@@ -12,6 +12,8 @@ services:
       - APP_DEBUG=${APP_DEBUG:-false}
       - APP_KEY=${APP_KEY}
       - APP_URL=${APP_URL:-http://localhost:8000}
+      - SATSETUI_BASE_URL=${SATSETUI_BASE_URL:-https://satsetui.com}
+      - SATSETUI_INTEGRATION_SECRET=${SATSETUI_INTEGRATION_SECRET:-}
       - STOREFRONT_DOMAIN=${STOREFRONT_DOMAIN:-fabriku.biz.id}
       - CLOUDFLARE_TOKEN=${CLOUDFLARE_TOKEN:-}
       - CLOUDFLARE_ZONE_ID=${CLOUDFLARE_ZONE_ID:-}
