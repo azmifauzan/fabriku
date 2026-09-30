@@ -62,4 +62,9 @@ return [
         'cname_target' => env('CLOUDFLARE_CNAME_TARGET', 'sites.fabriku.biz.id'),
     ],
 
+    'satsetui' => [
+        'base_url' => env('SATSETUI_BASE_URL'),
+        'integration_secret' => env('SATSETUI_INTEGRATION_SECRET'),
+    ],
+
 ];

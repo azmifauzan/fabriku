@@ -8,10 +8,12 @@ type Service = { id: number; name: string; slug: string | null; is_public: boole
 type ThemeVersion = {
     id: number;
     version: number;
+    source?: string;
     created_at: string;
     theme: { preset?: string; css_variables?: Record<string, string> };
     sections: Array<{ type: string; variables?: Record<string, string> }>;
 };
+type ThemeVersionHistory = { id: number; version: number; source: string };
 type Site = {
     id: number;
     slug: string;
@@ -23,7 +25,7 @@ type Site = {
     profile: Record<string, string>;
     seo: Record<string, string> | null;
     active_theme_version: ThemeVersion | null;
-    theme_versions: ThemeVersion[];
+    theme_versions: ThemeVersionHistory[];
     recipients: Array<{ id: number; name: string }>;
 };
 type Tab = 'permintaan' | 'identitas' | 'katalog' | 'desain' | 'pengaturan';
@@ -47,8 +49,11 @@ type Order = {
     created_at: string;
     customer: { name: string; phone: string };
 };
+type ContentPage = { id: number; slug: string; title: string; seo_title: string | null; seo_description: string | null; show_in_footer: boolean };
+type DraftThemeVersion = { id: number; version: number; pageCount: number };
 const props = defineProps<{
     site: Site | null;
+    draftThemeVersion: DraftThemeVersion | null;
     canManage: boolean;
     domainRecords: Array<{ type: string; name: string; value: string }>;
     cnameTarget: string;
@@ -58,9 +63,11 @@ const props = defineProps<{
     users: Array<{ id: number; name: string; email: string }>;
     leads: Lead[];
     orders: Order[];
+    contentPages: ContentPage[];
 }>();
 const page = usePage();
 const success = computed(() => (page.props.flash as { success?: string } | undefined)?.success);
+const satsetuiError = computed(() => (page.props.errors as Record<string, string> | undefined)?.satsetui);
 const siteForm = useForm({
     slug: props.site?.slug ?? '',
     mode: props.site?.mode ?? 'produk',
@@ -71,7 +78,10 @@ const siteForm = useForm({
     seo_title: props.site?.seo?.title ?? '',
     seo_description: props.site?.seo?.description ?? '',
 });
-const activeTab = ref<Tab>('permintaan');
+const requestedTab = new URLSearchParams(page.url.split('?')[1] ?? '').get('tab');
+const activeTab = ref<Tab>(
+    ['permintaan', 'identitas', 'katalog', 'desain', 'pengaturan'].includes(requestedTab ?? '') ? (requestedTab as Tab) : 'permintaan',
+);
 const setupActive = ref(!props.site || !props.site.setup_completed_at);
 const setupStep = ref<1 | 2 | 3>(!props.site ? 1 : props.site.active_theme_version ? 3 : 2);
 const tabs: Array<{ id: Tab; label: string }> = [
@@ -96,6 +106,18 @@ const productForm = useForm({ product_code: '', slug: '', title: '', description
 const recipientForm = useForm({ user_ids: props.site?.recipients?.map((r) => r.id) ?? ([] as number[]) });
 const domainForm = useForm({ domain: props.site?.custom_domain ?? '' });
 const selectedCode = ref('');
+const contentPageForms = ref<Record<number, Omit<ContentPage, 'id' | 'slug' | 'title'>>>(
+    Object.fromEntries(
+        props.contentPages.map((contentPage) => [
+            contentPage.id,
+            {
+                seo_title: contentPage.seo_title ?? '',
+                seo_description: contentPage.seo_description ?? '',
+                show_in_footer: contentPage.show_in_footer,
+            },
+        ]),
+    ) as Record<number, Omit<ContentPage, 'id' | 'slug' | 'title'>>,
+);
 function selectProduct(code: string) {
     selectedCode.value = code;
     const existing = props.products.find((p) => p.product_code === code);
@@ -120,6 +142,9 @@ function saveService(service: Service) {
 }
 function publish(status: 'published' | 'paused') {
     router.post('/website/publish', { status }, { preserveScroll: true });
+}
+function publishSatsetuiDraft() {
+    router.post('/website/satsetui/publish-draft', {}, { preserveScroll: true });
 }
 function saveIdentity() {
     const creating = !props.site;
@@ -158,6 +183,9 @@ function completeSetup() {
             },
         },
     );
+}
+function saveContentPage(contentPage: ContentPage) {
+    router.patch(`/website/pages/${contentPage.id}`, contentPageForms.value[contentPage.id], { preserveScroll: true });
 }
 function closeLead(lead: Lead) {
     const reason = window.prompt('Alasan menutup prospek ini:');
@@ -209,8 +237,9 @@ const whatsappLink = (phone: string, message: string) =>
                             : 'border-slate-300 hover:border-teal-700',
                     ]"
                     @click="activeTab = section.id"
-                    >{{ section.label }}</button
                 >
+                    {{ section.label }}
+                </button>
             </nav>
 
             <section v-if="setupActive" class="rounded-xl border border-teal-200 bg-teal-50 p-5 sm:p-7 dark:border-teal-900 dark:bg-teal-950/40">
@@ -539,9 +568,58 @@ const whatsappLink = (phone: string, message: string) =>
             >
                 <h2 class="text-xl font-semibold dark:text-white">Desain halaman depan</h2>
                 <p class="mb-5 text-sm text-slate-600 dark:text-slate-300">
-                    Ubah tulisan dan warna. Setiap simpan membuat versi yang bisa dipulihkan.
+                    Buat desain sesuai usaha dengan wizard Satsetui. Hasilnya masuk ke Fabriku sebagai draf.
                 </p>
-                <form class="grid gap-4" @submit.prevent="saveTheme">
+                <div
+                    v-if="draftThemeVersion"
+                    role="status"
+                    class="mb-5 rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/40"
+                >
+                    <p class="text-sm font-semibold text-amber-950 dark:text-amber-100">Draf desain Satsetui menunggu penerapan.</p>
+                    <p class="mt-1 text-sm text-amber-900 dark:text-amber-200">
+                        Website yang sudah terbit tetap memakai desain lama sampai draf ini diterapkan. {{ draftThemeVersion.pageCount }} halaman
+                        tambahan akan ikut diaktifkan.
+                    </p>
+                    <button
+                        type="button"
+                        class="mt-3 min-h-11 rounded-lg bg-amber-800 px-4 py-2.5 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-800"
+                        @click="publishSatsetuiDraft"
+                    >
+                        Terapkan draf desain v{{ draftThemeVersion.version }}
+                    </button>
+                </div>
+                <p
+                    v-if="satsetuiError"
+                    role="alert"
+                    class="mb-4 rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-100"
+                >
+                    {{ satsetuiError }}
+                </p>
+                <div class="mb-6 rounded-xl border border-teal-200 bg-teal-50 p-4 dark:border-teal-900 dark:bg-teal-950/40">
+                    <p class="text-sm text-slate-700 dark:text-slate-200">
+                        {{
+                            draftThemeVersion
+                                ? 'Desain Satsetui sudah diimpor sebagai draf. Kredit dan editor tetap dikelola di Satsetui.'
+                                : site.active_theme_version?.source === 'satsetui'
+                                  ? 'Desain aktif dibuat di Satsetui. Buka wizard untuk membuat versi baru. Kredit dan editor tetap dikelola di Satsetui.'
+                                  : 'Akun Satsetui akan ditautkan satu kali. Setelah itu wizard terbuka otomatis. Kredit dan editor tetap dikelola di Satsetui.'
+                        }}
+                    </p>
+                    <button
+                        type="button"
+                        class="mt-3 min-h-11 rounded-lg bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                        @click="router.post('/website/satsetui/launch', {}, { preserveScroll: true })"
+                    >
+                        {{
+                            site.active_theme_version?.source === 'satsetui'
+                                ? 'Buat versi desain baru'
+                                : draftThemeVersion
+                                  ? 'Buat desain lain'
+                                  : 'Buat desain dengan Satsetui'
+                        }}
+                    </button>
+                </div>
+                <form v-if="site.active_theme_version?.source !== 'satsetui' && !draftThemeVersion" class="grid gap-4" @submit.prevent="saveTheme">
                     <fieldset class="grid gap-2 sm:grid-cols-3">
                         <legend class="mb-2 text-sm font-semibold dark:text-white">Tata letak awal</legend>
                         <label
@@ -601,6 +679,9 @@ const whatsappLink = (phone: string, message: string) =>
                         Simpan desain
                     </button>
                 </form>
+                <div v-else class="rounded-lg border border-slate-200 p-4 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
+                    Editor template tersedia di Satsetui. Versi berikutnya dapat dibuat dari tombol di atas.
+                </div>
                 <div v-if="site.theme_versions.length" class="mt-7 border-t border-slate-200 pt-5">
                     <h3 class="mb-2 font-semibold dark:text-white">Riwayat desain</h3>
                     <div class="flex flex-wrap gap-2">
@@ -608,11 +689,12 @@ const whatsappLink = (phone: string, message: string) =>
                             v-for="version in site.theme_versions"
                             :key="version.id"
                             type="button"
-                            :disabled="site.active_theme_version?.id === version.id"
+                            :disabled="site.active_theme_version?.id === version.id || draftThemeVersion?.id === version.id"
                             class="rounded-lg border border-slate-400 px-3 py-2 text-sm disabled:opacity-50 dark:text-white"
                             @click="router.post(`/website/theme/${version.id}/restore`)"
                         >
-                            Versi {{ version.version }}{{ site.active_theme_version?.id === version.id ? ' · aktif' : '' }}
+                            Versi {{ version.version
+                            }}{{ site.active_theme_version?.id === version.id ? ' · aktif' : draftThemeVersion?.id === version.id ? ' · draf' : '' }}
                         </button>
                     </div>
                 </div>
@@ -714,6 +796,54 @@ const whatsappLink = (phone: string, message: string) =>
                         Simpan SEO
                     </button>
                 </form>
+            </section>
+
+            <section
+                v-if="site && canManage && !setupActive && activeTab === 'pengaturan' && contentPages.length"
+                class="rounded-xl border border-slate-200 bg-white p-5 sm:p-7 dark:border-slate-700 dark:bg-slate-900"
+            >
+                <h2 class="text-xl font-semibold dark:text-white">Halaman tambahan</h2>
+                <p class="mb-5 text-sm text-slate-600 dark:text-slate-300">Atur ringkasan mesin pencari dan tautan yang tampil di footer.</p>
+                <div class="grid gap-4">
+                    <form
+                        v-for="contentPage in contentPages"
+                        :key="contentPage.id"
+                        class="grid gap-3 rounded-lg border border-slate-200 p-4 dark:border-slate-700"
+                        @submit.prevent="saveContentPage(contentPage)"
+                    >
+                        <div>
+                            <h3 class="font-semibold dark:text-white">{{ contentPage.title }}</h3>
+                            <p class="text-sm text-slate-500">/halaman/{{ contentPage.slug }}</p>
+                        </div>
+                        <label class="grid gap-1 text-sm font-medium dark:text-white">
+                            Judul di Google
+                            <input
+                                v-model="contentPageForms[contentPage.id].seo_title"
+                                maxlength="70"
+                                class="rounded-lg border border-slate-400 bg-white p-3 text-slate-950"
+                            />
+                        </label>
+                        <label class="grid gap-1 text-sm font-medium dark:text-white">
+                            Ringkasan di Google
+                            <textarea
+                                v-model="contentPageForms[contentPage.id].seo_description"
+                                maxlength="160"
+                                rows="3"
+                                class="rounded-lg border border-slate-400 bg-white p-3 text-slate-950"
+                            ></textarea>
+                        </label>
+                        <label class="flex min-h-11 items-center gap-3 text-sm font-medium dark:text-white">
+                            <input v-model="contentPageForms[contentPage.id].show_in_footer" type="checkbox" class="h-5 w-5" />
+                            Tampilkan tautan di footer
+                        </label>
+                        <button
+                            type="submit"
+                            class="min-h-11 w-fit rounded-lg border border-teal-700 px-4 py-2 text-sm font-semibold text-teal-900 dark:text-teal-200"
+                        >
+                            Simpan halaman
+                        </button>
+                    </form>
+                </div>
             </section>
 
             <section

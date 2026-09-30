@@ -3,6 +3,7 @@
 namespace Tests\Feature\Storefront;
 
 use App\Models\BusinessSite;
+use App\Models\SiteContentPage;
 use App\Models\SiteThemeVersion;
 use App\Models\Tenant;
 use App\Services\Storefront\HtmlSanitizerService;
@@ -46,6 +47,54 @@ HTML;
         $this->assertStringContainsString('data-fb-section="hero"', $clean);
         $this->assertStringContainsString('<svg', $clean);
         $this->assertStringContainsString('<path', $clean);
+    }
+
+    public function test_imported_css_cannot_load_remote_assets_or_execute_legacy_syntax(): void
+    {
+        $sanitizer = app(HtmlSanitizerService::class);
+
+        $this->assertSame('.hero{color:#123456}', $sanitizer->sanitizeCss('.hero{color:#123456}'));
+        $this->assertSame('', $sanitizer->sanitizeCss('.hero{background:url(https://tracker.invalid/pixel)}'));
+        $this->assertSame('', $sanitizer->sanitizeCss('.hero{width:expression(alert(1))}'));
+    }
+
+    public function test_imported_content_page_has_seo_footer_link_and_sanitized_html(): void
+    {
+        $tenant = Tenant::factory()->create(['name' => 'Kue Mama']);
+        $site = BusinessSite::factory()->create([
+            'tenant_id' => $tenant->id,
+            'slug' => 'kue-mama',
+            'status' => 'published',
+            'profile' => ['name' => 'Kue Mama'],
+        ]);
+        $page = SiteContentPage::create([
+            'tenant_id' => $tenant->id,
+            'business_site_id' => $site->id,
+            'slug' => 'kebijakan-pemesanan',
+            'title' => 'Kebijakan Pemesanan',
+            'seo_title' => 'Cara Memesan Kue',
+            'seo_description' => 'Informasi pemesanan kue rumahan.',
+            'html' => '<main><h1>Pesan di sini</h1><script>alert(1)</script><form><input></form></main>',
+            'css' => '.imported{color:#123456}',
+            'show_in_footer' => true,
+            'is_published' => true,
+        ]);
+
+        $this->get('http://kue-mama.fabriku.biz.id/halaman/kebijakan-pemesanan')
+            ->assertOk()
+            ->assertSee('<title>Cara Memesan Kue</title>', false)
+            ->assertSee('name="description" content="Informasi pemesanan kue rumahan."', false)
+            ->assertSee('Pesan di sini')
+            ->assertSee('/halaman/kebijakan-pemesanan')
+            ->assertDontSee('<script', false)
+            ->assertDontSee('<form', false)
+            ->assertDontSee('alert(1)', false);
+
+        $this->get('http://kue-mama.fabriku.biz.id/sitemap.xml')
+            ->assertOk()
+            ->assertSee('/halaman/kebijakan-pemesanan');
+
+        $this->assertSame($site->id, $page->fresh()->business_site_id);
     }
 
     public function test_theme_renderer_injects_css_variables_and_renders_slots(): void

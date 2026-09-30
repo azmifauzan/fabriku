@@ -1,6 +1,6 @@
 # Master Plan: Website Usaha dan Pusat Sosial Fabriku
 
-Status: rencana kerja final, diputuskan bersama pemilik produk pada 23 September 2026. Target rilis: **31 Oktober 2026**. Dokumen lain di folder ini adalah lampiran riset/detail; bila bertentangan, dokumen ini yang berlaku.
+Status: rencana dasar 23 September 2026, diperbarui untuk alur Satsetui–Storefront pada 30 September 2026. Target **31 Oktober 2026** dan harga lama adalah baseline historis, bukan komitmen untuk perluasan baru. Bagian identitas, generasi, ekspor, dan halaman konten mengikuti [rencana integrasi Satsetui–Storefront](satsetui-storefront-integration-plan.md); bagian lain di dokumen ini tetap menjadi acuan.
 
 ## 0. Status implementasi — audit kode 29 September 2026
 
@@ -9,15 +9,15 @@ Status ini membedakan fondasi kode dari alur produk yang benar-benar selesai. Pe
 | Fase/jalur | Status | Yang sudah terverifikasi | Yang masih tersisa |
 |---|---|---|---|
 | Minggu 0 — persiapan | Selesai untuk storefront | Zona `fabriku.biz.id` aktif; Cloudflare for SaaS/Custom Hostnames API aktif; Origin CA untuk apex/wildcard dipasang; vhost Nginx tambahan lolos `nginx -t`; wildcard DNS, target CNAME, dan fallback origin aktif; image `290926-2` sehat | Mode SSL/TLS zona belum dapat dibaca API token (403/9109), jadi domain pelanggan tetap perlu satu uji custom hostname nyata sebelum pilot. Persiapan Repliz di luar cakupan MVP ini |
-| Minggu 1 — Fabriku | Selesai di repo, belum diverifikasi di produksi | Paket/kuota dasar dan `usage_events`; `business_sites`, host resolver, katalog produk/layanan, renderer Blade dan sanitizer, CSS hasil build lokal, pembatasan CSS tema dan CSP; pengelola situs dan tiga preset lokal; tes billing/routing/isolasi tenant | Cache publik ditunda karena sesi/CSRF; editor section bebas belum ada. Tiga preset lokal bukan pengganti 12 template/API Satsetui yang direncanakan |
-| Minggu 1 — Satsetui | Belum terintegrasi dengan Fabriku | Generator halaman dan Social Kit mandiri milik pengguna Satsetui sudah ada | Belum ditemukan API generasi khusus Fabriku, autentikasi service account, kontrak `fabriku-site-v1`, maupun pemakaian kredit atas nama akun layanan. `FABRIKU_INTERNAL_WEBHOOK_*` yang ada dipakai untuk routing webhook Sumopod, bukan API generasi |
-| Minggu 2 — Website Usaha/Fabriku | MVP di repo selesai, rilis belum | Keranjang dan checkout stok/harga dari server menjadi sales order draft, idempotensi; prospek jasa dengan consent/rate limit; inbox pesanan/prospek, WhatsApp staf, konversi prospek, penerima email/Telegram, editor profil/SEO/preset, versi/restore tema, publikasi, laporan situs dan suspend admin; 36 tes storefront lulus | Uji end-to-end produksi, delivery email/Telegram nyata, dan tenant pilot. Penulisan AI, editor section bebas, dan API Satsetui belum ada |
+| Minggu 1 — Fabriku | Selesai di repo, belum diverifikasi di produksi | Paket/kuota dasar dan `usage_events`; `business_sites`, host resolver, katalog produk/layanan, renderer Blade dan sanitizer, CSS hasil build lokal, pembatasan CSS tema dan CSP; pengelola situs dan tiga preset lokal; tes billing/routing/isolasi tenant | Cache publik ditunda karena sesi/CSRF; impor template final dan halaman konten belum ada. Editor section AI di Fabriku tidak direncanakan |
+| Minggu 1 — Satsetui | Belum terintegrasi dengan Fabriku | Generator halaman dan Social Kit mandiri milik pengguna Satsetui sudah ada | Belum ditemukan kategori Fabriku privat, penautan/login partner, kontrak `fabriku-site-v1`, maupun ekspor balik ke Fabriku. `FABRIKU_INTERNAL_WEBHOOK_*` yang ada dipakai untuk routing webhook Sumopod, bukan integrasi desain |
+| Minggu 2 — Website Usaha/Fabriku | MVP di repo selesai, rilis belum | Keranjang dan checkout stok/harga dari server menjadi sales order draft, idempotensi; prospek jasa dengan consent/rate limit; inbox pesanan/prospek, WhatsApp staf, konversi prospek, penerima email/Telegram, editor profil/SEO/preset, versi/restore tema, publikasi, laporan situs dan suspend admin; 36 tes storefront lulus | Uji end-to-end produksi, delivery email/Telegram nyata, dan tenant pilot. Integrasi akun/ekspor Satsetui belum ada; editor desain AI tetap di Satsetui |
 | Minggu 2 — Satsetui | Aset dasar ada, integrasi belum | Social Kit dapat dibuat melalui akun Satsetui dan diekspor sebagai ZIP gambar PNG atau PDF LinkedIn | Belum ada ekspor/API JPG sesuai alur Fabriku, profil `social-kit-v1`, 12 template katalog khusus Fabriku, atau impor otomatis ke Fabriku |
 | Minggu 3 — Pusat Sosial dasar | Belum dimulai di Fabriku | Belum ada kode koneksi akun sosial Fabriku yang terverifikasi | OAuth tenant, sinkronisasi, statistik, inbox komentar, balasan, konversi komentar/DM, dan alarm kapasitas |
 | Minggu 4 — Pusat Sosial/domain | Domain Fabriku aktif; domain pelanggan siap diuji; sosial ditunda | Pendaftaran custom hostname lewat API Cloudflare, record TXT/CNAME, pemeriksaan DNS/status sertifikat sebelum aktivasi, redirect subdomain ke domain aktif; fallback origin publik berstatus `active` | Satu uji custom hostname domain pelanggan dan mode TLS zona masih perlu konfirmasi; kalender/composer, antrean posting, polling status, serta inbox DM ditunda |
 | Minggu 5 — billing/peluncuran | Fondasi billing ada; paket Pro belum end-to-end | Konfigurasi Core/Pro, masa aktif Pro, ledger pemakaian, dan kolom pembayaran dasar | Checkout/prorata Pro, tagihan gabungan, lifecycle pembatalan/retensi, halaman harga/fitur Website Usaha dan Pusat Sosial, serta runbook peluncuran |
 
-Keputusan audit: status “selesai di repo” tidak sama dengan “siap dijual”. Social media dan harga paket tetap mengikuti rencana lama tetapi tidak menjadi syarat deploy Website Usaha awal. Integrasi Satsetui masih menjadi pekerjaan terpisah, bukan klaim fitur saat ini.
+Keputusan audit: status “selesai di repo” tidak sama dengan “siap dijual”. Social media dan perubahan harga paket ditunda. Audit integrasi 30 September: editor Fabriku masih tiga preset lokal; Satsetui belum punya kategori Fabriku privat, login partner, atau ekspor ke Fabriku. Kredit tetap milik user Satsetui, jadi sponsor kredit tidak diperlukan. Detail gap dan fase berikutnya ada di [rencana integrasi](satsetui-storefront-integration-plan.md).
 
 Verifikasi 29 September 2026: suite penuh `php artisan test` — **538 passed, 6 skipped (2.420 assertions)**; Pint `--test` untuk file PHP yang berubah — **lulus**.
 
@@ -25,10 +25,10 @@ Verifikasi 29 September 2026: suite penuh `php artisan test` — **538 passed, 6
 
 Fabriku menambah dua kemampuan untuk tenant:
 
-1. **Website Usaha**: storefront untuk usaha produk, landing page untuk usaha jasa, atau gabungan keduanya, di `namatoko.fabriku.biz.id` atau domain sendiri. Tampilan dibuat dengan Satsetui (katalog template khusus Fabriku atau desain AI per tenant) dan bisa diedit lagi di Fabriku. Produk, stok, dan layanan diambil langsung dari data Fabriku. Pesanan dan permintaan jasa masuk ke Fabriku, lalu dilanjutkan lewat WhatsApp.
+1. **Website Usaha**: storefront untuk usaha produk, landing page untuk usaha jasa, atau gabungan keduanya, di `namatoko.fabriku.biz.id` atau domain sendiri. Tampilan dibuat dan diedit di kategori privat Fabriku pada Satsetui, lalu diimpor sebagai template final untuk preview/publikasi di Fabriku. Produk, stok, dan layanan diambil langsung dari data Fabriku. Pesanan dan permintaan jasa masuk ke Fabriku, lalu dilanjutkan lewat WhatsApp.
 2. **Pusat Sosial**: menghubungkan Instagram dan Facebook usaha lewat Repliz, lalu memantau statistik, konten, komentar, dan DM di satu tempat. Komentar atau DM bisa diubah menjadi pesanan atau prospek. Tenant juga bisa menjadwalkan posting dan membuat konten visual dengan AI.
 
-Website Usaha dari template katalog termasuk langganan Core. Desain unik (tema AI), domain sendiri, Tulis dengan AI, dan seluruh Pusat Sosial dijual sebagai **add-on Fabriku Pro**. Tenant hanya berurusan dengan Fabriku: satu akun, satu tagihan. Satsetui dan Repliz bekerja di belakang layar.
+Website Usaha dilanggan di Fabriku. Desain AI memakai akun dan kredit Satsetui milik pengguna: akun baru yang dibuat dari Fabriku langsung terverifikasi dan mendapat welcome credit sesuai kebijakan Satsetui, sedangkan pendaftaran Satsetui biasa tidak berubah. Akun lama ditautkan setelah verifikasi kepemilikan sekali. Setelah tertaut, login dari Fabriku langsung membuka wizard Satsetui khusus Fabriku. Top-up kredit dilakukan di Satsetui, jadi jangan menjanjikan satu tagihan untuk desain AI. Asumsi paket Core/Pro dan harga lama ditunda.
 
 ## 2. Tujuan
 
@@ -67,76 +67,50 @@ Website Usaha dari template katalog termasuk langganan Core. Desain unik (tema A
 | ID | Area | Keputusan |
 |---|---|---|
 | K1 | Tujuan | Storefront/landing page untuk tenant + pemantauan sosial media usaha di satu tempat |
-| K2 | Jadwal | Seluruh cakupan selesai dan rilis 31 Oktober 2026, tanpa pemangkasan |
-| K3 | Akun | Satu akun dan satu tagihan Fabriku; tenant tidak mendaftar/membayar ke Satsetui atau Repliz |
+| K2 | Jadwal | Target 31 Oktober 2026 adalah baseline lama; perluasan Satsetui–Storefront memakai gerbang penerimaan bertahap, bukan janji tanggal tersebut |
+| K3 | Akun dan tagihan | Langganan Website Usaha di Fabriku; akun Satsetui dibuat bila email belum terdaftar atau ditautkan dengan verifikasi sekali bila sudah ada. Kredit/top-up desain dibayar langsung di Satsetui; Repliz ditunda |
 | K4 | Domain toko | Subdomain `{slug}.fabriku.biz.id` (domain dibeli di Minggu 0). Root `fabriku.biz.id` dan `www` → 301 ke `fabriku.id` |
 | K5 | Domain sendiri | Didukung, TLS lewat Cloudflare for SaaS (custom hostnames) |
 | K6 | Render | Storefront dirender Blade (HTML server), bukan Inertia |
-| K7 | Tema | Dibuat dengan Satsetui dan bisa diedit di Fabriku: katalog 12 template khusus Fabriku (4 gaya × 3 mode) + desain AI per tenant lewat API, keduanya format `fabriku-site-v1` |
-| K8 | API Satsetui | Internal untuk Fabriku (satu akun layanan). Kredit diisi admin Satsetui (grant), pemakaian tercatat di ledger |
+| K7 | Tema dan halaman | Desain beranda atau halaman konten dibuat dan diedit di kategori privat Fabriku pada Satsetui, diekspor sebagai `fabriku-site-v1`, lalu diimpor sebagai draf untuk preview/publikasi di Fabriku; halaman konten bisa ditautkan di footer |
+| K8 | Login dan kredit Satsetui | Kategori Fabriku tersembunyi dari wizard umum dan hanya terbuka untuk akun tertaut dengan konteks situs sah. Setelah link, SSO langsung membuka wizard. Kredit gratis, saldo, top-up, charge, dan refund tetap milik Satsetui/user; Fabriku tidak menjadi sponsor |
 | K9 | Pesanan | Pesanan produk = sales order `draft`; permintaan jasa = prospek terpisah, dikonversi ke sales order setelah deal |
 | K10 | Lanjutan transaksi | Tombol WhatsApp `wa.me` dengan pesan berisi nomor pesanan; staf dinotifikasi lewat email + Telegram |
 | K11 | Sosial | Repliz, platform Instagram + Facebook |
-| K12 | Kontrak Repliz | Bila belum ada kontrak tertulis per 31 Okt, Pusat Sosial rilis berlabel **Beta** tetap di Fabriku Pro |
+| K12 | Kontrak Repliz | Rencana sosial lama ditunda; kontrak dan label rilis ditentukan saat fase Repliz dibuka kembali |
 | K13 | Data sosial | Komentar disimpan 90 hari; DM tidak disimpan (dibaca langsung dari Repliz) |
 | K14 | Skema data | Netral vendor: kolom `provider` + `provider_*_id` |
-| K15 | Paket | Core Rp25.000/bulan, Rp250.000/tahun (tetap) termasuk Website Usaha dari template katalog. Add-on **Fabriku Pro** Rp49.000/bulan, Rp490.000/tahun untuk desain AI unik, domain sendiri, Tulis dengan AI, dan Pusat Sosial |
-| K16 | Kuota Pro/bulan | 2 akun sosial, 60 posting terjadwal, 50 teks AI, 3 desain tema AI + 20 regenerasi section, 8 Social Kit. Statistik, komentar, DM tanpa batas |
-| K17 | Tagihan Pro | Ikut periode Core; beli di tengah periode bayar prorata sampai tanggal habis Core |
-| K18 | Trial | Hanya Core (30 hari, termasuk website template). Tidak ada trial Pro |
-| K19 | Berhenti | Tenggang 7 hari, data Pro disimpan 90 hari. Pro berhenti: desain AI tetap tampil tanpa bisa diedit. Core habis: website tampil, pesanan ditutup |
+| K15 | Paket | Asumsi harga Core/Pro lama **ditunda**; tidak dipakai untuk menagih desain Satsetui sebelum biaya pilot dan kebijakan pelanggan eksisting diputuskan |
+| K16 | Kuota | Angka kuota Pro lama **ditunda**; fase integrasi membatasi biaya di backend, lalu mengukur pemakaian sebelum menetapkan kuota komersial |
+| K17 | Tagihan Pro | Rancangan prorata lama ditunda; tidak diterapkan untuk integrasi ini sebelum kebijakan komersial baru |
+| K18 | Trial | Rancangan trial lama ditunda; akses generasi AI selama trial belum diputuskan |
+| K19 | Berhenti | Aturan masa tenggang/retensi Pro lama ditunda; draf/halaman yang sudah terbit harus punya kebijakan masa simpan yang jelas sebelum dijual |
 | K20 | Kepemilikan produk | Website Usaha Fabriku untuk UMKM yang datanya di Fabriku. Link-in-bio/menu digital Satsetui tetap untuk pengguna Satsetui umum dan mengarahkan UMKM operasional ke Fabriku |
-| K21 | Rilis | Pilot 5–10 tenant mulai 13 Okt **hanya untuk fitur Core** (Website Usaha template). Fitur Pro diuji tim internal sampai 31 Okt. Semua dibuka 31 Okt |
-| K22 | Syarat Pro | Pro hanya bisa dibeli di atas Core berbayar yang aktif; tenant trial membayar Core dulu (boleh Core + Pro dalam satu tagihan) |
+| K21 | Rilis | Pilot tertutup desain Satsetui hanya setelah gerbang penautan aman, wizard privat, artefak aman, impor, dan halaman publik lolos; tanggal pilot lama tidak menjadi janji |
+| K22 | Syarat Pro | Gating Pro untuk Website Usaha belum diputuskan ulang; kredit Satsetui tidak dijual sebagai Pro Fabriku |
 
 ## 5. Fitur: Website Usaha
 
 ### 5.1 Aktivasi dan pengaturan
 
 - Menu **Website Usaha** di sidebar, gated rule `enable_business_site` di `config/business.php` (diset eksplisit di semua kategori, karena `isModuleEnabled()` men-default `true`) dan langganan Core aktif/trial. Fitur bertanda **Pro** di bawah hanya aktif bila `Tenant::hasFeature()` mengizinkan.
-- Wizard 4 langkah:
+- Alur aktivasi awal yang telah ada memakai identitas → desain preset lokal → katalog → simpan. Pengembangan AI berikutnya masuk tab Desain setelah situs dibuat; rincinya di [rencana integrasi Satsetui](satsetui-storefront-integration-plan.md). Rancangan wizard lama di bawah adalah referensi, bukan perilaku aplikasi saat ini:
   1. Mode `produk` / `jasa` / `gabungan` (default: `service` → jasa, lainnya → produk).
   2. Profil: nama, slug subdomain, logo, deskripsi, alamat/area layanan, jam buka, nomor WhatsApp, tautan sosial.
   3. Produk dan/atau layanan yang tampil.
-  4. Tema: pilih dari katalog, atau **Buat desain khusus dengan AI** (**Pro**, kuota desain tema), lalu pratinjau. Tenant Core melihat tombol ini dengan ajakan membeli Pro.
-- **Pro:** tombol **Tulis dengan AI** mengisi teks kosong (headline, tentang usaha, deskripsi produk/layanan) lewat `OpenAIService` (kuota teks AI). `OPENAI_MODEL` di produksi wajib diset ke model valid (default `gpt-5-nano` di `config/services.php` bukan ID valid).
+  4. Tema: pilih preset lokal, lalu bila akses integrasi sudah dirilis dapat memilih **Buat desain khusus** di Satsetui dan mengimpor hasil sebagai draf. Gating paket/kuota belum diputuskan.
+- Tombol **Tulis dengan AI** adalah rencana terpisah, bukan syarat alur generasi desain Satsetui pada fase ini.
 - Penerima notifikasi: pilih user staf; pemilik usaha menjadi cadangan.
 - Aksi: **Terbitkan**, **Jeda pesanan**, **Nonaktifkan**. Pemeriksaan sebelum terbit: WhatsApp valid, ≥ 1 produk/layanan, penerima valid, tidak ada teks contoh template yang tersisa.
 - Slug dicadangkan: `www`, `app`, `admin`, `api`, `mail`, `smtp`, `ftp`, `blog`, `help`, `status`, `toko`, `cdn`, `static`, `assets`, dan nama merek Fabriku/Satsetui/Repliz.
 
-### 5.2 Tema dari Satsetui
+### 5.2 Desain dari Satsetui dan halaman konten
 
-**Sumber tema:**
+Pengguna menekan **Buat di Satsetui** dari tab Desain Fabriku. Setelah akun tertaut, login otomatis langsung membuka wizard khusus Fabriku, yang tidak muncul pada pilihan kategori Satsetui umum. Mereka dapat menghasilkan dan mengedit `home` atau `content_page` di Satsetui. Tombol **Gunakan di Fabriku** mengimpor hasil final sebagai draf. Beranda memakai `SiteThemeVersion`; halaman konten mempunyai slug, metadata SEO, dan tautan footer. Publikasi dan data operasional tetap milik Fabriku.
 
-| Sumber | Siapa membuat | Kapan tersedia | Kuota |
-|---|---|---|---|
-| Katalog (12 template: 4 gaya × mode produk/jasa/gabungan) | Tim Fabriku lewat Satsetui, dikurasi, lalu diimpor sebagai template global | Langsung saat aktivasi, untuk Core dan Pro | Tidak memakai kuota |
-| Desain AI per tenant (**Pro**) | Tenant Pro, dari wizard atau pengaturan tema | ± beberapa menit (job) | 3 desain penuh + 20 regenerasi section/bulan |
+Kontrak `fabriku-site-v1` mempertahankan section/slot/penanda `data-fb-*` yang didukung renderer, ditambah slot dinamis `footer-links`. Harga, stok, pesanan, formulir, navigasi, dan footer link tidak boleh menjadi HTML statis hasil AI. Satsetui memvalidasi artefak; Fabriku memvalidasi dan menyanitasi ulang sebelum menyimpan. Editor desain tetap di Satsetui; Fabriku hanya preview, pengaturan rute/footer, dan publikasi snapshot final.
 
-**Format `fabriku-site-v1`** (dihasilkan Satsetui, dirender dan diedit di Fabriku):
-
-- Artifact berisi `theme.json` (metadata, daftar section, nilai default teks/gambar, nilai CSS variables), `shell.html` (header + footer), `sections/{id}.html` per section, dan `theme.css` yang sudah dikompilasi (Tailwind tidak dikompilasi ulang di Fabriku).
-- Penanda:
-  - `data-fb-shell="header|footer"`: kerangka halaman.
-  - `data-fb-section="{tipe}"` dengan tipe `hero`, `value-props`, `featured-products`, `service-list`, `about`, `testimonials`, `gallery`, `cta`, `contact`: blok yang bisa diurutkan dan disembunyikan.
-  - `data-fb-text="{kunci}"`, `data-fb-image="{kunci}"`, `data-fb-link="{kunci}"`: elemen yang bisa diedit.
-  - `data-fb-slot="{nama}"` dengan nama `logo`, `nav`, `products`, `services`, `lead-form`, `whatsapp-button`, `cart-button`, `map`: tempat Fabriku menyisipkan komponen native. Harga, stok, keranjang, dan formulir tidak pernah berasal dari HTML hasil AI.
-- Warna dan tipografi lewat CSS variables: `--fb-primary`, `--fb-accent`, `--fb-bg`, `--fb-surface`, `--fb-text`, `--fb-font-heading`, `--fb-font-body`, `--fb-radius`.
-- Dilarang: `<script>`, `<iframe>`, `<object>`, `<embed>`, `<form>` (formulir hanya lewat slot), `<meta http-equiv>`, atribut `on*`, URL `javascript:`/`data:` (kecuali gambar), dan URL aset di luar host yang diizinkan.
-- Halaman selain beranda (daftar produk, detail produk, layanan, keranjang, terima kasih, kebijakan privasi) adalah komponen Blade native Fabriku yang memakai `shell.html` dan CSS variables tema, sehingga tetap seragam dengan desain.
-
-**Validasi dua lapis:**
-
-1. Satsetui memvalidasi keluaran model terhadap format di atas; bila gagal, diperbaiki otomatis satu kali, lalu ditandai gagal dan kredit di-refund.
-2. Fabriku menyanitasi ulang saat impor dengan `symfony/html-sanitizer` (allowlist tag, atribut, dan host aset). Sanitizer regex milik Satsetui (`sanitizeSavedHtml`) tidak dipakai untuk storefront publik.
-
-**Editor tema di Fabriku:**
-
-- Memakai ulang `LivePreview.vue` dan `PropertiesPanel.vue` dari Satsetui (sama-sama Vue 3), dibatasi pada elemen bertanda.
-- Edit teks/gambar/tautan bertanda, urutkan/sembunyikan section, ubah CSS variables (warna, font, radius), unggah logo dan gambar ke `fabriku_s3`.
-- **Pro:** **Regenerasi section dengan AI** memanggil API Satsetui untuk satu section (kuota regenerasi).
-- Editor yang sama dipakai tenant Core (untuk template katalog) dan Pro (katalog + desain AI). Desain AI tanpa Pro aktif bersifat baca-saja (7.5).
-- Setiap simpan membuat versi tema baru; tenant bisa kembali ke versi sebelumnya. Hanya versi yang diterbitkan yang tampil publik.
+Alur akun/login, kredit Satsetui, skema artefak, impor aman, SEO halaman konten, dan gerbang penerimaan rinci ada di [Integrasi Satsetui–Storefront](satsetui-storefront-integration-plan.md). Jumlah template katalog dan gating paket lama belum menjadi keputusan fase ini.
 
 ### 5.3 Katalog produk
 
@@ -250,6 +224,8 @@ Repliz tidak punya webhook; data diperbarui lewat sinkronisasi berkala (9.3).
 
 ## 7. Paket, kuota, dan billing
 
+Bagian 7 adalah analisis harga/kuota 23 September dan **ditunda**. Khusus biaya desain Satsetui, asumsi bundling lama sudah dibatalkan: kredit gratis, top-up, charge, dan refund mengikuti akun Satsetui pengguna. Harga paket Website Usaha Fabriku belum diputuskan ulang; tabel lama di bawah tidak boleh dipakai sebagai janji pelanggan.
+
 ### 7.1 Core dan add-on Fabriku Pro
 
 Fitur baru dijual sebagai **add-on Fabriku Pro** di atas langganan Core. Tanpa Pro, tenant tetap punya website usaha dari template katalog, tetapi tidak bisa punya desain unik dan tidak bisa memantau sosial media.
@@ -315,7 +291,7 @@ Sesuai mode read-only Fabriku yang ada: setelah tenggang 7 hari, website tetap t
 | Repliz Gold Rp49.000 ÷ tenant Pro (2 akun/tenant, 1 workspace = ±90 tenant) | ± Rp550 |
 | Repliz Storage (bila dipakai) Rp39.000/5 GB | Dibagi rata, dipantau di panel admin |
 | LLM teks (`OpenAIService`) | Dicatat per `usage_events` × tarif model |
-| Satsetui (tema AI + Social Kit) | Kredit dari ledger akun layanan × nilai kredit |
+| Satsetui (tema AI) | Dibayar user melalui kredit akun Satsetui; bukan biaya wallet layanan Fabriku |
 | Cloudflare for SaaS | Rp0 sampai 100 domain sendiri |
 | Hosting website (juga untuk tenant Core) | Dipantau per bulan |
 
@@ -325,21 +301,17 @@ Laporan margin per tenant ada di panel admin sejak rilis.
 
 Pekerjaan di repo `/home/fauzan/dev/satsetui`.
 
-### 8.1 API internal
+### 8.1 Login partner dan API backend
 
-- Base `/api/v1`, Bearer key milik akun layanan Fabriku (disimpan hash, bisa dirotasi/dicabut, scope `generation:create`, `generation:read`).
-- `POST /generations` dengan header `Idempotency-Key` (sama + payload sama → generasi yang sama tanpa charge ulang; payload berbeda → `409`).
-- `GET /generations/{id}` → `queued` / `processing` / `completed` / `failed`.
-- `GET /generations/{id}/artifacts` → daftar file dengan URL unduh bertanda tangan berumur pendek.
-- Job di-dispatch saat create (tanpa SSE/browser), memakai `GenerationService` dan `CreditService` yang ada; refund tepat sekali saat gagal. Audit penguncian saldo di jalur refund sebelum kunci pertama dibuat.
-- Kredit: admin Satsetui melakukan grant berkala ke akun layanan Fabriku; alarm di Fabriku bila saldo < kebutuhan 7 hari.
+- Fabriku menerbitkan kode launch opaque sekali pakai untuk manager/site. Satsetui menukarnya server-to-server. Jika email terverifikasi Fabriku belum terdaftar, Satsetui membuat akun baru, langsung menandainya verified **hanya untuk jalur Fabriku**, dan memberi welcome credit menurut pengaturan Satsetui tepat sekali. Jika email sudah ada, pengguna memverifikasi kepemilikan akun sekali sebelum ditautkan tanpa bonus baru. Setelah tertaut, SSO langsung membuka wizard Fabriku; pendaftaran Satsetui biasa tetap memakai verifikasi email normal.
+- Kategori wizard Fabriku tersembunyi secara default dan backend menolak akses tanpa link serta site context sah. Saldo, top-up, charge, refund, dan editor memakai akun Satsetui pengguna yang ada; Fabriku tidak menyalurkan kredit atau menagihnya.
+- Tombol **Gunakan di Fabriku** menerbitkan tiket ekspor sekali pakai. Fabriku mengambil artefak `fabriku-site-v1` lewat API backend, memvalidasi dan menyalin aset, lalu membuat draf. Endpoint/status/error dan kontrak keamanan rinci ditetapkan pada Tahap 1 [rencana integrasi](satsetui-storefront-integration-plan.md); endpoint `/api/v1/generations` dari rancangan lama bukan keharusan MVP ini.
 
 ### 8.2 Profil `fabriku-site-v1`
 
-- Brief: nama usaha, kategori, mode, deskripsi, warna/logo (opsional), gaya, daftar section, contoh nama produk/layanan (tanpa harga/stok), `locale = id-ID`.
-- Keluaran sesuai format 5.2; `McpPromptBuilder` mendapat builder baru dengan aturan penanda; validator menolak/memperbaiki keluaran yang melanggar.
-- Mode regenerasi satu section: input `theme.json` + tipe section + instruksi singkat.
-- Katalog 12 template dibuat tim lewat profil yang sama, lalu diimpor ke Fabriku sebagai template global.
+- Brief mode produk/jasa/gabungan dan target `home` atau `content_page`, tanpa PII, harga, dan stok. Wizard Satsetui kategori Fabriku memakai generator HTML/CSS yang ada melalui adapter+validator format terstruktur.
+- Beranda membawa shell, CSS, dan sections; halaman konten membawa sections isi dan metadata SEO, lalu mewarisi shell/CSS situs Fabriku. Hanya komponen native Fabriku yang mengisi slot transaksi/navigasi/footer.
+- Katalog global dan regenerasi section boleh menyusul setelah alur satu target, satu ekspor, dan satu publikasi aman.
 
 ### 8.3 Profil `social-kit-v1`
 
@@ -420,7 +392,7 @@ Semua tabel tenant memakai `TenantScope`, `HasAuditLogs`, dan unique index yang 
 
 ## 11. Jadwal
 
-Dua jalur kerja paralel: **F** (repo Fabriku) dan **S** (repo Satsetui).
+Jadwal tanggal di bawah adalah baseline 23 September, bukan komitmen baru. Prioritas terbaru: selesaikan identitas → kategori/generasi → ekspor/impor → halaman publik → pilot sesuai gerbang [rencana integrasi Satsetui–Storefront](satsetui-storefront-integration-plan.md). Pusat Sosial dan perubahan harga ditunda. Dua jalur kerja: **F** (repo Fabriku) dan **S** (repo Satsetui).
 
 ### Minggu 0 — 24–26 Sep: persiapan
 
@@ -436,9 +408,9 @@ Dua jalur kerja paralel: **F** (repo Fabriku) dan **S** (repo Satsetui).
 - **F:** billing fondasi (`plan_code`, `config/plans.php`, `usage_events`, kolom baru `subscription_payments`, migrasi `full` → `core`, kolom Pro di `tenants`, gating `hasFeature()` Core vs Pro); `business_sites`, `ResolveStorefront`, `routes/storefront.php`; katalog produk/layanan (`site_products`, kolom `services`); renderer tema (shell + section + slot) + sanitizer.
 - **S:** API internal (kunci, idempotensi, job headless, kepemilikan); profil `fabriku-site-v1` + validator + CSS terkompilasi; mode regenerasi section.
 
-### Minggu 2 — 6–10 Okt: Website Usaha lengkap
+### Minggu 2 — 6–10 Okt: Website Usaha lengkap (arsip jadwal lama)
 
-- **F:** checkout (dedupe customer, nomor order per tenant + retry, idempotensi), prospek + konversi, Permintaan Masuk, notifikasi, WhatsApp, wizard, editor tema (port `LivePreview`/`PropertiesPanel`), versi tema, Tulis dengan AI, SEO dasar per host, panel admin (daftar situs, suspend, laporan situs).
+- **F:** checkout (dedupe customer, nomor order per tenant + retry, idempotensi), prospek + konversi, Permintaan Masuk, notifikasi, WhatsApp, wizard, versi tema, Tulis dengan AI, SEO dasar per host, panel admin (daftar situs, suspend, laporan situs). Rencana port editor Satsetui ke Fabriku dibatalkan; edit desain tetap di Satsetui.
 - **S:** buat 12 template katalog, kurasi, impor ke Fabriku; profil `social-kit-v1` (foto, JPEG per slide).
 - **Selesai minggu ini:** demo produk, jasa, gabungan terbit di subdomain.
 
@@ -508,14 +480,14 @@ Laporan bulanan di panel admin.
 - Posisi: **aplikasi operasional, website usaha, dan pusat sosial untuk UMKM**. Headline homepage mulai 31 Okt: *Kelola usaha, terima pesanan, dan pantau sosial media dari satu tempat.*
 - Halaman `/fitur/website-usaha` (website gratis dalam Core) dan `/fitur/pusat-sosial` (Fabriku Pro) terbit 31 Okt dengan contoh toko pilot yang sudah memberi izin. Halaman harga menampilkan Core + add-on Pro.
 - Pesan utama: *Semua pelanggan Fabriku kini punya website usaha. Tambah Fabriku Pro untuk desain unik dan pantau sosial media.*
-- Atribusi: `Dibuat dengan Fabriku` di toko; nama Satsetui/Repliz hanya di kebijakan privasi dan layar izin akun sosial.
+- Atribusi: `Powered by Fabriku` dapat tampil di storefront; `Powered by Satsetui` tampil pada pengalaman desain/generasi dan boleh pada atribusi desain yang relevan. Langganan Website Usaha di Fabriku, kredit/top-up desain di Satsetui; jelaskan dua transaksi ini secara terang. Atribusi Repliz menunggu fase sosial.
 - Artikel blog baru dari pertanyaan pilot. Detail SEO di [brand-seo-expansion-plan.md](brand-seo-expansion-plan.md).
 
 ## 16. Operasional
 
-- Panel admin: daftar situs + suspend, laporan situs, kapasitas workspace Repliz, saldo kredit Satsetui, akun sosial per tenant, kegagalan notifikasi/sinkron/jadwal, pemakaian kuota, margin per tenant.
+- Panel admin: daftar situs + suspend, laporan situs, status koneksi/ekspor Satsetui; kapasitas Repliz dan metrik sosial baru saat fase sosial aktif. Saldo kredit pribadi Satsetui tidak dikelola admin Fabriku.
 - Panduan bantuan: ubah IG ke akun Bisnis, hubungkan akun, domain sendiri, alur pesanan manual, upgrade.
-- Runbook: Repliz down (banner di Pusat Sosial, jadwal ditahan, retry setelah pulih), token akun kedaluwarsa massal, lonjakan spam formulir, saldo kredit Satsetui habis.
+- Runbook: kegagalan penautan Satsetui, tiket ekspor kedaluwarsa, artefak ditolak, lonjakan spam formulir; gangguan Repliz ditangani pada fase sosial. Jika saldo user Satsetui habis, arahkan top-up di Satsetui.
 
 ## 17. Referensi
 
@@ -525,5 +497,6 @@ Laporan bulanan di panel admin.
 | [commerce-mvp-plan.md](commerce-mvp-plan.md) | Rancangan awal alur pesanan/prospek dan batas data |
 | [website-usaha-pricing-plan.md](website-usaha-pricing-plan.md) | Analisis billing awal dan pelanggan lama |
 | [satsetui-api-plan.md](satsetui-api-plan.md) | Kontrak API Satsetui versi publik (acuan bila kelak dibuka) |
+| [satsetui-storefront-integration-plan.md](satsetui-storefront-integration-plan.md) | Keputusan terbaru alur identitas, generasi, ekspor, halaman konten, dan SEO storefront |
 | [brand-seo-expansion-plan.md](brand-seo-expansion-plan.md) | Posisi merek, pembanding, SEO |
 | [Dokumentasi API Repliz](https://docs.repliz.com/api/install) | Tier, OAuth, komentar, chat, konten, jadwal, storage |

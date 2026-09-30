@@ -53,4 +53,20 @@ class HtmlSanitizerService
 
         return $clean;
     }
+
+    public function sanitizeCss(string $css): string
+    {
+        $css = trim($css);
+        if ($css === '' || strlen($css) > 100_000) {
+            return '';
+        }
+
+        // ponytail: no CSS parser installed; reject network loads and executable legacy syntax.
+        $css = preg_replace('~/\*.*?\*/~s', '', $css) ?? '';
+        if (str_contains($css, '\\') || preg_match('/@import|url\s*\(|expression\s*\(|javascript:|vbscript:|-moz-binding|behavior\s*:|[<>]/i', $css)) {
+            return '';
+        }
+
+        return $css;
+    }
 }

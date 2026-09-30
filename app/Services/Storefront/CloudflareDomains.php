@@ -34,13 +34,26 @@ class CloudflareDomains
     public function dnsPointsToTarget(string $hostname): bool
     {
         $target = rtrim($this->cnameTarget(), '.');
+        if ($target === '') {
+            return false;
+        }
+
         foreach (dns_get_record($hostname, DNS_CNAME) ?: [] as $record) {
             if (rtrim(strtolower($record['target'] ?? ''), '.') === $target) {
                 return true;
             }
         }
 
-        return false;
+        $addresses = static function (string $domain): array {
+            $records = dns_get_record($domain, DNS_A | DNS_AAAA) ?: [];
+
+            return array_merge(array_column($records, 'ip'), array_column($records, 'ipv6'));
+        };
+
+        $hostnameAddresses = $addresses($hostname);
+        $targetAddresses = $addresses($target);
+
+        return $hostnameAddresses !== [] && array_diff($hostnameAddresses, $targetAddresses) === [];
     }
 
     private function request(string $method, string $path, array $data = []): array

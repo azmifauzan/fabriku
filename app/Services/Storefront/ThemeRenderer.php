@@ -29,6 +29,7 @@ class ThemeRenderer
     public function render(BusinessSite $site, ?SiteThemeVersion $themeVersion, array $context = []): string
     {
         $context['site'] = $site;
+        $context['contentPages'] ??= $site->contentPages()->where('is_published', true)->get(['id', 'business_site_id', 'slug', 'title', 'show_in_footer']);
         $page = $context['page'] ?? 'home';
 
         // 1. Resolve CSS variables
@@ -43,6 +44,8 @@ class ThemeRenderer
         // 3. Resolve Main Body Content and sanitize
         if ($page === 'home') {
             $rawContent = $this->renderHomeSections($site, $themeVersion, $context);
+        } elseif ($page === 'content_page') {
+            $rawContent = $this->replaceSlots($this->sanitizer->sanitize($context['page_content'] ?? ''), $context);
         } else {
             $rawContent = $context['page_content'] ?? '';
         }
@@ -50,14 +53,17 @@ class ThemeRenderer
         $mainContent = $rawContent;
 
         // 4. Assemble HTML document
-        $title = e($context['title'] ?? ($site->profile['name'] ?? $site->tenant->name ?? 'Toko Online'));
-        $description = e($site->seo['description'] ?? $site->profile['description'] ?? 'Selamat datang di toko resmi kami.');
+        $title = e($context['seo_title'] ?? $context['title'] ?? ($site->profile['name'] ?? $site->tenant->name ?? 'Toko Online'));
+        $description = e($context['seo_description'] ?? $site->seo['description'] ?? $site->profile['description'] ?? 'Selamat datang di toko resmi kami.');
         $cssPath = $themeVersion?->css_path;
         $stylesheet = app()->environment('testing') ? '' : '<link rel="stylesheet" href="'.e(Vite::asset('resources/css/storefront.css')).'">';
+        $generatedCss = $this->sanitizer->sanitizeCss($context['page_css'] ?? $themeVersion?->theme['satsetui_css'] ?? '');
+        $generatedCssBlock = $generatedCss === '' ? '' : "<style data-fb-generated-theme>\n{$generatedCss}\n</style>";
         $canonical = e($site->getStorefrontUrl().match ($page) {
             'products' => '/produk', 'services' => '/layanan', 'cart' => '/keranjang',
             'product_detail' => '/produk/'.($context['product']->slug ?? ''),
             'service_detail' => '/layanan/'.($context['service']->slug ?? ''),
+            'content_page' => '/halaman/'.($context['content_page']->slug ?? ''),
             'privacy' => '/privasi', 'report' => '/lapor',
             default => '/',
         });
@@ -76,6 +82,7 @@ class ThemeRenderer
     <link rel="canonical" href="{$canonical}">
     {$stylesheet}
     {$cssBlock}
+    {$generatedCssBlock}
     {$this->renderOptionalCssLink($cssPath)}
 </head>
 <body class="bg-[var(--fb-bg)] text-[var(--fb-text)] font-sans antialiased min-h-screen flex flex-col">
@@ -208,6 +215,7 @@ HTML;
             'whatsapp-button',
             'cart-button',
             'map',
+            'footer-links',
         ];
 
         preg_match_all(
@@ -248,6 +256,13 @@ HTML;
      */
     public function renderSlot(string $slotName, array $context): string
     {
+        if ($slotName === 'footer-links') {
+            return collect($context['contentPages'] ?? [])
+                ->where('show_in_footer', true)
+                ->map(fn ($page) => '<a class="hover:underline" href="/halaman/'.e($page->slug).'">'.e($page->title).'</a>')
+                ->implode(' ');
+        }
+
         $viewName = "storefront.slots.{$slotName}";
 
         if (View::exists($viewName)) {
@@ -338,6 +353,7 @@ HTML;
             <p>&copy; {$year} {$siteName}. Seluruh hak cipta dilindungi.</p>
         </div>
         <div class="flex items-center gap-6 text-xs">
+            <div data-fb-slot="footer-links" class="flex flex-wrap items-center gap-4"></div>
             <a href="https://fabriku.id" target="_blank" rel="noopener" class="hover:text-[var(--fb-primary)] transition">
                 Dibuat dengan Fabriku
             </a>

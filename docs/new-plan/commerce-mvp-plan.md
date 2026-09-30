@@ -2,15 +2,17 @@
 
 Status: rancangan, 23 September 2026. Ini bukan daftar fitur yang sudah tersedia.
 
+Catatan keputusan terbaru: bagian desain Satsetui di dokumen awal ini digantikan oleh [rencana integrasi Satsetui–Storefront](satsetui-storefront-integration-plan.md). Langganan Website Usaha ada di Fabriku, sedangkan kredit/top-up desain dan editor ada di Satsetui. Akun baru Satsetui dibuat bila email belum terdaftar; akun lama ditautkan setelah verifikasi sekali. Setelah tertaut, Fabriku langsung membuka wizard privat Fabriku di Satsetui. Bagian sosial dan harga lama di bawah ditunda.
+
 Dokumen terkait: [paket dan migrasi pelanggan](website-usaha-pricing-plan.md), [API partner Satsetui](satsetui-api-plan.md), dan [branding serta SEO](brand-seo-expansion-plan.md).
 
 ## Keputusan produk
 
 Fabriku menjadi aplikasi, identitas, tagihan, dan sumber data utama bagi merchant. Produk baru bernama kerja **Website Usaha**: satu situs per tenant dengan mode `produk`, `jasa`, atau `gabungan`. Situs bisa berupa toko dengan permintaan pesanan, landing page jasa dengan permintaan penawaran, atau keduanya. Pilihan mode mengubah konten dan alur pengunjung, bukan jumlah langganan.
 
-Satu akun dan satu tagihan Fabriku mencakup fitur paket yang dipilih. Satsetui dan Repliz adalah penyedia kemampuan di belakang Fabriku; atribusi `Powered by` boleh tampil. Merchant tidak membuat akun atau membeli kredit pada kedua layanan itu. Pemilik akun sosial tetap perlu memberikan izin OAuth melalui platform terkait.
+Fabriku mengelola situs, katalog, pesanan, dan langganan Website Usaha. Satsetui mengelola kredit, top-up, generasi, dan edit desain; atribusi `Powered by` boleh tampil. Pendaftaran akun Satsetui baru dibantu oleh integrasi, tetapi pembelian kredit tambahan dilakukan pengguna di Satsetui. Pemilik akun sosial tetap perlu memberikan izin OAuth melalui platform terkait bila fase sosial kelak dilanjutkan.
 
-Satu langganan tidak berarti pemakaian tanpa batas atau harga lama otomatis mencakup biaya baru. Rekomendasi paket adalah `Core` (kemampuan Fabriku saat ini) dan `Online` (Core + Website Usaha + Social Kit + penjadwalan terbatas), dengan satu tagihan Fabriku. Batas generasi desain, Social Kit, akun sosial, penyimpanan, dan jadwal harus terlihat jelas. Harga dan kuota final menunggu pengukuran pilot serta izin komersial Repliz; kebijakan pelanggan lama dirinci dalam [rencana harga](website-usaha-pricing-plan.md). Halaman harga tidak boleh menjanjikan fitur yang belum aktif.
+Asumsi paket `Core`/`Online` dan kuota AI dalam rancangan awal ini tidak lagi menjadi keputusan untuk desain Satsetui. Langganan situs dan biaya operasional Fabriku terpisah dari kredit desain yang dibeli di Satsetui. Harga Website Usaha untuk pelanggan eksisting belum diputuskan; lihat [catatan harga terbaru](website-usaha-pricing-plan.md). Halaman harga tidak boleh menjanjikan generasi AI sudah termasuk langganan Fabriku.
 
 Target awal: UMKM Indonesia yang menjual produk buatan/kelolaannya, menyediakan jasa, atau keduanya. Fabriku sudah memiliki katalog layanan dan sales order untuk jasa; website menambah pintu masuk permintaan pelanggan. Ini bukan integrasi marketplace, payment gateway, layanan pengiriman, atau booking otomatis pada MVP.
 
@@ -21,7 +23,7 @@ Target awal: UMKM Indonesia yang menjual produk buatan/kelolaannya, menyediakan 
 | Website usaha | Satu situs per tenant; mode produk/jasa/gabungan, subdomain Fabriku, opsi domain sendiri, preview dan publikasi | Multi-site, multi-bahasa, marketplace sinkron |
 | Produk | Katalog, halaman produk, keranjang sederhana, formulir permintaan pesanan | Promosi kompleks, ongkir otomatis, pembayaran online |
 | Jasa | Daftar layanan, detail/manfaat, profil/bukti kerja asli, CTA `Minta penawaran`/`Hubungi kami`, formulir prospek | Booking kalender, harga otomatis untuk pekerjaan kustom, pembayaran online |
-| Desain | Template dasar atau desain awal Satsetui; edit logo, warna, teks, gambar, urutan bagian, dan SEO dasar di Fabriku | Editor HTML/CSS bebas, kode khusus per merchant, regenerasi tanpa batas |
+| Desain | Template dasar lokal atau desain custom yang dibuat/diedit di Satsetui; hasil final diimpor untuk preview dan publikasi di Fabriku | Editor desain kedua di Fabriku, kode khusus per merchant, regenerasi tanpa batas |
 | Tindak lanjut | Inbox pesanan dan prospek terpisah; staf konfirmasi langsung; pembayaran dicatat setelah transaksi di luar sistem | Chatbot, auto-quote, akun pengunjung |
 | Notifikasi | Penerima staf yang dipilih, email dan Telegram, tautan aman ke pesanan/prospek, retry jika gagal | WhatsApp API berbayar, automasi percakapan |
 | Konten sosial | Brief dari produk/layanan, Social Kit Satsetui sebagai draf visual, caption yang bisa diedit, persetujuan merchant, lalu jadwal IG/FB melalui Repliz | Auto-post tanpa review, unified inbox, semua platform, automasi komentar/DM |
@@ -48,7 +50,7 @@ Order produk dan order jasa yang sudah disepakati dapat memakai state machine sa
 - Ubah pembuatan nomor order agar menerima tenant secara eksplisit; implementasi sekarang membaca `auth()->user()->tenant_id`, yang tidak tersedia pada checkout publik. Tambahkan kunci idempotensi untuk checkout dan permintaan jasa, rate limit, validasi data, serta perlindungan spam yang tidak menghalangi pengunjung normal.
 - Simpan pesanan dan item secara atomik. Harga, diskon, stok, dan ongkir final hanya berasal dari aturan server/staf. Jangan mempercayai `unit_price`, `tenant_id`, atau `payment_status` dari browser. Pertahankan audit siapa yang mengonfirmasi dan siapa yang mencatat pembayaran.
 - Gunakan `User.email` dan `User.telegram_chat_id` penerima usaha. Metode `TelegramService::sendMessage()` menargetkan chat staf; `sendAdminNotification()` yang ada mengarah ke admin platform, bukan merchant. Pengiriman via queue setelah commit dengan retry dan status kegagalan yang dapat dilihat admin usaha.
-- Templat Satsetui hanya memasok presentasi yang dapat diedit. Grid produk, daftar layanan, formulir prospek, harga, stok, keranjang, checkout, dan order tetap komponen native Fabriku. Jangan memasukkan HTML/JS hasil generasi sebagai aplikasi checkout/formulir.
+- Templat Satsetui hanya memasok presentasi yang diedit di Satsetui dan diekspor sebagai snapshot final. Grid produk, daftar layanan, formulir prospek, harga, stok, keranjang, checkout, dan order tetap komponen native Fabriku. Jangan memasukkan HTML/JS hasil generasi sebagai aplikasi checkout/formulir.
 - Prospek menyimpan persetujuan kontak, dibatasi akses staf tenant, dapat dihapus sesuai kebijakan retensi, dan tidak dipakai untuk kampanye tanpa persetujuan terpisah. Setelah konversi, hubungan ke sales order dapat diaudit.
 - Simpan kredensial Satsetui dan Repliz hanya di backend Fabriku. Pemetaan `tenant_id` ke generation/theme Satsetui dan `accountId` Repliz harus divalidasi pada setiap read/write. Audit koneksi, putus akses, dan hapus data saat merchant berhenti memakai fitur.
 
@@ -73,7 +75,7 @@ Sebelum menjual penjadwalan sosial sebagai fitur paket, minta konfirmasi tertuli
 | 0. Validasi komersial | Keputusan tertulis Repliz; biaya Satsetui/Repliz/domain/penyimpanan; paket, kuota, dan migrasi pelanggan lama | Tidak ada fitur yang dijual tanpa hak penggunaan, margin masuk akal, dan kebijakan pelanggan lama yang jelas |
 | 1. Fondasi website | Hostname dan sertifikat; katalog produk/layanan; editor bagian terbatas; publikasi/preview | Demo produk, jasa, dan gabungan terbuka lewat subdomain/domain sendiri tanpa kebocoran tenant |
 | 2. Permintaan masuk | Checkout produk dan prospek jasa, inbox, email/Telegram, tindak lanjut staf, pencatatan bayar pada order | Satu permintaan produk dan satu prospek jasa sampai order selesai; notifikasi gagal tetap muncul; submit ulang tidak menggandakan data |
-| 3. Desain Satsetui | API server-to-server, tema terstruktur untuk semua mode, status generasi, impor dan edit di Fabriku | Merchant tidak mempunyai akun Satsetui; desain dapat diedit tanpa menyentuh HTML hasil generasi |
+| 3. Desain Satsetui | Penautan aman, login otomatis setelah tertaut, kategori Fabriku privat, tema/halaman terstruktur, edit di Satsetui, ekspor draf ke Fabriku | Kredit gratis hanya untuk akun baru menurut kebijakan Satsetui; top-up, saldo, charge, dan refund tetap di Satsetui; Fabriku hanya preview/publikasi |
 | 4. Sosial terbatas | Social Kit → review draf → koneksi IG/FB → jadwal → status terbit/gagal | Dua tenant tidak dapat mengubah akun/jadwal satu sama lain; izin OAuth, batas media, dan pencabutan diuji |
 | 5. Peluncuran | Copy/harga/privasi diperbarui, halaman fitur terindeks, bantuan staf, observabilitas | Uji end-to-end dan SEO lolos; staf support mampu menjelaskan pembayaran manual dan domain |
 

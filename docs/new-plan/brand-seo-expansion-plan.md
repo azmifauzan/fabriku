@@ -1,12 +1,12 @@
 # Rencana branding dan SEO Fabriku untuk Website Usaha
 
-Status: rancangan, 23 September 2026. Copy di bawah adalah usulan untuk diuji, bukan klaim bahwa fitur baru sudah aktif. Baca bersama [rencana MVP](commerce-mvp-plan.md), [paket dan migrasi pelanggan](website-usaha-pricing-plan.md), dan [API Satsetui](satsetui-api-plan.md).
+Status: rancangan, 23 September 2026. Copy di bawah adalah usulan untuk diuji, bukan klaim bahwa fitur baru sudah aktif. Keputusan terbaru untuk desain adalah [integrasi Satsetui–Storefront](satsetui-storefront-integration-plan.md): kredit/top-up dan editor desain berada di Satsetui, sedangkan langganan/publikasi situs berada di Fabriku. Baca juga [rencana MVP](commerce-mvp-plan.md) dan [paket lama yang perlu direvisi](website-usaha-pricing-plan.md).
 
 ## Perubahan posisi merek
 
 Posisi saat ini di homepage adalah `Aplikasi Produksi dan Stok untuk UMKM`, dengan pesan utama tentang bahan baku, produksi, stok, penjualan, dan laporan. Posisi baru tidak perlu mengganti identitas Fabriku menjadi platform e-commerce generik. Fabriku menghubungkan kerja usaha dan kehadiran online: produsen menampilkan produk serta menerima pesanan; penyedia jasa menampilkan layanan serta menerima permintaan; usaha gabungan memakai keduanya.
 
-Usulan kategori: **aplikasi operasional dan website usaha untuk UMKM**. Bahasa publik tetap sederhana: `produksi`, `stok`, `layanan`, `website usaha`, `pesanan`, `permintaan penawaran`, dan `konten sosial`. `Toko online` tetap subfitur produk, bukan payung untuk semua usaha. Hindari `omnichannel marketplace`, `booking otomatis`, atau `checkout otomatis` selama kemampuan itu belum ada. Jangan mengklaim satu harga untuk semua pelanggan sebelum paket Online diluncurkan; katakan `satu akun dan satu tagihan Fabriku`.
+Usulan kategori: **aplikasi operasional dan website usaha untuk UMKM**. Bahasa publik tetap sederhana: `produksi`, `stok`, `layanan`, `website usaha`, `pesanan`, `permintaan penawaran`, dan `konten sosial`. `Toko online` tetap subfitur produk, bukan payung untuk semua usaha. Hindari `omnichannel marketplace`, `booking otomatis`, atau `checkout otomatis` selama kemampuan itu belum ada. Jangan mengklaim satu harga/tagihan untuk desain AI: langganan situs dibayar ke Fabriku, kredit tambahan desain dibayar ke Satsetui.
 
 | Kebutuhan pemilik UMKM | Pesan yang boleh diucapkan setelah fitur aktif | Bukti produk yang harus ditunjukkan |
 |---|---|---|
