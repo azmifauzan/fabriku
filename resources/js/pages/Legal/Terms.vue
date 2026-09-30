@@ -6,7 +6,11 @@ defineProps<{ canonical: string }>();
 </script>
 
 <template>
-    <SeoHead title="Syarat & Ketentuan — Fabriku" :canonical="canonical" />
+    <SeoHead
+        title="Syarat dan Ketentuan Fabriku"
+        description="Baca ketentuan penggunaan akun, uji coba, langganan, pembayaran, dan layanan Fabriku."
+        :canonical="canonical"
+    />
 
     <LegalLayout title="Syarat & Ketentuan" updated="27 Juli 2026">
         <section>

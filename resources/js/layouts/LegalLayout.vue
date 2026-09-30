@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import PublicLayout from '@/layouts/PublicLayout.vue';
 
 defineProps<{
     title: string;
@@ -8,42 +8,29 @@ defineProps<{
 </script>
 
 <template>
-    <div class="min-h-screen bg-slate-50 text-gray-800">
-        <nav class="border-b border-gray-200 bg-white/95 backdrop-blur">
-            <div class="mx-auto flex h-[74px] max-w-[880px] items-center justify-between px-5 sm:px-8">
-                <Link href="/" aria-label="Fabriku, kembali ke beranda" class="flex shrink-0 items-center gap-2">
-                    <img src="/images/fabriku-logo-only.png?v=2" alt="" class="h-9 w-14 shrink-0 object-contain" />
-                    <img src="/images/fabriku-word.png?v=2" alt="Fabriku" class="h-5 w-[92px] shrink-0 object-contain object-left" />
-                </Link>
-                <Link href="/" class="text-sm font-bold hover:underline">← Kembali ke beranda</Link>
-            </div>
-        </nav>
+    <PublicLayout>
+        <article class="mx-auto max-w-4xl px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
+            <header class="border-b border-slate-300 pb-7">
+                <p class="text-sm font-bold text-indigo-800">Informasi Fabriku</p>
+                <h1 class="mt-3 max-w-3xl text-3xl leading-tight font-black tracking-[-0.04em] text-[#163761] sm:text-5xl">
+                    {{ title }}
+                </h1>
+                <p class="mt-4 text-sm text-slate-700">Terakhir diperbarui: {{ updated }}</p>
+            </header>
 
-        <main class="mx-auto max-w-[880px] px-5 py-14 sm:px-8 sm:py-20">
-            <p class="mb-3 text-xs font-black tracking-[0.18em] text-indigo-600 uppercase">Fabriku</p>
-            <h1 class="text-4xl font-black tracking-[-0.04em] uppercase sm:text-5xl">{{ title }}</h1>
-            <p class="mt-3 text-sm font-medium text-slate-500">Terakhir diperbarui: {{ updated }}</p>
-
-            <div class="legal-content mt-12 space-y-8 text-[15px] leading-relaxed font-medium text-slate-700">
+            <div class="legal-content mt-9 space-y-8 text-base leading-7 text-slate-800">
                 <slot />
             </div>
-        </main>
-
-        <footer class="border-t border-gray-200 bg-white">
-            <div class="mx-auto max-w-[880px] px-5 py-8 text-sm font-medium text-slate-500 sm:px-8">
-                © {{ new Date().getFullYear() }} Fabriku · Dibuat untuk UMKM Indonesia.
-            </div>
-        </footer>
-    </div>
+        </article>
+    </PublicLayout>
 </template>
 
 <style scoped>
 .legal-content :deep(h2) {
-    font-size: 1.375rem;
-    font-weight: 900;
+    color: #163761;
+    font-size: 1.25rem;
+    font-weight: 800;
     letter-spacing: -0.02em;
-    text-transform: uppercase;
-    color: #0f172a;
 }
 
 .legal-content :deep(p + h2),
@@ -52,17 +39,17 @@ defineProps<{
 }
 
 .legal-content :deep(ul) {
-    list-style-type: disc;
-    padding-left: 1.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    list-style-type: disc;
+    padding-left: 1.25rem;
 }
 
 .legal-content :deep(a) {
-    color: #4f46e5;
+    color: #3730a3;
     text-decoration: underline;
-    text-underline-offset: 2px;
+    text-underline-offset: 3px;
 }
 
 .legal-content :deep(section) {
