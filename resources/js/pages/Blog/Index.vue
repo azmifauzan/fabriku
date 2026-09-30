@@ -24,20 +24,45 @@ defineProps<{
 
 <template>
     <SeoHead
-        title="Blog — Tips Operasional UMKM | Fabriku"
-        description="Tips dan panduan praktis untuk UMKM Indonesia: mengelola bahan baku, produksi, stok, penjualan, dan laporan keuangan."
+        title="Blog Fabriku | Panduan Produksi dan Stok UMKM"
+        description="Panduan praktis untuk mengelola bahan baku, produksi, stok, dan penjualan usaha."
         :canonical="canonical"
         :noindex="noindex"
     />
     <PublicLayout>
-        <div class="mx-auto max-w-5xl px-4 py-12">
-            <h1 class="mb-6 text-3xl font-bold text-gray-900 dark:text-white">Blog</h1>
+        <div class="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
+            <header class="grid gap-6 border-b border-slate-300 pb-8 lg:grid-cols-[1fr_0.7fr] lg:items-end">
+                <div>
+                    <p class="text-sm font-bold text-indigo-800">Panduan Fabriku</p>
+                    <h1 class="mt-3 max-w-2xl text-3xl leading-tight font-black tracking-[-0.04em] text-[#163761] sm:text-5xl">
+                        Produksi, stok, dan penjualan usaha.
+                    </h1>
+                </div>
+                <p class="max-w-xl leading-7 text-slate-700">
+                    Catatan praktis untuk membantu pemilik UMKM menjaga pekerjaan harian tetap tercatat dan mudah ditindaklanjuti.
+                </p>
+            </header>
 
-            <div class="mb-8 flex flex-wrap gap-2">
+            <aside class="mt-8 flex flex-col gap-4 border-y border-slate-300 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+                <p class="max-w-2xl text-sm leading-6 text-slate-700">
+                    Fabriku juga menghubungkan data katalog dan stok ke website usaha untuk produk maupun layanan.
+                </p>
+                <Link
+                    href="/#website"
+                    class="inline-flex min-h-11 shrink-0 items-center text-sm font-bold text-indigo-800 underline decoration-indigo-300 underline-offset-4 hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
+                >
+                    Lihat website usaha
+                </Link>
+            </aside>
+
+            <nav aria-label="Kategori artikel" class="mt-9 flex flex-wrap gap-2">
                 <Link
                     href="/blog"
-                    class="rounded-full px-3 py-1 text-sm"
-                    :class="!activeCategory ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'"
+                    class="inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
+                    :class="
+                        !activeCategory ? 'border-[#163761] bg-[#163761] text-white' : 'border-slate-300 bg-white text-slate-800 hover:bg-slate-100'
+                    "
+                    :aria-current="!activeCategory ? 'page' : undefined"
                 >
                     Semua
                 </Link>
@@ -45,45 +70,74 @@ defineProps<{
                     v-for="category in categories"
                     :key="category.slug"
                     :href="`/blog?category=${category.slug}`"
-                    class="rounded-full px-3 py-1 text-sm"
-                    :class="activeCategory === category.slug ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'"
+                    class="inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
+                    :class="
+                        activeCategory === category.slug
+                            ? 'border-[#163761] bg-[#163761] text-white'
+                            : 'border-slate-300 bg-white text-slate-800 hover:bg-slate-100'
+                    "
+                    :aria-current="activeCategory === category.slug ? 'page' : undefined"
                 >
                     {{ category.name }}
                 </Link>
-            </div>
+            </nav>
 
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div v-if="posts.data.length" class="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
                 <Link
                     v-for="post in posts.data"
                     :key="post.slug"
                     :href="`/blog/${post.slug}`"
-                    class="block overflow-hidden rounded-lg border border-gray-200 hover:shadow-md dark:border-gray-700"
+                    class="group block rounded-lg border border-slate-300 bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-700"
                 >
                     <img
                         v-if="post.featured_image_url"
                         :src="post.featured_image_url"
-                        class="h-40 w-full object-cover"
+                        class="aspect-[4/3] w-full rounded-t-[7px] object-cover"
                         :alt="post.title"
                     />
-                    <div class="p-4">
-                        <p v-if="post.category" class="mb-1 text-xs font-medium text-indigo-600">{{ post.category.name }}</p>
-                        <h2 class="mb-1 font-semibold text-gray-900 dark:text-white">{{ post.title }}</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ post.excerpt }}</p>
+                    <div class="p-5">
+                        <p v-if="post.category" class="text-xs font-bold text-indigo-800">{{ post.category.name }}</p>
+                        <h2 class="mt-2 text-lg leading-snug font-bold text-[#163761] group-hover:text-indigo-800">{{ post.title }}</h2>
+                        <p v-if="post.excerpt" class="mt-2 text-sm leading-6 text-slate-700">{{ post.excerpt }}</p>
+                        <time v-if="post.published_at" class="mt-4 block text-xs text-slate-600">
+                            {{ new Date(post.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) }}
+                        </time>
                     </div>
                 </Link>
             </div>
-
-            <div class="mt-8 flex flex-wrap gap-2">
+            <div v-else class="mt-8 border-y border-slate-300 py-10">
+                <h2 class="text-xl font-bold text-[#163761]">Belum ada artikel di kategori ini.</h2>
+                <p class="mt-2 text-slate-700">Pilih kategori lain untuk melihat panduan yang sudah terbit.</p>
                 <Link
-                    v-for="link in posts.links"
-                    :key="link.label"
-                    :href="link.url || '#'"
-                    class="rounded-md px-3 py-1 text-sm"
-                    :class="link.active ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'"
+                    href="/blog"
+                    class="mt-4 inline-flex min-h-11 items-center font-bold text-indigo-800 underline decoration-indigo-300 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
                 >
-                    <span v-html="link.label" />
+                    Tampilkan semua artikel
                 </Link>
             </div>
+
+            <nav v-if="posts.links.length > 1" aria-label="Navigasi halaman artikel" class="mt-9 flex flex-wrap gap-2">
+                <template v-for="link in posts.links" :key="link.label">
+                    <Link
+                        v-if="link.url"
+                        :href="link.url"
+                        class="inline-flex min-h-11 items-center rounded-md border px-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
+                        :class="
+                            link.active ? 'border-[#163761] bg-[#163761] text-white' : 'border-slate-300 bg-white text-slate-800 hover:bg-slate-100'
+                        "
+                        :aria-current="link.active ? 'page' : undefined"
+                    >
+                        <span v-html="link.label" />
+                    </Link>
+                    <span
+                        v-else
+                        class="inline-flex min-h-11 items-center rounded-md border border-slate-200 px-3 text-sm text-slate-500"
+                        aria-disabled="true"
+                    >
+                        <span v-html="link.label" />
+                    </span>
+                </template>
+            </nav>
         </div>
     </PublicLayout>
 </template>

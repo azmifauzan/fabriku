@@ -64,8 +64,8 @@ watch(
                 <div class="w-full max-w-lg">
                     <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
                         <Link href="/" class="mb-7 flex w-fit items-center gap-2">
-                            <img src="/images/fabriku-logo-only.png?v=2" alt="" class="h-9 w-14 object-contain" />
-                            <img src="/images/fabriku-word.png?v=2" alt="Fabriku" class="h-5 w-[92px] object-contain object-left" />
+                            <img src="/images/fabriku-logo-only.png?v=3" alt="" class="h-9 w-14 object-contain" />
+                            <img src="/images/fabriku-word.png?v=3" alt="Fabriku" class="h-5 w-[92px] object-contain object-left" />
                         </Link>
 
                         <div class="mb-7">

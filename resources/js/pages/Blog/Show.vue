@@ -62,21 +62,41 @@ const jsonLd = computed(() => [
         :json-ld="jsonLd"
     />
     <PublicLayout>
-        <article class="mx-auto max-w-3xl px-4 py-12">
-            <p v-if="post.category" class="mb-2 text-sm font-medium text-indigo-600">{{ post.category.name }}</p>
-            <h1 class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">{{ post.title }}</h1>
-            <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
-                Oleh {{ post.author_name }}
-                <template v-if="post.published_at"> &middot; {{ new Date(post.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) }}</template>
-            </p>
-            <img v-if="post.featured_image_url" :src="post.featured_image_url" class="mb-6 w-full rounded-lg object-cover" />
-            <div class="prose max-w-none dark:prose-invert" v-html="post.content_html" />
+        <article class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14 lg:px-10">
+            <Link
+                href="/blog"
+                class="inline-flex min-h-11 items-center rounded-sm text-sm font-bold text-indigo-800 underline decoration-indigo-300 underline-offset-4 hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-700"
+            >
+                Kembali ke blog
+            </Link>
+
+            <div class="mx-auto mt-7 max-w-3xl">
+                <p v-if="post.category" class="mb-3 text-sm font-bold text-indigo-800">{{ post.category.name }}</p>
+                <h1 class="text-3xl leading-tight font-black tracking-[-0.04em] text-[#163761] sm:text-5xl">{{ post.title }}</h1>
+                <p class="mt-5 text-sm text-slate-600">
+                    Oleh {{ post.author_name }}
+                    <time v-if="post.published_at" :datetime="post.published_at">
+                        &middot; {{ new Date(post.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) }}
+                    </time>
+                </p>
+                <img
+                    v-if="post.featured_image_url"
+                    :src="post.featured_image_url"
+                    :alt="post.title"
+                    class="mt-7 max-h-[32rem] w-full rounded-xl object-cover"
+                    decoding="async"
+                />
+                <div
+                    class="prose mt-8 max-w-none prose-slate prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-[#163761] prose-a:text-indigo-800 prose-a:underline prose-a:underline-offset-4"
+                    v-html="post.content_html"
+                />
+            </div>
             <div v-if="post.tags.length" class="mt-8 flex flex-wrap gap-2">
                 <Link
                     v-for="tag in post.tags"
                     :key="tag.slug"
                     :href="`/blog?tag=${tag.slug}`"
-                    class="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                    class="inline-flex min-h-11 items-center rounded-full border border-slate-300 bg-white px-4 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
                 >
                     #{{ tag.name }}
                 </Link>

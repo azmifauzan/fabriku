@@ -52,10 +52,10 @@ const logout = () => {
             <div class="flex h-16 items-center justify-between bg-black/20 px-6">
                 <div class="flex items-center space-x-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 p-1">
-                        <img src="/images/fabriku-logo-only.png?v=2" alt="Fabriku Logo" class="h-full w-full object-contain" />
+                        <img src="/images/fabriku-logo-only.png?v=3" alt="Fabriku Logo" class="h-full w-full object-contain" />
                     </div>
                     <div>
-                        <img src="/images/fabriku-word.png?v=2" alt="Fabriku" class="h-5 object-contain" />
+                        <img src="/images/fabriku-word.png?v=3" alt="Fabriku" class="h-5 brightness-0 invert object-contain" />
                         <p class="mt-0.5 text-xs text-purple-200">Admin Panel</p>
                     </div>
                 </div>
