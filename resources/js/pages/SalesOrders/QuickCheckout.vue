@@ -399,7 +399,7 @@ const checkout = () => {
                                 v-model="item.served_by"
                                 class="mt-1.5 w-full rounded border-gray-200 py-1 text-xs dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
                             >
-                                <option :value="null">— Pilih staff (opsional) —</option>
+                                <option :value="null">Pilih staf (opsional)</option>
                                 <option v-for="s in staff" :key="s.id" :value="s.id">{{ s.name }}</option>
                             </select>
                         </div>

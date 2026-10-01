@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import ProductThumbnail from '@/components/ProductThumbnail.vue';
 import { ChevronDown, Search } from 'lucide-vue-next';
 import { computed, nextTick, onBeforeUnmount, ref } from 'vue';
-import ProductThumbnail from '@/components/ProductThumbnail.vue';
 
 interface ProductOption {
     id: number;
@@ -32,10 +32,8 @@ const panelStyle = ref<Record<string, string>>({});
 const PANEL_HEIGHT_ESTIMATE = 320;
 const GAP = 4;
 
-// Dropdown is teleported to <body> and positioned fixed from the trigger's
-// bounding rect — a table wrapped in overflow-x-auto (desktop item table)
-// clips an absolutely-positioned descendant panel, silently hiding the list
-// behind a near-invisible inner scrollbar instead of the page scrollbar.
+// Position the teleported menu from the trigger's bounding box. The table's
+// overflow container clips absolutely positioned descendants.
 const updatePosition = () => {
     const rect = rootRef.value?.getBoundingClientRect();
     if (!rect) return;
@@ -47,9 +45,7 @@ const updatePosition = () => {
     panelStyle.value = {
         left: `${rect.left}px`,
         width: `${rect.width}px`,
-        ...(openUpward
-            ? { bottom: `${window.innerHeight - rect.top + GAP}px` }
-            : { top: `${rect.bottom + GAP}px` }),
+        ...(openUpward ? { bottom: `${window.innerHeight - rect.top + GAP}px` } : { top: `${rect.bottom + GAP}px` }),
     };
 };
 
@@ -114,10 +110,7 @@ onBeforeUnmount(() => {
         <Teleport to="body">
             <div v-if="open" class="fixed inset-0 z-[100]">
                 <div class="fixed inset-0" @click="close"></div>
-                <div
-                    class="fixed rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700"
-                    :style="panelStyle"
-                >
+                <div class="fixed rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700" :style="panelStyle">
                     <div class="relative border-b border-gray-100 p-2 dark:border-gray-600">
                         <Search :size="14" class="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400" />
                         <input

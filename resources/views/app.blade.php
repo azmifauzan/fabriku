@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title inertia>{{ config('app.name', 'Fabriku') }} — Operasional UMKM dalam satu alur</title>
+        <title inertia>{{ config('app.name', 'Fabriku') }} - Operasional UMKM dalam satu alur</title>
         {{-- description/og tags are page-specific, rendered per-page via the SeoHead Vue component --}}
 
         <!-- Apply saved theme before app loads (prevents FOUC) -->

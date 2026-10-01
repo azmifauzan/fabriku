@@ -210,7 +210,7 @@
         <!-- Header -->
         <div class="header">
             <div class="logo-box">
-                <img src="{{ config('app.url') }}/images/fabriku-word.png?v=2" alt="Fabriku" height="30" style="display: block; height: 30px; max-height: 30px; filter: brightness(0) invert(1);" />
+                <img src="{{ config('app.url') }}/images/fabriku-word.png?v=3" alt="Fabriku" height="30" style="display: block; height: 30px; max-height: 30px; filter: brightness(0) invert(1);" />
             </div>
             <h1>Fitur Unggulan Mingguan</h1>
             <p>Tips & Panduan Operasional Bisnis</p>
@@ -278,7 +278,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            <p><strong>Fabriku</strong> — Platform Operasional & Produksi Bisnis Anda</p>
+            <p><strong>Fabriku</strong>: Platform operasional dan produksi bisnis Anda</p>
             <p>Email ini dikirimkan khusus kepada Admin terdaftar pada <strong>{{ $tenant->name }}</strong>.</p>
             @if(!empty($unsubscribeUrl))
                 <p style="margin-top: 14px; font-size: 11px; color: #94a3b8; line-height: 1.5;">

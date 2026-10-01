@@ -778,7 +778,7 @@ const whatsappLink = (phone: string, message: string) =>
                             v-model="siteForm.seo_title"
                             maxlength="70"
                             class="rounded-lg border border-slate-400 bg-white p-3 text-slate-950"
-                            placeholder="Nama usaha — produk atau layanan" /></label
+                            placeholder="Nama usaha: produk atau layanan" /></label
                     ><label class="grid gap-1 text-sm font-medium dark:text-white"
                         >Ringkasan di Google<textarea
                             v-model="siteForm.seo_description"

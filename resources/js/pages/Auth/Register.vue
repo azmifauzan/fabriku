@@ -64,7 +64,7 @@ const submit = () => {
                     </ul>
                 </div>
 
-                <p class="text-xs font-bold tracking-[0.14em] text-slate-400 uppercase">Fabriku · Sistem kerja UMKM Indonesia</p>
+                <p class="text-xs font-bold tracking-[0.14em] text-slate-600 uppercase">Fabriku · Sistem kerja UMKM Indonesia</p>
             </aside>
 
             <main class="flex items-start justify-center px-4 py-8 sm:px-8 lg:px-12 lg:py-16">
@@ -86,7 +86,7 @@ const submit = () => {
 
                         <div class="my-6 flex items-center gap-3">
                             <div class="h-px flex-1 bg-gray-200"></div>
-                            <span class="text-xs font-semibold tracking-wide text-gray-400 uppercase">atau</span>
+                            <span class="text-xs font-semibold tracking-wide text-gray-600 uppercase">atau</span>
                             <div class="h-px flex-1 bg-gray-200"></div>
                         </div>
 
@@ -100,10 +100,10 @@ const submit = () => {
                                     type="text"
                                     required
                                     placeholder="Contoh: Konveksi Maju Jaya"
-                                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    class="w-full rounded-xl border border-[#858A94] px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     :class="{ 'border-red-500': form.errors.business_name }"
                                 />
-                                <p v-if="form.errors.business_name" class="mt-1 text-sm text-red-500">
+                                <p v-if="form.errors.business_name" class="mt-1 text-sm text-red-700">
                                     {{ form.errors.business_name }}
                                 </p>
                             </div>
@@ -121,13 +121,11 @@ const submit = () => {
                                         :class="[
                                             selectedCategory === key
                                                 ? 'border-indigo-500 bg-indigo-50'
-                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50',
+                                                : 'border-[#858A94] bg-white hover:border-indigo-500 hover:bg-gray-50',
                                         ]"
                                     >
                                         <div class="flex items-center gap-3">
-                                            <span
-                                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600"
-                                            >
+                                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                                                 <component :is="businessCategoryIcons[key as string]" :size="18" />
                                             </span>
                                             <div>
@@ -145,7 +143,7 @@ const submit = () => {
                                         </div>
                                     </button>
                                 </div>
-                                <p v-if="form.errors.business_category" class="mt-1 text-sm text-red-500">
+                                <p v-if="form.errors.business_category" class="mt-1 text-sm text-red-700">
                                     {{ form.errors.business_category }}
                                 </p>
                             </div>
@@ -159,10 +157,10 @@ const submit = () => {
                                     type="text"
                                     required
                                     placeholder="Nama lengkap"
-                                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    class="w-full rounded-xl border border-[#858A94] px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     :class="{ 'border-red-500': form.errors.name }"
                                 />
-                                <p v-if="form.errors.name" class="mt-1 text-sm text-red-500">
+                                <p v-if="form.errors.name" class="mt-1 text-sm text-red-700">
                                     {{ form.errors.name }}
                                 </p>
                             </div>
@@ -176,10 +174,10 @@ const submit = () => {
                                     type="email"
                                     required
                                     placeholder="email@contoh.com"
-                                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    class="w-full rounded-xl border border-[#858A94] px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     :class="{ 'border-red-500': form.errors.email }"
                                 />
-                                <p v-if="form.errors.email" class="mt-1 text-sm text-red-500">
+                                <p v-if="form.errors.email" class="mt-1 text-sm text-red-700">
                                     {{ form.errors.email }}
                                 </p>
                             </div>
@@ -187,35 +185,35 @@ const submit = () => {
                             <!-- Password -->
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label for="password" class="mb-2 block text-sm font-medium text-gray-700"> Password </label>
+                                    <label for="password" class="mb-2 block text-sm font-medium text-gray-700">Kata sandi</label>
                                     <div class="relative">
                                         <input
                                             id="password"
                                             v-model="form.password"
                                             :type="showPassword ? 'text' : 'password'"
                                             required
-                                            placeholder="Min. 8 karakter"
-                                            class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                            placeholder="Minimal 8 karakter"
+                                            class="w-full rounded-xl border border-[#858A94] px-4 py-3 pr-12 text-gray-900 placeholder-gray-500 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                             :class="{ 'border-red-500': form.errors.password }"
                                         />
                                         <button
                                             type="button"
                                             @click="showPassword = !showPassword"
-                                            class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
-                                            :aria-label="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                                            class="absolute top-1/2 right-1 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                            :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
                                             :aria-pressed="showPassword"
                                         >
                                             <Eye v-if="!showPassword" :size="18" />
                                             <EyeOff v-else :size="18" />
                                         </button>
                                     </div>
-                                    <p v-if="form.errors.password" class="mt-1 text-sm text-red-500">
+                                    <p v-if="form.errors.password" class="mt-1 text-sm text-red-700">
                                         {{ form.errors.password }}
                                     </p>
                                 </div>
                                 <div>
                                     <label for="password_confirmation" class="mb-2 block text-sm font-medium text-gray-700">
-                                        Konfirmasi Password
+                                        Konfirmasi kata sandi
                                     </label>
                                     <div class="relative">
                                         <input
@@ -223,15 +221,15 @@ const submit = () => {
                                             v-model="form.password_confirmation"
                                             :type="showPasswordConfirmation ? 'text' : 'password'"
                                             required
-                                            placeholder="Ulangi password"
-                                            class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                            placeholder="Ulangi kata sandi"
+                                            class="w-full rounded-xl border border-[#858A94] px-4 py-3 pr-12 text-gray-900 placeholder-gray-500 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                         />
                                         <button
                                             type="button"
                                             @click="showPasswordConfirmation = !showPasswordConfirmation"
-                                            class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
+                                            class="absolute top-1/2 right-1 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                             :aria-label="
-                                                showPasswordConfirmation ? 'Sembunyikan konfirmasi password' : 'Tampilkan konfirmasi password'
+                                                showPasswordConfirmation ? 'Sembunyikan kata sandi konfirmasi' : 'Tampilkan kata sandi konfirmasi'
                                             "
                                             :aria-pressed="showPasswordConfirmation"
                                         >
@@ -271,7 +269,7 @@ const submit = () => {
                         <div class="mt-4 border-t border-gray-200 pt-4 text-center">
                             <p class="text-gray-600">
                                 Sudah punya akun?
-                                <Link href="/login" class="font-semibold text-indigo-600 transition-colors hover:text-indigo-500">
+                                <Link href="/login" class="font-semibold text-indigo-600 transition-colors hover:text-indigo-700">
                                     Masuk di sini
                                 </Link>
                             </p>
