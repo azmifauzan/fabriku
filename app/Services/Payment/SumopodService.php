@@ -26,7 +26,7 @@ class SumopodService
      */
     public function createPayment(array $params): array
     {
-        $redirectUrl = $params['success_return_url'] ?? config('services.sumopod.redirect_url', url('/dashboard/subscription'));
+        $redirectUrl = $params['success_return_url'] ?? url('/dashboard/subscription');
 
         $response = Http::withHeaders(['X-Api-Key' => $this->apiKey])
             ->timeout(30)

@@ -43,18 +43,6 @@ defineProps<{
                 </p>
             </header>
 
-            <aside class="mt-8 flex flex-col gap-4 border-y border-slate-300 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
-                <p class="max-w-2xl text-sm leading-6 text-slate-700">
-                    Fabriku juga menghubungkan data katalog dan stok ke website usaha untuk produk maupun layanan.
-                </p>
-                <Link
-                    href="/#website"
-                    class="inline-flex min-h-11 shrink-0 items-center text-sm font-bold text-indigo-800 underline decoration-indigo-300 underline-offset-4 hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
-                >
-                    Lihat website usaha
-                </Link>
-            </aside>
-
             <nav aria-label="Kategori artikel" class="mt-9 flex flex-wrap gap-2">
                 <Link
                     href="/blog"

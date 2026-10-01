@@ -26,7 +26,9 @@ class SubscriptionGatewayTest extends TestCase
             ->once()
             ->withArgs(function ($params) {
                 return str_starts_with($params['order_id'], 'FAB-SUB-')
-                    && $params['amount'] === 25000;
+                    && $params['amount'] === 25000
+                    && $params['success_return_url'] === route('subscription.index')
+                    && $params['cancel_return_url'] === route('subscription.index');
             })
             ->andReturn([
                 'payment_id' => 'pay-fab-gateway-123',
