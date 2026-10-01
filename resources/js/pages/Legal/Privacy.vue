@@ -25,14 +25,14 @@ defineProps<{ canonical: string }>();
         <section>
             <h2>2. Data yang Kami Kumpulkan</h2>
             <ul>
-                <li><strong>Data akun</strong> — nama, email, nomor telepon, dan kata sandi (tersimpan dalam bentuk terenkripsi/hash).</li>
+                <li><strong>Data akun:</strong> nama, email, nomor telepon, dan kata sandi (tersimpan dalam bentuk terenkripsi/hash).</li>
                 <li>
-                    <strong>Data bisnis (tenant)</strong> — data operasional yang Anda input: bahan baku, produksi, stok inventaris, pesanan
+                    <strong>Data bisnis (tenant):</strong> data operasional yang Anda input, seperti bahan baku, produksi, stok inventaris, pesanan
                     penjualan, pelanggan, staf, dan laporan keuangan terkait bisnis Anda.
                 </li>
-                <li><strong>Data teknis</strong> — alamat IP, jenis perangkat/browser, dan log aktivitas untuk keamanan dan audit.</li>
+                <li><strong>Data teknis:</strong> alamat IP, jenis perangkat/browser, dan log aktivitas untuk keamanan dan audit.</li>
                 <li>
-                    <strong>Data integrasi opsional</strong> — chat ID Telegram (jika Anda menghubungkan bot Telegram) dan riwayat percakapan dengan
+                    <strong>Data integrasi opsional:</strong> chat ID Telegram (jika Anda menghubungkan bot Telegram) dan riwayat percakapan dengan
                     asisten AI (jika fitur ini digunakan).
                 </li>
             </ul>
@@ -52,14 +52,14 @@ defineProps<{ canonical: string }>();
             <h2>4. Berbagi Data dengan Pihak Ketiga</h2>
             <p>Kami tidak menjual data Anda. Data hanya dibagikan ke pihak ketiga berikut sepanjang diperlukan untuk menjalankan layanan:</p>
             <ul>
-                <li><strong>Penyedia email transaksional</strong> — untuk mengirim email verifikasi, reset password, dan pengingat.</li>
-                <li><strong>Penyedia penyimpanan berkas (object storage)</strong> — untuk menyimpan foto produk dan lampiran yang Anda unggah.</li>
+                <li><strong>Penyedia email transaksional:</strong> mengirim email verifikasi, reset password, dan pengingat.</li>
+                <li><strong>Penyedia penyimpanan berkas (object storage):</strong> menyimpan foto produk dan lampiran yang Anda unggah.</li>
                 <li>
-                    <strong>OpenAI</strong> — jika Anda menggunakan fitur Asisten AI, sebagian data bisnis relevan dikirim ke OpenAI untuk
+                    <strong>OpenAI:</strong> jika Anda menggunakan fitur Asisten AI, sebagian data bisnis relevan dikirim ke OpenAI untuk
                     menghasilkan jawaban. Fitur ini bersifat opsional.
                 </li>
                 <li>
-                    <strong>Telegram</strong> — jika Anda menghubungkan akun ke bot Telegram Fabriku, chat ID dan pesan yang Anda kirim ke bot
+                    <strong>Telegram:</strong> jika Anda menghubungkan akun ke bot Telegram Fabriku, chat ID dan pesan yang Anda kirim ke bot
                     diproses untuk memberikan balasan. Fitur ini bersifat opsional dan dapat diputus kapan saja.
                 </li>
             </ul>
@@ -68,7 +68,7 @@ defineProps<{ canonical: string }>();
         <section>
             <h2>5. Keamanan Data</h2>
             <p>
-                Setiap tenant (bisnis) terisolasi secara logis satu sama lain — data bisnis Anda tidak dapat diakses oleh tenant lain. Kata sandi
+                Setiap tenant (bisnis) terisolasi secara logis satu sama lain. Tenant lain tidak dapat mengakses data bisnis Anda. Kata sandi
                 disimpan dalam bentuk hash, bukan teks biasa. Koneksi ke aplikasi dienkripsi menggunakan HTTPS/TLS.
             </p>
         </section>
