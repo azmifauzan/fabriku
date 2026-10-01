@@ -44,7 +44,7 @@ watch(
             <aside class="hidden flex-col justify-between border-r border-indigo-100 bg-indigo-50/90 px-12 pt-24 pb-14 lg:flex xl:px-16">
                 <div class="max-w-xl">
                     <p class="mb-5 text-xs font-black tracking-[0.18em] text-indigo-600 uppercase">Kembali ke alur kerja</p>
-                    <h1 class="text-6xl leading-[0.92] font-black tracking-[-0.055em] uppercase xl:text-7xl">Lanjutkan yang sedang berjalan.</h1>
+                    <p class="text-6xl leading-[0.92] font-black tracking-[-0.055em] uppercase xl:text-7xl">Lanjutkan yang sedang berjalan.</p>
                     <p class="mt-7 max-w-md text-lg leading-relaxed font-medium text-slate-600">
                         Produksi, stok, pesanan, dan laporan Anda tetap tersambung dalam satu tempat.
                     </p>
@@ -70,7 +70,7 @@ watch(
 
                         <div class="mb-7">
                             <p class="text-xs font-black tracking-[0.16em] text-indigo-600 uppercase">Area anggota</p>
-                            <h2 class="mt-2 text-3xl font-black tracking-tight text-gray-900">Selamat datang kembali.</h2>
+                            <h1 class="mt-2 text-3xl font-black tracking-tight text-gray-900">Selamat datang kembali.</h1>
                             <p class="mt-2 text-slate-500">Masuk untuk melanjutkan operasional bisnis Anda.</p>
                         </div>
 
