@@ -31,16 +31,8 @@ defineProps<{
     />
     <PublicLayout>
         <div class="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
-            <header class="grid gap-6 border-b border-slate-300 pb-8 lg:grid-cols-[1fr_0.7fr] lg:items-end">
-                <div>
-                    <p class="text-sm font-bold text-indigo-800">Panduan Fabriku</p>
-                    <h1 class="mt-3 max-w-2xl text-3xl leading-tight font-black tracking-[-0.04em] text-[#163761] sm:text-5xl">
-                        Produksi, stok, dan penjualan usaha.
-                    </h1>
-                </div>
-                <p class="max-w-xl leading-7 text-slate-700">
-                    Catatan praktis untuk membantu pemilik UMKM menjaga pekerjaan harian tetap tercatat dan mudah ditindaklanjuti.
-                </p>
+            <header class="border-b border-slate-300 pb-8">
+                <h1 class="max-w-2xl text-3xl leading-tight font-black tracking-[-0.04em] text-[#163761] sm:text-5xl">Blog</h1>
             </header>
 
             <nav aria-label="Kategori artikel" class="mt-9 flex flex-wrap gap-2">
