@@ -53,7 +53,6 @@ return [
         'api_key' => env('SUMOPOD_API_KEY', ''),
         'environment' => env('SUMOPOD_ENVIRONMENT', 'live'),
         'internal_secret' => env('FABRIKU_INTERNAL_WEBHOOK_SECRET', env('SUMOPOD_INTERNAL_WEBHOOK_SECRET', '')),
-        'redirect_url' => env('SUMOPOD_REDIRECT_URL'),
     ],
 
     'cloudflare_storefront' => [
