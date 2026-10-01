@@ -52,12 +52,12 @@ watch(
                     <div class="mt-10 grid grid-cols-2 gap-3 text-sm font-bold">
                         <div class="rounded-xl border border-indigo-100 bg-white/80 p-4">01 · Bahan</div>
                         <div class="rounded-xl border border-indigo-100 bg-white/80 p-4">02 · Produksi</div>
-                        <div class="rounded-xl border border-indigo-100 bg-white/80 p-4">03 · Inventory</div>
+                        <div class="rounded-xl border border-indigo-100 bg-white/80 p-4">03 · Persediaan</div>
                         <div class="rounded-xl border border-indigo-100 bg-white/80 p-4">04 · Laporan</div>
                     </div>
                 </div>
 
-                <p class="text-xs font-bold tracking-[0.14em] text-slate-400 uppercase">Fabriku · Sistem kerja UMKM Indonesia</p>
+                <p class="text-xs font-bold tracking-[0.14em] text-slate-600 uppercase">Fabriku · Sistem kerja UMKM Indonesia</p>
             </aside>
 
             <main class="flex items-start justify-center px-4 py-8 sm:px-8 lg:px-12 lg:py-16">
@@ -79,7 +79,7 @@ watch(
 
                         <div class="my-6 flex items-center gap-3">
                             <div class="h-px flex-1 bg-gray-200"></div>
-                            <span class="text-xs font-semibold tracking-wide text-gray-400 uppercase">atau</span>
+                            <span class="text-xs font-semibold tracking-wide text-gray-600 uppercase">atau</span>
                             <div class="h-px flex-1 bg-gray-200"></div>
                         </div>
 
@@ -95,14 +95,14 @@ watch(
                                     required
                                     v-model="form.email"
                                     placeholder="email@contoh.com"
-                                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    class="w-full rounded-xl border border-[#858A94] px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     :class="{ 'border-red-500': errors.email }"
                                 />
                             </div>
 
                             <!-- Password -->
                             <div>
-                                <label for="password" class="mb-2 block text-sm font-medium text-gray-700"> Password </label>
+                                <label for="password" class="mb-2 block text-sm font-medium text-gray-700">Kata sandi</label>
                                 <div class="relative">
                                     <input
                                         id="password"
@@ -111,15 +111,15 @@ watch(
                                         autocomplete="current-password"
                                         required
                                         v-model="form.password"
-                                        placeholder="Masukkan password"
-                                        class="w-full rounded-xl border border-gray-300 px-4 py-2.5 pr-12 text-gray-900 placeholder-gray-400 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                        placeholder="Masukkan kata sandi"
+                                        class="w-full rounded-xl border border-[#858A94] px-4 py-2.5 pr-12 text-gray-900 placeholder-gray-500 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                         :class="{ 'border-red-500': errors.password || errors.email }"
                                     />
                                     <button
                                         type="button"
                                         @click="showPassword = !showPassword"
-                                        class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
-                                        :aria-label="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                                        class="absolute top-1/2 right-1 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                        :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
                                         :aria-pressed="showPassword"
                                     >
                                         <Eye v-if="!showPassword" :size="20" />
@@ -129,7 +129,7 @@ watch(
                             </div>
 
                             <!-- Error Message -->
-                            <div v-if="errors.email" class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-500">
+                            <div v-if="errors.email" class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
                                 {{ errors.email }}
                             </div>
 
@@ -141,12 +141,15 @@ watch(
                                         name="remember"
                                         type="checkbox"
                                         v-model="form.remember"
-                                        class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                        class="h-4 w-4 rounded border-[#858A94] text-indigo-600 focus:ring-indigo-500"
                                     />
                                     <label for="remember" class="ml-2 block text-sm text-gray-700"> Ingat saya </label>
                                 </div>
-                                <Link href="/forgot-password" class="text-sm font-medium text-indigo-600 hover:text-indigo-700">
-                                    Lupa Password?
+                                <Link
+                                    href="/forgot-password"
+                                    class="inline-flex min-h-11 items-center text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                                >
+                                    Lupa kata sandi?
                                 </Link>
                             </div>
 
@@ -165,14 +168,17 @@ watch(
                         <div class="mt-6 border-t border-gray-200 pt-4">
                             <button
                                 type="button"
+                                id="demo-credentials-toggle"
                                 @click="showDemoCredentials = !showDemoCredentials"
-                                class="flex w-full cursor-pointer flex-col items-center justify-center gap-1 py-2 transition-all duration-300 focus:outline-none"
+                                :aria-expanded="showDemoCredentials"
+                                aria-controls="demo-credentials"
+                                class="flex min-h-11 w-full cursor-pointer flex-col items-center justify-center gap-1 py-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                             >
                                 <div
                                     class="flex items-center gap-2 text-gray-500 transition-colors hover:text-indigo-600"
                                     :class="{ 'text-indigo-600': showDemoCredentials }"
                                 >
-                                    <p class="flex items-center gap-1.5 text-sm font-semibold"><Target :size="14" /> Demo Credentials</p>
+                                    <p class="flex items-center gap-1.5 text-sm font-semibold"><Target :size="14" /> Akun demo</p>
                                     <svg
                                         class="h-4 w-4 transition-transform duration-300"
                                         :class="{ 'rotate-180': showDemoCredentials }"
@@ -183,7 +189,7 @@ watch(
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                     </svg>
                                 </div>
-                                <p class="text-[10px] text-gray-400" v-show="!showDemoCredentials">Klik untuk melihat akun demo</p>
+                                <p class="text-[10px] text-gray-600" v-show="!showDemoCredentials">Pilih untuk mengisi akun demo</p>
                             </button>
 
                             <transition
@@ -194,7 +200,13 @@ watch(
                                 leave-from-class="max-h-[600px] opacity-100 transform translate-y-0"
                                 leave-to-class="max-h-0 opacity-0 transform -translate-y-2"
                             >
-                                <div v-show="showDemoCredentials" class="overflow-hidden">
+                                <div
+                                    id="demo-credentials"
+                                    v-show="showDemoCredentials"
+                                    role="region"
+                                    aria-labelledby="demo-credentials-toggle"
+                                    class="overflow-hidden"
+                                >
                                     <div
                                         class="mb-3 flex items-center justify-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50 p-2 text-center text-xs text-indigo-700"
                                     >
@@ -204,123 +216,130 @@ watch(
 
                                     <div class="space-y-1.5">
                                         <!-- Retail Demo -->
-                                        <div
+                                        <button
+                                            type="button"
                                             @click="fillCredentials('admin@tokoserbaada.com')"
-                                            class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors select-none hover:border-indigo-200 hover:bg-indigo-50/30"
+                                            class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg border border-[#858A94] bg-gray-50 px-3 py-2 text-left transition-colors select-none hover:border-indigo-300 hover:bg-indigo-50/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                         >
                                             <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-white">
                                                 <Store :size="14" class="text-gray-500" />
                                             </div>
                                             <div class="min-w-0 flex-1">
                                                 <p class="text-xs font-semibold text-gray-800">
-                                                    Toko Serba Ada <span class="font-normal text-gray-400">· Retail</span>
+                                                    Toko Serba Ada <span class="font-normal text-gray-600">· Retail</span>
                                                 </p>
                                                 <p class="truncate font-mono text-[11px] text-indigo-600">admin@tokoserbaada.com</p>
                                             </div>
-                                            <span class="shrink-0 text-[10px] text-gray-400">password</span>
-                                        </div>
+                                            <span class="shrink-0 text-[10px] text-gray-600">kata sandi</span>
+                                        </button>
 
                                         <!-- Garment Demo -->
-                                        <div
+                                        <button
+                                            type="button"
                                             @click="fillCredentials('admin@konveksi.com')"
-                                            class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors select-none hover:border-indigo-200 hover:bg-indigo-50/30"
+                                            class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg border border-[#858A94] bg-gray-50 px-3 py-2 text-left transition-colors select-none hover:border-indigo-300 hover:bg-indigo-50/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                         >
                                             <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-white">
                                                 <Scissors :size="14" class="text-gray-500" />
                                             </div>
                                             <div class="min-w-0 flex-1">
                                                 <p class="text-xs font-semibold text-gray-800">
-                                                    Konveksi Fabriku <span class="font-normal text-gray-400">· Garment</span>
+                                                    Konveksi Fabriku <span class="font-normal text-gray-600">· Garment</span>
                                                 </p>
                                                 <p class="truncate font-mono text-[11px] text-indigo-600">admin@konveksi.com</p>
                                             </div>
-                                            <span class="shrink-0 text-[10px] text-gray-400">password</span>
-                                        </div>
+                                            <span class="shrink-0 text-[10px] text-gray-600">kata sandi</span>
+                                        </button>
 
                                         <!-- Food Demo -->
-                                        <div
+                                        <button
+                                            type="button"
                                             @click="fillCredentials('admin@kuemama.com')"
-                                            class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors select-none hover:border-indigo-200 hover:bg-indigo-50/30"
+                                            class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg border border-[#858A94] bg-gray-50 px-3 py-2 text-left transition-colors select-none hover:border-indigo-300 hover:bg-indigo-50/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                         >
                                             <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-white">
                                                 <ChefHat :size="14" class="text-gray-500" />
                                             </div>
                                             <div class="min-w-0 flex-1">
                                                 <p class="text-xs font-semibold text-gray-800">
-                                                    Kue Mama Homemade <span class="font-normal text-gray-400">· Makanan</span>
+                                                    Kue Mama Homemade <span class="font-normal text-gray-600">· Makanan</span>
                                                 </p>
                                                 <p class="truncate font-mono text-[11px] text-indigo-600">admin@kuemama.com</p>
                                             </div>
-                                            <span class="shrink-0 text-[10px] text-gray-400">password</span>
-                                        </div>
+                                            <span class="shrink-0 text-[10px] text-gray-600">kata sandi</span>
+                                        </button>
 
                                         <!-- Craft Demo -->
-                                        <div
+                                        <button
+                                            type="button"
                                             @click="fillCredentials('admin@crafty.com')"
-                                            class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors select-none hover:border-indigo-200 hover:bg-indigo-50/30"
+                                            class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg border border-[#858A94] bg-gray-50 px-3 py-2 text-left transition-colors select-none hover:border-indigo-300 hover:bg-indigo-50/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                         >
                                             <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-white">
                                                 <Palette :size="14" class="text-gray-500" />
                                             </div>
                                             <div class="min-w-0 flex-1">
                                                 <p class="text-xs font-semibold text-gray-800">
-                                                    Crafty Handmade <span class="font-normal text-gray-400">· Craft</span>
+                                                    Crafty Handmade <span class="font-normal text-gray-600">· Craft</span>
                                                 </p>
                                                 <p class="truncate font-mono text-[11px] text-indigo-600">admin@crafty.com</p>
                                             </div>
-                                            <span class="shrink-0 text-[10px] text-gray-400">password</span>
-                                        </div>
+                                            <span class="shrink-0 text-[10px] text-gray-600">kata sandi</span>
+                                        </button>
 
                                         <!-- Cosmetic Demo -->
-                                        <div
+                                        <button
+                                            type="button"
                                             @click="fillCredentials('admin@glowbeauty.com')"
-                                            class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors select-none hover:border-indigo-200 hover:bg-indigo-50/30"
+                                            class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg border border-[#858A94] bg-gray-50 px-3 py-2 text-left transition-colors select-none hover:border-indigo-300 hover:bg-indigo-50/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                         >
                                             <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-white">
                                                 <Sparkles :size="14" class="text-gray-500" />
                                             </div>
                                             <div class="min-w-0 flex-1">
                                                 <p class="text-xs font-semibold text-gray-800">
-                                                    Glow Beauty Lab <span class="font-normal text-gray-400">· Kosmetik</span>
+                                                    Glow Beauty Lab <span class="font-normal text-gray-600">· Kosmetik</span>
                                                 </p>
                                                 <p class="truncate font-mono text-[11px] text-indigo-600">admin@glowbeauty.com</p>
                                             </div>
-                                            <span class="shrink-0 text-[10px] text-gray-400">password</span>
-                                        </div>
+                                            <span class="shrink-0 text-[10px] text-gray-600">kata sandi</span>
+                                        </button>
 
                                         <!-- Homemade Demo -->
-                                        <div
+                                        <button
+                                            type="button"
                                             @click="fillCredentials('admin@homemade.com')"
-                                            class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors select-none hover:border-indigo-200 hover:bg-indigo-50/30"
+                                            class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg border border-[#858A94] bg-gray-50 px-3 py-2 text-left transition-colors select-none hover:border-indigo-300 hover:bg-indigo-50/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                         >
                                             <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-white">
                                                 <Home :size="14" class="text-gray-500" />
                                             </div>
                                             <div class="min-w-0 flex-1">
                                                 <p class="text-xs font-semibold text-gray-800">
-                                                    Dapur Coklat Rumahan <span class="font-normal text-gray-400">· Produksi Rumahan</span>
+                                                    Dapur Coklat Rumahan <span class="font-normal text-gray-600">· Produksi Rumahan</span>
                                                 </p>
                                                 <p class="truncate font-mono text-[11px] text-indigo-600">admin@homemade.com</p>
                                             </div>
-                                            <span class="shrink-0 text-[10px] text-gray-400">password</span>
-                                        </div>
+                                            <span class="shrink-0 text-[10px] text-gray-600">kata sandi</span>
+                                        </button>
 
                                         <!-- Service Demo -->
-                                        <div
+                                        <button
+                                            type="button"
                                             @click="fillCredentials('admin@bengkel.com')"
-                                            class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors select-none hover:border-indigo-200 hover:bg-indigo-50/30"
+                                            class="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg border border-[#858A94] bg-gray-50 px-3 py-2 text-left transition-colors select-none hover:border-indigo-300 hover:bg-indigo-50/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                                         >
                                             <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-white">
                                                 <Wrench :size="14" class="text-gray-500" />
                                             </div>
                                             <div class="min-w-0 flex-1">
                                                 <p class="text-xs font-semibold text-gray-800">
-                                                    Bengkel Motor Maju Jaya <span class="font-normal text-gray-400">· Jasa</span>
+                                                    Bengkel Motor Maju Jaya <span class="font-normal text-gray-600">· Jasa</span>
                                                 </p>
                                                 <p class="truncate font-mono text-[11px] text-indigo-600">admin@bengkel.com</p>
                                             </div>
-                                            <span class="shrink-0 text-[10px] text-gray-400">password</span>
-                                        </div>
+                                            <span class="shrink-0 text-[10px] text-gray-600">kata sandi</span>
+                                        </button>
                                     </div>
                                 </div>
                             </transition>
@@ -330,11 +349,11 @@ watch(
                         <div class="mt-4 border-t border-gray-200 pt-4 text-center">
                             <p class="text-gray-600">
                                 Belum punya akun?
-                                <Link href="/register" class="font-semibold text-indigo-600 transition-colors hover:text-indigo-500">
+                                <Link href="/register" class="font-semibold text-indigo-600 transition-colors hover:text-indigo-700">
                                     Daftar di sini
                                 </Link>
                             </p>
-                            <p class="mt-3 text-xs text-gray-400">
+                            <p class="mt-3 text-xs text-gray-600">
                                 <Link href="/privasi" class="hover:underline">Kebijakan Privasi</Link>
                                 ·
                                 <Link href="/syarat-ketentuan" class="hover:underline">Syarat & Ketentuan</Link>

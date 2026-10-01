@@ -113,7 +113,7 @@ const close = () => {
                                     >
                                         <option :value="null" disabled>Pilih item tujuan</option>
                                         <option v-for="candidate in candidates" :key="candidate.id" :value="candidate.id">
-                                            {{ candidate.sku }} — stok saat ini: {{ formatNumber(candidate.current_quantity) }}
+                                            {{ candidate.sku }}: stok saat ini {{ formatNumber(candidate.current_quantity) }}
                                         </option>
                                     </select>
                                     <p v-if="form.errors.destination_item_id" class="mt-1 text-xs text-red-600">

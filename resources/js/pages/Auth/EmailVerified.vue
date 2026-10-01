@@ -1,44 +1,43 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import SeoHead from '@/components/SeoHead.vue';
+import { Link } from '@inertiajs/vue3';
 import { ArrowRight, CheckCircle } from 'lucide-vue-next';
 </script>
 
 <template>
-    <div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 via-white to-emerald-50 px-4 py-6">
-        <Head title="Email Terverifikasi - Fabriku" />
+    <div class="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-6">
+        <SeoHead title="Email Terverifikasi - Fabriku" :noindex="true" />
 
         <div class="w-full max-w-md">
             <!-- Card -->
-            <div class="rounded-2xl border border-gray-100 bg-white p-8 shadow-xl">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                 <!-- Success Icon -->
                 <div class="mb-6 text-center">
                     <div class="mb-4 flex items-center justify-center">
-                        <div
-                            class="animate-bounce-slow flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-emerald-500"
-                        >
+                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-700">
                             <CheckCircle :size="48" class="text-white" />
                         </div>
                     </div>
-                    <h1 class="mb-2 text-2xl font-bold text-gray-900">Email Berhasil Diverifikasi! 🎉</h1>
-                    <p class="text-gray-600">Selamat! Alamat email Anda telah berhasil diverifikasi. Akun Anda sekarang aktif dan siap digunakan.</p>
+                    <h1 class="mb-2 text-2xl font-bold text-gray-900">Email sudah terverifikasi</h1>
+                    <p class="text-gray-600">Alamat email Anda terverifikasi. Akun siap digunakan.</p>
                 </div>
 
                 <!-- Info Box -->
-                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4">
-                    <h3 class="mb-2 font-semibold text-green-800">✨ Langkah Selanjutnya:</h3>
-                    <ul class="space-y-1 text-sm text-green-700">
-                        <li>• Login ke dashboard Anda</li>
-                        <li>• Lengkapi profil bisnis Anda</li>
-                        <li>• Mulai kelola produksi dengan Fabriku!</li>
+                <div class="mb-6 rounded-xl border border-emerald-700 bg-emerald-50 p-4">
+                    <h2 class="mb-2 font-semibold text-emerald-900">Langkah berikutnya</h2>
+                    <ul class="list-disc space-y-1 pl-5 text-sm text-emerald-900">
+                        <li>Masuk ke dashboard Anda.</li>
+                        <li>Lengkapi profil bisnis.</li>
+                        <li>Mulai kelola operasional usaha.</li>
                     </ul>
                 </div>
 
                 <!-- Login Button -->
                 <Link
                     href="/login"
-                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl"
+                    class="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
                 >
-                    Masuk ke Dashboard
+                    Masuk ke dashboard
                     <ArrowRight :size="20" />
                 </Link>
 
@@ -48,19 +47,3 @@ import { ArrowRight, CheckCircle } from 'lucide-vue-next';
         </div>
     </div>
 </template>
-
-<style scoped>
-@keyframes bounce-slow {
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-.animate-bounce-slow {
-    animation: bounce-slow 2s ease-in-out infinite;
-}
-</style>

@@ -27,7 +27,7 @@
                         class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         :class="{ 'border-red-500': form.errors.status }"
                     >
-                        <option value="">— Pilih status —</option>
+                        <option value="">Pilih status</option>
                         <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">
                             {{ opt.label }}
                         </option>

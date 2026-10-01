@@ -22,13 +22,7 @@ defineProps<{
 const { confirm } = useSweetAlert();
 
 const deleteRole = async (role: RoleRow) => {
-    const result = await confirm(
-        'Hapus Role',
-        `Apakah Anda yakin ingin menghapus role "${role.name}"?`,
-        'Ya, Hapus',
-        'warning',
-        '#dc2626',
-    );
+    const result = await confirm('Hapus Role', `Apakah Anda yakin ingin menghapus role "${role.name}"?`, 'Ya, Hapus', 'warning', '#dc2626');
 
     if (result.isConfirmed) {
         router.delete(`/roles/${role.id}`);
@@ -45,9 +39,7 @@ const deleteRole = async (role: RoleRow) => {
                 <!-- Page Header -->
                 <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-white">
-                            Role &amp; Izin
-                        </h1>
+                        <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-white">Role &amp; Izin</h1>
                         <p class="mt-2 text-sm text-gray-600 sm:text-base dark:text-gray-400">
                             Kelola role custom dan lihat izin tiap role yang tersedia
                         </p>
@@ -67,7 +59,7 @@ const deleteRole = async (role: RoleRow) => {
                         <div>
                             <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Role Custom Tenant</h2>
                             <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                                Dibuat khusus untuk bisnis Anda — dapat diedit dan dihapus
+                                Dibuat khusus untuk bisnis Anda. Role ini dapat diedit dan dihapus.
                             </p>
                         </div>
                         <span
@@ -81,39 +73,25 @@ const deleteRole = async (role: RoleRow) => {
                         <table v-if="customRoles.length > 0" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-900/50">
                                 <tr>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                                    >
+                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Nama Role
                                     </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                                    >
+                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Deskripsi
                                     </th>
-                                    <th
-                                        class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                                    >
+                                    <th class="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Jumlah Izin
                                     </th>
-                                    <th
-                                        class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                                    >
+                                    <th class="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Jumlah Staff
                                     </th>
-                                    <th
-                                        class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                                    >
+                                    <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Aksi
                                     </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                                <tr
-                                    v-for="role in customRoles"
-                                    :key="role.id"
-                                    class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                                >
+                                <tr v-for="role in customRoles" :key="role.id" class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-2">
                                             <Shield :size="14" class="flex-shrink-0 text-indigo-500 dark:text-indigo-400" />
@@ -180,13 +158,9 @@ const deleteRole = async (role: RoleRow) => {
                     <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
                         <div>
                             <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Role Sistem</h2>
-                            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                                Role bawaan platform — tidak dapat diedit atau dihapus
-                            </p>
+                            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Role bawaan platform tidak dapat diedit atau dihapus.</p>
                         </div>
-                        <span
-                            class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-400"
-                        >
+                        <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-400">
                             {{ systemRoles.length }} role
                         </span>
                     </div>
@@ -195,34 +169,22 @@ const deleteRole = async (role: RoleRow) => {
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-900/50">
                                 <tr>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                                    >
+                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Nama Role
                                     </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                                    >
+                                    <th class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Deskripsi
                                     </th>
-                                    <th
-                                        class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                                    >
+                                    <th class="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Jumlah Izin
                                     </th>
-                                    <th
-                                        class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                                    >
+                                    <th class="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Status
                                     </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                                <tr
-                                    v-for="role in systemRoles"
-                                    :key="role.id"
-                                    class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                                >
+                                <tr v-for="role in systemRoles" :key="role.id" class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-2">
                                             <Shield :size="14" class="flex-shrink-0 text-gray-400 dark:text-gray-500" />

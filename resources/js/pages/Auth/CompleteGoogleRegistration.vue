@@ -51,7 +51,7 @@ const submit = () => {
                     </p>
                 </div>
 
-                <p class="text-xs font-bold tracking-[0.14em] text-slate-400 uppercase">Fabriku · Sistem kerja UMKM Indonesia</p>
+                <p class="text-xs font-bold tracking-[0.14em] text-slate-600 uppercase">Fabriku · Sistem kerja UMKM Indonesia</p>
             </aside>
 
             <main class="flex items-start justify-center px-4 py-8 sm:px-8 lg:px-12 lg:py-16">
@@ -80,10 +80,10 @@ const submit = () => {
                                     type="text"
                                     required
                                     placeholder="Nama lengkap"
-                                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    class="w-full rounded-xl border border-[#858A94] px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     :class="{ 'border-red-500': form.errors.name }"
                                 />
-                                <p v-if="form.errors.name" class="mt-1 text-sm text-red-500">{{ form.errors.name }}</p>
+                                <p v-if="form.errors.name" class="mt-1 text-sm text-red-700">{{ form.errors.name }}</p>
                             </div>
 
                             <!-- Business Name -->
@@ -95,10 +95,10 @@ const submit = () => {
                                     type="text"
                                     required
                                     placeholder="Contoh: Konveksi Maju Jaya"
-                                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                    class="w-full rounded-xl border border-[#858A94] px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-colors focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                                     :class="{ 'border-red-500': form.errors.business_name }"
                                 />
-                                <p v-if="form.errors.business_name" class="mt-1 text-sm text-red-500">{{ form.errors.business_name }}</p>
+                                <p v-if="form.errors.business_name" class="mt-1 text-sm text-red-700">{{ form.errors.business_name }}</p>
                             </div>
 
                             <!-- Business Category -->
@@ -114,13 +114,11 @@ const submit = () => {
                                         :class="[
                                             selectedCategory === key
                                                 ? 'border-indigo-500 bg-indigo-50'
-                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50',
+                                                : 'border-[#858A94] bg-white hover:border-indigo-500 hover:bg-gray-50',
                                         ]"
                                     >
                                         <div class="flex items-center gap-3">
-                                            <span
-                                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600"
-                                            >
+                                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                                                 <component :is="businessCategoryIcons[key as string]" :size="18" />
                                             </span>
                                             <div>
@@ -138,7 +136,7 @@ const submit = () => {
                                         </div>
                                     </button>
                                 </div>
-                                <p v-if="form.errors.business_category" class="mt-1 text-sm text-red-500">{{ form.errors.business_category }}</p>
+                                <p v-if="form.errors.business_category" class="mt-1 text-sm text-red-700">{{ form.errors.business_category }}</p>
                             </div>
 
                             <!-- Submit Button -->

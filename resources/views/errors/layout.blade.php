@@ -79,8 +79,8 @@
     <!-- Header Navigation -->
     <header class="py-6 px-8 flex justify-center md:justify-start">
         <a href="/" class="flex items-center gap-2 group transition-transform duration-200 hover:scale-[1.02]">
-            <img src="/images/fabriku-logo-only.png?v=2" alt="Fabriku Logo" class="h-9 w-9 object-contain" />
-            <img src="/images/fabriku-word.png?v=2" alt="Fabriku" class="h-7 object-contain dark:invert" />
+            <img src="/images/fabriku-logo-only.png?v=3" alt="" class="h-9 w-9 object-contain" />
+            <img src="/images/fabriku-word.png?v=3" alt="Fabriku" class="h-7 object-contain dark:invert" />
         </a>
     </header>
 

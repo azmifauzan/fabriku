@@ -12,7 +12,7 @@ defineProps<{ canonical: string }>();
         :canonical="canonical"
     />
 
-    <LegalLayout title="Syarat & Ketentuan" updated="27 Juli 2026">
+    <LegalLayout title="Syarat & Ketentuan" updated="1 Oktober 2026">
         <section>
             <h2>1. Penerimaan Ketentuan</h2>
             <p>
@@ -24,9 +24,14 @@ defineProps<{ canonical: string }>();
         <section>
             <h2>2. Deskripsi Layanan</h2>
             <p>
-                Fabriku adalah platform manajemen produksi dan penjualan berbasis langganan (SaaS) untuk UMKM Indonesia, mencakup pengelolaan bahan
-                baku, produksi, inventaris, penjualan, dan pelaporan, dengan penyesuaian alur kerja sesuai kategori bisnis (Garment, Food, Craft,
-                Cosmetic, Retail, Homemade, Service).
+                Fabriku adalah platform operasional berbasis langganan untuk UMKM Indonesia. Layanan mencakup pengelolaan bahan baku, produksi,
+                inventaris, penjualan, pelaporan, serta pembuatan website usaha untuk menampilkan produk, layanan, dan halaman informasi. Website
+                dapat menerima permintaan pesanan produk atau permintaan layanan; pembayaran dan tindak lanjut dikonfirmasi oleh usaha terkait.
+            </p>
+            <p>
+                Pembuatan desain khusus membuka SatsetUI, sistem terpisah yang kami operasikan. Kredit generasi dan penyuntingan desain tersedia di
+                SatsetUI dan mengikuti keterangan kredit yang ditampilkan di sana. Kredit SatsetUI tidak termasuk dalam langganan Fabriku. Hasil yang
+                diekspor ke Fabriku masuk sebagai draf website.
             </p>
         </section>
 
@@ -42,9 +47,9 @@ defineProps<{ canonical: string }>();
         <section>
             <h2>4. Masa Uji Coba & Langganan</h2>
             <p>
-                Akun baru mendapatkan masa uji coba gratis selama 30 hari dengan akses penuh ke fitur yang berlaku untuk kategori bisnis Anda.
-                Setelah masa uji coba berakhir, akun beralih menjadi mode baca-saja (read-only) sampai Anda berlangganan paket bulanan atau
-                tahunan. Harga paket ditampilkan di halaman beranda dan dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya.
+                Akun baru mendapatkan masa uji coba gratis selama 30 hari dengan akses penuh ke fitur yang berlaku untuk kategori bisnis Anda. Setelah
+                masa uji coba berakhir, akun beralih menjadi mode baca-saja (read-only) sampai Anda berlangganan paket bulanan atau tahunan. Harga
+                paket ditampilkan di halaman beranda dan dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya.
             </p>
         </section>
 
@@ -68,9 +73,9 @@ defineProps<{ canonical: string }>();
         <section>
             <h2>7. Batasan Tanggung Jawab</h2>
             <p>
-                Fabriku disediakan "sebagaimana adanya". Kami berupaya menjaga ketersediaan dan keakuratan layanan, namun tidak bertanggung jawab
-                atas kerugian tidak langsung yang timbul dari kesalahan input data, gangguan pihak ketiga (penyedia hosting, email, atau layanan
-                AI), atau force majeure di luar kendali kami.
+                Fabriku disediakan "sebagaimana adanya". Kami berupaya menjaga ketersediaan dan keakuratan layanan, namun tidak bertanggung jawab atas
+                kerugian tidak langsung yang timbul dari kesalahan input data, gangguan pihak ketiga (penyedia hosting, email, atau layanan AI), atau
+                force majeure di luar kendali kami.
             </p>
         </section>
 
@@ -85,8 +90,8 @@ defineProps<{ canonical: string }>();
         <section>
             <h2>9. Perubahan Ketentuan</h2>
             <p>
-                Ketentuan ini dapat diperbarui sewaktu-waktu. Perubahan material akan diinformasikan melalui email atau notifikasi di dalam
-                aplikasi sebelum berlaku efektif.
+                Ketentuan ini dapat diperbarui sewaktu-waktu. Perubahan material akan diinformasikan melalui email atau notifikasi di dalam aplikasi
+                sebelum berlaku efektif.
             </p>
         </section>
 
