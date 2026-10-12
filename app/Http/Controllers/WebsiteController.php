@@ -24,6 +24,7 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 use Throwable;
 
 class WebsiteController extends Controller
@@ -85,12 +86,12 @@ class WebsiteController extends Controller
         ]);
     }
 
-    public function satsetuiLaunch(Request $request, SatsetuiTemplateClient $satsetui): RedirectResponse
+    public function satsetuiLaunch(Request $request, SatsetuiTemplateClient $satsetui): HttpResponse
     {
         $this->ensureManager($request);
 
         try {
-            return redirect()->away($satsetui->launch($request->user(), $this->site($request)));
+            return Inertia::location($satsetui->launch($request->user(), $this->site($request)));
         } catch (Throwable $exception) {
             report($exception);
 

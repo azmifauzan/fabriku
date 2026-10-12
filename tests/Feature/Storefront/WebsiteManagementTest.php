@@ -60,13 +60,14 @@ class WebsiteManagementTest extends TestCase
         ]);
         $site->update(['active_theme_version_id' => $activeVersion->id]);
         $ticket = Str::random(60);
+        $redirectUrl = 'https://satsetui.test/integrations/fabriku/continue/'.Str::random(60);
         config([
             'services.satsetui.base_url' => 'https://satsetui.test',
             'services.satsetui.integration_secret' => 'shared-test-secret',
         ]);
-        Http::fake(function ($request) {
+        Http::fake(function ($request) use ($redirectUrl) {
             if (str_ends_with($request->url(), '/api/integrations/fabriku/launch')) {
-                return Http::response(['redirect_url' => 'https://satsetui.test/integrations/fabriku/continue/'.Str::random(60)]);
+                return Http::response(['redirect_url' => $redirectUrl]);
             }
 
             if (str_contains($request->url(), '/api/integrations/fabriku/exports/')) {
@@ -96,7 +97,11 @@ class WebsiteManagementTest extends TestCase
 
         $this->actingAs($manager)
             ->post('/website/satsetui/launch')
-            ->assertRedirect();
+            ->assertRedirect($redirectUrl);
+        $this->post('/website/satsetui/launch', [], ['X-Inertia' => 'true'])
+            ->assertStatus(409)
+            ->assertHeader('X-Inertia-Location', $redirectUrl)
+            ->assertHeaderMissing('Location');
         $this->get('/website/satsetui/import?ticket='.$ticket)
             ->assertRedirect(route('website.index', ['tab' => 'desain']));
 
