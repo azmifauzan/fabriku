@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import WebsiteThemePreview from '@/components/WebsiteThemePreview.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 type Product = { id: number; product_code: string; slug: string; title: string; description: string | null; is_visible: boolean };
 type Service = { id: number; name: string; slug: string | null; is_public: boolean; is_active: boolean };
@@ -66,6 +67,10 @@ const props = defineProps<{
     contentPages: ContentPage[];
 }>();
 const page = usePage();
+const csrfToken = ref('');
+onMounted(() => {
+    csrfToken.value = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
+});
 const success = computed(() => (page.props.flash as { success?: string } | undefined)?.success);
 const satsetuiError = computed(() => (page.props.errors as Record<string, string> | undefined)?.satsetui);
 const siteForm = useForm({
@@ -93,6 +98,10 @@ const tabs: Array<{ id: Tab; label: string }> = [
 ];
 const hero = props.site?.active_theme_version?.sections?.find((s) => s.type === 'hero')?.variables;
 const colors = props.site?.active_theme_version?.theme?.css_variables ?? {};
+const designVersions = computed(() => {
+    const priority = (id: number) => (id === props.site?.active_theme_version?.id ? 0 : id === props.draftThemeVersion?.id ? 1 : 2);
+    return [...(props.site?.theme_versions ?? [])].sort((a, b) => priority(a.id) - priority(b.id));
+});
 const themeForm = useForm({
     primary: colors['--fb-primary'] ?? '#2563eb',
     accent: colors['--fb-accent'] ?? '#3b82f6',
@@ -605,19 +614,22 @@ const whatsappLink = (phone: string, message: string) =>
                                   : 'Akun Satsetui akan ditautkan satu kali. Setelah itu wizard terbuka otomatis. Kredit dan editor tetap dikelola di Satsetui.'
                         }}
                     </p>
-                    <button
-                        type="button"
-                        class="mt-3 min-h-11 rounded-lg bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-                        @click="router.post('/website/satsetui/launch', {}, { preserveScroll: true })"
-                    >
-                        {{
-                            site.active_theme_version?.source === 'satsetui'
-                                ? 'Buat versi desain baru'
-                                : draftThemeVersion
-                                  ? 'Buat desain lain'
-                                  : 'Buat desain dengan Satsetui'
-                        }}
-                    </button>
+                    <form action="/website/satsetui/launch" method="post" target="_blank" rel="noopener">
+                        <input type="hidden" name="_token" :value="csrfToken" />
+                        <button
+                            type="submit"
+                            class="mt-3 min-h-11 rounded-lg bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                        >
+                            {{
+                                site.active_theme_version?.source === 'satsetui'
+                                    ? 'Buat versi desain baru'
+                                    : draftThemeVersion
+                                      ? 'Buat desain lain'
+                                      : 'Buat desain dengan Satsetui'
+                            }}
+                        </button>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Satsetui terbuka di tab baru.</p>
+                    </form>
                 </div>
                 <form v-if="site.active_theme_version?.source !== 'satsetui' && !draftThemeVersion" class="grid gap-4" @submit.prevent="saveTheme">
                     <fieldset class="grid gap-2 sm:grid-cols-3">
@@ -682,21 +694,63 @@ const whatsappLink = (phone: string, message: string) =>
                 <div v-else class="rounded-lg border border-slate-200 p-4 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
                     Editor template tersedia di Satsetui. Versi berikutnya dapat dibuat dari tombol di atas.
                 </div>
-                <div v-if="site.theme_versions.length" class="mt-7 border-t border-slate-200 pt-5">
-                    <h3 class="mb-2 font-semibold dark:text-white">Riwayat desain</h3>
-                    <div class="flex flex-wrap gap-2">
-                        <button
-                            v-for="version in site.theme_versions"
+                <div class="mt-7 border-t border-slate-200 pt-5 dark:border-slate-700">
+                    <h3 class="font-semibold dark:text-white">Desain tersimpan</h3>
+                    <p class="mt-1 mb-4 text-sm text-slate-600 dark:text-slate-300">
+                        Bandingkan tampilan tiap versi. Preview memakai desain tersimpan dan katalog usaha saat ini.
+                    </p>
+                    <div v-if="designVersions.length" class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        <article
+                            v-for="version in designVersions"
                             :key="version.id"
-                            type="button"
-                            :disabled="site.active_theme_version?.id === version.id || draftThemeVersion?.id === version.id"
-                            class="rounded-lg border border-slate-400 px-3 py-2 text-sm disabled:opacity-50 dark:text-white"
-                            @click="router.post(`/website/theme/${version.id}/restore`)"
+                            class="min-w-0 overflow-hidden rounded-xl border bg-white dark:bg-slate-900"
+                            :class="
+                                site.active_theme_version?.id === version.id
+                                    ? 'border-teal-700 dark:border-teal-400'
+                                    : 'border-slate-300 dark:border-slate-600'
+                            "
                         >
-                            Versi {{ version.version
-                            }}{{ site.active_theme_version?.id === version.id ? ' · aktif' : draftThemeVersion?.id === version.id ? ' · draf' : '' }}
-                        </button>
+                            <WebsiteThemePreview :version-id="version.id" :version="version.version" />
+                            <div class="p-4">
+                                <h4 class="font-semibold text-slate-950 dark:text-white">Versi {{ version.version }}</h4>
+                                <p
+                                    v-if="site.active_theme_version?.id === version.id"
+                                    class="mt-1 text-sm font-semibold text-teal-800 dark:text-teal-300"
+                                >
+                                    Aktif saat ini
+                                </p>
+                                <p
+                                    v-else-if="draftThemeVersion?.id === version.id"
+                                    class="mt-1 text-sm font-semibold text-amber-900 dark:text-amber-200"
+                                >
+                                    Draf · belum diterapkan
+                                </p>
+                                <p v-else class="mt-1 text-sm text-slate-600 dark:text-slate-300">Versi sebelumnya</p>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    <a
+                                        :href="`/website/theme/${version.id}/preview`"
+                                        target="_blank"
+                                        rel="noopener"
+                                        :aria-label="`Lihat preview versi ${version.version} di tab baru`"
+                                        class="inline-flex min-h-11 items-center rounded-lg border border-slate-500 px-3 py-2 text-sm font-semibold text-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 dark:text-slate-100 dark:focus-visible:outline-teal-300"
+                                        >Lihat preview</a
+                                    >
+                                    <button
+                                        v-if="site.active_theme_version?.id !== version.id && draftThemeVersion?.id !== version.id"
+                                        type="button"
+                                        :aria-label="`Pulihkan desain versi ${version.version}`"
+                                        class="min-h-11 rounded-lg border border-slate-500 px-3 py-2 text-sm font-semibold text-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 dark:text-slate-100 dark:focus-visible:outline-teal-300"
+                                        @click="router.post(`/website/theme/${version.id}/restore`, {}, { preserveScroll: true })"
+                                    >
+                                        Pulihkan versi
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
                     </div>
+                    <p v-else class="rounded-lg border border-slate-300 p-4 text-sm text-slate-600 dark:border-slate-600 dark:text-slate-300">
+                        Belum ada desain tersimpan. Simpan desain awal atau buat desain dengan Satsetui untuk melihat preview di sini.
+                    </p>
                 </div>
             </section>
 

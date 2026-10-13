@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Services\SatsetuiTemplateClient;
 use App\Services\Storefront\CloudflareDomains;
 use App\Services\Storefront\HtmlSanitizerService;
+use App\Services\Storefront\Storefront;
 use App\Services\Storefront\ThemeRenderer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -343,6 +344,25 @@ class WebsiteController extends Controller
         });
 
         return back()->with('success', 'Desain website disimpan sebagai versi baru.');
+    }
+
+    public function previewTheme(Request $request, SiteThemeVersion $version, ThemeRenderer $renderer): HttpResponse
+    {
+        $this->ensureManager($request);
+        $site = $this->site($request);
+        abort_unless($version->business_site_id === $site->id && $version->tenant_id === $site->tenant_id, 404);
+
+        $html = $renderer->render($site, $version, [
+            'page' => 'home',
+            'products' => $site->mode === 'jasa' ? collect() : Storefront::for($site->tenant)->products()->get(),
+            'services' => $site->mode === 'produk' ? collect() : Storefront::for($site->tenant)->services()->get(),
+        ]);
+
+        return response($html)
+            ->header('Content-Type', 'text/html; charset=UTF-8')
+            ->header('Cache-Control', 'private, no-store')
+            ->header('X-Robots-Tag', 'noindex, nofollow')
+            ->header('Content-Security-Policy', "sandbox; form-action 'none'; base-uri 'none'; frame-ancestors 'self'");
     }
 
     public function restoreTheme(Request $request, SiteThemeVersion $version): RedirectResponse

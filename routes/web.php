@@ -209,6 +209,7 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
     Route::post('/website/satsetui/publish-draft', [WebsiteController::class, 'publishSatsetuiDraft'])->name('website.satsetui.publishDraft');
     Route::patch('/website/pages/{page}', [WebsiteController::class, 'updateContentPage'])->name('website.pages.update');
     Route::post('/website/theme/{version}/restore', [WebsiteController::class, 'restoreTheme'])->name('website.theme.restore');
+    Route::get('/website/theme/{version}/preview', [WebsiteController::class, 'previewTheme'])->name('website.theme.preview');
     Route::post('/website/publish', [WebsiteController::class, 'publish'])->name('website.publish');
     Route::post('/website/setup/complete', [WebsiteController::class, 'completeSetup'])->name('website.setup.complete');
     Route::post('/website/products', [WebsiteController::class, 'product'])->name('website.products');

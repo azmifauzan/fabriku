@@ -18,6 +18,61 @@ class WebsiteManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_manager_can_preview_each_saved_design_without_changing_the_active_version(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'status' => 'draft']);
+        $versions = collect([1, 2])->map(fn ($number) => SiteThemeVersion::create([
+            'tenant_id' => $tenant->id,
+            'business_site_id' => $site->id,
+            'version' => $number,
+            'source' => $number === 1 ? 'catalog' : 'satsetui',
+            'theme' => ['satsetui_css' => '.hero{color:#123456}'],
+            'sections' => [['type' => 'hero', 'html' => '<h1>Desain versi '.$number.'</h1><script>alert(1)</script>']],
+            'created_by' => $manager->id,
+        ]));
+        $site->update(['active_theme_version_id' => $versions[0]->id, 'draft_theme_version_id' => $versions[1]->id]);
+        $this->actingAs($manager);
+
+        foreach ($versions as $version) {
+            $this->get('/website/theme/'.$version->id.'/preview')
+                ->assertOk()
+                ->assertHeader('Content-Type', 'text/html; charset=UTF-8')
+                ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
+                ->assertHeader('Content-Security-Policy', "sandbox; form-action 'none'; base-uri 'none'; frame-ancestors 'self'")
+                ->assertSee('Desain versi '.$version->version)
+                ->assertSee('.hero{color:#123456}', false)
+                ->assertDontSee('<script', false);
+        }
+
+        $this->assertSame($versions[0]->id, $site->fresh()->active_theme_version_id);
+        $this->assertSame($versions[1]->id, $site->fresh()->draft_theme_version_id);
+    }
+
+    public function test_design_preview_is_private_to_the_site_manager(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        $version = SiteThemeVersion::create([
+            'tenant_id' => $tenant->id,
+            'business_site_id' => $site->id,
+            'version' => 1,
+            'source' => 'catalog',
+            'theme' => [],
+            'sections' => [],
+            'created_by' => $manager->id,
+        ]);
+        $url = '/website/theme/'.$version->id.'/preview';
+        $this->get($url)->assertRedirect(route('login'));
+        $otherManager = User::factory()->manager()->create();
+        BusinessSite::factory()->create(['tenant_id' => $otherManager->tenant_id]);
+        $this->actingAs($otherManager)->get($url)->assertNotFound();
+        $staff = User::factory()->forTenant($tenant->id)->create(['role' => 'staff']);
+        $this->actingAs($staff)->get($url)->assertForbidden();
+    }
+
     public function test_manager_can_create_publish_and_edit_website(): void
     {
         $tenant = Tenant::factory()->create();
