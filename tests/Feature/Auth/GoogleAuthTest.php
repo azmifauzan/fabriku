@@ -46,7 +46,8 @@ describe('Google OAuth', function () {
             'business_name' => 'Toko Bie',
             'business_category' => 'retail',
             'name' => 'New Bie',
-        ])->assertRedirect(route('dashboard'));
+        ])->assertRedirect(route('dashboard'))
+            ->assertSessionHas('analytics_event', 'sign_up');
 
         $user = User::where('email', 'newbie@example.com')->first();
         expect($user)->not->toBeNull();

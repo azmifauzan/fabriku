@@ -11,6 +11,17 @@ const navigation = [
     { label: 'Blog', href: '/blog' },
 ];
 
+// ponytail: mirrors config/landing_pages.php keys; LandingPageTest asserts every slug resolves.
+const categoryPages = [
+    { label: 'Konveksi', href: '/aplikasi/konveksi' },
+    { label: 'Makanan & kue', href: '/aplikasi/usaha-makanan-kue' },
+    { label: 'Kerajinan', href: '/aplikasi/kerajinan-handmade' },
+    { label: 'Kosmetik', href: '/aplikasi/kosmetik-skincare' },
+    { label: 'Toko retail', href: '/aplikasi/toko-retail' },
+    { label: 'Usaha rumahan', href: '/aplikasi/produksi-rumahan' },
+    { label: 'Bengkel & jasa', href: '/aplikasi/bengkel-jasa-servis' },
+];
+
 const closeMenu = () => {
     mobileMenuOpen.value = false;
 };
@@ -139,6 +150,19 @@ const closeMenu = () => {
                         class="min-h-11 py-3 text-slate-700 hover:text-indigo-800 focus-visible:outline-2 focus-visible:outline-indigo-700"
                         >Syarat</Link
                     >
+                </nav>
+
+                <nav aria-label="Fabriku untuk jenis usaha" class="md:col-span-2">
+                    <p class="text-sm font-bold text-[#163761]">Fabriku untuk</p>
+                    <ul class="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-sm font-semibold">
+                        <li v-for="item in categoryPages" :key="item.href">
+                            <Link
+                                :href="item.href"
+                                class="inline-flex min-h-11 items-center text-slate-700 hover:text-indigo-800 focus-visible:outline-2 focus-visible:outline-indigo-700"
+                                >{{ item.label }}</Link
+                            >
+                        </li>
+                    </ul>
                 </nav>
 
                 <p class="border-t border-slate-300 pt-5 text-xs text-slate-600 md:col-span-2">

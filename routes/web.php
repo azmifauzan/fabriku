@@ -29,6 +29,7 @@ use App\Http\Controllers\InventoryItemCategoryController;
 use App\Http\Controllers\InventoryItemController;
 use App\Http\Controllers\InventoryLocationController;
 use App\Http\Controllers\InventoryVisualizationController;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MaterialReceiptController;
 use App\Http\Controllers\MaterialTypeController;
@@ -75,6 +76,7 @@ Route::get('/syarat-ketentuan', fn () => Inertia::render('Legal/Terms', ['canoni
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('/aplikasi/{slug}', [LandingPageController::class, 'show'])->name('landing.category');
 
 // Email Campaign Unsubscribe Routes (Signed URLs)
 Route::get('/campaign/unsubscribe/{user}', [CampaignUnsubscribeController::class, 'unsubscribe'])->name('campaign.unsubscribe');

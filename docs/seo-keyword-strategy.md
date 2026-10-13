@@ -38,16 +38,16 @@ Ranked by ease-to-rank (long-tail specificity + zero existing competition from F
 | 3 | "cara kelola stok retur barang UMKM retail" | Retail | Informational | High | Terbit 2026-09-05 |
 | 4 | "cara stok opname toko kelontong/retail tanpa tutup toko" | Retail | Informational | High | Terbit 2026-09-10 |
 | 5 | "cara mengelola kontraktor/maklun konveksi agar tidak telat" | Garment | Informational → transactional | High | Terbit 2026-09-10 |
-| 6 | "cara membuat BOM (bill of material) produksi UMKM per varian ukuran/warna" | Garment | Informational | Medium | Belum |
-| 7 | "cara mengatur jadwal staf servis/bengkel biar tidak bentrok" | Jasa | Informational | Medium | Belum |
-| 8 | "cara melacak sparepart/bahan habis pakai jasa servis" | Jasa | Informational | Medium | Belum |
+| 6 | "cara membuat BOM (bill of material) produksi UMKM per varian ukuran/warna" | Garment | Informational | Medium | Terbit 2026-10-13 |
+| 7 | "cara mengatur jadwal staf servis/bengkel biar tidak bentrok" | Jasa | Informational | Medium | Terbit 2026-10-13 |
+| 8 | "cara melacak sparepart/bahan habis pakai jasa servis" | Jasa | Informational | Medium | Terbit 2026-10-13 |
 | 9 | "kapan usaha rumahan butuh sistem pencatatan, bukan buku/Excel lagi" | Cross-category | Consideration | High (funnel-relevant) | Terbit 2026-09-10 |
-| 10 | "cara kelola stok reseller dan dropship kosmetik tanpa selisih" | Kosmetik | Informational | Medium | Belum |
-| 11 | "cara menyiapkan stok UMKM sebelum lebaran/nataru (forecast musiman)" | Cross-category | Informational | Medium (seasonal — schedule ~6 weeks before Ramadan/Desember) | Belum |
+| 10 | "cara kelola stok reseller dan dropship kosmetik tanpa selisih" | Kosmetik | Informational | Medium | Terbit 2026-10-13 |
+| 11 | "cara menyiapkan stok UMKM sebelum lebaran/nataru (forecast musiman)" | Cross-category | Informational | Medium (seasonal — schedule ~6 weeks before Ramadan/Desember) | Terbit 2026-10-13 |
 | 12 | "aplikasi pencatatan UMKM vs Excel: kapan harus pindah" | Cross-category | Consideration/transactional | High (bottom-funnel) | Terbit 2026-09-10 |
-| 13 | "cara kelola banyak cabang/outlet UMKM dengan stok terpusat" | Cross-category | Informational | Medium | Belum |
-| 14 | "cara menghitung HPP produk handmade/kerajinan custom order" | Craft | Informational | Medium | Belum |
-| 15 | "cara mencatat produksi multi-produk dalam satu dapur rumahan" | Homemade | Informational | Low | Belum |
+| 13 | "cara kelola banyak cabang/outlet UMKM dengan stok terpusat" | Cross-category | Informational | Medium | Terbit 2026-10-13 |
+| 14 | "cara menghitung HPP produk handmade/kerajinan custom order" | Craft | Informational | Medium | Ditunda — tumpang tindih dengan post harga jual kerajinan (sudah memuat contoh custom order) |
+| 15 | "cara mencatat produksi multi-produk dalam satu dapur rumahan" | Homemade | Informational | Low | Terbit 2026-10-13 |
 
 Keyword #9 dan #12 aslinya diberi kategori "Cross-category" di riset ini, tapi `BlogSeeder.php` hanya punya 4 kategori nyata (Manajemen Stok/Produksi/Penjualan/Keuangan) — keduanya diterbitkan dengan kategori **Produksi**, bukan kategori baru "Tips Bisnis" yang sempat direncanakan di plan implementasi.
 

@@ -5,8 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title inertia>{{ config('app.name', 'Fabriku') }} - Operasional UMKM dalam satu alur</title>
-        {{-- description/og tags are page-specific, rendered per-page via the SeoHead Vue component --}}
+        {{-- title/description/og tags are page-specific, rendered per-page via the SeoHead Vue component --}}
+        @inertiaHead
+        {{-- ponytail: reads @inertiaHead's internal $__inertiaSsrResponse; fallback title only when SSR is off/down, else crawlers see two <title> tags --}}
+        @if (empty($__inertiaSsrResponse))
+            <title inertia>{{ config('app.name', 'Fabriku') }} - Operasional UMKM dalam satu alur</title>
+        @endif
 
         <!-- Apply saved theme before app loads (prevents FOUC) -->
         <script>
@@ -33,7 +37,6 @@
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
         @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
-        @inertiaHead
     </head>
     <body class="font-sans antialiased">
         @inertia

@@ -54,6 +54,6 @@ class RegisterController extends Controller
         // Auto-login the user
         Auth::login($user);
 
-        return redirect()->route('verification.notice');
+        return redirect()->route('verification.notice')->with('analytics_event', 'sign_up');
     }
 }

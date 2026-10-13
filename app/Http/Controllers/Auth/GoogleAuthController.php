@@ -138,6 +138,6 @@ class GoogleAuthController extends Controller
 
         Auth::login($user, true);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('dashboard')->with('analytics_event', 'sign_up');
     }
 }

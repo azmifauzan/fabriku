@@ -31,7 +31,8 @@ describe('User Registration and Authentication Flow', function () {
         ];
 
         $response = $this->post(route('register'), $userData);
-        $response->assertRedirect(route('verification.notice'));
+        $response->assertRedirect(route('verification.notice'))
+            ->assertSessionHas('analytics_event', 'sign_up');
 
         // Step 3: Verify tenant created
         $tenant = Tenant::where('name', 'Konveksi Sejahtera')->first();

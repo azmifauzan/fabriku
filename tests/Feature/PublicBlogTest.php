@@ -140,3 +140,12 @@ it('canonicalizes page 1 to the bare listing but page 2 to itself', function () 
             ->where('noindex', false)
         );
 });
+
+it('exposes the current page so paginated listings get their own title', function () {
+    BlogPost::factory()->published()->count(13)->create();
+
+    $this->get('/blog?page=2')->assertInertia(fn ($page) => $page
+        ->where('posts.current_page', 2)
+        ->where('canonical', url('/blog?page=2'))
+    );
+});

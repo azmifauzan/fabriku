@@ -2,8 +2,9 @@
 import SeoHead from '@/components/SeoHead.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     posts: {
         data: Array<{
             slug: string;
@@ -14,18 +15,22 @@ defineProps<{
             category: { name: string; slug: string } | null;
         }>;
         links: Array<{ url: string | null; label: string; active: boolean }>;
+        current_page: number;
     };
     categories: Array<{ name: string; slug: string }>;
     activeCategory: string | null;
     canonical: string;
     noindex: boolean;
 }>();
+
+// Page 2+ has its own canonical, so it needs its own title/description too.
+const pageSuffix = computed(() => (props.posts.current_page > 1 ? ` - Halaman ${props.posts.current_page}` : ''));
 </script>
 
 <template>
     <SeoHead
-        title="Blog Fabriku | Panduan Produksi dan Stok UMKM"
-        description="Panduan praktis untuk mengelola bahan baku, produksi, stok, dan penjualan usaha."
+        :title="`Blog Fabriku | Panduan Produksi dan Stok UMKM${pageSuffix}`"
+        :description="`Panduan praktis untuk mengelola bahan baku, produksi, stok, dan penjualan usaha${pageSuffix}.`"
         :canonical="canonical"
         :noindex="noindex"
     />

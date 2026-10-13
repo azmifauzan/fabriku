@@ -23,6 +23,6 @@ it('emits lastmod only for blog posts, never for static pages', function () {
 
     $body = $this->get('/sitemap.xml')->getContent();
 
-    expect(substr_count($body, '<loc>'))->toBe(6);      // 4 static + 2 posts
+    expect(substr_count($body, '<loc>'))->toBe(13);     // 4 static + 7 landing + 2 posts
     expect(substr_count($body, '<lastmod>'))->toBe(2);  // posts only
 });

@@ -37,6 +37,10 @@ class BlogSeeder extends Seeder
         $posts = $this->posts();
 
         foreach ($posts as $data) {
+            // Keep the original publish date on re-seed; re-dating every run
+            // reshuffles the blog order and lies to crawlers about freshness.
+            $publishedAt = BlogPost::where('slug', $data['slug'])->value('published_at') ?? now()->subDays($data['days_ago']);
+
             $post = BlogPost::updateOrCreate(
                 ['slug' => $data['slug']],
                 [
@@ -46,7 +50,7 @@ class BlogSeeder extends Seeder
                     'excerpt' => $data['excerpt'],
                     'content' => $data['content'],
                     'status' => 'published',
-                    'published_at' => now()->subDays($data['days_ago']),
+                    'published_at' => $publishedAt,
                     'meta_title' => $data['meta_title'],
                     'meta_description' => $data['meta_description'],
                 ]
@@ -123,7 +127,7 @@ Cara paling praktis untuk mulai: lihat catatan pemakaian 1-2 bulan terakhir, hit
 
 Selama jumlah bahan masih sedikit dan transaksinya jarang, catatan manual di buku atau spreadsheet masih bisa jalan. Tapi begitu jenis bahan mulai banyak, ada lebih dari satu orang yang mencatat, atau sudah beberapa kali kejadian stok "hilang" tanpa sebab jelas, itu tanda saatnya pindah ke sistem yang mencatat otomatis setiap pergerakan stok.
 
-Fabriku punya modul stok bahan baku dengan pencatatan FIFO/FEFO otomatis dan notifikasi saat stok mendekati batas minimum, jadi kamu tidak perlu lagi menghitung manual atau was-was lupa cek gudang.
+Fabriku punya modul stok bahan baku dengan pemakaian FIFO otomatis dan daftar stok menipis di dashboard saat stok menyentuh batas minimum, jadi kamu tidak perlu lagi menghitung manual atau was-was lupa cek gudang.
 
 Kalau usahamu bergerak di konveksi, pola kerugian dari stok bahan baku biasanya lebih spesifik lagi — lihat [5 kesalahan mengelola stok bahan baku yang bikin UMKM konveksi rugi](/blog/kesalahan-mengelola-stok-bahan-baku-umkm-konveksi). Dan begitu stok bahan sudah tercatat rapi, langkah berikutnya adalah memastikan harga jual produk juga dihitung dari angka yang benar, bukan tebakan — baca [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm).
 MD,
@@ -335,13 +339,61 @@ Dari tabel sederhana ini saja sudah kelihatan beberapa hal: total omzet minggu i
 
 Laporan sesederhana ini sudah cukup untuk mulai mengambil keputusan — misalnya menyiapkan stok lebih banyak menjelang hari yang biasanya ramai, atau mengingatkan pelanggan yang belum melunasi pembayaran sebelum piutang menumpuk.
 
+## Template Laporan Penjualan Bulanan
+
+Setelah catatan harian berjalan, buat ringkasan bulanan di sheet terpisah. Tiga tabel ini sudah cukup untuk usaha kecil:
+
+**1. Ringkasan per minggu**
+
+| Minggu | Jumlah transaksi | Omzet | Sudah dibayar | Belum dibayar |
+|---|---|---|---|---|
+| 1–7 Agt | 42 | Rp3.150.000 | Rp2.775.000 | Rp375.000 |
+| 8–14 Agt | 38 | Rp2.850.000 | Rp2.850.000 | Rp0 |
+| 15–21 Agt | 51 | Rp3.825.000 | Rp3.450.000 | Rp375.000 |
+| 22–31 Agt | 60 | Rp4.500.000 | Rp4.125.000 | Rp375.000 |
+| **Total** | **191** | **Rp14.325.000** | **Rp13.200.000** | **Rp1.125.000** |
+
+**2. Penjualan per produk** — kolom: produk, qty terjual, omzet, persentase dari total omzet. Urutkan dari omzet terbesar untuk melihat produk andalan.
+
+**3. Penjualan per channel** — kolom: offline/toko, WhatsApp, marketplace, reseller. Ini membantu menentukan channel mana yang layak diberi waktu dan modal lebih.
+
+## Rumus Excel yang Paling Berguna
+
+Jika catatan harian ada di sheet *Transaksi* dengan kolom A = Tanggal, B = Produk, C = Qty, D = Harga, E = Total, F = Metode, G = Status:
+
+- **Total kolom E**: `=C2*D2` lalu tarik ke bawah.
+- **Omzet satu produk**: `=SUMIF(Transaksi!B:B;"Kaos Polos";Transaksi!E:E)`
+- **Omzet rentang tanggal**: `=SUMIFS(Transaksi!E:E;Transaksi!A:A;">="&DATE(2026;8;1);Transaksi!A:A;"<="&DATE(2026;8;7))`
+- **Total belum dibayar**: `=SUMIF(Transaksi!G:G;"Belum Lunas";Transaksi!E:E)`
+- **Jumlah transaksi**: `=COUNTA(Transaksi!A:A)-1`
+
+Pemisah argumen `;` atau `,` tergantung pengaturan bahasa Excel Anda. Untuk ringkasan per produk tanpa menulis rumus satu per satu, gunakan **PivotTable** dengan *Produk* di baris dan *Sum of Total* di nilai.
+
+## Kesalahan yang Membuat Laporan Tidak Bisa Dipakai
+
+- **Nama produk ditulis berbeda-beda.** "Kaos polos", "kaos Polos", dan "kaos plos" dihitung sebagai tiga produk di rumus SUMIF. Buat daftar nama produk baku dan pilih dari daftar itu (Data Validation di Excel).
+- **Retur dan diskon tidak dicatat.** Omzet terlihat lebih besar dari uang yang benar-benar masuk.
+- **Penjualan pribadi dicampur.** Barang yang diambil untuk dipakai sendiri atau diberikan gratis harus dicatat terpisah agar stok dan omzet tetap cocok.
+- **Tanggal ditulis sebagai teks.** Rumus rentang tanggal tidak akan berjalan jika kolom tanggal berformat teks.
+
 ## Berapa Sering Laporan Ini Perlu Dibuat
 
 Untuk usaha yang baru mulai, rekap mingguan biasanya cukup untuk mulai melihat pola tanpa terasa membebani. Begitu transaksi harian mulai lebih dari 10-15 kali, rekap harian jadi lebih berguna karena pola penjualan bisa berubah cukup cepat, dan menunggu seminggu untuk melihat data berarti terlambat mengambil keputusan seperti menambah stok atau menyesuaikan harga.
 
 Yang lebih penting dari frekuensi adalah konsistensi. Laporan yang dibuat rutin walau formatnya sederhana jauh lebih berguna dibanding laporan detail yang hanya dibuat sesekali saat sempat. Kebiasaan mencatat setiap transaksi di hari yang sama juga mengurangi risiko lupa atau salah ingat detail transaksi, yang sering terjadi kalau pencatatan ditunda sampai akhir hari atau akhir minggu.
 
-Fabriku mencatat setiap pesanan langsung sebagai data penjualan, sehingga laporan seperti ini tidak perlu disusun manual — tinggal dilihat dan dianalisis.
+## Pertanyaan yang Sering Muncul
+
+**Apa bedanya laporan penjualan dengan laporan laba rugi?**
+Laporan penjualan mencatat omzet (uang dari penjualan). Laporan laba rugi mengurangi omzet dengan HPP dan biaya operasional untuk mengetahui untung bersih. Laporan penjualan adalah bahan dasar laporan laba rugi.
+
+**Apakah penjualan yang belum dibayar dihitung sebagai omzet?**
+Dicatat sebagai penjualan, tapi tandai statusnya. Uang yang belum diterima adalah piutang dan belum bisa dipakai untuk belanja bahan.
+
+**Apakah cukup memakai buku tulis?**
+Cukup untuk awal, selama kolomnya sama setiap hari. Kendalanya muncul saat ingin merekap per produk atau per bulan, karena semuanya harus dihitung ulang manual.
+
+Fabriku mencatat setiap pesanan langsung sebagai data penjualan, sehingga laporan seperti ini tidak perlu disusun manual — rekap per periode, per produk, dan status pembayaran bisa dilihat dan diekspor ke Excel atau PDF. Untuk usaha yang terutama menjual barang jadi, lihat [Fabriku untuk toko retail](/aplikasi/toko-retail).
 
 Setelah laporan dasar ini rutin dibuat, langkah selanjutnya adalah membacanya lebih dalam — lihat [5 metrik laporan penjualan yang wajib dipantau UMKM setiap bulan](/blog/metrik-laporan-penjualan-wajib-dipantau-umkm). Kolom status pembayaran di atas juga berkaitan erat dengan [cara mencatat dan menagih piutang pelanggan UMKM](/blog/cara-mencatat-menagih-piutang-pelanggan-umkm) — transaksi yang belum lunas hari ini adalah piutang yang perlu ditagih besok.
 MD,
@@ -430,7 +482,61 @@ Contoh perhitungan: sebuah usaha membuat 50 pcs tas kain dalam satu batch produk
 
 HPP per unit = Rp2.500.000 ÷ 50 pcs = **Rp50.000 per tas**.
 
-Dari angka ini, kalau usaha ingin margin 40%, harga jual minimal yang masuk akal adalah Rp50.000 + (40% × Rp50.000) = Rp70.000. Kalau selama ini dijual di bawah angka itu — misalnya Rp55.000 karena "sudah biasa segitu" — margin sebenarnya hanya 10%, jauh dari target yang dikira sudah tercapai.
+Dari angka ini, kalau usaha ingin markup 40% di atas HPP, harga jual minimal yang masuk akal adalah Rp50.000 + (40% × Rp50.000) = Rp70.000. Kalau selama ini dijual di bawah angka itu — misalnya Rp55.000 karena "sudah biasa segitu" — markup sebenarnya hanya 10%, jauh dari target yang dikira sudah tercapai.
+
+## Rincian Perhitungan dalam Tabel
+
+Supaya mudah ditiru, berikut rincian contoh tas kain di atas dalam bentuk tabel. Format seperti ini bisa langsung dipakai di Excel atau buku catatan:
+
+| Komponen | Rincian | Total Batch | Per Unit (÷50) |
+|---|---|---|---|
+| Bahan baku | Kain kanvas 25 m × Rp45.000 + aksesoris Rp375.000 | Rp1.500.000 | Rp30.000 |
+| Tenaga kerja langsung | Upah jahit borongan Rp15.000/pcs | Rp750.000 | Rp15.000 |
+| Overhead | Listrik, penyusutan mesin jahit | Rp100.000 | Rp2.000 |
+| Kemasan | Plastik + label Rp3.000/pcs | Rp150.000 | Rp3.000 |
+| **HPP** | | **Rp2.500.000** | **Rp50.000** |
+
+Kolom "per unit" penting karena memperlihatkan komponen mana yang paling berat. Di contoh ini bahan baku menyumbang 60% HPP, jadi kenaikan harga bahan baku 10% saja langsung menaikkan HPP Rp3.000 per tas.
+
+## Markup vs Margin: Jangan Sampai Tertukar
+
+Dua istilah ini sering dipakai bergantian padahal hasilnya berbeda:
+
+- **Markup** dihitung dari HPP. Markup 40% atas HPP Rp50.000 berarti harga jual Rp70.000.
+- **Margin** dihitung dari harga jual. Dengan harga jual Rp70.000 dan HPP Rp50.000, keuntungannya Rp20.000, atau margin **28,6%** dari harga jual.
+
+Kalau target Anda adalah margin 40% dari harga jual, rumusnya berbeda: **Harga Jual = HPP ÷ (1 − 40%)** = Rp50.000 ÷ 0,6 = **Rp83.333**. Selisih Rp13.000 per unit ini sering jadi sumber salah paham ketika pemilik usaha membaca "margin" di laporan keuangan tapi menghitung harga dengan rumus markup.
+
+## Contoh Kedua: HPP Produk Makanan per Resep
+
+Untuk usaha makanan, HPP lebih mudah dihitung per resep atau per adonan, lalu dibagi jumlah porsi yang dihasilkan. Contoh satu adonan brownies panggang ukuran 20×20 cm yang dipotong 16 bagian:
+
+| Bahan | Pemakaian | Biaya |
+|---|---|---|
+| Dark chocolate compound | 200 g | Rp18.000 |
+| Mentega | 150 g | Rp12.000 |
+| Gula pasir | 200 g | Rp3.200 |
+| Telur | 4 butir | Rp8.000 |
+| Tepung terigu & kakao | 120 g | Rp4.000 |
+| Gas oven (estimasi) | 45 menit | Rp3.000 |
+| Kotak + mika | 16 pcs | Rp16.000 |
+| **Total** | | **Rp64.200** |
+
+HPP per potong = Rp64.200 ÷ 16 = **Rp4.013**, dibulatkan Rp4.000. Belum termasuk upah membuat. Jika satu adonan dikerjakan 1 jam dengan upah Rp15.000/jam, tambahkan Rp940 per potong sehingga HPP menjadi sekitar Rp5.000. Dengan harga jual Rp8.000 per potong, margin terhadap harga jual adalah 37,5%.
+
+Satu hal yang sering terlewat di usaha makanan adalah **susut dan gagal produksi**. Kalau rata-rata 1 dari 16 potong pecah atau tidak layak jual, HPP sebenarnya dibagi 15, bukan 16 — naik sekitar 7%.
+
+## Template HPP Sederhana di Excel
+
+Buat satu sheet per produk dengan kolom: *Komponen, Satuan, Pemakaian per batch, Harga per satuan, Total, Per unit*. Lalu:
+
+1. Isi semua bahan berdasarkan nota pembelian terakhir, bukan harga yang diingat.
+2. Masukkan upah dan overhead per batch.
+3. Rumus kolom *Total* = Pemakaian × Harga per satuan.
+4. Rumus *HPP per unit* = jumlah kolom Total ÷ jumlah unit yang layak jual.
+5. Tambahkan sel *Harga jual* dan hitung margin = (Harga jual − HPP) ÷ Harga jual.
+
+Perbarui kolom harga setiap kali belanja bahan dengan harga berbeda. Begitu jumlah produk sudah lebih dari lima, memperbarui banyak sheet ini mulai memakan waktu dan rawan lupa.
 
 ## Kesalahan Umum saat Menghitung HPP
 
@@ -446,7 +552,18 @@ Dari empat komponen HPP, overhead paling sering diabaikan karena tidak sejelas b
 
 Cara praktis mengestimasi overhead tanpa perlu hitungan akuntansi rumit: jumlahkan total biaya listrik, gas, dan penyusutan alat dalam sebulan, lalu bagi dengan jumlah total unit yang diproduksi bulan itu untuk dapat estimasi overhead per unit. Angka ini tidak perlu presisi sampai rupiah terakhir — yang penting ada, supaya HPP tidak terlihat lebih murah dari kenyataan hanya karena satu komponen biaya terlewat begitu saja.
 
-Modul produksi dan stok bahan baku Fabriku mencatat biaya per bahan secara otomatis dari setiap pembelian, sehingga perhitungan HPP bisa mengikuti harga bahan yang aktual, bukan asumsi harga lama yang sudah berubah.
+## Pertanyaan yang Sering Muncul
+
+**Apakah gaji pemilik usaha masuk HPP?**
+Masuk, sebesar waktu yang dipakai untuk produksi. Jika pemilik ikut menjahit atau memasak, hitung waktunya dengan upah yang wajar. Waktu untuk promosi atau administrasi masuk biaya operasional, bukan HPP.
+
+**Apa bedanya HPP dengan biaya operasional?**
+HPP hanya biaya yang melekat pada pembuatan produk. Sewa toko, ongkos iklan, dan gaji admin adalah biaya operasional yang ditutup dari laba kotor (harga jual − HPP).
+
+**Seberapa sering harga bahan perlu diperbarui?**
+Setiap kali membeli bahan dengan harga berbeda. Minimal tinjau sebulan sekali bila harga bahan sering berubah.
+
+Modul produksi dan stok bahan baku Fabriku mencatat biaya per bahan secara otomatis dari setiap penerimaan bahan, sehingga perhitungan HPP bisa mengikuti harga bahan yang aktual, bukan asumsi harga lama yang sudah berubah. Lihat cara kerjanya untuk [usaha konveksi](/aplikasi/konveksi) atau [usaha makanan dan kue](/aplikasi/usaha-makanan-kue).
 
 Untuk produk yang lebih personal seperti kerajinan tangan, komponen biayanya sedikit berbeda dan skill jadi faktor tambahan — lihat [cara menentukan harga jual produk kerajinan handmade](/blog/cara-menentukan-harga-jual-produk-kerajinan-handmade). Untuk usaha jasa yang tidak punya produk fisik sama sekali, logikanya mirip tapi komponennya berbeda — baca [cara menghitung harga jasa servis kecil agar tidak rugi](/blog/cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi).
 MD,
@@ -601,7 +718,7 @@ Dari tabel ini kelihatan jelas: meski total stok Serum Vitamin C ada 55 pcs, bat
 
 Selain risiko komplain dan iritasi pelanggan, menjual kosmetik yang sudah lewat tanggal aman pakai juga berisiko dari sisi legal, terutama untuk produk yang terdaftar BPOM. Reputasi yang rusak karena satu kejadian seperti ini biasanya jauh lebih sulit dipulihkan dibanding sekadar menanggung rugi modal dari stok yang harus dimusnahkan lebih awal.
 
-Fabriku mencatat tanggal kadaluarsa per item stok dan menandai status "expired" secara otomatis begitu tanggalnya lewat, jadi produk yang mendekati kadaluarsa bisa terdeteksi lebih awal sebelum jadi masalah di tangan pelanggan.
+Fabriku mencatat tanggal kadaluarsa per item stok dan menandai item yang tanggalnya sudah lewat dengan status "expired", jadi produk yang mendekati kadaluarsa bisa dipantau lebih awal sebelum jadi masalah di tangan pelanggan. Lihat juga [Fabriku untuk kosmetik dan skincare](/aplikasi/kosmetik-skincare).
 
 Prinsip dasar pengelolaan stok di atas — minimum stock per varian, pencatatan yang konsisten, stock opname rutin — berlaku juga untuk bahan baku UMKM secara umum. Kalau ingin melihat gambaran lebih lengkap, baca [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi).
 MD,
@@ -644,7 +761,30 @@ Setelah tiga komponen di atas dijumlahkan, tambahkan margin yang jadi keuntungan
 
 Misalnya sebuah bengkel menghitung harga jasa tune up motor: waktu kerja 45 menit dengan tarif tenaga kerja Rp40.000/jam (setara Rp30.000), bahan pendukung seperti cairan pembersih karburator dan majun Rp10.000, biaya listrik dan penyusutan alat kompresor diperkirakan Rp5.000. Total biaya: Rp45.000.
 
-Kalau bengkel ingin margin 50%, harga jasa minimal yang masuk akal adalah Rp45.000 + (50% × Rp45.000) = Rp67.500, dibulatkan jadi Rp70.000 di luar harga sparepart yang diganti (oli, busi, dll dihitung terpisah sesuai harga beli). Kalau selama ini dipatok Rp50.000 rata dengan bengkel sebelah tanpa hitungan ini, marginnya jauh lebih tipis dari yang dikira, bahkan bisa nombok kalau servisnya ternyata makan waktu lebih lama dari biasanya.
+Kalau bengkel ingin markup 50% di atas biaya, harga jasa minimal yang masuk akal adalah Rp45.000 + (50% × Rp45.000) = Rp67.500, dibulatkan jadi Rp70.000 di luar harga sparepart yang diganti (oli, busi, dll dihitung terpisah sesuai harga beli). Kalau selama ini dipatok Rp50.000 rata dengan bengkel sebelah tanpa hitungan ini, marginnya jauh lebih tipis dari yang dikira, bahkan bisa nombok kalau servisnya ternyata makan waktu lebih lama dari biasanya.
+
+## Daftar Tarif Berdasarkan Tingkat Kesulitan
+
+Cara paling praktis adalah membuat daftar tarif per jenis layanan, bukan satu tarif rata. Contoh untuk bengkel motor dengan tarif tenaga kerja Rp40.000/jam dan markup 50%:
+
+| Layanan | Waktu | Bahan pendukung | Biaya alat | Total biaya | Tarif (dibulatkan) |
+|---|---|---|---|---|---|
+| Ganti oli | 15 menit | Rp2.000 | Rp1.000 | Rp13.000 | Rp20.000 |
+| Tune up | 45 menit | Rp10.000 | Rp5.000 | Rp45.000 | Rp70.000 |
+| Servis CVT | 60 menit | Rp15.000 | Rp5.000 | Rp60.000 | Rp90.000 |
+| Turun mesin | 6 jam | Rp40.000 | Rp20.000 | Rp300.000 | Rp450.000 |
+
+Harga sparepart yang diganti (oli, busi, kampas) ditagih terpisah sesuai harga jual sparepart. Pemisahan ini membuat pelanggan tahu apa yang mereka bayar, dan membuat Anda tahu berapa pendapatan dari jasa dan berapa dari sparepart.
+
+## Contoh Lain: Laundry Kiloan dan Reparasi HP
+
+**Laundry kiloan (per kg):** deterjen dan pewangi Rp1.200, listrik mesin cuci dan pengering Rp1.500, air Rp300, plastik Rp500, waktu kerja 6 menit per kg (upah Rp15.000/jam) Rp1.500, penyusutan mesin Rp500. Total Rp5.500/kg. Dengan markup 45%, tarif menjadi sekitar Rp8.000/kg.
+
+**Reparasi HP ganti LCD:** waktu kerja 1 jam dengan tarif teknisi Rp35.000, lem dan alat habis pakai Rp8.000, biaya alat Rp4.000. Total biaya jasa Rp47.000, tarif jasa Rp70.000 di luar harga LCD. Untuk pekerjaan berisiko seperti membuka HP dengan bodi lem, tambahkan cadangan risiko kerusakan sekitar 5–10% dari tarif.
+
+## Jangan Lupa Waktu Tidak Produktif
+
+Teknisi tidak bekerja 8 jam penuh setiap hari. Ada waktu menunggu pelanggan, membersihkan tempat kerja, dan membeli sparepart. Jika rata-rata hanya 6 dari 8 jam yang benar-benar dipakai untuk servis, tarif per jam harus dihitung dari 6 jam tersebut: upah harian Rp240.000 ÷ 6 jam = Rp40.000/jam, bukan Rp30.000/jam.
 
 ## Kesalahan Umum yang Bikin Usaha Jasa Rugi Diam-Diam
 
@@ -654,7 +794,18 @@ Kesalahan paling sering: menyamakan tarif untuk semua tingkat kesulitan servis, 
 
 Tinjau ulang tarif setiap kali ada kenaikan signifikan pada harga bahan pendukung atau upah tenaga kerja. Untuk usaha yang bahan pendukungnya sering naik-turun harga, meninjau tarif tiap 2-3 bulan lebih aman daripada menunggu sampai terasa rugi baru disadari.
 
-Untuk kategori usaha jasa, Fabriku menyediakan katalog layanan tanpa perlu modul material atau produksi, lengkap dengan pemetaan bahan pendukung per layanan yang otomatis terpotong dari stok setiap kali transaksi servis selesai — jadi biaya bahan pendukung tidak lagi terlewat dari perhitungan.
+## Pertanyaan yang Sering Muncul
+
+**Apakah tarif boleh berbeda dengan bengkel sebelah?**
+Boleh. Tarif yang lebih tinggi bisa dijelaskan dengan garansi servis, kecepatan, atau kualitas pengerjaan. Yang berbahaya justru tarif lebih murah yang tidak menutup biaya.
+
+**Bagaimana menghitung tarif jika teknisi dibayar komisi?**
+Masukkan komisi sebagai biaya tenaga kerja per layanan. Misalnya komisi 30% dari tarif jasa, maka tarif harus cukup untuk menutup komisi, bahan, alat, dan tetap menyisakan laba.
+
+**Perlukah tarif dicantumkan di tempat usaha?**
+Sangat disarankan. Daftar tarif yang jelas mengurangi tawar-menawar dan membuat semua staf memasang harga yang sama.
+
+Untuk kategori usaha jasa, Fabriku menyediakan [katalog layanan untuk bengkel dan jasa servis](/aplikasi/bengkel-jasa-servis) tanpa perlu modul material atau produksi, lengkap dengan pemetaan bahan pendukung per layanan yang otomatis terpotong dari stok setiap kali transaksi kasir cepat disimpan — jadi biaya bahan pendukung tidak lagi terlewat dari perhitungan.
 
 Logika menghitung komponen biaya di atas sebenarnya sama dengan cara menghitung HPP produk fisik, hanya komponennya yang berbeda — lihat [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm) untuk pembahasan yang lebih umum.
 MD,
@@ -752,7 +903,35 @@ Beda dari produk pabrikan yang biaya produksinya relatif tetap dan bisa dihitung
 
 Contoh: seorang pengrajin membuat satu gelang manik-manik dengan biaya bahan Rp8.000, waktu pengerjaan 45 menit dengan upah yang ditetapkan Rp20.000/jam (setara Rp15.000 untuk 45 menit), dan overhead alat diperkirakan Rp2.000 per produk. Total biaya produksi: Rp8.000 + Rp15.000 + Rp2.000 = Rp25.000.
 
-Kalau pengrajin ingin margin 40%, harga jual minimal adalah Rp25.000 + (40% × Rp25.000) = **Rp35.000**. Bandingkan dengan kalau harga hanya ditentukan dari "harga bahan plus sedikit untung" tanpa menghitung waktu kerja — misalnya dijual Rp15.000 karena dikira sudah untung dari modal bahan Rp8.000. Padahal setelah dihitung lengkap, harga segitu justru menombok waktu kerja sebesar Rp17.000 per gelang, yang berarti setiap gelang terjual justru mengurangi "gaji" yang seharusnya didapat pengrajin.
+Kalau pengrajin ingin markup 40% di atas biaya, harga jual minimal adalah Rp25.000 + (40% × Rp25.000) = **Rp35.000** (margin terhadap harga jual sekitar 28,6%). Bandingkan dengan kalau harga hanya ditentukan dari "harga bahan plus sedikit untung" tanpa menghitung waktu kerja — misalnya dijual Rp15.000 karena dikira sudah untung dari modal bahan Rp8.000. Padahal setelah dihitung lengkap, harga segitu justru menombok waktu kerja sebesar Rp17.000 per gelang, yang berarti setiap gelang terjual justru mengurangi "gaji" yang seharusnya didapat pengrajin.
+
+## Contoh Lengkap: Tas Rajut Custom
+
+Contoh kedua dengan produk yang lebih rumit — tas rajut custom dengan motif pesanan pelanggan:
+
+| Komponen | Rincian | Biaya |
+|---|---|---|
+| Benang katun | 4 gulung × Rp22.000 | Rp88.000 |
+| Furing, resleting, label | — | Rp27.000 |
+| Waktu kerja | 10 jam × Rp20.000 | Rp200.000 |
+| Waktu desain motif custom | 1,5 jam × Rp30.000 | Rp45.000 |
+| Penyusutan alat & listrik | — | Rp5.000 |
+| Kemasan & kartu ucapan | — | Rp10.000 |
+| **Total biaya** | | **Rp375.000** |
+
+Dengan markup 50% untuk nilai custom dan skill, harga jualnya **Rp562.500**, dibulatkan Rp560.000. Angka ini mungkin terasa mahal dibanding tas rajut massal di marketplace, tapi produknya memang berbeda: dibuat satu per satu sesuai pesanan. Jika pelanggan menawar, rincian di atas membantu memutuskan bagian mana yang bisa disesuaikan — misalnya mengganti benang yang lebih murah — tanpa memotong upah sendiri.
+
+## Hitung Waktu Kerja dengan Jujur
+
+Cara paling mudah: catat jam mulai dan selesai untuk lima produk pertama, lalu ambil rata-ratanya. Jangan hanya menghitung waktu merangkai atau menjahit. Waktu memilih bahan, memotong, finishing, foto produk, dan mengemas juga bagian dari pembuatan produk.
+
+Untuk menentukan upah per jam, gunakan acuan upah minimum daerah Anda dibagi jam kerja sebulan (sekitar 173 jam), lalu sesuaikan dengan tingkat keahlian. Pengrajin yang sudah bertahun-tahun pantas memasang tarif di atas upah minimum.
+
+## Harga untuk Reseller dan Bazar
+
+Jika produk juga dijual lewat reseller, harga jual eceran harus menyisakan ruang diskon untuk reseller (biasanya 20–30%) **tanpa** turun di bawah biaya. Dari contoh gelang di atas: harga eceran Rp35.000 dengan diskon reseller 25% berarti reseller membeli Rp26.250. Pengrajin masih untung Rp1.250 per gelang — tipis sekali. Jika ingin aktif menjual lewat reseller, naikkan markup eceran, misalnya ke 70% (Rp42.500), agar setelah diskon reseller pengrajin tetap mendapat sekitar Rp6.900 per gelang.
+
+Untuk bazar atau pameran, masukkan biaya sewa stan dibagi perkiraan jumlah produk terjual sebagai biaya tambahan per unit selama acara tersebut.
 
 ## Kerajinan Tangan Boleh Dihargai Lebih dari Sekadar HPP
 
@@ -764,7 +943,18 @@ Kesalahan paling sering adalah menghargai jam kerja sendiri sebagai Rp0 karena d
 
 Sebelum menentukan harga jual, ada baiknya juga menata dulu bagaimana [bahan baku kerajinan yang tidak standar](/blog/cara-mengelola-bahan-baku-kerajinan-tidak-standar) — seperti sisa kain, manik lepasan, atau potongan kayu — dicatat dan dihitung nilainya, karena tanpa itu komponen biaya bahan di atas hanya jadi perkiraan kasar. Untuk pembahasan HPP yang lebih mendalam di luar konteks kerajinan tangan, lihat juga [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm).
 
-Fabriku mendukung pencatatan HPP per produk untuk usaha kerajinan, termasuk batch kecil dan produksi custom order, sehingga harga jual bisa ditentukan dari data biaya yang sebenarnya, bukan sekadar mengikuti harga pasar.
+## Pertanyaan yang Sering Muncul
+
+**Berapa markup yang wajar untuk produk handmade?**
+Tidak ada angka baku, tapi banyak pengrajin memakai markup 50–100% di atas total biaya (termasuk upah). Produk custom dan edisi terbatas wajar di atas itu.
+
+**Bagaimana jika harga hasil hitungan jauh di atas kompetitor?**
+Periksa dulu apakah ada komponen yang bisa dibuat lebih efisien, misalnya membeli bahan dalam jumlah lebih besar. Jika tidak, jelaskan nilai produk Anda (bahan, proses, kustomisasi) alih-alih menurunkan harga di bawah biaya.
+
+**Apakah bahan sisa perlu dihitung?**
+Perlu. Bahan sisa yang dipakai ulang tetap punya nilai sebesar harga belinya dulu.
+
+Fabriku mendukung pencatatan biaya per produk untuk [usaha kerajinan dan handmade](/aplikasi/kerajinan-handmade), termasuk batch kecil dan produksi custom order, sehingga harga jual bisa ditentukan dari data biaya yang sebenarnya, bukan sekadar mengikuti harga pasar.
 MD,
             ],
             [
@@ -1072,7 +1262,612 @@ Kesalahan paling umum adalah memindahkan semua data dan fungsi sekaligus dalam s
 
 Kalau kebutuhan utamanya soal pencatatan transaksi penjualan, [7 tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula) bisa membantu menyaring opsi sebelum memutuskan. Dan kalau masih ragu apakah sudah waktunya pindah sama sekali, gejala-gejala yang lebih spesifik untuk usaha rumahan sudah dibahas di [kapan usaha rumahan butuh sistem pencatatan](/blog/kapan-usaha-rumahan-butuh-sistem-pencatatan).
 
-Fabriku dirancang untuk migrasi bertahap seperti ini — data stok dan produk bisa diimpor dari spreadsheet yang sudah ada, sehingga usaha yang pindah dari Excel tidak perlu memulai pencatatan dari nol.
+Fabriku bisa dipakai bertahap seperti ini — mulai dari mencatat stok awal (opening balance) dan penjualan, lalu menambah modul lain saat sudah terbiasa. Data yang sudah tercatat tetap bisa diekspor ke Excel kapan saja.
+MD,
+            ],
+            [
+                'slug' => 'cara-membuat-bom-produksi-konveksi-per-ukuran-warna',
+                'title' => 'Cara Membuat BOM (Bill of Material) Produksi Konveksi per Ukuran dan Warna',
+                'category' => 'Produksi',
+                'tags' => ['Konveksi', 'Produksi', 'BOM'],
+                'days_ago' => 0,
+                'excerpt' => 'Tanpa BOM per varian, konveksi menghitung kebutuhan kain dengan kira-kira dan baru sadar kurang saat potong. Ini cara menyusun BOM per ukuran dan warna, lengkap dengan contoh.',
+                'meta_title' => 'Cara Membuat BOM Produksi Konveksi per Ukuran & Warna',
+                'meta_description' => 'Cara membuat BOM (bill of material) produksi konveksi per ukuran dan warna: komponen, konsumsi kain per size, toleransi susut, dan contoh order kaos.',
+                'content' => <<<'MD'
+Order 300 kaos dengan tiga warna dan lima ukuran terdengar sederhana sampai kain yang dibeli ternyata kurang untuk ukuran XL warna hitam, sementara kain putih tersisa dua roll. Masalahnya hampir selalu sama: kebutuhan bahan dihitung dari rata-rata, bukan dari daftar bahan per varian. Daftar inilah yang disebut **BOM (bill of material)**.
+
+## Apa Itu BOM dalam Produksi Konveksi
+
+BOM adalah daftar semua bahan dan jumlahnya yang dibutuhkan untuk membuat **satu unit** produk. Untuk konveksi, satu unit berarti satu potong pakaian dengan ukuran dan warna tertentu. BOM kaos ukuran S tidak sama dengan BOM kaos ukuran XXL, karena konsumsi kainnya berbeda.
+
+BOM yang rapi dipakai untuk tiga hal: menghitung belanja bahan sebelum produksi, menghitung HPP per varian, dan mengecek apakah bahan yang keluar dari gudang sesuai dengan jumlah produk yang dihasilkan.
+
+## Komponen BOM Konveksi
+
+Untuk satu potong kaos, komponennya biasanya:
+
+1. **Kain utama** — dalam meter atau kilogram, tergantung cara Anda membeli kain.
+2. **Kain tambahan** — rib leher, kain kontras, atau furing.
+3. **Benang** — dalam meter atau persentase cone.
+4. **Aksesoris** — label merek, label ukuran, hangtag, kancing, resleting.
+5. **Sablon/bordir** — jika dikerjakan sendiri, catat tinta atau benang bordir; jika maklun, catat sebagai biaya jasa per potong.
+6. **Kemasan** — plastik, stiker, karton.
+
+## Menghitung Konsumsi Kain per Ukuran
+
+Cara paling akurat adalah membuat marker (susunan pola di atas kain) untuk tiap ukuran, lalu mengukur panjang kain yang terpakai. Jika belum memakai marker, timbang atau ukur kain sebelum dan sesudah memotong 10 potong per ukuran, lalu ambil rata-ratanya.
+
+Contoh hasil pengukuran untuk kaos cotton combed 30s, kain lebar 180 cm, dibeli per kilogram:
+
+| Ukuran | Kain per potong | Rib leher | Label & hangtag | Plastik |
+|---|---|---|---|---|
+| S | 0,20 kg | 0,010 kg | 1 set | 1 pcs |
+| M | 0,22 kg | 0,011 kg | 1 set | 1 pcs |
+| L | 0,24 kg | 0,012 kg | 1 set | 1 pcs |
+| XL | 0,27 kg | 0,013 kg | 1 set | 1 pcs |
+| XXL | 0,30 kg | 0,014 kg | 1 set | 1 pcs |
+
+Selisih S ke XXL di contoh ini 50%. Menghitung semua ukuran dengan angka rata-rata (misalnya 0,24 kg) membuat order dengan banyak ukuran besar pasti kekurangan kain.
+
+## Tambahkan Toleransi Susut dan Sisa Potong
+
+Kain tidak terpakai 100%. Ada sisa potongan, kain cacat, dan susut setelah dicuci. Tambahkan toleransi 3–8% tergantung jenis kain dan kerumitan pola. Kaos polos biasanya 3–5%, kemeja dengan banyak potongan bisa sampai 8%.
+
+**Kebutuhan kain = konsumsi per potong × jumlah potong × (1 + toleransi)**
+
+## Contoh: Order 300 Kaos, Tiga Warna
+
+Order dari pelanggan:
+
+| Warna | S | M | L | XL | XXL | Total |
+|---|---|---|---|---|---|---|
+| Hitam | 10 | 30 | 40 | 30 | 10 | 120 |
+| Putih | 10 | 25 | 30 | 20 | 5 | 90 |
+| Navy | 10 | 25 | 30 | 20 | 5 | 90 |
+
+Kebutuhan kain hitam: (10×0,20) + (30×0,22) + (40×0,24) + (30×0,27) + (10×0,30) = 2 + 6,6 + 9,6 + 8,1 + 3 = **29,3 kg**. Dengan toleransi 5%, belanja **30,8 kg**, dibulatkan 31 kg.
+
+Kain putih: (10×0,20) + (25×0,22) + (30×0,24) + (20×0,27) + (5×0,30) = 2 + 5,5 + 7,2 + 5,4 + 1,5 = 21,6 kg, dengan toleransi menjadi 22,7 kg. Kain navy sama dengan putih karena komposisi ukurannya sama.
+
+Bandingkan jika dihitung rata-rata 0,24 kg × 120 potong = 28,8 kg untuk warna hitam. Setelah toleransi menjadi 30,2 kg — kurang sekitar 0,5 kg, setara dua potong XL yang tidak bisa dipotong.
+
+## Simpan BOM sebagai Data, Bukan Ingatan
+
+BOM yang hanya ada di kepala kepala produksi akan hilang saat orangnya cuti atau berhenti. Simpan dalam tabel dengan kolom: *Produk, Ukuran, Warna, Bahan, Jumlah, Satuan, Toleransi*. Perbarui setiap kali pola berubah atau ganti supplier kain dengan gramasi berbeda.
+
+Setelah produksi selesai, bandingkan kain yang benar-benar keluar gudang dengan kebutuhan menurut BOM. Selisih di atas toleransi adalah tanda ada pemborosan di proses potong, atau ada kain yang tidak tercatat keluar.
+
+## Kesalahan Umum Saat Menyusun BOM
+
+- **Satu BOM untuk semua ukuran.** Penyebab paling sering kain kurang di tengah produksi.
+- **Lupa aksesoris kecil.** Label ukuran dan hangtag sering habis duluan karena tidak masuk hitungan belanja.
+- **Tidak membedakan warna.** Kain warna gelap kadang punya gramasi berbeda dari warna terang di supplier yang sama.
+- **Tidak memperbarui setelah ganti supplier.** Lebar kain 180 cm dan 160 cm menghasilkan konsumsi berbeda untuk pola yang sama.
+
+## Pertanyaan yang Sering Muncul
+
+**Apakah BOM sama dengan HPP?**
+Bukan. BOM berisi jumlah bahan. HPP adalah biaya, yaitu jumlah bahan di BOM dikalikan harga bahan, ditambah upah dan overhead. Lihat [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm).
+
+**Bagaimana BOM untuk produksi yang dimaklunkan?**
+Tetap susun BOM yang sama. Bahan yang diserahkan ke maklun dihitung dari BOM, sehingga Anda bisa mengecek apakah sisa bahan yang kembali masuk akal. Baca juga [cara mengelola kontraktor maklun konveksi](/blog/cara-mengelola-kontraktor-maklun-konveksi-agar-tidak-telat).
+
+Di Fabriku, kain masuk dicatat per penerimaan lengkap dengan warna, lebar, dan gramasi, lalu bahan yang dipakai di order persiapan (potong) mengurangi stok secara FIFO. Dengan begitu selisih antara kebutuhan menurut BOM dan kain yang benar-benar keluar bisa dicek per order. Lihat [Fabriku untuk konveksi](/aplikasi/konveksi).
+MD,
+            ],
+            [
+                'slug' => 'cara-mengatur-jadwal-teknisi-bengkel-servis-agar-tidak-bentrok',
+                'title' => 'Cara Mengatur Jadwal Teknisi Bengkel dan Jasa Servis agar Tidak Bentrok',
+                'category' => 'Produksi',
+                'tags' => ['Jasa Servis', 'Jadwal Staf', 'UMKM'],
+                'days_ago' => 1,
+                'excerpt' => 'Pelanggan menunggu lama sementara teknisi lain menganggur adalah tanda jadwal kerja tidak diatur. Ini cara menyusun jadwal teknisi bengkel dan jasa servis yang sederhana tapi jalan.',
+                'meta_title' => 'Cara Mengatur Jadwal Teknisi Bengkel & Jasa Servis',
+                'meta_description' => 'Cara mengatur jadwal teknisi bengkel dan jasa servis agar tidak bentrok: durasi layanan, slot booking, pembagian keahlian, dan contoh papan jadwal.',
+                'content' => <<<'MD'
+Di bengkel atau usaha servis kecil, jadwal biasanya diatur dengan prinsip siapa datang duluan dilayani duluan. Cara ini berjalan saat pelanggan sedikit. Begitu ramai, muncul masalah: tiga motor menunggu teknisi senior, sementara teknisi junior tidak ada pekerjaan; pelanggan yang sudah janji datang jam 10 masih menunggu jam 12; servis berat menumpuk di sore hari dan harus lembur.
+
+## Mulai dari Durasi Setiap Layanan
+
+Jadwal tidak bisa disusun tanpa tahu berapa lama setiap layanan. Catat waktu pengerjaan nyata selama dua minggu, lalu ambil rata-ratanya. Contoh untuk bengkel motor:
+
+| Layanan | Durasi rata-rata | Siapa yang bisa |
+|---|---|---|
+| Ganti oli | 15 menit | Semua teknisi |
+| Servis ringan / tune up | 45 menit | Semua teknisi |
+| Servis CVT | 60 menit | Teknisi senior & madya |
+| Kelistrikan | 30–90 menit | Teknisi kelistrikan |
+| Turun mesin | 4–6 jam | Teknisi senior |
+
+Kolom "siapa yang bisa" sama pentingnya dengan durasi. Bentrok sering terjadi bukan karena kurang orang, tapi karena pekerjaan yang hanya bisa dikerjakan satu orang menumpuk di jam yang sama.
+
+## Bagi Hari Menjadi Slot
+
+Bagi jam buka menjadi slot 30 menit. Bengkel yang buka 08.00–17.00 dengan istirahat satu jam punya 16 slot per teknisi per hari. Tiga teknisi berarti 48 slot.
+
+Lalu tentukan aturan sederhana:
+
+1. **Sisakan 20–30% slot untuk pelanggan tanpa janji.** Jangan habiskan semua slot untuk booking.
+2. **Taruh pekerjaan panjang di pagi hari.** Turun mesin yang dimulai sore hampir pasti mundur ke hari berikutnya.
+3. **Satu teknisi senior, maksimal satu pekerjaan berat per hari.** Sisanya untuk layanan cepat atau membantu teknisi lain.
+4. **Beri jeda 15 menit antar pekerjaan panjang** untuk membersihkan area dan mengambil sparepart.
+
+## Contoh Papan Jadwal Harian
+
+| Jam | Teknisi A (senior) | Teknisi B (madya) | Teknisi C (junior) |
+|---|---|---|---|
+| 08.00 | Turun mesin – Booking #12 | Servis CVT – Booking #13 | Walk-in |
+| 09.00 | Turun mesin | Tune up – Booking #14 | Ganti oli – Walk-in |
+| 10.00 | Turun mesin | Walk-in | Tune up – Booking #15 |
+| 11.00 | Turun mesin | Kelistrikan – Booking #16 | Walk-in |
+| 13.00 | Pengecekan akhir | Walk-in | Walk-in |
+| 14.00 | Servis CVT – Booking #17 | Tune up – Booking #18 | Walk-in |
+| 15.00 | Walk-in | Walk-in | Ganti oli – Booking #19 |
+| 16.00 | Walk-in | Walk-in | Walk-in |
+
+Papan seperti ini cukup ditulis di papan tulis atau spreadsheet yang dibuka di HP. Yang penting semua orang melihat versi yang sama.
+
+## Konfirmasi Booking Sehari Sebelumnya
+
+Pelanggan yang tidak datang membuat slot kosong yang tidak bisa diisi. Kirim pesan konfirmasi sehari sebelumnya: jam datang, layanan, dan perkiraan selesai. Jika pelanggan membatalkan, slotnya bisa dibuka untuk walk-in.
+
+## Catat Siapa Mengerjakan Apa
+
+Jadwal yang rapi baru separuh pekerjaan. Separuh lainnya adalah mencatat siapa yang benar-benar mengerjakan setiap layanan. Dari catatan ini Anda bisa tahu:
+
+- teknisi mana yang paling sering menangani layanan tertentu,
+- berapa omzet jasa yang dihasilkan setiap teknisi,
+- apakah durasi nyata jauh berbeda dari estimasi, sehingga jadwal perlu disesuaikan,
+- dasar menghitung komisi atau bonus secara adil.
+
+Tanpa catatan ini, komisi dihitung dari ingatan dan sering jadi sumber selisih paham.
+
+## Tinjau Setiap Bulan
+
+Setiap akhir bulan, lihat tiga hal: jam berapa antrean paling panjang, layanan apa yang paling sering molor dari estimasi, dan teknisi mana yang paling sering lembur. Gunakan jawabannya untuk menggeser jam istirahat, menambah teknisi di jam sibuk, atau melatih teknisi junior untuk layanan yang selama ini hanya bisa dikerjakan senior.
+
+## Pertanyaan yang Sering Muncul
+
+**Perlukah aplikasi booking khusus?**
+Untuk bengkel dengan 2–4 teknisi, papan jadwal di spreadsheet bersama dan konfirmasi WhatsApp biasanya cukup. Aplikasi booking baru terasa manfaatnya saat booking per hari sudah puluhan.
+
+**Bagaimana jika pekerjaan molor dari jadwal?**
+Beri kabar ke pelanggan berikutnya sedini mungkin dan tawarkan geser jam. Catat penyebabnya; jika sering terjadi pada layanan yang sama, perbarui estimasi durasinya.
+
+**Bagaimana menentukan tarif setiap layanan?**
+Durasi yang sudah Anda catat untuk jadwal adalah bahan utama menghitung tarif. Lihat [cara menghitung harga jasa servis kecil agar tidak rugi](/blog/cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi).
+
+Fabriku belum menyediakan kalender booking, tapi setiap baris layanan di transaksi bisa diisi staf yang mengerjakannya. Laporan layanan kemudian merekap omzet per layanan dan per staf, sehingga beban kerja dan dasar komisi tiap teknisi terlihat tanpa rekap manual. Lihat [Fabriku untuk bengkel dan jasa servis](/aplikasi/bengkel-jasa-servis).
+MD,
+            ],
+            [
+                'slug' => 'cara-melacak-sparepart-bahan-habis-pakai-jasa-servis',
+                'title' => 'Cara Melacak Sparepart dan Bahan Habis Pakai di Usaha Jasa Servis',
+                'category' => 'Manajemen Stok',
+                'tags' => ['Jasa Servis', 'Sparepart', 'UMKM'],
+                'days_ago' => 2,
+                'excerpt' => 'Oli, lem, cairan pembersih, dan sparepart kecil berkurang setiap hari tanpa tercatat. Ini cara melacak sparepart dan bahan habis pakai di bengkel, laundry, atau reparasi agar stok dan biaya tidak bocor.',
+                'meta_title' => 'Cara Melacak Sparepart & Bahan Habis Pakai Jasa Servis',
+                'meta_description' => 'Cara melacak sparepart dan bahan habis pakai di usaha jasa servis: pisahkan jenis stok, tetapkan pemakaian standar per layanan, dan cek selisih mingguan.',
+                'content' => <<<'MD'
+Usaha jasa jarang menganggap dirinya punya masalah stok. Yang dijual adalah keahlian dan waktu. Padahal setiap servis memakai sesuatu: oli dan busi di bengkel, deterjen dan plastik di laundry, timah solder dan thermal paste di reparasi elektronik. Karena nilainya kecil per transaksi, pemakaian ini jarang dicatat — sampai tiba-tiba stok habis di tengah hari atau pengeluaran belanja bahan bulan ini dua kali lipat tanpa tahu sebabnya.
+
+## Pisahkan Dua Jenis Stok
+
+Langkah pertama adalah membedakan dua jenis barang:
+
+1. **Sparepart yang dijual ke pelanggan** — oli, busi, kampas rem, LCD, baterai. Barang ini muncul di nota dengan harga sendiri.
+2. **Bahan habis pakai (consumable)** — cairan pembersih karburator, majun, lem, pelumas semprot, deterjen. Barang ini tidak ditagih terpisah, tapi biayanya sudah termasuk di tarif jasa.
+
+Sparepart relatif mudah dilacak karena tercatat di nota. Bahan habis pakai yang sering bocor, karena tidak ada dokumen yang mencatat keluarnya.
+
+## Tetapkan Pemakaian Standar per Layanan
+
+Cara paling praktis melacak bahan habis pakai adalah menetapkan berapa yang biasanya dipakai untuk setiap layanan. Contoh untuk bengkel motor:
+
+| Layanan | Bahan habis pakai | Pemakaian standar |
+|---|---|---|
+| Tune up | Cairan pembersih karburator | 50 ml |
+| Tune up | Majun | 1 lembar |
+| Servis CVT | Grease | 10 g |
+| Servis CVT | Cairan pembersih | 30 ml |
+| Ganti oli | Majun | 1 lembar |
+
+Untuk laundry kiloan:
+
+| Layanan | Bahan | Pemakaian per kg |
+|---|---|---|
+| Cuci kering | Deterjen cair | 20 ml |
+| Cuci kering | Pewangi | 10 ml |
+| Cuci setrika | Plastik kemasan | 0,25 lembar |
+
+Angka ini tidak harus presisi. Tujuannya adalah punya patokan untuk dibandingkan dengan pemakaian nyata.
+
+## Hitung Pemakaian Teoritis vs Nyata
+
+Setiap minggu, hitung pemakaian teoritis dari jumlah layanan yang dikerjakan. Misalnya minggu ini ada 60 tune up: pemakaian teoritis cairan pembersih karburator = 60 × 50 ml = 3 liter.
+
+Lalu hitung pemakaian nyata dari stok: stok awal minggu 6 liter, belanja 2 liter, stok akhir 3,8 liter. Pemakaian nyata = 6 + 2 − 3,8 = **4,2 liter**.
+
+Selisih 1,2 liter (40%) terlalu besar untuk disebut wajar. Kemungkinan penyebabnya:
+
+- standar pemakaian terlalu kecil dan perlu diperbarui,
+- bahan dipakai untuk pekerjaan yang tidak dicatat (misalnya servis kendaraan sendiri),
+- tumpah atau terbuang karena wadah besar sulit dituang,
+- ada yang mengambil.
+
+Selisih 5–10% biasanya masih wajar. Di atas itu, cari penyebabnya sebelum menyesuaikan standar.
+
+## Simpan di Satu Tempat dengan Satu Penanggung Jawab
+
+Bahan habis pakai yang tersebar di tiap meja kerja tidak bisa dihitung. Simpan stok utama di satu rak atau lemari, dan keluarkan dalam jumlah kecil ke area kerja. Tunjuk satu orang yang mencatat setiap kali stok utama diambil. Cara sederhana ini saja sudah memangkas banyak kebocoran.
+
+## Tentukan Titik Pesan Ulang
+
+Untuk setiap bahan, tentukan stok minimum sebelum harus belanja lagi:
+
+**Stok minimum = pemakaian rata-rata per hari × waktu tunggu belanja (hari) + cadangan**
+
+Jika rata-rata pemakaian deterjen 1,5 liter/hari, supplier butuh 2 hari untuk mengirim, dan Anda ingin cadangan 2 hari, maka stok minimum = 1,5 × 2 + 1,5 × 2 = **6 liter**. Begitu stok menyentuh 6 liter, pesan lagi.
+
+## Masukkan ke Perhitungan Tarif
+
+Setelah pemakaian standar per layanan diketahui, biayanya bisa dimasukkan ke tarif jasa dengan akurat. Jika cairan pembersih Rp60.000/liter, maka 50 ml per tune up = Rp3.000. Angka ini sering hilang dari hitungan tarif. Lihat [cara menghitung harga jasa servis kecil agar tidak rugi](/blog/cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi).
+
+## Pertanyaan yang Sering Muncul
+
+**Apakah majun dan lap perlu dicatat juga?**
+Jika belanjanya rutin dan nilainya berarti dalam sebulan, ya. Jika sangat kecil, cukup catat total belanja bulanan sebagai overhead.
+
+**Bagaimana dengan sparepart yang dipakai untuk garansi?**
+Catat sebagai pengeluaran sparepart tanpa penjualan, dengan keterangan garansi. Jangan dibiarkan tidak tercatat karena akan terlihat seperti barang hilang saat stok opname.
+
+**Seberapa sering stok perlu dihitung?**
+Bahan yang paling sering dipakai cukup dihitung mingguan. Sparepart bernilai tinggi lebih baik dicek setiap kali keluar.
+
+Di Fabriku, bahan habis pakai bisa dipetakan ke setiap layanan beserta jumlah pemakaiannya. Saat transaksi melalui kasir cepat disimpan, stok bahan tersebut berkurang otomatis, dan transaksi ditolak bila stok tidak cukup. Sparepart yang dijual bisa masuk ke transaksi yang sama sebagai baris produk. Lihat [Fabriku untuk bengkel dan jasa servis](/aplikasi/bengkel-jasa-servis).
+MD,
+            ],
+            [
+                'slug' => 'cara-kelola-stok-reseller-dropship-kosmetik',
+                'title' => 'Cara Kelola Stok Reseller dan Dropship Kosmetik tanpa Selisih',
+                'category' => 'Manajemen Stok',
+                'tags' => ['Kosmetik', 'Reseller', 'UMKM'],
+                'days_ago' => 3,
+                'excerpt' => 'Brand kosmetik lokal yang menjual lewat reseller dan dropshipper sering kehilangan jejak stok: barang sudah dijanjikan ke dropshipper, ternyata habis untuk reseller. Ini cara mengelolanya.',
+                'meta_title' => 'Cara Kelola Stok Reseller & Dropship Kosmetik',
+                'meta_description' => 'Cara kelola stok reseller dan dropship untuk brand kosmetik dan skincare lokal: bedakan model penjualan, alokasi stok, catat batch, dan rekonsiliasi bulanan.',
+                'content' => <<<'MD'
+Banyak brand kosmetik dan skincare lokal tumbuh lewat jaringan reseller dan dropshipper. Penjualan naik cepat, tapi pencatatan stok sering tertinggal. Gejalanya mudah dikenali: dropshipper sudah menerima pesanan, ternyata stok habis karena baru diambil reseller; reseller mengaku stoknya sudah habis terjual, tapi tidak jelas berapa yang masih ada di tangannya; dan saat ada keluhan produk, batch yang dikirim ke reseller tertentu tidak bisa ditelusuri.
+
+## Bedakan Tiga Model Penjualan
+
+Sebelum mengatur stok, pastikan jelas model mana yang dipakai, karena perlakuan stoknya berbeda:
+
+| Model | Barang pindah tangan | Stok tercatat di |
+|---|---|---|
+| **Reseller beli putus** | Saat reseller membayar | Keluar dari gudang Anda, selesai |
+| **Reseller titip jual (konsinyasi)** | Saat reseller menjual ke pembeli | Masih milik Anda sampai terjual |
+| **Dropship** | Anda mengirim langsung ke pembeli dropshipper | Gudang Anda, keluar saat dikirim |
+
+Masalah paling sering muncul pada konsinyasi: barang sudah keluar gudang, tapi masih milik Anda. Jika dicatat sebagai "terjual", omzet terlihat lebih besar dari kenyataan. Jika tidak dicatat sama sekali, stok di gudang terlihat hilang.
+
+## Catat Stok Titipan sebagai Lokasi Terpisah
+
+Cara paling mudah: perlakukan setiap reseller konsinyasi sebagai **lokasi stok** tersendiri. Saat mengirim 50 serum ke Reseller A, catat sebagai perpindahan stok dari *Gudang* ke *Titipan Reseller A*, bukan sebagai penjualan. Stok total Anda tidak berubah; yang berubah hanya lokasinya.
+
+Penjualan baru dicatat saat reseller melaporkan barang terjual dan membayar. Saat itu stok di lokasi *Titipan Reseller A* berkurang.
+
+Dengan cara ini Anda selalu bisa menjawab: berapa stok di gudang yang bisa dijual sekarang, dan berapa yang ada di tangan setiap reseller.
+
+## Alokasikan Stok untuk Dropship
+
+Dropship dan penjualan reseller mengambil dari gudang yang sama. Agar tidak saling menghabiskan, tentukan alokasi. Misalnya dari 500 unit toner:
+
+- 300 unit untuk reseller beli putus,
+- 150 unit untuk dropship,
+- 50 unit cadangan untuk penjualan langsung dan penggantian produk rusak.
+
+Alokasi ini tidak harus kaku. Tinjau setiap minggu berdasarkan channel mana yang paling cepat habis. Yang penting, dropshipper tidak menjanjikan barang yang sebenarnya sudah habis.
+
+## Selalu Catat Batch dan Tanggal Kadaluarsa
+
+Untuk kosmetik, setiap pengiriman ke reseller sebaiknya mencatat **nomor batch** dan **tanggal kadaluarsa**. Manfaatnya:
+
+1. Jika ada keluhan iritasi atau produk berubah warna, Anda tahu batch mana yang perlu ditarik dan reseller mana yang menerimanya.
+2. Anda bisa memastikan reseller menerima batch yang lebih lama lebih dulu, sehingga stok di gudang tidak tertinggal sampai kedaluwarsa.
+3. Reseller yang menyimpan stok lama bisa diingatkan sebelum produknya mendekati kadaluarsa.
+
+## Rekonsiliasi Bulanan dengan Reseller
+
+Setiap akhir bulan, cocokkan data dengan setiap reseller konsinyasi:
+
+| Item | Jumlah |
+|---|---|
+| Stok titipan awal bulan | 40 |
+| Kiriman baru bulan ini | 50 |
+| Dilaporkan terjual | 62 |
+| Retur ke gudang | 3 |
+| **Seharusnya tersisa** | **25** |
+| Hasil hitung fisik reseller | 23 |
+| **Selisih** | **−2** |
+
+Selisih harus dibicarakan: apakah ada penjualan yang belum dilaporkan, barang rusak, atau hilang. Tetapkan aturan siapa yang menanggung selisih sejak awal kerja sama.
+
+## Atur Harga per Level
+
+Harga untuk reseller, dropshipper, dan pembeli langsung biasanya berbeda. Pastikan setiap pesanan tercatat dengan channel-nya, sehingga laporan bisa menunjukkan margin per channel. Sering kali channel yang omzetnya paling besar ternyata bukan yang paling menguntungkan setelah dipotong diskon reseller dan ongkos kirim.
+
+## Pertanyaan yang Sering Muncul
+
+**Lebih baik beli putus atau konsinyasi?**
+Beli putus lebih sederhana dan arus kas lebih aman. Konsinyasi membantu menarik reseller baru, tapi butuh pencatatan dan rekonsiliasi lebih disiplin.
+
+**Bagaimana jika reseller menjual di bawah harga yang disepakati?**
+Itu urusan kebijakan harga, bukan stok, tapi data penjualan per channel membantu mendeteksinya: reseller yang tiba-tiba menjual jauh lebih banyak dari biasanya patut ditanya.
+
+**Apakah dropshipper perlu melihat stok?**
+Sebaiknya ya, minimal stok yang dialokasikan untuk dropship. Ini mengurangi pesanan yang harus dibatalkan.
+
+Fabriku mencatat batch dan tanggal kadaluarsa wajib untuk kategori kosmetik, mendukung banyak lokasi stok beserta perpindahan antar lokasi, dan setiap sales order punya channel (offline, online, marketplace, atau reseller). Untuk pemantauan masa simpan, baca juga [cara mengelola stok kosmetik agar tidak kadaluarsa](/blog/cara-mengelola-stok-kosmetik-agar-tidak-kadaluarsa) dan lihat [Fabriku untuk kosmetik dan skincare](/aplikasi/kosmetik-skincare).
+MD,
+            ],
+            [
+                'slug' => 'cara-menyiapkan-stok-umkm-menjelang-ramadan-lebaran',
+                'title' => 'Cara Menyiapkan Stok UMKM Menjelang Ramadan dan Lebaran',
+                'category' => 'Manajemen Stok',
+                'tags' => ['Stok Musiman', 'Retail', 'UMKM'],
+                'days_ago' => 4,
+                'excerpt' => 'Permintaan saat Ramadan dan Lebaran bisa naik berkali lipat, tapi supplier juga sibuk dan harga bahan naik. Ini cara memperkirakan dan menyiapkan stok musiman UMKM dari data tahun lalu.',
+                'meta_title' => 'Cara Menyiapkan Stok UMKM Menjelang Ramadan & Lebaran',
+                'meta_description' => 'Cara menyiapkan stok UMKM menjelang Ramadan dan Lebaran: data penjualan tahun lalu, hitung kebutuhan, jadwal belanja bahan, dan sisa stok.',
+                'content' => <<<'MD'
+Bagi banyak UMKM, Ramadan dan Lebaran adalah musim penjualan terbesar dalam setahun. Konveksi kebanjiran pesanan baju muslim, usaha kue menerima pesanan hampers dan kue kering, toko kelontong menjual sirup dan biskuit kaleng berlipat-lipat. Masalahnya, persiapan sering dilakukan terlambat: bahan baku dibeli saat harga sudah naik, supplier kehabisan stok, dan produksi kejar tayang di minggu terakhir.
+
+Ramadan 2027 diperkirakan dimulai sekitar awal Februari, dengan Lebaran sekitar awal Maret. Artinya persiapan stok idealnya dimulai **Desember hingga awal Januari**.
+
+## Langkah 1: Buka Data Penjualan Tahun Lalu
+
+Perkiraan terbaik datang dari data sendiri. Ambil penjualan per produk untuk tiga periode tahun lalu:
+
+1. **Bulan normal** sebelum Ramadan (sebagai pembanding).
+2. **Ramadan** — biasanya terbagi dua: minggu 1–2 masih normal, minggu 3–4 mulai naik tajam.
+3. **Seminggu sebelum Lebaran** — puncak permintaan.
+
+Contoh dari toko kue kering:
+
+| Produk | Rata-rata per minggu (normal) | Minggu 3–4 Ramadan | Seminggu sebelum Lebaran |
+|---|---|---|---|
+| Nastar toples 500 g | 15 | 80 | 140 |
+| Kastengel toples 500 g | 10 | 55 | 95 |
+| Putri salju toples 500 g | 8 | 40 | 60 |
+
+Dari sini terlihat kenaikan 5–9 kali lipat, dan setiap produk naik dengan pola berbeda.
+
+## Langkah 2: Sesuaikan dengan Kondisi Tahun Ini
+
+Data tahun lalu bukan ramalan pasti. Sesuaikan dengan:
+
+- **Pertumbuhan usaha.** Jika penjualan bulan normal tahun ini sudah 30% lebih tinggi, naikkan perkiraan dengan proporsi yang mirip, tapi lebih konservatif (misalnya 20%).
+- **Produk baru atau yang dihentikan.**
+- **Kapasitas produksi.** Perkiraan penjualan tidak berguna jika dapur atau penjahit hanya mampu memproduksi setengahnya.
+- **Pesanan yang sudah pasti**, seperti pesanan hampers dari kantor atau reseller yang sudah membayar DP.
+
+## Langkah 3: Hitung Kebutuhan Bahan Baku
+
+Ubah perkiraan penjualan menjadi kebutuhan bahan dengan resep atau BOM. Untuk nastar 140 toples di minggu puncak, jika satu toples membutuhkan 250 g tepung, 150 g mentega, dan 120 g selai nanas, maka minggu itu saja butuh 35 kg tepung, 21 kg mentega, dan 16,8 kg selai nanas.
+
+Jumlahkan untuk seluruh periode Ramadan, tambahkan cadangan 10–15% untuk produk gagal dan pesanan mendadak. Untuk konveksi, gunakan BOM per ukuran seperti di [cara membuat BOM produksi konveksi](/blog/cara-membuat-bom-produksi-konveksi-per-ukuran-warna).
+
+## Langkah 4: Jadwalkan Belanja Bertahap
+
+Membeli semua bahan sekaligus di awal butuh modal besar dan tempat penyimpanan. Membeli semuanya mendekati Lebaran berisiko harga naik dan barang kosong. Jalan tengahnya adalah belanja bertahap:
+
+| Waktu | Yang dibeli |
+|---|---|
+| 6–8 minggu sebelum Ramadan | Bahan tahan lama: kemasan, toples, label, kain, aksesoris |
+| 3–4 minggu sebelum Ramadan | Bahan kering: tepung, gula, bahan setengah jadi |
+| Selama Ramadan, per minggu | Bahan cepat rusak: mentega, telur, susu, bahan segar |
+
+Konfirmasi ketersediaan dengan supplier sejak awal. Supplier kemasan dan kain biasanya penuh pesanan menjelang Ramadan.
+
+## Langkah 5: Perhatikan Tanggal Kadaluarsa
+
+Stok besar membawa risiko besar untuk bahan yang punya masa simpan. Saat menerima bahan, catat tanggal kadaluarsa dan susun rak agar bahan yang lebih dulu kedaluwarsa dipakai lebih dulu. Untuk produk jadi seperti kue kering, hitung mundur dari tanggal kadaluarsa: kue yang dibuat terlalu awal mungkin sudah lewat masa terbaiknya saat Lebaran.
+
+## Langkah 6: Rencanakan Sisa Stok Setelah Lebaran
+
+Setelah Lebaran, permintaan turun drastis. Rencanakan sejak awal:
+
+- Hentikan produksi produk musiman 5–7 hari sebelum Lebaran, lalu jual dari stok.
+- Siapkan promo pasca-Lebaran untuk produk yang masih tersisa.
+- Bahan baku yang tersisa dan masih aman dipakai bisa dialihkan ke produk reguler.
+
+## Langkah 7: Catat untuk Tahun Depan
+
+Setelah musim selesai, catat: perkiraan vs penjualan nyata per produk, bahan yang kehabisan atau berlebih, dan supplier yang terlambat. Catatan ini membuat perkiraan tahun depan jauh lebih akurat.
+
+## Pertanyaan yang Sering Muncul
+
+**Bagaimana jika belum punya data tahun lalu?**
+Gunakan penjualan bulan biasa sebagai dasar dan tanyakan pola kenaikan ke sesama pelaku usaha di bidang yang sama. Mulai catat tahun ini agar tahun depan punya data sendiri.
+
+**Apakah perlu pinjaman modal untuk stok musiman?**
+Hitung dulu perkiraan omzet dan margin. Jika pesanan sudah ada DP, gunakan DP untuk belanja bahan sebelum mengambil pinjaman.
+
+**Kapan sebaiknya berhenti menerima pesanan?**
+Saat kapasitas produksi sudah penuh. Lebih baik menolak pesanan daripada terlambat mengirim pesanan yang sudah dibayar.
+
+Fabriku menyimpan riwayat penjualan per periode dan per produk, sehingga data Ramadan tahun lalu bisa dibuka dan diekspor ke Excel untuk perkiraan. Bahan dicatat dengan tanggal kadaluarsa untuk kategori makanan dan kosmetik. Lihat [Fabriku untuk usaha makanan dan kue](/aplikasi/usaha-makanan-kue) atau [Fabriku untuk toko retail](/aplikasi/toko-retail).
+MD,
+            ],
+            [
+                'slug' => 'cara-kelola-stok-banyak-cabang-outlet-umkm',
+                'title' => 'Cara Kelola Stok Banyak Cabang atau Outlet UMKM dari Satu Tempat',
+                'category' => 'Manajemen Stok',
+                'tags' => ['Multi Cabang', 'Retail', 'UMKM'],
+                'days_ago' => 5,
+                'excerpt' => 'Membuka cabang kedua sering membuat stok kacau: cabang A kehabisan barang yang menumpuk di cabang B. Ini cara mengelola stok banyak outlet UMKM dari satu pusat data.',
+                'meta_title' => 'Cara Kelola Stok Banyak Cabang/Outlet UMKM',
+                'meta_description' => 'Cara kelola stok banyak cabang atau outlet UMKM: satu sumber data, kode barang seragam, transfer antar cabang, stok minimum, dan opname bergilir.',
+                'content' => <<<'MD'
+Membuka cabang kedua adalah tanda usaha tumbuh. Tapi bagi banyak UMKM, cabang kedua juga awal kekacauan stok. Setiap cabang punya buku catatan sendiri, pemilik harus menelepon satu per satu untuk tahu stok, dan barang yang habis di satu cabang ternyata menumpuk di cabang lain. Semakin banyak cabang, semakin besar modal yang tertahan di barang yang tidak bergerak.
+
+## Prinsip Utama: Satu Sumber Data
+
+Kesalahan paling umum adalah membiarkan setiap cabang mencatat dengan caranya sendiri. Satu cabang memakai buku, satu lagi Excel, satu lagi hanya mengandalkan ingatan kepala toko. Hasilnya tidak bisa digabung.
+
+Apa pun alatnya, semua cabang harus mencatat ke **satu sumber data yang sama**, dengan format yang sama. Setiap cabang menjadi satu **lokasi** di dalam data stok, bukan pembukuan terpisah.
+
+## Seragamkan Kode dan Nama Barang
+
+Sebelum menggabungkan data, pastikan setiap barang punya satu kode (SKU) dan satu nama yang sama di semua cabang. "Sirup Melon 460ml" di cabang A tidak boleh tercatat sebagai "Sirup Mlon kecil" di cabang B. Tanpa ini, laporan gabungan akan menghitungnya sebagai dua barang berbeda.
+
+Buat satu daftar barang induk. Cabang tidak boleh menambah barang baru sendiri; permintaan barang baru diajukan ke pusat.
+
+## Tetapkan Stok Minimum per Cabang
+
+Setiap cabang punya pola penjualan berbeda. Cabang dekat sekolah mungkin menjual banyak alat tulis, cabang dekat perumahan menjual banyak kebutuhan dapur. Jadi stok minimum tidak bisa disamaratakan.
+
+Hitung stok minimum per barang per cabang dari penjualan rata-rata:
+
+**Stok minimum = penjualan rata-rata per hari × waktu kirim dari gudang/supplier (hari) + cadangan**
+
+| Barang | Cabang | Rata-rata terjual/hari | Waktu kirim | Cadangan | Stok minimum |
+|---|---|---|---|---|---|
+| Minyak goreng 2 L | Pasar | 12 | 2 hari | 12 | 36 |
+| Minyak goreng 2 L | Perumahan | 5 | 2 hari | 5 | 15 |
+
+## Gunakan Transfer Stok, Bukan Belanja Baru
+
+Saat satu cabang kekurangan, cek dulu apakah cabang lain kelebihan. Memindahkan stok antar cabang hampir selalu lebih murah daripada belanja baru, apalagi untuk barang yang perputarannya lambat.
+
+Setiap perpindahan harus tercatat sebagai **transfer**: stok berkurang di cabang asal dan bertambah di cabang tujuan pada saat yang sama. Jika hanya dicatat di salah satu sisi, stok total akan terlihat bertambah atau hilang.
+
+Tetapkan aturan sederhana: barang yang tidak terjual dalam 30 hari di satu cabang tapi laku di cabang lain, dipindahkan setiap minggu.
+
+## Pisahkan Gudang Pusat jika Perlu
+
+Jika belanja dilakukan terpusat, buat satu lokasi *Gudang Pusat*. Semua barang dari supplier masuk ke gudang pusat dulu, lalu didistribusikan ke cabang dengan transfer. Ini membuat harga modal dan penerimaan barang tercatat di satu tempat, dan cabang hanya fokus menjual.
+
+Untuk usaha dengan 2–3 cabang kecil, belanja langsung ke cabang masih masuk akal, asal penerimaan dicatat ke lokasi cabang yang benar.
+
+## Batasi Akses per Peran
+
+Kepala cabang perlu mencatat penjualan dan penerimaan, tapi tidak perlu mengubah harga atau menghapus barang. Beri hak akses sesuai peran: kasir mencatat penjualan, kepala cabang menerima barang dan mengajukan transfer, pemilik atau admin pusat mengatur harga dan daftar barang.
+
+## Opname Bergilir per Cabang
+
+Menghitung stok semua cabang sekaligus melelahkan dan mengganggu operasional. Lakukan opname bergilir: minggu pertama cabang A, minggu kedua cabang B, dan seterusnya. Di dalam setiap cabang, hitung per rak atau per kategori. Caranya dijelaskan di [cara stok opname toko retail tanpa tutup toko](/blog/cara-stok-opname-toko-retail-tanpa-tutup-toko).
+
+Bandingkan selisih antar cabang. Cabang yang selisihnya selalu lebih besar dari yang lain perlu diperiksa prosedurnya.
+
+## Laporan yang Perlu Dilihat Pemilik
+
+Setiap minggu, cukup lihat empat hal:
+
+1. Penjualan per cabang dan per kategori barang.
+2. Barang yang di bawah stok minimum per cabang.
+3. Barang yang tidak terjual dalam 30 hari per cabang.
+4. Selisih opname per cabang.
+
+## Pertanyaan yang Sering Muncul
+
+**Apakah harga jual harus sama di semua cabang?**
+Tidak harus, tapi harga modal sebaiknya dihitung terpusat. Jika harga jual berbeda, catat alasannya agar tidak membingungkan pelanggan yang datang ke dua cabang.
+
+**Kapan perlu gudang pusat?**
+Biasanya saat cabang sudah tiga atau lebih, atau saat belanja dalam jumlah besar memberi diskon yang berarti dari supplier.
+
+**Bagaimana jika satu cabang belum ada internet stabil?**
+Catat di buku dengan format kolom yang sama, lalu masukkan ke sistem setiap hari sebelum tutup. Yang penting datanya tetap masuk ke satu tempat.
+
+Di Fabriku, setiap cabang atau gudang bisa dibuat sebagai lokasi stok tersendiri. Stok bisa dipindahkan antar lokasi dengan pencatatan di kedua sisi, setiap item dan lokasi punya QR code untuk dicek cepat, dan hak akses staf diatur per peran. Lihat [Fabriku untuk toko retail](/aplikasi/toko-retail).
+MD,
+            ],
+            [
+                'slug' => 'cara-mencatat-produksi-banyak-produk-satu-dapur-rumahan',
+                'title' => 'Cara Mencatat Produksi Banyak Produk dalam Satu Dapur Rumahan',
+                'category' => 'Produksi',
+                'tags' => ['Produksi Rumahan', 'Kuliner Rumahan', 'UMKM'],
+                'days_ago' => 6,
+                'excerpt' => 'Satu dapur, satu stok bahan, lima produk berbeda. Tanpa pencatatan yang tepat, tidak jelas produk mana yang menghabiskan bahan dan mana yang benar-benar menguntungkan.',
+                'meta_title' => 'Cara Mencatat Produksi Banyak Produk di Dapur Rumahan',
+                'meta_description' => 'Cara mencatat produksi banyak produk dalam satu dapur rumahan: resep standar, catatan produksi harian, pembagian bahan bersama, dan untung per produk.',
+                'content' => <<<'MD'
+Usaha rumahan jarang hanya membuat satu produk. Dapur yang sama dipakai untuk brownies, bolu, cookies, dan kadang pesanan nasi kotak. Bahan seperti tepung, gula, telur, dan mentega dipakai bersama. Di akhir bulan, yang terlihat hanya total belanja bahan dan total uang masuk. Pertanyaan penting tidak bisa dijawab: produk mana yang paling menguntungkan, dan produk mana yang diam-diam menghabiskan bahan paling banyak?
+
+## Mulai dari Resep Standar
+
+Langkah pertama adalah menuliskan resep standar untuk setiap produk, lengkap dengan takaran dan jumlah hasil. Resep "secukupnya" atau "kira-kira dua gelas" tidak bisa dihitung.
+
+Contoh:
+
+| Produk | Hasil per adonan | Tepung | Gula | Telur | Mentega |
+|---|---|---|---|---|---|
+| Brownies 20×20 | 16 potong | 120 g | 200 g | 4 butir | 150 g |
+| Bolu pandan | 1 loyang (12 potong) | 200 g | 180 g | 6 butir | 100 g |
+| Cookies coklat | 40 keping | 250 g | 150 g | 2 butir | 175 g |
+
+Timbang bahan saat membuat, minimal untuk beberapa kali produksi pertama, agar takaran di resep sesuai kenyataan.
+
+## Catat Produksi Harian per Produk
+
+Setiap kali selesai produksi, catat satu baris per produk:
+
+| Tanggal | Produk | Jumlah adonan | Hasil layak jual | Gagal/pecah |
+|---|---|---|---|---|
+| 10 Okt | Brownies | 3 | 46 potong | 2 |
+| 10 Okt | Cookies | 2 | 78 keping | 2 |
+| 11 Okt | Bolu pandan | 2 | 24 potong | 0 |
+
+Dari jumlah adonan dan resep standar, pemakaian bahan bisa dihitung tanpa harus menimbang ulang. Tiga adonan brownies berarti 360 g tepung, 600 g gula, 12 butir telur, dan 450 g mentega.
+
+Kolom **gagal/pecah** penting. Jika satu produk sering gagal, biaya sebenarnya lebih tinggi dari hitungan resep.
+
+## Bagi Bahan Bersama Berdasarkan Pemakaian
+
+Tepung dan gula dibeli satu karung untuk semua produk. Untuk tahu biaya per produk, kalikan pemakaian dari catatan produksi dengan harga bahan per gram. Jika tepung Rp12.000/kg, maka 360 g tepung untuk brownies hari itu bernilai Rp4.320.
+
+Untuk biaya yang tidak bisa dihitung per produk, seperti gas dan listrik, bagi berdasarkan jumlah adonan atau lama pemakaian oven dalam sebulan. Tidak perlu presisi; yang penting dibagi dengan cara yang konsisten.
+
+## Cocokkan dengan Stok Bahan
+
+Setiap minggu, bandingkan pemakaian bahan menurut catatan produksi dengan bahan yang benar-benar berkurang di dapur:
+
+**Pemakaian nyata = stok awal + belanja − stok akhir**
+
+Jika pemakaian nyata jauh lebih besar dari catatan, ada produksi yang tidak dicatat, takaran resep yang sudah bergeser, atau bahan terbuang. Selisih kecil wajar; selisih besar perlu dicari penyebabnya.
+
+## Hitung Untung per Produk
+
+Setelah biaya bahan per produk diketahui, gabungkan dengan data penjualan:
+
+| Produk | Terjual sebulan | Harga jual | Omzet | Biaya bahan + overhead | Untung kotor | Margin |
+|---|---|---|---|---|---|---|
+| Brownies | 480 potong | Rp8.000 | Rp3.840.000 | Rp2.400.000 | Rp1.440.000 | 37,5% |
+| Cookies | 900 keping | Rp2.500 | Rp2.250.000 | Rp1.170.000 | Rp1.080.000 | 48% |
+| Bolu pandan | 200 potong | Rp6.000 | Rp1.200.000 | Rp900.000 | Rp300.000 | 25% |
+
+Dari contoh ini, bolu pandan omzetnya paling kecil dan marginnya juga paling tipis. Pilihannya: naikkan harga, cari bahan yang lebih efisien, atau kurangi produksinya dan alihkan waktu dapur ke cookies yang marginnya lebih besar.
+
+## Jadwalkan Produksi agar Dapur Tidak Rebutan
+
+Dengan beberapa produk dalam satu dapur, urutan produksi memengaruhi efisiensi. Kelompokkan produk yang memakai suhu oven sama di hari yang sama, buat adonan yang perlu didiamkan lebih dulu, dan hindari membuat produk bertekstur basah dan kering bergantian tanpa jeda membersihkan peralatan.
+
+## Pertanyaan yang Sering Muncul
+
+**Perlukah menimbang bahan setiap kali produksi?**
+Tidak, jika resep standar sudah akurat. Cukup timbang ulang sesekali, misalnya sebulan sekali, untuk memastikan takaran tidak bergeser.
+
+**Bagaimana dengan pesanan custom yang resepnya berbeda?**
+Catat sebagai produk tersendiri atau tambahkan baris catatan bahan tambahan untuk pesanan tersebut.
+
+**Kapan pencatatan manual ini sudah tidak cukup?**
+Biasanya saat produk sudah lebih dari lima, pesanan datang setiap hari, atau ada lebih dari satu orang yang memproduksi. Baca [kapan usaha rumahan butuh sistem pencatatan](/blog/kapan-usaha-rumahan-butuh-sistem-pencatatan).
+
+Fabriku menyediakan pencatatan produksi sederhana untuk usaha rumahan: pilih bahan yang dipakai dan jumlah hasil jadi dalam satu form, lalu stok bahan berkurang dan stok produk bertambah otomatis, dengan biaya per unit dihitung dari bahan yang dipakai. Lihat [Fabriku untuk produksi rumahan](/aplikasi/produksi-rumahan).
 MD,
             ],
         ];

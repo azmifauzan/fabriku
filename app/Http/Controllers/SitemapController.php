@@ -18,6 +18,9 @@ class SitemapController extends Controller
             ['loc' => route('legal.privacy'), 'priority' => '0.3'],
             ['loc' => route('legal.terms'), 'priority' => '0.3'],
         ])->concat(
+            collect(array_keys(config('landing_pages')))
+                ->map(fn (string $slug) => ['loc' => route('landing.category', $slug), 'priority' => '0.9'])
+        )->concat(
             // Only canonical post URLs — category/tag filter views are excluded on purpose,
             // their canonical points back to /blog so they must not appear here too.
             BlogPost::where('status', 'published')
