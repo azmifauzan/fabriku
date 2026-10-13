@@ -107,7 +107,7 @@ class CartController extends Controller
                         $product = $products->get((int) $id);
                         $remaining = (int) $quantity;
                         $inventory = InventoryItem::withoutGlobalScope(TenantScope::class)
-                            ->where('tenant_id', $tenant->id)->where('product_code', $product->product_code)
+                            ->where('tenant_id', $tenant->id)->where('id', $product->inventory_item_id)
                             ->where('status', 'available')->where('selling_price', '>', 0)
                             ->orderBy('selling_price')->orderBy('id')->get();
                         foreach ($inventory as $item) {

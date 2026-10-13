@@ -76,8 +76,8 @@ class WebsiteController extends Controller
             'domainRecords' => $domainRecords,
             'cnameTarget' => $cloudflare->cnameTarget(),
             'canManage' => $canManage,
-            'catalog' => $canManage ? InventoryItem::query()->whereNotNull('product_code')->where('product_code', '!=', '')
-                ->select('product_code')->selectRaw('MIN(product_name) as product_name')->groupBy('product_code')->orderBy('product_name')->get() : [],
+            'catalog' => $canManage ? InventoryItem::query()->where('status', 'available')->whereColumn('current_quantity', '>', 'reserved_quantity')
+                ->orderBy('product_name')->get(['id', 'sku', 'product_name']) : [],
             'products' => $canManage ? SiteProduct::orderBy('sort')->get() : [],
             'services' => $canManage ? Service::orderBy('name')->get(['id', 'name', 'slug', 'is_public', 'is_active']) : [],
             'users' => $canManage ? User::withoutGlobalScope(TenantScope::class)->where('tenant_id', $tenantId)->where('is_active', true)->get(['id', 'name', 'email']) : [],
@@ -405,13 +405,13 @@ class WebsiteController extends Controller
         $this->ensureManager($request);
         $site = $this->site($request);
         $data = $request->validate([
-            'product_code' => ['required', 'string', 'max:255', Rule::exists('inventory_items', 'product_code')->where('tenant_id', $site->tenant_id)],
-            'slug' => ['required', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'max:100', Rule::unique('site_products')->where('tenant_id', $site->tenant_id)->ignore(SiteProduct::where('product_code', $request->input('product_code'))->first()?->id)],
+            'inventory_item_id' => ['required', 'integer', Rule::exists('inventory_items', 'id')->where('tenant_id', $site->tenant_id)],
+            'slug' => ['required', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'max:100', Rule::unique('site_products')->where('tenant_id', $site->tenant_id)->ignore(SiteProduct::where('inventory_item_id', $request->input('inventory_item_id'))->first()?->id)],
             'title' => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string', 'max:2000'],
             'is_visible' => ['required', 'boolean'],
         ]);
-        SiteProduct::updateOrCreate(['tenant_id' => $site->tenant_id, 'product_code' => $data['product_code']], [
+        SiteProduct::updateOrCreate(['tenant_id' => $site->tenant_id, 'inventory_item_id' => $data['inventory_item_id']], [
             'slug' => strtolower($data['slug']), 'title' => $data['title'], 'description' => $data['description'] ?? null, 'is_visible' => $data['is_visible'],
         ]);
 

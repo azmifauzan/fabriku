@@ -203,15 +203,17 @@ class WebsiteManagementTest extends TestCase
         $manager = User::factory()->forTenant($tenant->id)->create();
         $otherUser = User::factory()->forTenant($other->id)->create();
         BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'status' => 'draft']);
-        $item = InventoryItem::factory()->create(['tenant_id' => $tenant->id, 'product_code' => 'PK-1']);
-        $otherItem = InventoryItem::factory()->create(['tenant_id' => $other->id, 'product_code' => 'PK-2']);
+        // product_code stays null for items created through the inventory UI.
+        $item = InventoryItem::factory()->create(['tenant_id' => $tenant->id, 'product_code' => null, 'status' => 'available', 'current_quantity' => 5, 'reserved_quantity' => 0]);
+        $otherItem = InventoryItem::factory()->create(['tenant_id' => $other->id]);
         $service = Service::create(['tenant_id' => $tenant->id, 'code' => 'S-1', 'name' => 'Kelas Kopi', 'price' => 50000]);
         $otherService = Service::create(['tenant_id' => $other->id, 'code' => 'S-2', 'name' => 'Jasa Lain', 'price' => 50000]);
         $this->actingAs($manager);
 
-        $this->post('/website/products', ['product_code' => $item->product_code, 'slug' => 'kopi-bubuk', 'title' => 'Kopi Bubuk', 'is_visible' => 1])->assertRedirect();
+        $this->get('/website?tab=katalog')->assertInertia(fn ($page) => $page->has('catalog', 1)->where('catalog.0.id', $item->id));
+        $this->post('/website/products', ['inventory_item_id' => $item->id, 'slug' => 'kopi-bubuk', 'title' => 'Kopi Bubuk', 'is_visible' => 1])->assertRedirect();
         $this->assertDatabaseHas('site_products', ['tenant_id' => $tenant->id, 'slug' => 'kopi-bubuk']);
-        $this->post('/website/products', ['product_code' => $otherItem->product_code, 'slug' => 'milik-lain', 'title' => 'Salah', 'is_visible' => 1])->assertSessionHasErrors('product_code');
+        $this->post('/website/products', ['inventory_item_id' => $otherItem->id, 'slug' => 'milik-lain', 'title' => 'Salah', 'is_visible' => 1])->assertSessionHasErrors('inventory_item_id');
         $this->post('/website/services/'.$service->id, ['is_public' => 1, 'slug' => 'kelas-kopi'])->assertRedirect();
         $this->post('/website/services/'.$otherService->id, ['is_public' => 1, 'slug' => 'milik-lain'])->assertNotFound();
         $this->post('/website/recipients', ['user_ids' => [$otherUser->id]])->assertSessionHasErrors('user_ids.0');

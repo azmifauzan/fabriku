@@ -17,7 +17,7 @@ class SiteProduct extends Model
 
     protected $fillable = [
         'tenant_id',
-        'product_code',
+        'inventory_item_id',
         'slug',
         'title',
         'description',
@@ -50,9 +50,12 @@ class SiteProduct extends Model
         return $this->belongsTo(Tenant::class);
     }
 
+    /**
+     * The linked inventory row, as a query so the price/stock helpers below can aggregate on it.
+     */
     public function inventoryItems(): HasMany
     {
-        return $this->hasMany(InventoryItem::class, 'product_code', 'product_code')
+        return $this->hasMany(InventoryItem::class, 'id', 'inventory_item_id')
             ->where('inventory_items.tenant_id', $this->tenant_id);
     }
 

@@ -19,52 +19,32 @@ class StorefrontCatalogTest extends TestCase
     {
         $tenant = Tenant::factory()->create();
 
-        $item1 = InventoryItem::factory()->create([
+        $item = InventoryItem::factory()->create([
             'tenant_id' => $tenant->id,
-            'product_code' => 'PRD-001',
             'selling_price' => 75000,
             'current_quantity' => 10,
             'reserved_quantity' => 2,
             'minimum_stock' => 5,
         ]);
 
-        $item2 = InventoryItem::factory()->create([
-            'tenant_id' => $tenant->id,
-            'product_code' => 'PRD-001',
-            'selling_price' => 85000,
-            'current_quantity' => 5,
-            'reserved_quantity' => 0,
-            'minimum_stock' => 5,
-        ]);
-
         $siteProduct = SiteProduct::create([
             'tenant_id' => $tenant->id,
-            'product_code' => 'PRD-001',
+            'inventory_item_id' => $item->id,
             'slug' => 'baju-batik-modern',
             'title' => 'Baju Batik Modern',
             'description' => 'Batik katun halus premium.',
         ]);
 
         $this->assertEquals(75000, $siteProduct->getStartingPrice());
-        $this->assertTrue($siteProduct->hasPriceVariation());
-        $this->assertEquals(13, $siteProduct->getTotalAvailableStock()); // (10-2) + (5-0) = 13
+        $this->assertFalse($siteProduct->hasPriceVariation());
+        $this->assertEquals(8, $siteProduct->getTotalAvailableStock());
         $this->assertEquals('Tersedia', $siteProduct->getAvailabilityStatus());
 
-        // Update to limited stock (total stock 3 <= minimum_stock 5)
-        $item1->update([
-            'current_quantity' => 3,
-            'reserved_quantity' => 0,
-        ]);
-        $item2->update([
-            'current_quantity' => 0,
-            'reserved_quantity' => 0,
-        ]);
+        $item->update(['current_quantity' => 3, 'reserved_quantity' => 0]);
         $this->assertEquals(3, $siteProduct->getTotalAvailableStock());
         $this->assertEquals('Stok terbatas', $siteProduct->getAvailabilityStatus());
 
-        // Out of stock
-        $item1->update(['current_quantity' => 0, 'reserved_quantity' => 0]);
-        $item2->update(['current_quantity' => 0, 'reserved_quantity' => 0]);
+        $item->update(['current_quantity' => 0, 'reserved_quantity' => 0]);
         $this->assertEquals('Habis', $siteProduct->getAvailabilityStatus());
     }
 
@@ -86,14 +66,14 @@ class StorefrontCatalogTest extends TestCase
 
         $p1 = SiteProduct::create([
             'tenant_id' => $tenant1->id,
-            'product_code' => 'P1',
+            'inventory_item_id' => InventoryItem::factory()->create(['tenant_id' => $tenant1->id])->id,
             'slug' => 'produk-satu',
             'title' => 'Produk Khusus Toko Satu',
         ]);
 
         $p2 = SiteProduct::create([
             'tenant_id' => $tenant2->id,
-            'product_code' => 'P2',
+            'inventory_item_id' => InventoryItem::factory()->create(['tenant_id' => $tenant2->id])->id,
             'slug' => 'produk-dua',
             'title' => 'Produk Khusus Toko Dua',
         ]);
@@ -177,20 +157,19 @@ class StorefrontCatalogTest extends TestCase
             ],
         ]);
 
-        $product = SiteProduct::create([
+        $item = InventoryItem::factory()->create([
             'tenant_id' => $tenant->id,
-            'product_code' => 'KEMEJA-01',
-            'slug' => 'kemeja-pria-premium',
-            'title' => 'Kemeja Pria Premium',
-            'description' => 'Kemeja katun premium lengan panjang.',
-        ]);
-
-        InventoryItem::factory()->create([
-            'tenant_id' => $tenant->id,
-            'product_code' => 'KEMEJA-01',
             'selling_price' => 125000,
             'current_quantity' => 20,
             'reserved_quantity' => 0,
+        ]);
+
+        $product = SiteProduct::create([
+            'tenant_id' => $tenant->id,
+            'inventory_item_id' => $item->id,
+            'slug' => 'kemeja-pria-premium',
+            'title' => 'Kemeja Pria Premium',
+            'description' => 'Kemeja katun premium lengan panjang.',
         ]);
 
         $service = Service::create([

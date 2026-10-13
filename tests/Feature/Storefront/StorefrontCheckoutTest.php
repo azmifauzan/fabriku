@@ -19,8 +19,8 @@ class StorefrontCheckoutTest extends TestCase
     {
         $tenant = Tenant::factory()->create();
         BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'slug' => 'checkout-shop', 'mode' => 'produk', 'status' => 'published']);
-        $product = SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'product_code' => 'P-1', 'slug' => 'produk-1']);
-        $item = InventoryItem::factory()->create(['tenant_id' => $tenant->id, 'product_code' => 'P-1', 'selling_price' => 25000, 'current_quantity' => 10, 'reserved_quantity' => 0, 'status' => 'available']);
+        $item = InventoryItem::factory()->create(['tenant_id' => $tenant->id, 'selling_price' => 25000, 'current_quantity' => 10, 'reserved_quantity' => 0, 'status' => 'available']);
+        $product = SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'inventory_item_id' => $item->id, 'slug' => 'produk-1']);
 
         $this->post('http://checkout-shop.fabriku.biz.id/keranjang', ['product_id' => $product->id, 'quantity' => 2])->assertRedirect('/keranjang');
         $this->get('http://checkout-shop.fabriku.biz.id/keranjang')->assertOk()->assertSee('Kirim pesanan');
@@ -46,8 +46,8 @@ class StorefrontCheckoutTest extends TestCase
         $other = SiteProduct::factory()->create(['tenant_id' => Tenant::factory()->create()->id]);
         $this->post('http://limited-shop.fabriku.biz.id/keranjang', ['product_id' => $other->id, 'quantity' => 1])->assertNotFound();
 
-        $product = SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'product_code' => 'P-2', 'slug' => 'produk-2']);
-        InventoryItem::factory()->create(['tenant_id' => $tenant->id, 'product_code' => 'P-2', 'selling_price' => 10000, 'current_quantity' => 1, 'reserved_quantity' => 0, 'status' => 'available']);
+        $item = InventoryItem::factory()->create(['tenant_id' => $tenant->id, 'selling_price' => 10000, 'current_quantity' => 1, 'reserved_quantity' => 0, 'status' => 'available']);
+        $product = SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'inventory_item_id' => $item->id, 'slug' => 'produk-2']);
         $this->post('http://limited-shop.fabriku.biz.id/keranjang', ['product_id' => $product->id, 'quantity' => 2])->assertRedirect('/keranjang');
         $this->post('http://limited-shop.fabriku.biz.id/checkout', ['idempotency_key' => (string) Str::uuid(), 'name' => 'Pembeli', 'phone' => '081234567890'])
             ->assertSessionHasErrors('cart');

@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
 
-type Product = { id: number; product_code: string; slug: string; title: string; description: string | null; is_visible: boolean };
+type Product = { id: number; inventory_item_id: number; slug: string; title: string; description: string | null; is_visible: boolean };
 type Service = { id: number; name: string; slug: string | null; is_public: boolean; is_active: boolean };
 type ThemeVersion = {
     id: number;
@@ -58,7 +58,7 @@ const props = defineProps<{
     canManage: boolean;
     domainRecords: Array<{ type: string; name: string; value: string }>;
     cnameTarget: string;
-    catalog: Array<{ product_code: string; product_name: string }>;
+    catalog: Array<{ id: number; sku: string; product_name: string }>;
     products: Product[];
     services: Service[];
     users: Array<{ id: number; name: string; email: string }>;
@@ -111,7 +111,7 @@ const themeForm = useForm({
     hero_subtitle: hero?.['hero-subtitle'] ?? props.site?.profile?.description ?? '',
     preset: props.site?.active_theme_version?.theme?.preset ?? 'ruang',
 });
-const productForm = useForm({ product_code: '', slug: '', title: '', description: '', is_visible: true });
+const productForm = useForm({ inventory_item_id: 0, slug: '', title: '', description: '', is_visible: true });
 const recipientForm = useForm({ user_ids: props.site?.recipients?.map((r) => r.id) ?? ([] as number[]) });
 const domainForm = useForm({ domain: props.site?.custom_domain ?? '' });
 const selectedCode = ref('');
@@ -129,9 +129,9 @@ const contentPageForms = ref<Record<number, Omit<ContentPage, 'id' | 'slug' | 't
 );
 function selectProduct(code: string) {
     selectedCode.value = code;
-    const existing = props.products.find((p) => p.product_code === code);
-    const source = props.catalog.find((p) => p.product_code === code);
-    productForm.product_code = code;
+    const existing = props.products.find((p) => p.inventory_item_id === Number(code));
+    const source = props.catalog.find((p) => p.id === Number(code));
+    productForm.inventory_item_id = Number(code);
     productForm.title = existing?.title ?? source?.product_name ?? '';
     productForm.slug =
         existing?.slug ??
@@ -494,8 +494,8 @@ const whatsappLink = (phone: string, message: string) =>
                                 @change="selectProduct(($event.target as HTMLSelectElement).value)"
                             >
                                 <option value="">Pilih produk</option>
-                                <option v-for="item in catalog" :key="item.product_code" :value="item.product_code">
-                                    {{ item.product_name }} · {{ item.product_code }}
+                                <option v-for="item in catalog" :key="item.id" :value="item.id">
+                                    {{ item.product_name }} · {{ item.sku }}
                                 </option>
                             </select></label
                         >

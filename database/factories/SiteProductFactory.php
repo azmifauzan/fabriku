@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\InventoryItem;
 use App\Models\SiteProduct;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,7 +21,7 @@ class SiteProductFactory extends Factory
 
         return [
             'tenant_id' => Tenant::factory(),
-            'product_code' => 'PRD-'.fake()->unique()->randomNumber(5),
+            'inventory_item_id' => fn (array $attributes) => InventoryItem::factory()->create(['tenant_id' => $attributes['tenant_id']])->id,
             'slug' => Str::slug($title).'-'.fake()->unique()->randomNumber(4),
             'title' => ucfirst($title),
             'description' => fake()->paragraph(),
