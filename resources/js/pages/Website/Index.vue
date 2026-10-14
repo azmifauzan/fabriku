@@ -9,12 +9,14 @@ import {
     Play,
     Sparkles,
 } from 'lucide-vue-next';
-import { computed, onMounted, ref, watch } from 'vue';
-import TabDesain from './tabs/TabDesain.vue';
-import TabIdentitas from './tabs/TabIdentitas.vue';
-import TabKatalog from './tabs/TabKatalog.vue';
-import TabPengaturan from './tabs/TabPengaturan.vue';
-import TabPermintaan from './tabs/TabPermintaan.vue';
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
+
+// Lazy tabs: static imports would put every tab chunk in the Link preload header, which exceeded nginx's proxy_buffer_size (502).
+const TabDesain = defineAsyncComponent(() => import('./tabs/TabDesain.vue'));
+const TabIdentitas = defineAsyncComponent(() => import('./tabs/TabIdentitas.vue'));
+const TabKatalog = defineAsyncComponent(() => import('./tabs/TabKatalog.vue'));
+const TabPengaturan = defineAsyncComponent(() => import('./tabs/TabPengaturan.vue'));
+const TabPermintaan = defineAsyncComponent(() => import('./tabs/TabPermintaan.vue'));
 
 type ThemeVersion = {
     id: number;
