@@ -76,15 +76,16 @@ onMounted(() => {
 const successMessage = computed(() => (page.props.flash as { success?: string } | undefined)?.success);
 
 // Tab Navigation & URL Sync
-const getRequestedTab = (): Tab => {
-    const tabParam = new URLSearchParams(window.location.search).get('tab');
+// Takes a query string so setup can read Inertia's page.url: window does not exist during SSR.
+const parseTab = (search: string): Tab => {
+    const tabParam = new URLSearchParams(search).get('tab');
     if (tabParam && ['permintaan', 'identitas', 'katalog', 'desain', 'pengaturan'].includes(tabParam)) {
         return tabParam as Tab;
     }
     return 'permintaan';
 };
 
-const activeTab = ref<Tab>(getRequestedTab());
+const activeTab = ref<Tab>(parseTab(page.url.split('?')[1] ?? ''));
 
 function switchTab(tab: Tab) {
     activeTab.value = tab;
@@ -106,7 +107,7 @@ function onTabKeydown(event: KeyboardEvent) {
 // Watch browser back/forward buttons
 onMounted(() => {
     window.addEventListener('popstate', () => {
-        activeTab.value = getRequestedTab();
+        activeTab.value = parseTab(window.location.search);
     });
 });
 
