@@ -44,6 +44,8 @@ class StorefrontTenantScope
         return Service::withoutGlobalScopes()
             ->where('tenant_id', $this->tenant->id)
             ->where('is_public', true)
-            ->where('is_active', true);
+            ->where('is_active', true)
+            ->orderBy('sort')
+            ->orderBy('id');
     }
 }

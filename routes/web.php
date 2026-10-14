@@ -209,13 +209,18 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
     Route::post('/website/satsetui/launch', [WebsiteController::class, 'satsetuiLaunch'])->name('website.satsetui.launch');
     Route::get('/website/satsetui/import', [WebsiteController::class, 'satsetuiImport'])->name('website.satsetui.import');
     Route::post('/website/satsetui/publish-draft', [WebsiteController::class, 'publishSatsetuiDraft'])->name('website.satsetui.publishDraft');
+    Route::post('/website/satsetui/discard-draft', [WebsiteController::class, 'discardSatsetuiDraft'])->name('website.satsetui.discardDraft');
     Route::patch('/website/pages/{page}', [WebsiteController::class, 'updateContentPage'])->name('website.pages.update');
     Route::post('/website/theme/{version}/restore', [WebsiteController::class, 'restoreTheme'])->name('website.theme.restore');
     Route::get('/website/theme/{version}/preview', [WebsiteController::class, 'previewTheme'])->name('website.theme.preview');
     Route::post('/website/publish', [WebsiteController::class, 'publish'])->name('website.publish');
     Route::post('/website/setup/complete', [WebsiteController::class, 'completeSetup'])->name('website.setup.complete');
     Route::post('/website/products', [WebsiteController::class, 'product'])->name('website.products');
+    Route::delete('/website/products/{product}', [WebsiteController::class, 'destroyProduct'])->name('website.products.destroy');
+    Route::post('/website/products/{product}/toggle', [WebsiteController::class, 'toggleProduct'])->name('website.products.toggle');
+    Route::post('/website/products/{product}/move', [WebsiteController::class, 'moveProduct'])->name('website.products.move');
     Route::post('/website/services/{service}', [WebsiteController::class, 'service'])->name('website.services');
+    Route::post('/website/services/{service}/move', [WebsiteController::class, 'moveService'])->name('website.services.move');
     Route::post('/website/recipients', [WebsiteController::class, 'recipients'])->name('website.recipients');
     Route::post('/website/leads/{lead}/status', [WebsiteLeadController::class, 'update'])->name('website.leads.status');
     Route::post('/website/leads/{lead}/convert', [WebsiteLeadController::class, 'convert'])->name('website.leads.convert');

@@ -23,6 +23,7 @@ class Service extends Model
         return [
             'is_active' => 'boolean',
             'is_public' => 'boolean',
+            'sort' => 'integer',
             'price' => 'decimal:2',
         ];
     }

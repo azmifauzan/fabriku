@@ -50,6 +50,11 @@ class SiteProduct extends Model
         return $this->belongsTo(Tenant::class);
     }
 
+    public function inventoryItem(): BelongsTo
+    {
+        return $this->belongsTo(InventoryItem::class, 'inventory_item_id');
+    }
+
     /**
      * The linked inventory row, as a query so the price/stock helpers below can aggregate on it.
      */

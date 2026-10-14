@@ -6,9 +6,11 @@ use App\Models\BusinessSite;
 use App\Models\InventoryItem;
 use App\Models\Lead;
 use App\Models\Service;
+use App\Models\SiteProduct;
 use App\Models\SiteThemeVersion;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\Storefront\Storefront;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -233,5 +235,251 @@ class WebsiteManagementTest extends TestCase
         $this->post('/website/leads/'.$lead->id.'/convert')->assertRedirect();
         $this->assertDatabaseCount('sales_orders', 1);
         $this->assertSame('converted', $lead->fresh()->status);
+    }
+
+    public function test_closing_a_lead_requires_status_and_reason(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        $lead = Lead::create(['tenant_id' => $tenant->id, 'business_site_id' => $site->id, 'source' => 'website', 'name' => 'Calon pelanggan', 'phone' => '081234567890', 'consent_at' => now(), 'consent_text' => 'Setuju', 'idempotency_key' => Str::uuid()]);
+        $this->actingAs($manager);
+
+        $this->post('/website/leads/'.$lead->id.'/status', ['closed_reason' => 'Tidak jadi'])->assertSessionHasErrors('status');
+        $this->post('/website/leads/'.$lead->id.'/status', ['status' => 'closed'])->assertSessionHasErrors('closed_reason');
+        $this->assertSame('new', $lead->fresh()->status);
+
+        $this->post('/website/leads/'.$lead->id.'/status', ['status' => 'closed', 'closed_reason' => 'Tidak jadi'])->assertRedirect();
+        $this->assertSame('closed', $lead->fresh()->status);
+        $this->assertSame('Tidak jadi', $lead->fresh()->closed_reason);
+    }
+
+    public function test_manager_can_save_fabriku_theme_when_satsetui_is_active_without_carrying_over_template(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'status' => 'published']);
+        $satsetuiVersion = SiteThemeVersion::create([
+            'tenant_id' => $tenant->id,
+            'business_site_id' => $site->id,
+            'source' => 'satsetui',
+            'version' => 1,
+            'theme' => ['preset' => 'ruang'],
+            'sections' => [[
+                'type' => 'satsetui-template',
+                'sort' => 0,
+                'is_visible' => true,
+                'variables' => [],
+                'html' => '<main><h1>Template Satsetui</h1></main>',
+            ]],
+            'created_by' => $manager->id,
+        ]);
+        $site->update(['active_theme_version_id' => $satsetuiVersion->id]);
+
+        $this->actingAs($manager)
+            ->post('/website/theme', [
+                'primary' => '#123456',
+                'accent' => '#654321',
+                'background' => '#ffffff',
+                'text' => '#111111',
+                'hero_title' => 'Toko Baru',
+                'hero_subtitle' => 'Deskripsi Toko',
+                'preset' => 'ruang',
+            ])
+            ->assertRedirect();
+
+        $newVersion = $site->fresh()->activeThemeVersion;
+        $this->assertNotNull($newVersion);
+        $this->assertSame('manual', $newVersion->source);
+        $this->assertSame(2, $newVersion->version);
+
+        // Sections should NOT contain the satsetui-template!
+        $sectionTypes = collect($newVersion->sections)->pluck('type')->all();
+        $this->assertNotContains('satsetui-template', $sectionTypes);
+        $this->assertContains('hero', $sectionTypes);
+    }
+
+    public function test_manager_can_discard_satsetui_draft_and_keep_it_in_history(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        $draft = SiteThemeVersion::create([
+            'tenant_id' => $tenant->id,
+            'business_site_id' => $site->id,
+            'source' => 'satsetui',
+            'version' => 1,
+            'theme' => ['preset' => 'ruang'],
+            'sections' => [],
+            'created_by' => $manager->id,
+        ]);
+        $site->update(['draft_theme_version_id' => $draft->id]);
+
+        $this->actingAs($manager)
+            ->post('/website/satsetui/discard-draft')
+            ->assertRedirect();
+
+        $this->assertNull($site->fresh()->draft_theme_version_id);
+        $this->assertDatabaseHas('site_theme_versions', ['id' => $draft->id]);
+    }
+
+    public function test_restoring_satsetui_version_becomes_draft_and_manual_version_becomes_active(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        $manualVersion = SiteThemeVersion::create([
+            'tenant_id' => $tenant->id, 'business_site_id' => $site->id, 'source' => 'manual', 'version' => 1,
+            'theme' => ['preset' => 'ruang'], 'sections' => [], 'created_by' => $manager->id,
+        ]);
+        $satsetuiVersion = SiteThemeVersion::create([
+            'tenant_id' => $tenant->id, 'business_site_id' => $site->id, 'source' => 'satsetui', 'version' => 2,
+            'theme' => ['preset' => 'ruang', 'satsetui_pages' => [[
+                'slug' => 'kebijakan-layanan', 'title' => 'Kebijakan Layanan', 'html' => '<p>Syarat kami</p>',
+                'seo_title' => 'Kebijakan', 'seo_description' => 'Ketentuan layanan.', 'sort' => 1,
+            ]]],
+            'sections' => [], 'created_by' => $manager->id,
+        ]);
+        $site->update(['active_theme_version_id' => $manualVersion->id]);
+
+        $this->actingAs($manager)->post('/website/theme/'.$satsetuiVersion->id.'/restore')->assertRedirect();
+
+        // Satsetui version only becomes a draft: the live design and extra pages are untouched until applied.
+        $this->assertSame($manualVersion->id, $site->fresh()->active_theme_version_id);
+        $this->assertSame($satsetuiVersion->id, $site->fresh()->draft_theme_version_id);
+        $this->assertDatabaseMissing('site_content_pages', ['business_site_id' => $site->id, 'slug' => 'kebijakan-layanan']);
+
+        $this->post('/website/satsetui/publish-draft')->assertRedirect();
+        $this->assertSame($satsetuiVersion->id, $site->fresh()->active_theme_version_id);
+        $this->assertDatabaseHas('site_content_pages', ['business_site_id' => $site->id, 'slug' => 'kebijakan-layanan', 'is_published' => true]);
+
+        // Going back to the Fabriku version keeps the Satsetui extra pages published.
+        $this->post('/website/theme/'.$manualVersion->id.'/restore')->assertRedirect();
+        $this->assertSame($manualVersion->id, $site->fresh()->active_theme_version_id);
+        $this->assertDatabaseHas('site_content_pages', ['business_site_id' => $site->id, 'slug' => 'kebijakan-layanan', 'is_published' => true]);
+    }
+
+    public function test_changing_site_mode_resets_active_design_but_keeps_versions(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'mode' => 'produk', 'slug' => 'toko-mode']);
+        $version = SiteThemeVersion::create([
+            'tenant_id' => $tenant->id, 'business_site_id' => $site->id, 'source' => 'manual', 'version' => 1,
+            'theme' => ['preset' => 'ruang'], 'sections' => [], 'created_by' => $manager->id,
+        ]);
+        $site->update(['active_theme_version_id' => $version->id]);
+
+        $this->actingAs($manager)->post('/website', ['slug' => 'toko-mode', 'mode' => 'produk', 'name' => 'Toko'])->assertRedirect();
+        $this->assertSame($version->id, $site->fresh()->active_theme_version_id);
+
+        $this->post('/website', ['slug' => 'toko-mode', 'mode' => 'jasa', 'name' => 'Toko'])->assertRedirect();
+        $this->assertNull($site->fresh()->active_theme_version_id);
+        $this->assertDatabaseHas('site_theme_versions', ['id' => $version->id]);
+    }
+
+    public function test_product_move_swaps_neighbours_and_is_tenant_scoped(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        $make = fn (int $sort) => SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'sort' => $sort]);
+        [$a, $b, $c] = [$make(1), $make(2), $make(3)];
+
+        $this->actingAs($manager)->post('/website/products/'.$b->id.'/move', ['direction' => 'down'])->assertRedirect();
+        $this->assertSame([$a->id, $c->id, $b->id], SiteProduct::where('tenant_id', $tenant->id)->orderBy('sort')->orderBy('id')->pluck('id')->all());
+
+        $this->post('/website/products/'.$a->id.'/move', ['direction' => 'up'])->assertRedirect();
+        $this->assertSame([$a->id, $c->id, $b->id], SiteProduct::where('tenant_id', $tenant->id)->orderBy('sort')->orderBy('id')->pluck('id')->all());
+
+        $this->post('/website/products/'.$b->id.'/move', ['direction' => 'sideways'])->assertSessionHasErrors('direction');
+
+        $other = User::factory()->forTenant(Tenant::factory()->create()->id)->manager()->create();
+        $this->actingAs($other)->post('/website/products/'.$a->id.'/move', ['direction' => 'down'])->assertNotFound();
+        $this->delete('/website/products/'.$a->id)->assertNotFound();
+        $this->post('/website/products', ['id' => $a->id, 'slug' => 'x', 'title' => 'X', 'is_visible' => 1])->assertNotFound();
+        $this->post('/website/products/'.$a->id.'/toggle')->assertNotFound();
+    }
+
+    public function test_service_move_swaps_neighbours_from_unnormalized_order(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        $make = fn (string $code, int $sort) => Service::create(['tenant_id' => $tenant->id, 'code' => $code, 'name' => $code, 'price' => 1000, 'sort' => $sort]);
+        [$a, $b, $c] = [$make('S-A', 1), $make('S-B', 2), $make('S-C', 3)];
+
+        $this->actingAs($manager)->post('/website/services/'.$b->id.'/move', ['direction' => 'down'])->assertRedirect();
+        $this->assertSame([$a->id, $c->id, $b->id], Service::where('tenant_id', $tenant->id)->orderBy('sort')->orderBy('id')->pluck('id')->all());
+    }
+
+    public function test_manager_can_manage_product_lifecycle_on_website(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        $item1 = InventoryItem::factory()->create(['tenant_id' => $tenant->id, 'current_quantity' => 10, 'reserved_quantity' => 0, 'status' => 'available']);
+        $item2 = InventoryItem::factory()->create(['tenant_id' => $tenant->id, 'current_quantity' => 15, 'reserved_quantity' => 0, 'status' => 'available']);
+
+        $this->actingAs($manager);
+
+        // Add item1
+        $this->post('/website/products', [
+            'inventory_item_id' => $item1->id,
+            'slug' => 'item-satu',
+            'title' => 'Item Satu',
+            'is_visible' => 1,
+        ])->assertRedirect();
+        $prod1 = SiteProduct::where('inventory_item_id', $item1->id)->firstOrFail();
+
+        // Add item2
+        $this->post('/website/products', [
+            'inventory_item_id' => $item2->id,
+            'slug' => 'item-dua',
+            'title' => 'Item Dua',
+            'is_visible' => 1,
+        ])->assertRedirect();
+        $prod2 = SiteProduct::where('inventory_item_id', $item2->id)->firstOrFail();
+
+        // Edit item1 (linked inventory item cannot be changed)
+        $this->post('/website/products', [
+            'id' => $prod1->id,
+            'slug' => 'item-satu-updated',
+            'title' => 'Item Satu Updated',
+            'is_visible' => 1,
+        ])->assertRedirect();
+        $this->assertSame('item-satu-updated', $prod1->fresh()->slug);
+        $this->assertSame($item1->id, $prod1->fresh()->inventory_item_id);
+
+        // Toggle visibility
+        $this->post('/website/products/'.$prod1->id.'/toggle')->assertRedirect();
+        $this->assertFalse($prod1->fresh()->is_visible);
+
+        // Move products
+        $this->post('/website/products/'.$prod2->id.'/move', ['direction' => 'up'])->assertRedirect();
+        $this->assertTrue($prod2->fresh()->sort < $prod1->fresh()->sort);
+
+        // Delete product from website
+        $this->delete('/website/products/'.$prod1->id)->assertRedirect();
+        $this->assertDatabaseMissing('site_products', ['id' => $prod1->id]);
+        $this->assertDatabaseHas('inventory_items', ['id' => $item1->id]); // stock unharmed
+    }
+
+    public function test_manager_can_reorder_services(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        $s1 = Service::create(['tenant_id' => $tenant->id, 'code' => 'S-1', 'name' => 'Layanan A', 'price' => 10000, 'sort' => 0, 'is_public' => true, 'is_active' => true]);
+        $s2 = Service::create(['tenant_id' => $tenant->id, 'code' => 'S-2', 'name' => 'Layanan B', 'price' => 20000, 'sort' => 1, 'is_public' => true, 'is_active' => true]);
+
+        $this->actingAs($manager);
+        $this->post('/website/services/'.$s2->id.'/move', ['direction' => 'up'])->assertRedirect();
+
+        $this->assertTrue($s2->fresh()->sort < $s1->fresh()->sort);
+
+        // Verify Storefront query reflects the order
+        $orderedServices = Storefront::for($tenant)->services()->get();
+        $this->assertSame($s2->id, $orderedServices->first()->id);
     }
 }

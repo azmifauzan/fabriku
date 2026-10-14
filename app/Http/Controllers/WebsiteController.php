@@ -34,14 +34,14 @@ class WebsiteController extends Controller
     {
         $tenantId = $request->user()->tenant_id;
         $site = BusinessSite::where('tenant_id', $tenantId)->with([
-            'activeThemeVersion',
-            'themeVersions' => fn ($query) => $query->select(['id', 'tenant_id', 'business_site_id', 'version', 'source', 'created_at'])->latest('version'),
+            'activeThemeVersion.creator:id,name',
+            'themeVersions' => fn ($query) => $query->select(['id', 'tenant_id', 'business_site_id', 'version', 'source', 'created_by', 'created_at'])->with('creator:id,name')->latest('version'),
             'recipients:id,name,email',
         ])->first();
         $draftVersion = $site?->draftThemeVersion()->first(['id', 'version', 'source', 'theme']);
         if ($site?->activeThemeVersion) {
             $activeVersion = $site->activeThemeVersion;
-            $activeVersion->setAttribute('theme', array_intersect_key($activeVersion->theme ?? [], array_flip(['preset', 'css_variables'])));
+            $activeVersion->setAttribute('theme', array_intersect_key($activeVersion->theme ?? [], array_flip(['preset', 'css_variables', 'satsetui_generation_id'])));
             $activeVersion->setAttribute('sections', collect($activeVersion->sections ?? [])->map(fn ($section) => [
                 'type' => $section['type'] ?? '',
                 'variables' => $section['variables'] ?? [],
@@ -66,6 +66,84 @@ class WebsiteController extends Controller
             }
         }
 
+        $lastManualVersion = $site?->themeVersions()
+            ->whereIn('source', ['manual', 'catalog'])
+            ->latest('version')
+            ->first();
+        $lastManualTheme = null;
+        if ($lastManualVersion) {
+            $heroSection = collect($lastManualVersion->sections ?? [])->firstWhere('type', 'hero');
+            $lastManualTheme = [
+                'preset' => $lastManualVersion->theme['preset'] ?? 'ruang',
+                'css_variables' => $lastManualVersion->theme['css_variables'] ?? [],
+                'hero_title' => $heroSection['variables']['hero-title'] ?? '',
+                'hero_subtitle' => $heroSection['variables']['hero-subtitle'] ?? '',
+            ];
+        }
+
+        $existingItemIds = $canManage ? SiteProduct::where('tenant_id', $tenantId)->pluck('inventory_item_id') : collect();
+        $catalog = $canManage ? InventoryItem::query()
+            ->where('tenant_id', $tenantId)
+            ->where('status', 'available')
+            ->whereColumn('current_quantity', '>', 'reserved_quantity')
+            ->whereNotIn('id', $existingItemIds)
+            ->orderBy('product_name')
+            ->get()
+            ->map(fn ($item) => [
+                'id' => $item->id,
+                'sku' => $item->sku,
+                'product_name' => $item->product_name,
+                'current_stock' => $item->current_quantity,
+                'reserved_stock' => $item->reserved_quantity,
+                'selling_price' => $item->selling_price ? (float) $item->selling_price : 0,
+                'image_url' => $item->image_url,
+            ]) : [];
+
+        $products = $canManage ? SiteProduct::where('tenant_id', $tenantId)
+            ->with('inventoryItem')
+            ->orderBy('sort')
+            ->orderBy('id')
+            ->get()
+            ->map(function ($product) {
+                $item = $product->inventoryItem;
+                $availStock = $item ? max(0, $item->current_quantity - $item->reserved_quantity) : 0;
+
+                $statusKey = 'visible';
+                $statusLabel = 'Tampil';
+                if (! $product->is_visible) {
+                    $statusKey = 'hidden';
+                    $statusLabel = 'Disembunyikan';
+                } elseif (! $item || $item->status !== 'available') {
+                    $statusKey = 'unavailable';
+                    $statusLabel = 'Barang tidak tersedia';
+                } elseif ($availStock <= 0) {
+                    $statusKey = 'out_of_stock';
+                    $statusLabel = 'Stok habis';
+                }
+
+                return [
+                    'id' => $product->id,
+                    'inventory_item_id' => $product->inventory_item_id,
+                    'title' => $product->title,
+                    'slug' => $product->slug,
+                    'description' => $product->description,
+                    'is_visible' => $product->is_visible,
+                    'sort' => $product->sort,
+                    'image_url' => $product->getImageUrl() ?? $item?->image_url,
+                    'product_name' => $item?->product_name ?? '-',
+                    'sku' => $item?->sku ?? '-',
+                    'selling_price' => $item?->selling_price ? (float) $item->selling_price : 0,
+                    'available_stock' => $availStock,
+                    'status_key' => $statusKey,
+                    'status_label' => $statusLabel,
+                ];
+            }) : [];
+
+        $services = $canManage ? Service::where('tenant_id', $tenantId)
+            ->orderBy('sort')
+            ->orderBy('id')
+            ->get(['id', 'name', 'slug', 'is_public', 'is_active', 'sort', 'price', 'price_label', 'image_path']) : [];
+
         return Inertia::render('Website/Index', [
             'site' => $site,
             'draftThemeVersion' => $draftVersion?->source === 'satsetui' ? [
@@ -73,13 +151,13 @@ class WebsiteController extends Controller
                 'version' => $draftVersion->version,
                 'pageCount' => count($draftVersion->theme['satsetui_pages'] ?? []),
             ] : null,
+            'lastManualTheme' => $lastManualTheme,
             'domainRecords' => $domainRecords,
             'cnameTarget' => $cloudflare->cnameTarget(),
             'canManage' => $canManage,
-            'catalog' => $canManage ? InventoryItem::query()->where('status', 'available')->whereColumn('current_quantity', '>', 'reserved_quantity')
-                ->orderBy('product_name')->get(['id', 'sku', 'product_name']) : [],
-            'products' => $canManage ? SiteProduct::orderBy('sort')->get() : [],
-            'services' => $canManage ? Service::orderBy('name')->get(['id', 'name', 'slug', 'is_public', 'is_active']) : [],
+            'catalog' => $catalog,
+            'products' => $products,
+            'services' => $services,
             'users' => $canManage ? User::withoutGlobalScope(TenantScope::class)->where('tenant_id', $tenantId)->where('is_active', true)->get(['id', 'name', 'email']) : [],
             'leads' => $site ? Lead::where('business_site_id', $site->id)->with('service:id,name')->latest()->limit(50)->get() : [],
             'orders' => $site ? SalesOrder::whereNotNull('storefront_checkout_key')->with('customer:id,name,phone')->latest()->limit(50)->get(['id', 'customer_id', 'order_number', 'status', 'payment_status', 'total_amount', 'created_at']) : [],
@@ -253,6 +331,17 @@ class WebsiteController extends Controller
         return back()->with('success', 'Desain dan halaman Satsetui diterapkan. Pengaturan terbit atau jeda website tidak berubah.');
     }
 
+    public function discardSatsetuiDraft(Request $request): RedirectResponse
+    {
+        $this->ensureManager($request);
+        $site = $this->site($request);
+        abort_unless($site->draft_theme_version_id !== null, 404);
+
+        $site->update(['draft_theme_version_id' => null]);
+
+        return back()->with('success', 'Draf desain Satsetui dibuang. Versi tetap tersimpan di riwayat.');
+    }
+
     public function updateContentPage(Request $request, SiteContentPage $page): RedirectResponse
     {
         $this->ensureManager($request);
@@ -306,7 +395,6 @@ class WebsiteController extends Controller
     {
         $this->ensureManager($request);
         $site = $this->site($request);
-        abort_if($site->activeThemeVersion?->source === 'satsetui' || $site->draftThemeVersion?->source === 'satsetui', 422, 'Desain template ini dikelola dari Satsetui.');
         $data = $request->validate([
             'primary' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'accent' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
@@ -316,10 +404,13 @@ class WebsiteController extends Controller
             'hero_subtitle' => ['nullable', 'string', 'max:300'],
             'preset' => ['required', Rule::in(['ruang', 'etalase', 'studio'])],
         ]);
-        $currentPreset = $site->activeThemeVersion?->theme['preset'] ?? 'ruang';
-        $sections = $currentPreset === $data['preset']
+
+        $isManualActive = $site->activeThemeVersion?->source === 'manual';
+        $currentPreset = $isManualActive ? ($site->activeThemeVersion?->theme['preset'] ?? 'ruang') : null;
+        $sections = ($isManualActive && $currentPreset === $data['preset'])
             ? ($site->activeThemeVersion?->sections ?: $renderer->sectionsForPreset($site, $data['preset']))
             : $renderer->sectionsForPreset($site, $data['preset']);
+
         foreach ($sections as &$section) {
             if (($section['type'] ?? '') === 'hero') {
                 $section['variables']['hero-title'] = $data['hero_title'];
@@ -327,16 +418,22 @@ class WebsiteController extends Controller
             }
         }
         unset($section);
+
         DB::transaction(function () use ($site, $request, $sections, $data) {
             $version = SiteThemeVersion::create([
                 'tenant_id' => $site->tenant_id,
                 'business_site_id' => $site->id,
                 'source' => 'manual',
                 'version' => ($site->themeVersions()->max('version') ?? 0) + 1,
-                'theme' => ['preset' => $data['preset'], 'css_variables' => [
-                    '--fb-primary' => $data['primary'], '--fb-accent' => $data['accent'],
-                    '--fb-bg' => $data['background'], '--fb-text' => $data['text'],
-                ]],
+                'theme' => [
+                    'preset' => $data['preset'],
+                    'css_variables' => [
+                        '--fb-primary' => $data['primary'],
+                        '--fb-accent' => $data['accent'],
+                        '--fb-bg' => $data['background'],
+                        '--fb-text' => $data['text'],
+                    ],
+                ],
                 'sections' => $sections,
                 'created_by' => $request->user()->id,
             ]);
@@ -370,15 +467,19 @@ class WebsiteController extends Controller
         $this->ensureManager($request);
         $site = $this->site($request);
         abort_unless($version->business_site_id === $site->id && $version->tenant_id === $site->tenant_id, 404);
+
         if ($version->source === 'satsetui') {
             $site->update(['draft_theme_version_id' => $version->id]);
 
             return back()->with('success', 'Versi Satsetui dipulihkan sebagai draf. Terapkan setelah memeriksanya.');
         }
 
-        $site->update(['active_theme_version_id' => $version->id, 'draft_theme_version_id' => null]);
+        $site->update([
+            'active_theme_version_id' => $version->id,
+            'draft_theme_version_id' => $site->draft_theme_version_id === $version->id ? null : $site->draft_theme_version_id,
+        ]);
 
-        return back()->with('success', 'Versi desain dipulihkan.');
+        return back()->with('success', 'Versi desain v'.$version->version.' diterapkan sebagai desain aktif.');
     }
 
     public function publish(Request $request): RedirectResponse
@@ -404,18 +505,125 @@ class WebsiteController extends Controller
     {
         $this->ensureManager($request);
         $site = $this->site($request);
+
+        $productId = $request->input('id');
+        if ($productId) {
+            $existingProduct = SiteProduct::where('tenant_id', $site->tenant_id)->findOrFail($productId);
+            $data = $request->validate([
+                'slug' => [
+                    'required',
+                    'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+                    'max:100',
+                    Rule::unique('site_products')->where('tenant_id', $site->tenant_id)->ignore($existingProduct->id),
+                ],
+                'title' => ['required', 'string', 'max:150'],
+                'description' => ['nullable', 'string', 'max:2000'],
+                'is_visible' => ['required', 'boolean'],
+            ]);
+
+            $existingProduct->update([
+                'slug' => strtolower($data['slug']),
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'is_visible' => $data['is_visible'],
+            ]);
+
+            return back()->with('success', 'Produk website diperbarui.');
+        }
+
         $data = $request->validate([
-            'inventory_item_id' => ['required', 'integer', Rule::exists('inventory_items', 'id')->where('tenant_id', $site->tenant_id)],
-            'slug' => ['required', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'max:100', Rule::unique('site_products')->where('tenant_id', $site->tenant_id)->ignore(SiteProduct::where('inventory_item_id', $request->input('inventory_item_id'))->first()?->id)],
+            'inventory_item_id' => [
+                'required',
+                'integer',
+                Rule::exists('inventory_items', 'id')->where('tenant_id', $site->tenant_id),
+                Rule::unique('site_products')->where('tenant_id', $site->tenant_id),
+            ],
+            'slug' => [
+                'required',
+                'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+                'max:100',
+                Rule::unique('site_products')->where('tenant_id', $site->tenant_id),
+            ],
             'title' => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string', 'max:2000'],
             'is_visible' => ['required', 'boolean'],
         ]);
-        SiteProduct::updateOrCreate(['tenant_id' => $site->tenant_id, 'inventory_item_id' => $data['inventory_item_id']], [
-            'slug' => strtolower($data['slug']), 'title' => $data['title'], 'description' => $data['description'] ?? null, 'is_visible' => $data['is_visible'],
+
+        $maxSort = SiteProduct::where('tenant_id', $site->tenant_id)->max('sort') ?? 0;
+        SiteProduct::create([
+            'tenant_id' => $site->tenant_id,
+            'inventory_item_id' => $data['inventory_item_id'],
+            'slug' => strtolower($data['slug']),
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'is_visible' => $data['is_visible'],
+            'sort' => $maxSort + 1,
         ]);
 
-        return back()->with('success', 'Produk website disimpan.');
+        return back()->with('success', 'Produk berhasil ditambahkan ke website.');
+    }
+
+    public function destroyProduct(Request $request, SiteProduct $product): RedirectResponse
+    {
+        $this->ensureManager($request);
+        $site = $this->site($request);
+        abort_unless($product->tenant_id === $site->tenant_id, 404);
+
+        $product->delete();
+
+        return back()->with('success', 'Produk dihapus dari website. Stok inventori tidak berubah.');
+    }
+
+    public function toggleProduct(Request $request, SiteProduct $product): RedirectResponse
+    {
+        $this->ensureManager($request);
+        $site = $this->site($request);
+        abort_unless($product->tenant_id === $site->tenant_id, 404);
+
+        $product->update(['is_visible' => ! $product->is_visible]);
+
+        return back()->with('success', $product->is_visible ? 'Produk sekarang tampil di website.' : 'Produk disembunyikan dari website.');
+    }
+
+    public function moveProduct(Request $request, SiteProduct $product): RedirectResponse
+    {
+        $this->ensureManager($request);
+        $site = $this->site($request);
+        abort_unless($product->tenant_id === $site->tenant_id, 404);
+
+        $data = $request->validate([
+            'direction' => ['required', Rule::in(['up', 'down'])],
+        ]);
+
+        DB::transaction(function () use ($site, $product, $data) {
+            $products = SiteProduct::where('tenant_id', $site->tenant_id)
+                ->orderBy('sort')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+
+            foreach ($products as $idx => $p) {
+                if ($p->sort !== $idx) {
+                    $p->update(['sort' => $idx]);
+                }
+            }
+
+            $currentIndex = $products->search(fn ($p) => $p->id === $product->id);
+            if ($currentIndex === false) {
+                return;
+            }
+
+            $targetIndex = $data['direction'] === 'up' ? $currentIndex - 1 : $currentIndex + 1;
+            if ($targetIndex >= 0 && $targetIndex < $products->count()) {
+                $current = $products[$currentIndex];
+                $target = $products[$targetIndex];
+                [$currentSort, $targetSort] = [$current->sort, $target->sort];
+                $current->update(['sort' => $targetSort]);
+                $target->update(['sort' => $currentSort]);
+            }
+        });
+
+        return back()->with('success', 'Urutan produk berhasil diubah.');
     }
 
     public function service(Request $request, Service $service): RedirectResponse
@@ -430,6 +638,47 @@ class WebsiteController extends Controller
         $service->update($data);
 
         return back()->with('success', 'Tampilan layanan diperbarui.');
+    }
+
+    public function moveService(Request $request, Service $service): RedirectResponse
+    {
+        $this->ensureManager($request);
+        $site = $this->site($request);
+        abort_unless($service->tenant_id === $site->tenant_id, 404);
+
+        $data = $request->validate([
+            'direction' => ['required', Rule::in(['up', 'down'])],
+        ]);
+
+        DB::transaction(function () use ($site, $service, $data) {
+            $services = Service::where('tenant_id', $site->tenant_id)
+                ->orderBy('sort')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+
+            foreach ($services as $idx => $s) {
+                if ($s->sort !== $idx) {
+                    $s->update(['sort' => $idx]);
+                }
+            }
+
+            $currentIndex = $services->search(fn ($s) => $s->id === $service->id);
+            if ($currentIndex === false) {
+                return;
+            }
+
+            $targetIndex = $data['direction'] === 'up' ? $currentIndex - 1 : $currentIndex + 1;
+            if ($targetIndex >= 0 && $targetIndex < $services->count()) {
+                $current = $services[$currentIndex];
+                $target = $services[$targetIndex];
+                [$currentSort, $targetSort] = [$current->sort, $target->sort];
+                $current->update(['sort' => $targetSort]);
+                $target->update(['sort' => $currentSort]);
+            }
+        });
+
+        return back()->with('success', 'Urutan layanan berhasil diubah.');
     }
 
     public function recipients(Request $request): RedirectResponse
