@@ -26,8 +26,6 @@ const props = withDefaults(
 const description =
     'Kelola produksi, stok, dan penjualan di Fabriku. Buat website usaha untuk menampilkan produk atau layanan, menerima pesanan, dan mengelola permintaan pelanggan.';
 
-const ogImage = computed(() => new URL('/images/fabriku-word.png', props.canonical ?? 'https://fabriku.id').toString());
-
 const jsonLd = computed(() => {
     const origin = props.canonical ?? 'https://fabriku.id';
 
@@ -86,7 +84,6 @@ const includedFeatures = [
         title="Fabriku | Produksi, Stok, dan Website Usaha untuk UMKM"
         :description="description"
         :canonical="canonical"
-        :og-image="ogImage"
         :json-ld="jsonLd"
     />
 

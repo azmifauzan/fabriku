@@ -19,6 +19,7 @@ const props = defineProps<{
         pains: Block[];
         features: Block[];
         faqs: Array<{ question: string; answer: string }>;
+        og_image: string;
     };
     relatedPosts: Array<{ slug: string; title: string; excerpt: string | null }>;
     otherPages: Array<{ slug: string; label: string }>;
@@ -53,7 +54,7 @@ const jsonLd = computed(() => {
 </script>
 
 <template>
-    <SeoHead :title="page.meta_title" :description="page.meta_description" :canonical="canonical" :json-ld="jsonLd" />
+    <SeoHead :title="page.meta_title" :description="page.meta_description" :canonical="canonical" :og-image="page.og_image" :json-ld="jsonLd" />
     <PublicLayout>
         <section class="border-b border-slate-200">
             <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20 lg:px-10">

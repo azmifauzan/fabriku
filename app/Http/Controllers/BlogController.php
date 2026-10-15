@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -48,6 +49,7 @@ class BlogController extends Controller
                 'content_html' => $post->content_html,
                 'excerpt' => $post->excerpt,
                 'featured_image_url' => $post->featured_image_url,
+                'og_image_url' => $post->featured_image ? route('blog.og-image', $post) : null,
                 'published_at' => $post->published_at,
                 'updated_at' => $post->updated_at,
                 'meta_title' => $post->meta_title ?? $post->title,
@@ -58,5 +60,17 @@ class BlogController extends Controller
                 'canonical' => url("/blog/{$post->slug}"),
             ],
         ]);
+    }
+
+    /**
+     * Stable og:image URL for a post's featured image. The image itself is a signed S3
+     * URL that expires in minutes, but Threads/FB cache og:image URLs for days, so the
+     * meta tag points here and every fetch is redirected to a freshly signed URL.
+     */
+    public function ogImage(BlogPost $post): RedirectResponse
+    {
+        abort_unless($post->status === 'published' && $post->featured_image, 404);
+
+        return redirect()->away($post->featured_image_url);
     }
 }

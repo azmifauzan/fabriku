@@ -41,7 +41,7 @@ it('creates a post with image, category, and tags', function () {
         'status' => 'draft',
         'blog_category_id' => $category->id,
         'tags' => 'retail, tips, stok',
-        'featured_image' => UploadedFile::fake()->image('cover.jpg'),
+        'featured_image' => UploadedFile::fake()->image('cover.jpg', 1200, 630),
     ]);
 
     $response->assertRedirect(route('admin.blog.index'))->assertSessionHas('success');
@@ -100,7 +100,7 @@ it('replaces the featured image on update and deletes the old file', function ()
         'title' => $post->title,
         'content' => $post->content,
         'status' => 'draft',
-        'featured_image' => UploadedFile::fake()->image('new.jpg'),
+        'featured_image' => UploadedFile::fake()->image('new.jpg', 1200, 630),
     ]);
 
     Storage::disk('fabriku_s3')->assertMissing('blog/old.jpg');

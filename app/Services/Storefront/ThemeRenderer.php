@@ -67,6 +67,12 @@ class ThemeRenderer
             'privacy' => '/privasi', 'report' => '/lapor',
             default => '/',
         });
+        $siteName = e($site->profile['name'] ?? $site->tenant->name ?? 'Toko Online');
+        $ogImage = $this->resolveOgImage($site, $context);
+        $ogImageTags = $ogImage === null ? '' : '<meta property="og:image" content="'.e($ogImage).'">
+    <meta property="og:image:alt" content="'.$title.'">
+    <meta name="twitter:image" content="'.e($ogImage).'">';
+        $twitterCard = $ogImage === null ? 'summary' : 'summary_large_image';
 
         return <<<HTML
 <!DOCTYPE html>
@@ -79,6 +85,11 @@ class ThemeRenderer
     <meta property="og:title" content="{$title}">
     <meta property="og:description" content="{$description}">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="{$canonical}">
+    <meta property="og:site_name" content="{$siteName}">
+    <meta property="og:locale" content="id_ID">
+    {$ogImageTags}
+    <meta name="twitter:card" content="{$twitterCard}">
     <link rel="canonical" href="{$canonical}">
     {$stylesheet}
     {$cssBlock}
@@ -94,6 +105,29 @@ class ThemeRenderer
 </body>
 </html>
 HTML;
+    }
+
+    /**
+     * Picks the social-preview image: the product/service on a detail page, else the
+     * site logo, else the first catalog image, so a shared link always gets a thumbnail
+     * when the tenant has any image at all.
+     */
+    protected function resolveOgImage(BusinessSite $site, array $context): ?string
+    {
+        $image = ($context['product'] ?? null)?->getImageUrl()
+            ?? ($context['service'] ?? null)?->getImageUrl()
+            ?? $site->profile['logo_url']
+            ?? $site->tenant->logo_url;
+
+        if ($image === null) {
+            $scope = Storefront::for($site->tenant);
+            $catalog = $site->mode === 'jasa' ? $scope->services() : $scope->products();
+            // ponytail: first item only; scan for one with an image if this proves too often null
+            $image = $catalog->first()?->getImageUrl();
+        }
+
+        // og:image must be absolute; drop data: URIs and relative paths.
+        return $image !== null && str_starts_with($image, 'http') ? $image : null;
     }
 
     /**

@@ -87,6 +87,8 @@ function submit() {
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gambar Utama</label>
                 <input type="file" accept="image/*" class="mt-1" @change="handleFileChange" />
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Disarankan 1200×630 px (minimal 600×315) agar tampil sebagai thumbnail saat dibagikan di medsos.</p>
+                <p v-if="form.errors.featured_image" class="mt-1 text-sm text-red-600">{{ form.errors.featured_image }}</p>
                 <img v-if="post?.featured_image_url" :src="post.featured_image_url" class="mt-2 h-32 w-32 rounded-md object-cover" />
             </div>
 

@@ -76,6 +76,7 @@ Route::get('/syarat-ketentuan', fn () => Inertia::render('Legal/Terms', ['canoni
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('/blog/{post:slug}/og-image', [BlogController::class, 'ogImage'])->name('blog.og-image');
 Route::get('/aplikasi/{slug}', [LandingPageController::class, 'show'])->name('landing.category');
 
 // Email Campaign Unsubscribe Routes (Signed URLs)

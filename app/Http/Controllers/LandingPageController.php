@@ -25,6 +25,7 @@ class LandingPageController extends Controller
             'page' => [
                 ...collect($page)->except('blog_tags')->all(),
                 'category_label' => config("business.categories.{$page['category']}.label"),
+                'og_image' => "/images/og/{$slug}.png",
             ],
             'relatedPosts' => $relatedPosts,
             'otherPages' => collect(config('landing_pages'))

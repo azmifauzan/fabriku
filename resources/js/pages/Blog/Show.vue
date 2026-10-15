@@ -10,6 +10,7 @@ const props = defineProps<{
         content_html: string;
         excerpt: string | null;
         featured_image_url: string | null;
+        og_image_url: string | null;
         published_at: string | null;
         updated_at: string | null;
         meta_title: string;
@@ -21,7 +22,9 @@ const props = defineProps<{
     };
 }>();
 
-const ogImage = computed(() => props.post.featured_image_url ?? new URL('/images/fabriku-word.png', props.post.canonical).toString());
+// og_image_url is a stable redirect to the signed featured image (see BlogController::ogImage);
+// null falls back to SeoHead's default.
+const ogImage = computed(() => props.post.og_image_url ?? new URL('/images/og-default.png', props.post.canonical).toString());
 
 const jsonLd = computed(() => [
     {
@@ -57,7 +60,7 @@ const jsonLd = computed(() => [
         :title="post.meta_title"
         :description="post.meta_description"
         :canonical="post.canonical"
-        :og-image="ogImage"
+        :og-image="post.og_image_url"
         og-type="article"
         :json-ld="jsonLd"
     />
