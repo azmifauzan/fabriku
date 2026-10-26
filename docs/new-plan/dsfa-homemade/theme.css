@@ -1,0 +1,87 @@
+:root {
+    --fb-primary: #424b34;
+    --fb-accent: #424b34;
+    --fb-bg: #fcf9f0;
+    --fb-surface: #f5efe0;
+    --fb-text: #302d27;
+    --fb-radius: 0.5rem;
+}
+
+body { margin: 0; background: var(--fb-bg); color: var(--fb-text); font-family: system-ui, sans-serif; line-height: 1.65; }
+*, *::before, *::after { box-sizing: border-box; }
+img { max-width: 100%; height: auto; }
+a { color: var(--fb-primary); text-underline-offset: 0.25em; }
+a:hover { text-decoration: underline; }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid #946d50; outline-offset: 4px; }
+h1, h2, h3 { font-family: Georgia, serif; font-weight: 400; line-height: 1.2; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 1.4rem + 2.5vw, 3.6rem); }
+h2 { font-size: clamp(1.65rem, 1.2rem + 1.5vw, 2.4rem); }
+h3 { font-size: 1.35rem; }
+p, h1, h2, h3 { margin: 0; }
+.dsfa-wrap { width: min(100% - 2rem, 72rem); margin-inline: auto; overflow-wrap: anywhere; }
+.dsfa-section { padding-block: clamp(2.5rem, 5vw, 4.5rem); }
+.dsfa-header { border-bottom: 1px solid #d8d0c0; }
+.dsfa-header-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1.5rem; padding-block: 1rem; }
+.dsfa-brand { display: inline-flex; align-items: center; gap: 0.75rem; max-width: 100%; text-decoration: none; }
+.dsfa-brand span { min-width: 0; }
+.dsfa-brand img { width: 3.75rem; height: 3.75rem; object-fit: contain; }
+.dsfa-brand strong { display: block; font: 1.3rem Georgia, serif; color: var(--fb-text); }
+.dsfa-brand small { display: block; color: #5c5549; font-size: 0.85rem; }
+.dsfa-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem; }
+.dsfa-nav a, .dsfa-footer-links a, .dsfa-legal a, .dsfa-breadcrumb a { display: inline-flex; align-items: center; min-height: 44px; padding: 0.4rem 0.25rem; font-size: 0.95rem; }
+.dsfa-nav a { text-decoration: none; }
+.dsfa-hero { display: grid; gap: 2rem; align-items: center; }
+.dsfa-hero-copy { max-width: 47rem; }
+.dsfa-kicker { color: #5c5549; margin-bottom: 1rem; font-size: 0.95rem; }
+.dsfa-intro { margin-top: 1.5rem; max-width: 42rem; font-size: 1.1rem; }
+.dsfa-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+.dsfa-button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0.7rem 1.15rem; border: 1px solid var(--fb-primary); border-radius: 0.4rem; text-decoration: none; font-weight: 600; line-height: 1.5; }
+.dsfa-button-primary { background: var(--fb-primary); color: #fff; }
+.dsfa-button:hover { background: #eee8d9; color: var(--fb-primary); }
+.dsfa-hero-logo { width: min(100%, 19rem); justify-self: center; }
+.dsfa-note { padding: 1.25rem 1.5rem; background: var(--fb-surface); color: #5c5549; border-left: 3px solid #946d50; }
+.dsfa-note p + p { margin-top: 0.5rem; }
+.dsfa-menu { border-top: 1px solid #d8d0c0; border-bottom: 1px solid #d8d0c0; }
+.dsfa-menu-list { display: grid; gap: 0 2rem; margin-top: 1.75rem; }
+.dsfa-menu-list a { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem 1rem; padding: 1.25rem 0; border-top: 1px solid #d8d0c0; text-decoration: none; }
+.dsfa-menu-list strong { font: 1.6rem Georgia, serif; }
+.dsfa-menu-list span { color: #5c5549; font-size: 0.9rem; }
+.dsfa-menu-list a:hover strong { text-decoration: underline; text-underline-offset: 0.2em; }
+.dsfa-heading-copy { margin-top: 1rem; max-width: 42rem; color: #5c5549; }
+.dsfa-catalog { margin-top: 1.5rem; }
+.dsfa-catalog .text-slate-500 { color: #5c5549; }
+.dsfa-story { display: grid; gap: 1.5rem 4rem; border-top: 1px solid #d8d0c0; }
+.dsfa-story p { max-width: 42rem; }
+.dsfa-contact { background: var(--fb-surface); }
+.dsfa-contact-inner { display: grid; gap: 2rem 4rem; }
+.dsfa-contact p { margin-top: 1rem; max-width: 42rem; }
+.dsfa-footer { padding-block: 2rem; }
+.dsfa-footer-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 1rem 3rem; }
+.dsfa-footer-name { font: 1.4rem Georgia, serif; }
+.dsfa-footer-links { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 1.25rem; }
+.dsfa-legal { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #d8d0c0; }
+.dsfa-page { width: min(100% - 2rem, 51rem); margin-inline: auto; padding-block: 1.5rem 3rem; overflow-wrap: anywhere; }
+.dsfa-breadcrumb { margin-bottom: 2rem; }
+.dsfa-page h1 { max-width: 18ch; }
+.dsfa-page .dsfa-note { margin-top: 1.5rem; }
+.dsfa-page-section { margin-top: 2.5rem; }
+.dsfa-page-section h2 { font-size: 1.65rem; }
+.dsfa-page-section p, .dsfa-page-section ul { margin-top: 1rem; }
+.dsfa-page-section ul { padding-left: 1.25rem; }
+.dsfa-page-section li + li { margin-top: 0.5rem; }
+.dsfa-related { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 1rem; }
+.dsfa-related a { display: inline-flex; align-items: center; min-height: 44px; padding-block: 0.4rem; }
+main a[href="/produk"], main a[href="https://fabriku.id/privasi"] { display: inline-flex; align-items: center; min-height: 44px; }
+@media (min-width: 40rem) {
+    .dsfa-wrap { width: min(100% - 3rem, 72rem); }
+    .dsfa-menu-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dsfa-story { grid-template-columns: 1fr 1.5fr; }
+}
+@media (min-width: 64rem) {
+    .dsfa-hero { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+    .dsfa-contact-inner { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 39.99rem) {
+    .dsfa-hero-logo { display: none; }
+    .dsfa-nav { width: 100%; justify-content: space-between; gap: 0.25rem; }
+}
