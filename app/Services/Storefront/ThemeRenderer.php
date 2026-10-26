@@ -250,6 +250,7 @@ HTML;
             'cart-button',
             'map',
             'footer-links',
+            'featured-product',
         ];
 
         preg_match_all(
@@ -279,7 +280,14 @@ HTML;
                     }
                 }
 
-                return $this->renderSlot($slotName, $context);
+                $rendered = $this->renderSlot($slotName, $context);
+
+                // Slots that can legitimately be empty keep the designer's fallback markup.
+                if ($rendered === '' && $slotName === 'featured-product') {
+                    return preg_match('/^<[^>]*>(.*)<\/[^>]+>$/s', $matches[0], $inner) ? $inner[1] : '';
+                }
+
+                return $rendered;
             },
             $html
         );
@@ -295,6 +303,14 @@ HTML;
                 ->where('show_in_footer', true)
                 ->map(fn ($page) => '<a class="hover:underline" href="/halaman/'.e($page->slug).'">'.e($page->title).'</a>')
                 ->implode(' ');
+        }
+
+        if ($slotName === 'featured-product') {
+            // First visible product (catalog order) that has an image; no image, no slot.
+            $context['featured'] = collect($context['products'] ?? [])->first(fn ($product) => $product->getImageUrl() !== null);
+            if ($context['featured'] === null) {
+                return '';
+            }
         }
 
         $viewName = "storefront.slots.{$slotName}";

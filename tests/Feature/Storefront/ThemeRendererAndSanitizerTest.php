@@ -4,6 +4,7 @@ namespace Tests\Feature\Storefront;
 
 use App\Models\BusinessSite;
 use App\Models\SiteContentPage;
+use App\Models\SiteProduct;
 use App\Models\SiteThemeVersion;
 use App\Models\Tenant;
 use App\Services\Storefront\HtmlSanitizerService;
@@ -198,5 +199,62 @@ HTML;
         $html = app(ThemeRenderer::class)->render($site, $themeVersion, ['page' => 'home', 'errors' => new ViewErrorBag]);
 
         $this->assertSame(1, substr_count($html, 'aria-label="Navigasi toko"'));
+    }
+
+    private function featuredSlotHtml(): string
+    {
+        return '<section><figure data-fb-slot="featured-product"><p>Ilustrasi cadangan</p></figure></section>';
+    }
+
+    public function test_featured_product_slot_shows_first_catalog_product_that_has_an_image(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'title' => 'Tanpa Foto', 'slug' => 'tanpa-foto', 'sort' => 1]);
+        $second = SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'title' => 'Takoyaki Isi', 'slug' => 'takoyaki-isi', 'image_path' => 'https://cdn.example.test/takoyaki.jpg', 'sort' => 2]);
+        SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'title' => 'Puding Buah', 'slug' => 'puding-buah', 'image_path' => 'https://cdn.example.test/puding.jpg', 'sort' => 3]);
+
+        $html = app(ThemeRenderer::class)->replaceSlots($this->featuredSlotHtml(), ['site' => $site, 'products' => $site->tenant->siteProducts()->orderBy('sort')->get()]);
+
+        $this->assertStringContainsString('https://cdn.example.test/takoyaki.jpg', $html);
+        $this->assertStringContainsString('href="/produk/'.$second->slug.'"', $html);
+        $this->assertStringNotContainsString('puding.jpg', $html);
+        $this->assertStringNotContainsString('Ilustrasi cadangan', $html);
+    }
+
+    public function test_featured_product_slot_keeps_the_designer_fallback_when_no_product_has_an_image(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'image_path' => null]);
+
+        $html = app(ThemeRenderer::class)->replaceSlots($this->featuredSlotHtml(), ['site' => $site, 'products' => SiteProduct::withoutGlobalScopes()->where('tenant_id', $tenant->id)->get()]);
+
+        $this->assertSame('<section><p>Ilustrasi cadangan</p></section>', $html);
+        $this->assertSame('<section></section>', app(ThemeRenderer::class)->replaceSlots('<section><figure data-fb-slot="featured-product"></figure></section>', ['site' => $site, 'products' => collect()]));
+    }
+
+    public function test_home_featured_slot_ignores_hidden_and_other_tenant_products(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'slug' => 'toko-hero', 'status' => 'published', 'mode' => 'produk']);
+        $version = SiteThemeVersion::create([
+            'tenant_id' => $tenant->id, 'business_site_id' => $site->id, 'source' => 'manual', 'version' => 1,
+            'theme' => ['preset' => 'ruang'],
+            'sections' => [['type' => 'hero', 'sort' => 0, 'is_visible' => true, 'variables' => [], 'html' => $this->featuredSlotHtml()]],
+        ]);
+        $site->update(['active_theme_version_id' => $version->id]);
+        SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'is_visible' => false, 'sort' => 0, 'image_path' => 'https://cdn.example.test/hidden.jpg']);
+        SiteProduct::factory()->create(['tenant_id' => Tenant::factory()->create()->id, 'sort' => 0, 'image_path' => 'https://cdn.example.test/other-tenant.jpg']);
+
+        $this->get('http://toko-hero.fabriku.biz.id/')->assertOk()
+            ->assertSee('Ilustrasi cadangan')
+            ->assertDontSee('hidden.jpg')->assertDontSee('other-tenant.jpg');
+
+        SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'sort' => 5, 'image_path' => 'https://cdn.example.test/visible.jpg']);
+
+        $this->get('http://toko-hero.fabriku.biz.id/')->assertOk()
+            ->assertSee('visible.jpg')->assertDontSee('Ilustrasi cadangan')
+            ->assertDontSee('hidden.jpg')->assertDontSee('other-tenant.jpg');
     }
 }
