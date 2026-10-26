@@ -690,3 +690,18 @@ it('can filter sales orders by overdue payment status', function () {
         ->where('orders.data.0.id', $overdueOrder->id)
     );
 });
+
+it('rejects a soft-deleted inventory item when creating a sales order', function () {
+    $this->inventoryItem->update(['reserved_quantity' => 0]);
+    $this->inventoryItem->delete();
+    $this->assertSoftDeleted('inventory_items', ['id' => $this->inventoryItem->id]);
+
+    $this->post(route('sales-orders.store'), [
+        'customer_id' => $this->customer->id,
+        'order_date' => now()->toDateString(),
+        'channel' => 'offline',
+        'status' => 'draft',
+        'payment_method' => 'cash',
+        'items' => [['inventory_item_id' => $this->inventoryItem->id, 'quantity' => 1, 'unit_price' => 1000]],
+    ])->assertSessionHasErrors('items.0.inventory_item_id');
+});

@@ -5,6 +5,7 @@ use App\Models\InventoryLocation;
 use App\Models\Pattern;
 use App\Models\PreparationOrder;
 use App\Models\ProductionOrder;
+use App\Models\SalesOrder;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\InventoryService;
@@ -1028,4 +1029,53 @@ it('only lists merge candidates that are actually compatible', function () {
             return $ids->contains($compatible->id) && ! $ids->contains($incompatible->id);
         })
     );
+});
+
+it('keeps the fully transferred source item when a draft sales order still references it', function () {
+    $item = InventoryItem::factory()
+        ->for($this->tenant)
+        ->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)
+        ->create(['current_quantity' => 100, 'reserved_quantity' => 0]);
+
+    SalesOrder::factory()->create(['tenant_id' => $this->tenant->id, 'status' => 'draft'])
+        ->items()->create(['inventory_item_id' => $item->id, 'quantity' => 5, 'unit_price' => 1000, 'subtotal' => 5000]);
+
+    $rackA = InventoryLocation::factory()->for($this->tenant)->create(['capacity' => 300]);
+
+    $this->post("/inventory/items/{$item->id}/transfer", [
+        'splits' => [['location_id' => $rackA->id, 'quantity' => 100]],
+        'reason' => 'Move all',
+    ]);
+
+    $this->assertNotSoftDeleted('inventory_items', ['id' => $item->id]);
+});
+
+it('repoints draft sales order lines to the destination when merging', function () {
+    $compatible = [
+        'product_name' => 'Kaos Polos M',
+        'product_code' => 'PC-KAOS-M',
+        'quality_grade' => 'A',
+        'unit_cost' => 15000,
+        'selling_price' => 25000,
+        'status' => 'available',
+        'expired_date' => null,
+        'reserved_quantity' => 0,
+    ];
+
+    $source = InventoryItem::factory()->for($this->tenant)->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)->create([...$compatible, 'current_quantity' => 40]);
+    $destination = InventoryItem::factory()->for($this->tenant)->for($this->location, 'inventoryLocation')
+        ->for($this->productionOrder)->create([...$compatible, 'current_quantity' => 10]);
+
+    $line = SalesOrder::factory()->create(['tenant_id' => $this->tenant->id, 'status' => 'draft'])
+        ->items()->create(['inventory_item_id' => $source->id, 'quantity' => 5, 'unit_price' => 25000, 'subtotal' => 125000]);
+
+    $this->post("/inventory/items/{$source->id}/merge", [
+        'destination_item_id' => $destination->id,
+        'reason' => 'Konsolidasi rak',
+    ]);
+
+    $this->assertSoftDeleted('inventory_items', ['id' => $source->id]);
+    expect($line->fresh()->inventory_item_id)->toBe($destination->id);
 });

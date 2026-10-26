@@ -3,7 +3,9 @@
 namespace App\Observers;
 
 use App\Exceptions\InsufficientStockException;
+use App\Models\InventoryItem;
 use App\Models\SalesOrder;
+use App\Models\SalesOrderItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -81,9 +83,11 @@ class SalesOrderObserver
         DB::transaction(function () use ($salesOrder) {
             foreach ($salesOrder->items()->get() as $item) {
                 if ($item->inventory_item_id) {
-                    if (! $item->inventoryItem->reserveStock($item->quantity)) {
+                    $inventoryItem = $this->inventoryItemFor($item, $salesOrder);
+
+                    if (! $inventoryItem->reserveStock($item->quantity)) {
                         throw new InsufficientStockException(
-                            "Stok tidak cukup untuk reservasi item {$item->inventoryItem->sku} (butuh {$item->quantity}) pada pesanan {$salesOrder->order_number}."
+                            "Stok tidak cukup untuk reservasi item {$inventoryItem->sku} (butuh {$item->quantity}) pada pesanan {$salesOrder->order_number}."
                         );
                     }
                 }
@@ -97,7 +101,7 @@ class SalesOrderObserver
             foreach ($salesOrder->items()->get() as $item) {
                 if ($item->inventory_item_id) {
                     // Deduct from current_quantity AND reserved_quantity
-                    $inventoryItem = $item->inventoryItem;
+                    $inventoryItem = $this->inventoryItemFor($item, $salesOrder);
 
                     // Reduce reserved quantity (releasing the reservation)
                     if (! $inventoryItem->releaseReservedStock($item->quantity)) {
@@ -122,13 +126,25 @@ class SalesOrderObserver
         DB::transaction(function () use ($salesOrder) {
             foreach ($salesOrder->items()->get() as $item) {
                 if ($item->inventory_item_id) {
-                    if (! $item->inventoryItem->releaseReservedStock($item->quantity)) {
+                    $inventoryItem = $this->inventoryItemFor($item, $salesOrder);
+
+                    if (! $inventoryItem->releaseReservedStock($item->quantity)) {
                         throw new InsufficientStockException(
-                            "Reserved stock tidak cukup untuk item {$item->inventoryItem->sku} (butuh {$item->quantity}) pada pesanan {$salesOrder->order_number}."
+                            "Reserved stock tidak cukup untuk item {$inventoryItem->sku} (butuh {$item->quantity}) pada pesanan {$salesOrder->order_number}."
                         );
                     }
                 }
             }
         });
+    }
+
+    /**
+     * Item stok bisa hilang (soft-delete akibat gabung item / dihapus); jangan 500, kembalikan 422.
+     */
+    protected function inventoryItemFor(SalesOrderItem $item, SalesOrder $salesOrder): InventoryItem
+    {
+        return $item->inventoryItem ?? throw new InsufficientStockException(
+            "Item stok pada pesanan {$salesOrder->order_number} sudah dihapus atau digabung. Edit/ganti item pesanan terlebih dahulu."
+        );
     }
 }

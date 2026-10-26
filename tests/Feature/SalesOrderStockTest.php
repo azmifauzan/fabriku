@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\InsufficientStockException;
 use App\Models\Customer;
 use App\Models\InventoryItem;
 use App\Models\InventoryLocation;
@@ -182,3 +183,16 @@ it('releases reserved stock when deleting item from confirmed order', function (
     $this->inventoryItem->refresh();
     expect($this->inventoryItem->reserved_quantity)->toBe(0);
 });
+
+it('throws InsufficientStockException instead of a null error when item was soft-deleted', function () {
+    $order = SalesOrder::factory()->create(['tenant_id' => $this->tenant->id, 'status' => 'draft']);
+    $order->items()->create([
+        'inventory_item_id' => $this->inventoryItem->id,
+        'quantity' => 10,
+        'unit_price' => 150000,
+        'subtotal' => 1500000,
+    ]);
+    $this->inventoryItem->delete();
+
+    $order->update(['status' => 'confirmed']);
+})->throws(InsufficientStockException::class, 'sudah dihapus atau digabung');

@@ -38,7 +38,7 @@ class UpdateSalesOrderRequest extends FormRequest
             'invoice_number' => ['nullable', 'string', 'max:255'],
             'resi_number' => ['nullable', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.inventory_item_id' => ['nullable', 'required_without:items.*.service_id', Rule::exists('inventory_items', 'id')->where('tenant_id', $tenantId)],
+            'items.*.inventory_item_id' => ['nullable', 'required_without:items.*.service_id', Rule::exists('inventory_items', 'id')->where('tenant_id', $tenantId)->whereNull('deleted_at')],
             'items.*.service_id' => ['nullable', 'required_without:items.*.inventory_item_id', Rule::exists('services', 'id')->where('tenant_id', $tenantId)],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],

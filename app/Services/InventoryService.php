@@ -7,6 +7,7 @@ use App\Models\InventoryItemCategory;
 use App\Models\InventoryLocation;
 use App\Models\Pattern;
 use App\Models\ProductionOrder;
+use App\Models\SalesOrderItem;
 use App\Models\StockAdjustment;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -137,7 +138,13 @@ class InventoryService
                 $createdItems[] = $newItem;
             }
 
-            if ($item->current_quantity === 0 && $item->reserved_quantity === 0) {
+            // Draft SO belum reserve stok; item yang masih dirujuk draft tetap disimpan (qty 0) agar baris SO tidak yatim.
+            $referencedByDraft = SalesOrderItem::query()
+                ->where('inventory_item_id', $item->id)
+                ->whereHas('salesOrder', fn ($q) => $q->where('status', 'draft'))
+                ->exists();
+
+            if ($item->current_quantity === 0 && $item->reserved_quantity === 0 && ! $referencedByDraft) {
                 $item->delete();
             }
 
@@ -211,6 +218,12 @@ class InventoryService
                 'reason' => $reason,
                 'notes' => $notes,
             ]);
+
+            // Draft SO belum reserve stok; item kompatibel identik, jadi baris draft dialihkan ke tujuan agar tidak yatim.
+            SalesOrderItem::query()
+                ->where('inventory_item_id', $source->id)
+                ->whereHas('salesOrder', fn ($q) => $q->where('status', 'draft'))
+                ->update(['inventory_item_id' => $destination->id]);
 
             $source->delete();
 
