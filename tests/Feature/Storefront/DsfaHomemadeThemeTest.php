@@ -54,7 +54,7 @@ class DsfaHomemadeThemeTest extends TestCase
             ->assertOk()->assertHeader('X-Robots-Tag', 'noindex, nofollow')
             ->assertHeader('Cache-Control', 'no-store, private')
             ->assertSee('Belum ada produk yang ditampilkan.')
-            ->assertDontSee('href="#"', false)->assertDontSee('wa.me')->assertDontSee('<script', false);
+            ->assertDontSee('href="#"', false)->assertSee('https://wa.me/6285220150587?text&#61;Halo', false)->assertDontSee('<script', false);
         $this->assertSame(1, $this->dom($preview->getContent())->query('//h1')->length);
         $this->assertSame('draft', $this->site->fresh()->status);
         $this->assertNull($this->site->fresh()->active_theme_version_id);
@@ -96,7 +96,11 @@ class DsfaHomemadeThemeTest extends TestCase
             foreach ($this->dom($html)->query('//a/@href') as $href) {
                 $url = parse_url($href->nodeValue);
                 if (isset($url['host'])) {
-                    $this->assertSame('fabriku.id', $url['host']);
+                    $this->assertContains($url['host'], ['fabriku.id', 'wa.me'], $path.': '.$href->nodeValue);
+                    if ($url['host'] === 'wa.me') {
+                        $this->assertContains($url['path'], ['/6285220150587', '/6281267822754'], $href->nodeValue);
+                        $this->assertStringStartsWith('text=Halo%20DSFA%20Homemade', $url['query']);
+                    }
 
                     continue;
                 }
@@ -107,6 +111,15 @@ class DsfaHomemadeThemeTest extends TestCase
                 }
             }
         }
+        foreach (['/', '/halaman/cara-pesan'] as $path) {
+            $this->assertStringContainsString('0852-2015-0587', $documents[$path]);
+            $this->assertStringContainsString('0812-6782-2754', $documents[$path]);
+        }
+        $this->assertStringContainsString('maksimal 1 jam', $documents['/halaman/area-pengiriman']);
+        foreach (['Bandung Kidul', 'Cimahi Tengah', 'Jatinangor', 'Rancaekek'] as $area) {
+            $this->assertStringContainsString($area, $documents['/halaman/area-pengiriman']);
+        }
+        $this->assertStringNotContainsString('Padalarang', $documents['/halaman/area-pengiriman']);
         $this->assertStringContainsString('<svg class="dsfa-art"', $documents['/']);
         $this->assertSame(4, substr_count($documents['/'], 'class="dsfa-icon"'));
         $sitemap = $this->get('https://dsfahomemade.com/sitemap.xml')->assertOk();

@@ -2,127 +2,118 @@
 
 // Tenant data for the existing draft-import lifecycle; no Satsetui generation or credits.
 // Copy rule: buyer-facing text only. No prices, areas, claims, or owner notes until the owner supplies them.
+$waNumbers = ['admin1' => '6285220150587', 'admin2' => '6281267822754'];
+$waLink = fn (string $text, string $number = '6285220150587'): string => 'https://wa.me/'.$number.'?text='.rawurlencode($text);
+$waGeneral = $waLink('Halo DSFA Homemade, saya mau pesan.');
+$waAdmin1 = $waLink('Halo DSFA Homemade (admin 1), saya mau pesan.', $waNumbers['admin1']);
+$waAdmin2 = $waLink('Halo DSFA Homemade (admin 2), saya mau pesan.', $waNumbers['admin2']);
+
 $orderSteps = <<<'HTML'
-<ol><li>Lihat varian, porsi, dan harga di <a href="/#menu">katalog menu</a>.</li><li>Tentukan jumlah dan tanggal kebutuhan Anda.</li><li>Kirim pesanan lewat kontak di halaman <a href="/halaman/cara-pesan">cara pesan</a>.</li></ol>
+<ol><li>Lihat varian, porsi, dan harga di <a href="/#menu">katalog menu</a>.</li><li>Tentukan jumlah, tanggal, dan alamat tujuan.</li><li>Kirim pesanan lewat WhatsApp admin kami.</li></ol>
 HTML;
 
+$deliveryAnswer = 'Kami mengantar ke Kota Bandung, Cimahi, dan sebagian Kabupaten Bandung. Waktu antar maksimal 1 jam dalam kondisi lalu lintas normal. Daftar kecamatan ada di halaman <a href="/halaman/area-pengiriman">area pengiriman</a>.';
+
+$menuPage = fn (string $slug, string $title, string $seoTitle, string $seoDescription, int $sort, string $h1, string $intro, string $useHeading, string $useText, string $stepsHeading, string $waText, string $faqSubject, string $faqAnswer, string $related): array => [
+    'slug' => $slug,
+    'title' => $title,
+    'seo_title' => $seoTitle,
+    'seo_description' => $seoDescription,
+    'sort' => $sort,
+    'html' => <<<HTML
+<article class="dsfa-page" id="isi">
+    <nav class="dsfa-breadcrumb"><a href="/">Beranda</a></nav>
+    <h1>{$h1}</h1>
+    <p class="dsfa-intro">{$intro}</p>
+    <div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="{$waLink($waText)}" rel="noopener" target="_blank">Pesan via WhatsApp</a><a class="dsfa-button" href="/#menu">Lihat harga di katalog</a></div>
+    <section class="dsfa-page-section"><h2>{$useHeading}</h2><p>{$useText}</p></section>
+    <section class="dsfa-page-section"><h2>{$stepsHeading}</h2>{$orderSteps}</section>
+    <section class="dsfa-page-section dsfa-faq"><h2>Pertanyaan tentang {$faqSubject}</h2>
+        {$faqAnswer}
+        <h3>Bisa diantar ke mana?</h3><p>{$deliveryAnswer}</p>
+        <h3>Ada menu lain?</h3><p>{$related}</p>
+    </section>
+</article>
+HTML,
+];
+
 $pages = [
-    [
-        'slug' => 'cheesecuit-bandung',
-        'title' => 'Cheesecuit Bandung',
-        'seo_title' => 'Cheesecuit Homemade Bandung | DSFA Homemade',
-        'seo_description' => 'Pesan cheesecuit homemade di Bandung dari DSFA Homemade: dessert biskuit dan krim keju buatan rumah. Lihat menu dan cara pesannya.',
-        'sort' => 1,
-        'html' => <<<HTML
-<article class="dsfa-page" id="isi">
-    <nav class="dsfa-breadcrumb"><a href="/">Beranda</a></nav>
-    <h1>Cheesecuit homemade di Bandung</h1>
-    <p class="dsfa-intro">Cheesecuit adalah dessert lapisan biskuit dan krim keju yang biasa disajikan dingin. Di DSFA Homemade, cheesecuit kami buat sendiri di dapur rumah di Bandung.</p>
-    <section class="dsfa-page-section"><h2>Cheesecuit untuk penutup makan dan suguhan</h2><p>Cheesecuit pas sebagai penutup makan, teman minum teh sore, atau suguhan saat keluarga dan teman berkunjung. Pilihan rasa dan ukurannya tercantum di katalog menu.</p></section>
-    <section class="dsfa-page-section"><h2>Cara pesan cheesecuit di Bandung</h2>{$orderSteps}</section>
-    <section class="dsfa-page-section dsfa-faq"><h2>Pertanyaan tentang cheesecuit DSFA</h2>
-        <h3>Apakah DSFA Homemade cabang toko cheesecuit lain?</h3><p>Bukan. DSFA Homemade adalah usaha rumahan sendiri di Bandung, dan cheesecuit adalah salah satu menu dessert kami.</p>
-        <h3>Bisa diantar ke mana?</h3><p>Cheesecuit perlu tetap dingin di perjalanan. Wilayah pengantaran kami tulis di halaman <a href="/halaman/area-pengiriman">area pengiriman</a>.</p>
-        <h3>Ada menu lain?</h3><p>Ada. Kami juga menjual <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, <a href="/halaman/puding-buah-bandung">puding buah</a>, dan <a href="/halaman/jus-homemade-bandung">jus homemade</a>.</p>
-    </section>
-</article>
-HTML,
-    ],
-    [
-        'slug' => 'jual-takoyaki-bandung',
-        'title' => 'Takoyaki Bandung',
-        'seo_title' => 'Jual Takoyaki Bandung | DSFA Homemade',
-        'seo_description' => 'Jual takoyaki homemade di Bandung. DSFA Homemade membuat takoyaki sendiri di dapur rumah. Lihat menu, cara pesan, dan area pengiriman.',
-        'sort' => 2,
-        'html' => <<<HTML
-<article class="dsfa-page" id="isi">
-    <nav class="dsfa-breadcrumb"><a href="/">Beranda</a></nav>
-    <h1>Jual takoyaki homemade di Bandung</h1>
-    <p class="dsfa-intro">Takoyaki adalah bola adonan gurih khas Jepang yang dimasak di cetakan bulat, lalu disajikan dengan saus dan taburan. DSFA Homemade membuat takoyaki sendiri di dapur rumah kami di Bandung.</p>
-    <section class="dsfa-page-section"><h2>Takoyaki rumahan untuk camilan</h2><p>Takoyaki paling enak dimakan hangat: untuk camilan sore, teman nonton di rumah, atau suguhan saat kumpul keluarga. Pilihan isian dan jumlah per porsi tercantum di katalog menu.</p></section>
-    <section class="dsfa-page-section"><h2>Cara pesan takoyaki di Bandung</h2>{$orderSteps}</section>
-    <section class="dsfa-page-section dsfa-faq"><h2>Pertanyaan tentang takoyaki DSFA</h2>
-        <h3>Apakah takoyakinya buatan rumahan?</h3><p>Ya. Kami membuat adonan dan memasaknya sendiri di dapur DSFA Homemade di Bandung.</p>
-        <h3>Bisa diantar ke mana?</h3><p>Wilayah pengantaran kami tulis di halaman <a href="/halaman/area-pengiriman">area pengiriman</a>.</p>
-        <h3>Ada menu lain?</h3><p>Ada. Pesan takoyaki bersama <a href="/halaman/jus-homemade-bandung">jus homemade</a>, <a href="/halaman/puding-buah-bandung">puding buah</a>, atau <a href="/halaman/cheesecuit-bandung">cheesecuit</a>.</p>
-    </section>
-</article>
-HTML,
-    ],
-    [
-        'slug' => 'puding-buah-bandung',
-        'title' => 'Puding Buah Bandung',
-        'seo_title' => 'Puding Buah Bandung | Pesan di DSFA Homemade',
-        'seo_description' => 'Pesan puding buah homemade di Bandung dari DSFA Homemade. Puding lembut dengan potongan buah, dibuat di dapur rumah dan disajikan dingin.',
-        'sort' => 3,
-        'html' => <<<HTML
-<article class="dsfa-page" id="isi">
-    <nav class="dsfa-breadcrumb"><a href="/">Beranda</a></nav>
-    <h1>Puding buah homemade di Bandung</h1>
-    <p class="dsfa-intro">Puding buah DSFA Homemade adalah puding lembut dengan potongan buah, kami buat di dapur rumah di Bandung dan disajikan dingin.</p>
-    <section class="dsfa-page-section"><h2>Puding buah untuk keluarga dan tamu</h2><p>Puding buah cocok untuk hidangan penutup di rumah, camilan anak, atau suguhan saat ada tamu. Pilihan buah dan ukurannya tercantum di katalog menu.</p></section>
-    <section class="dsfa-page-section"><h2>Cara pesan puding buah di Bandung</h2>{$orderSteps}</section>
-    <section class="dsfa-page-section dsfa-faq"><h2>Pertanyaan tentang puding buah DSFA</h2>
-        <h3>Apakah pudingnya buatan rumahan?</h3><p>Ya. Kami memasak dan mencetak puding buah sendiri di dapur DSFA Homemade di Bandung.</p>
-        <h3>Bisa diantar ke mana?</h3><p>Puding perlu tetap dingin di perjalanan, jadi jarak ikut menentukan. Wilayahnya kami tulis di halaman <a href="/halaman/area-pengiriman">area pengiriman</a>.</p>
-        <h3>Ada menu lain?</h3><p>Ada. Kami juga menjual <a href="/halaman/cheesecuit-bandung">cheesecuit</a>, <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, dan <a href="/halaman/jus-homemade-bandung">jus homemade</a>.</p>
-    </section>
-</article>
-HTML,
-    ],
-    [
-        'slug' => 'jus-homemade-bandung',
-        'title' => 'Jus Homemade Bandung',
-        'seo_title' => 'Jus Homemade Bandung | DSFA Homemade',
-        'seo_description' => 'Jus buah homemade di Bandung dari DSFA Homemade. Pesan bersama takoyaki, cheesecuit, atau puding buah supaya camilan dan minuman datang sekaligus.',
-        'sort' => 4,
-        'html' => <<<HTML
-<article class="dsfa-page" id="isi">
-    <nav class="dsfa-breadcrumb"><a href="/">Beranda</a></nav>
-    <h1>Jus homemade di Bandung</h1>
-    <p class="dsfa-intro">DSFA Homemade membuat jus buah sendiri di dapur rumah kami di Bandung, untuk diminum bersama camilan dan dessert kami.</p>
-    <section class="dsfa-page-section"><h2>Jus untuk teman camilan</h2><p>Pesan jus bersama takoyaki, cheesecuit, atau puding buah supaya camilan dan minuman datang sekaligus. Pilihan buah dan ukurannya tercantum di katalog menu.</p></section>
-    <section class="dsfa-page-section"><h2>Cara pesan jus di Bandung</h2>{$orderSteps}</section>
-    <section class="dsfa-page-section dsfa-faq"><h2>Pertanyaan tentang jus DSFA</h2>
-        <h3>Apakah jusnya dibuat sendiri?</h3><p>Ya. Kami membuat jus di dapur DSFA Homemade di Bandung.</p>
-        <h3>Bisa diantar ke mana?</h3><p>Wilayah pengantaran kami tulis di halaman <a href="/halaman/area-pengiriman">area pengiriman</a>.</p>
-        <h3>Ada menu lain?</h3><p>Ada. Lihat <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, <a href="/halaman/cheesecuit-bandung">cheesecuit</a>, dan <a href="/halaman/puding-buah-bandung">puding buah</a>.</p>
-    </section>
-</article>
-HTML,
-    ],
+    $menuPage('cheesecuit-bandung', 'Cheesecuit Bandung', 'Cheesecuit Homemade Bandung | DSFA Homemade',
+        'Pesan cheesecuit homemade di Bandung dari DSFA Homemade: dessert biskuit dan krim keju buatan rumah. Pesan via WhatsApp, diantar maks. 1 jam.', 1,
+        'Cheesecuit homemade di Bandung',
+        'Cheesecuit adalah dessert lapisan biskuit dan krim keju yang biasa disajikan dingin. Di DSFA Homemade, cheesecuit kami buat sendiri di dapur rumah di Bandung.',
+        'Cheesecuit untuk penutup makan dan suguhan',
+        'Cheesecuit pas sebagai penutup makan, teman minum teh sore, atau suguhan saat keluarga dan teman berkunjung. Pilihan rasa dan ukurannya tercantum di katalog menu.',
+        'Cara pesan cheesecuit di Bandung', 'Halo DSFA Homemade, saya mau pesan cheesecuit.', 'cheesecuit DSFA',
+        '<h3>Apakah DSFA Homemade cabang toko cheesecuit lain?</h3><p>Bukan. DSFA Homemade adalah usaha rumahan sendiri di Bandung, dan cheesecuit adalah salah satu menu dessert kami.</p>',
+        'Ada. Kami juga menjual <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, <a href="/halaman/puding-buah-bandung">puding buah</a>, dan <a href="/halaman/jus-homemade-bandung">jus homemade</a>.'),
+    $menuPage('jual-takoyaki-bandung', 'Takoyaki Bandung', 'Jual Takoyaki Bandung | DSFA Homemade',
+        'Jual takoyaki homemade di Bandung. DSFA Homemade membuat takoyaki sendiri di dapur rumah. Pesan via WhatsApp, diantar maks. 1 jam.', 2,
+        'Jual takoyaki homemade di Bandung',
+        'Takoyaki adalah bola adonan gurih khas Jepang yang dimasak di cetakan bulat, lalu disajikan dengan saus dan taburan. DSFA Homemade membuat takoyaki sendiri di dapur rumah kami di Bandung.',
+        'Takoyaki rumahan untuk camilan',
+        'Takoyaki paling enak dimakan hangat: untuk camilan sore, teman nonton di rumah, atau suguhan saat kumpul keluarga. Pilihan isian dan jumlah per porsi tercantum di katalog menu.',
+        'Cara pesan takoyaki di Bandung', 'Halo DSFA Homemade, saya mau pesan takoyaki.', 'takoyaki DSFA',
+        '<h3>Apakah takoyakinya buatan rumahan?</h3><p>Ya. Kami membuat adonan dan memasaknya sendiri di dapur DSFA Homemade di Bandung.</p>',
+        'Ada. Pesan takoyaki bersama <a href="/halaman/jus-homemade-bandung">jus homemade</a>, <a href="/halaman/puding-buah-bandung">puding buah</a>, atau <a href="/halaman/cheesecuit-bandung">cheesecuit</a>.'),
+    $menuPage('puding-buah-bandung', 'Puding Buah Bandung', 'Puding Buah Bandung | Pesan di DSFA Homemade',
+        'Pesan puding buah homemade di Bandung dari DSFA Homemade. Puding lembut dengan potongan buah, disajikan dingin. Pesan via WhatsApp.', 3,
+        'Puding buah homemade di Bandung',
+        'Puding buah DSFA Homemade adalah puding lembut dengan potongan buah, kami buat di dapur rumah di Bandung dan disajikan dingin.',
+        'Puding buah untuk keluarga dan tamu',
+        'Puding buah cocok untuk hidangan penutup di rumah, camilan anak, atau suguhan saat ada tamu. Pilihan buah dan ukurannya tercantum di katalog menu.',
+        'Cara pesan puding buah di Bandung', 'Halo DSFA Homemade, saya mau pesan puding buah.', 'puding buah DSFA',
+        '<h3>Apakah pudingnya buatan rumahan?</h3><p>Ya. Kami memasak dan mencetak puding buah sendiri di dapur DSFA Homemade di Bandung.</p>',
+        'Ada. Kami juga menjual <a href="/halaman/cheesecuit-bandung">cheesecuit</a>, <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, dan <a href="/halaman/jus-homemade-bandung">jus homemade</a>.'),
+    $menuPage('jus-homemade-bandung', 'Jus Homemade Bandung', 'Jus Homemade Bandung | DSFA Homemade',
+        'Jus buah homemade di Bandung dari DSFA Homemade. Pesan bersama takoyaki, cheesecuit, atau puding buah lewat WhatsApp, diantar maks. 1 jam.', 4,
+        'Jus homemade di Bandung',
+        'DSFA Homemade membuat jus buah sendiri di dapur rumah kami di Bandung, untuk diminum bersama camilan dan dessert kami.',
+        'Jus untuk teman camilan',
+        'Pesan jus bersama takoyaki, cheesecuit, atau puding buah supaya camilan dan minuman datang sekaligus. Pilihan buah dan ukurannya tercantum di katalog menu.',
+        'Cara pesan jus di Bandung', 'Halo DSFA Homemade, saya mau pesan jus.', 'jus DSFA',
+        '<h3>Apakah jusnya dibuat sendiri?</h3><p>Ya. Kami membuat jus di dapur DSFA Homemade di Bandung.</p>',
+        'Ada. Lihat <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, <a href="/halaman/cheesecuit-bandung">cheesecuit</a>, dan <a href="/halaman/puding-buah-bandung">puding buah</a>.'),
     [
         'slug' => 'cara-pesan',
         'title' => 'Cara Pesan',
-        'seo_title' => 'Cara Pesan DSFA Homemade Bandung',
-        'seo_description' => 'Cara pesan cheesecuit, takoyaki, puding buah, dan jus homemade di DSFA Homemade Bandung, dan apa saja yang perlu disiapkan sebelum memesan.',
+        'seo_title' => 'Cara Pesan via WhatsApp | DSFA Homemade Bandung',
+        'seo_description' => 'Cara pesan cheesecuit, takoyaki, puding buah, dan jus homemade di DSFA Homemade Bandung lewat WhatsApp admin. Diantar maksimal 1 jam.',
         'sort' => 5,
         'html' => <<<HTML
 <article class="dsfa-page" id="isi">
     <nav class="dsfa-breadcrumb"><a href="/">Beranda</a></nav>
     <h1>Cara pesan di DSFA Homemade</h1>
-    <p class="dsfa-intro">Pesan cheesecuit, takoyaki, puding buah, dan jus homemade di Bandung dalam tiga langkah.</p>
+    <p class="dsfa-intro">Pesan cheesecuit, takoyaki, puding buah, dan jus homemade di Bandung lewat WhatsApp admin kami.</p>
+    <section class="dsfa-page-section"><h2>Pesan lewat WhatsApp</h2><p>Hubungi salah satu admin kami:</p><div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="{$waAdmin1}" rel="noopener" target="_blank">WhatsApp admin 1: 0852-2015-0587</a><a class="dsfa-button" href="{$waAdmin2}" rel="noopener" target="_blank">WhatsApp admin 2: 0812-6782-2754</a></div></section>
     <section class="dsfa-page-section"><h2>Langkah pemesanan</h2>{$orderSteps}</section>
-    <section class="dsfa-page-section"><h2>Kontak pemesanan</h2><p>Nomor WhatsApp pemesanan akan kami cantumkan di halaman ini.</p></section>
     <section class="dsfa-page-section"><h2>Siapkan sebelum memesan</h2><ul><li>Menu dan jumlah yang ingin dipesan.</li><li>Tanggal dan jam kebutuhan.</li><li>Alamat tujuan di Bandung atau sekitarnya.</li><li>Pertanyaan soal bahan atau alergi, bila ada.</li></ul></section>
-    <div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="/#pilihan-menu">Lihat menu</a><a class="dsfa-button" href="/halaman/area-pengiriman">Area pengiriman</a></div>
+    <section class="dsfa-page-section"><h2>Waktu antar</h2><p>Pesanan diantar maksimal 1 jam dalam kondisi lalu lintas normal. Cek wilayah yang kami layani di halaman <a href="/halaman/area-pengiriman">area pengiriman</a>.</p></section>
+    <div class="dsfa-actions"><a class="dsfa-button" href="/#pilihan-menu">Lihat menu</a><a class="dsfa-button" href="/halaman/area-pengiriman">Area pengiriman</a></div>
 </article>
 HTML,
     ],
     [
         'slug' => 'area-pengiriman',
         'title' => 'Area Pengiriman',
-        'seo_title' => 'Area Pengiriman DSFA Homemade Bandung',
-        'seo_description' => 'Area pengiriman DSFA Homemade di Bandung, termasuk info untuk pemesan dari Cimahi, Kabupaten Bandung, dan Bandung Barat.',
+        'seo_title' => 'Pengiriman Dessert & Takoyaki Bandung | DSFA Homemade',
+        'seo_description' => 'DSFA Homemade mengantar cheesecuit, takoyaki, puding buah, dan jus ke Kota Bandung, Cimahi, dan sekitarnya. Antar maksimal 1 jam kondisi normal.',
         'sort' => 6,
-        'html' => <<<'HTML'
+        'html' => <<<HTML
 <article class="dsfa-page" id="isi">
     <nav class="dsfa-breadcrumb"><a href="/">Beranda</a></nav>
     <h1>Area pengiriman DSFA Homemade di Bandung</h1>
-    <p class="dsfa-intro">DSFA Homemade berbasis di Bandung. Daftar kecamatan yang kami layani dan cara pengantarannya kami tulis di halaman ini.</p>
-    <section class="dsfa-page-section"><h2>Pesan dari luar Kota Bandung</h2><p>Untuk alamat di Cimahi, Kabupaten Bandung, atau Bandung Barat, tanyakan dulu ketersediaan pengantaran saat memesan.</p></section>
-    <section class="dsfa-page-section"><h2>Menu yang perlu tetap dingin</h2><p>Puding buah dan cheesecuit perlu tetap dingin di perjalanan, jadi jarak pengantaran ikut menentukan menu yang bisa dikirim.</p></section>
-    <div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="/halaman/cara-pesan">Cara pesan</a><a class="dsfa-button" href="/#pilihan-menu">Lihat menu</a></div>
+    <p class="dsfa-intro">Kami mengantar dari dapur DSFA Homemade di Kecamatan Bandung Kidul, Kota Bandung. Waktu antar maksimal 1 jam dalam kondisi lalu lintas normal.</p>
+    <div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="{$waLink('Halo DSFA Homemade, apakah bisa diantar ke alamat saya?')}" rel="noopener" target="_blank">Tanya pengantaran via WhatsApp</a></div>
+    <section class="dsfa-page-section dsfa-faq"><h2>Wilayah yang kami layani</h2>
+        <h3>Kota Bandung</h3><p>Seluruh kecamatan: Andir, Antapani, Arcamanik, Astanaanyar, Babakan Ciparay, Bandung Kidul, Bandung Kulon, Bandung Wetan, Batununggal, Bojongloa Kaler, Bojongloa Kidul, Buahbatu, Cibeunying Kaler, Cibeunying Kidul, Cibiru, Cicendo, Cidadap, Cinambo, Coblong, Gedebage, Kiaracondong, Lengkong, Mandalajati, Panyileukan, Rancasari, Regol, Sukajadi, Sukasari, Sumur Bandung, dan Ujung Berung.</p>
+        <h3>Kota Cimahi</h3><p>Cimahi Selatan, Cimahi Tengah, dan Cimahi Utara.</p>
+        <h3>Kabupaten Bandung</h3><p>Baleendah, Banjaran, Bojongsoang, Cangkuang, Cicalengka, Cikancung, Cileunyi, Cimenyan, Ciparay, Dayeuhkolot, Katapang, Majalaya, Margaasih, Margahayu, Nagreg, Pameungpeuk, Rancaekek, dan Solokanjeruk.</p>
+        <h3>Kabupaten Sumedang</h3><p>Jatinangor dan Cimanggung.</p>
+    </section>
+    <section class="dsfa-page-section"><h2>Alamat di luar daftar</h2><p>Untuk wilayah lain, misalnya Soreang, Lembang, atau Ngamprah, tanyakan dulu ketersediaan pengantaran lewat WhatsApp sebelum memesan.</p></section>
+    <section class="dsfa-page-section"><h2>Biaya antar</h2><p>Tanyakan biaya antar ke admin saat memesan. Sebutkan kecamatan tujuan Anda.</p></section>
+    <div class="dsfa-actions"><a class="dsfa-button" href="/halaman/cara-pesan">Cara pesan</a><a class="dsfa-button" href="/#pilihan-menu">Lihat menu</a></div>
 </article>
 HTML,
     ],
@@ -130,7 +121,7 @@ HTML,
 
 return [
     'theme' => [
-        'shell_html' => <<<'HTML'
+        'shell_html' => <<<HTML
 <header data-fb-shell="header" class="dsfa-header">
     <div class="dsfa-wrap dsfa-header-inner">
         <a class="dsfa-brand" href="/"><img src="https://fabriku.id/storage/logos/dsfa-homemade.png" alt="" width="60" height="60"><span><strong>DSFA Homemade</strong><small>Camilan dan dessert rumahan, Bandung</small></span></a>
@@ -139,7 +130,7 @@ return [
 </header>
 <footer data-fb-shell="footer" class="dsfa-footer">
     <div class="dsfa-wrap dsfa-footer-grid">
-        <div class="dsfa-footer-brand"><p class="dsfa-footer-name">DSFA Homemade</p><p>Cheesecuit, takoyaki, puding buah, dan jus homemade dari dapur rumah kami di Bandung.</p></div>
+        <div class="dsfa-footer-brand"><p class="dsfa-footer-name">DSFA Homemade</p><p>Cheesecuit, takoyaki, puding buah, dan jus homemade dari dapur rumah kami di Bandung.</p><p class="dsfa-footer-wa"><a href="{$waAdmin1}" rel="noopener" target="_blank">WhatsApp 0852-2015-0587</a><a href="{$waAdmin2}" rel="noopener" target="_blank">WhatsApp 0812-6782-2754</a></p></div>
         <nav class="dsfa-footer-col"><p class="dsfa-footer-title">Menu</p><ul><li><a href="/halaman/cheesecuit-bandung">Cheesecuit Bandung</a></li><li><a href="/halaman/jual-takoyaki-bandung">Takoyaki Bandung</a></li><li><a href="/halaman/puding-buah-bandung">Puding buah Bandung</a></li><li><a href="/halaman/jus-homemade-bandung">Jus homemade Bandung</a></li></ul></nav>
         <nav class="dsfa-footer-col"><p class="dsfa-footer-title">Informasi</p><ul><li><a href="/halaman/cara-pesan">Cara pesan</a></li><li><a href="/halaman/area-pengiriman">Area pengiriman</a></li><li><a href="/#menu">Katalog dan harga</a></li><li><a href="/privasi">Privasi</a></li></ul></nav>
     </div>
@@ -149,16 +140,16 @@ HTML,
         'satsetui_css' => file_get_contents(__DIR__.'/theme.css'),
         'satsetui_home_seo' => [
             'title' => 'DSFA Homemade Bandung | Cheesecuit, Takoyaki, Puding & Jus',
-            'description' => 'DSFA Homemade menjual cheesecuit, takoyaki, puding buah, dan jus homemade di Bandung. Lihat menu, cara pesan, dan area pengiriman.',
+            'description' => 'DSFA Homemade menjual cheesecuit, takoyaki, puding buah, dan jus homemade di Bandung. Pesan via WhatsApp, diantar maks. 1 jam.',
         ],
         'satsetui_pages' => $pages,
     ],
     'sections' => [
         [
             'id' => 'dsfa-hero', 'type' => 'hero', 'sort' => 10, 'is_visible' => true,
-            'html' => <<<'HTML'
+            'html' => <<<HTML
 <section class="dsfa-wrap dsfa-section dsfa-hero" id="isi">
-    <div class="dsfa-hero-copy"><p class="dsfa-kicker">Camilan dan dessert rumahan di Bandung</p><h1>Cheesecuit, takoyaki, puding buah, dan jus homemade di Bandung</h1><p class="dsfa-intro">DSFA Homemade membuat camilan dan dessert di dapur rumah kami di Bandung. Pesan untuk teman santai di rumah, kumpul keluarga, atau suguhan tamu.</p><div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="/#menu">Lihat menu</a><a class="dsfa-button" href="/halaman/cara-pesan">Cara pesan</a></div></div>
+    <div class="dsfa-hero-copy"><p class="dsfa-kicker">Camilan dan dessert rumahan di Bandung</p><h1>Cheesecuit, takoyaki, puding buah, dan jus homemade di Bandung</h1><p class="dsfa-intro">DSFA Homemade membuat camilan dan dessert di dapur rumah kami di Bandung. Pesan lewat WhatsApp, kami antar ke Bandung dan sekitarnya, maksimal 1 jam dalam kondisi lalu lintas normal.</p><div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="{$waGeneral}" rel="noopener" target="_blank">Pesan via WhatsApp</a><a class="dsfa-button" href="/#menu">Lihat menu</a></div></div>
     <div class="dsfa-hero-media"><figure data-fb-slot="featured-product"><svg class="dsfa-art" viewbox="50 60 300 225" xmlns="http://www.w3.org/2000/svg" width="400" height="300" fill="none"><rect width="400" height="300" fill="#f5efe0"/><rect x="60" y="205" width="280" height="22" rx="11" fill="#946d50"/><circle cx="150" cy="170" r="48" fill="#d9b777" stroke="#946d50" stroke-width="4"/><circle cx="250" cy="170" r="48" fill="#d9b777" stroke="#946d50" stroke-width="4"/><circle cx="200" cy="120" r="48" fill="#d9b777" stroke="#946d50" stroke-width="4"/><path d="M165 112q18-12 35 0t35 0" stroke="#424b34" stroke-width="5" stroke-linecap="round"/><path d="M118 162q16-10 32 0t32 0" stroke="#424b34" stroke-width="5" stroke-linecap="round"/><path d="M218 162q16-10 32 0t32 0" stroke="#424b34" stroke-width="5" stroke-linecap="round"/><circle cx="185" cy="98" r="4" fill="#747c60"/><circle cx="215" cy="136" r="4" fill="#747c60"/><circle cx="138" cy="186" r="4" fill="#747c60"/><circle cx="262" cy="190" r="4" fill="#747c60"/></svg></figure></div>
 </section>
 HTML,
@@ -186,7 +177,7 @@ HTML,
         [
             'id' => 'dsfa-steps', 'type' => 'steps', 'sort' => 40, 'is_visible' => true,
             'html' => <<<'HTML'
-<section class="dsfa-wrap dsfa-section dsfa-steps"><h2>Pesan dalam 3 langkah</h2><ol class="dsfa-steps-list"><li><strong>Pilih menu</strong><span>Lihat menu dan harga di katalog.</span></li><li><strong>Tentukan jumlah dan tanggal</strong><span>Siapkan jumlah porsi, tanggal kebutuhan, dan alamat tujuan.</span></li><li><strong>Kirim pesanan</strong><span>Pesan lewat kontak di halaman <a href="/halaman/cara-pesan">cara pesan</a>.</span></li></ol></section>
+<section class="dsfa-wrap dsfa-section dsfa-steps"><h2>Pesan dalam 3 langkah</h2><ol class="dsfa-steps-list"><li><strong>Pilih menu</strong><span>Lihat menu dan harga di katalog.</span></li><li><strong>Tentukan jumlah dan tanggal</strong><span>Siapkan jumlah porsi, tanggal kebutuhan, dan alamat tujuan.</span></li><li><strong>Kirim pesanan</strong><span>Pesan lewat <a href="/halaman/cara-pesan">WhatsApp admin kami</a>.</span></li></ol></section>
 HTML,
         ],
         [
@@ -197,8 +188,8 @@ HTML,
         ],
         [
             'id' => 'dsfa-contact', 'type' => 'contact', 'sort' => 60, 'is_visible' => true,
-            'html' => <<<'HTML'
-<section class="dsfa-contact dsfa-section" id="kontak"><div class="dsfa-wrap dsfa-contact-inner"><div><h2>Pesan camilan homemade di Bandung</h2><p>Langkah pemesanan dan kontak kami ada di halaman cara pesan.</p><div class="dsfa-actions"><a class="dsfa-button" href="/halaman/cara-pesan">Cara pesan</a></div></div><div><h2>Pengiriman di Bandung</h2><p>Cek wilayah pengantaran, termasuk untuk pemesan dari Cimahi dan Kabupaten Bandung.</p><div class="dsfa-actions"><a class="dsfa-button" href="/halaman/area-pengiriman">Area pengiriman</a></div></div></div></section>
+            'html' => <<<HTML
+<section class="dsfa-contact dsfa-section" id="kontak"><div class="dsfa-wrap dsfa-contact-inner"><div><h2>Pesan lewat WhatsApp</h2><p>Hubungi salah satu admin kami untuk memesan cheesecuit, takoyaki, puding buah, atau jus homemade.</p><div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="{$waAdmin1}" rel="noopener" target="_blank">Admin 1: 0852-2015-0587</a><a class="dsfa-button" href="{$waAdmin2}" rel="noopener" target="_blank">Admin 2: 0812-6782-2754</a></div></div><div><h2>Antar maksimal 1 jam</h2><p>Kami mengantar ke Kota Bandung, Cimahi, dan sebagian Kabupaten Bandung dalam kondisi lalu lintas normal.</p><div class="dsfa-actions"><a class="dsfa-button" href="/halaman/area-pengiriman">Area pengiriman</a></div></div></div></section>
 HTML,
         ],
     ],
