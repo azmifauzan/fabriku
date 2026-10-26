@@ -206,20 +206,47 @@ HTML;
         return '<section><figure data-fb-slot="featured-product"><p>Ilustrasi cadangan</p></figure></section>';
     }
 
-    public function test_featured_product_slot_shows_first_catalog_product_that_has_an_image(): void
+    public function test_featured_product_slot_is_a_slideshow_of_distinct_photos_in_catalog_order(): void
     {
         $tenant = Tenant::factory()->create();
         $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
         SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'title' => 'Tanpa Foto', 'slug' => 'tanpa-foto', 'sort' => 1]);
-        $second = SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'title' => 'Takoyaki Isi', 'slug' => 'takoyaki-isi', 'image_path' => 'https://cdn.example.test/takoyaki.jpg', 'sort' => 2]);
-        SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'title' => 'Puding Buah', 'slug' => 'puding-buah', 'image_path' => 'https://cdn.example.test/puding.jpg', 'sort' => 3]);
+        $first = SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'title' => 'Takoyaki Isi 4', 'slug' => 'takoyaki-isi-4', 'image_path' => 'https://cdn.example.test/takoyaki.jpg', 'sort' => 2]);
+        SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'title' => 'Takoyaki Isi 8', 'slug' => 'takoyaki-isi-8', 'image_path' => 'https://cdn.example.test/takoyaki.jpg', 'sort' => 3]);
+        SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'title' => 'Puding Buah', 'slug' => 'puding-buah', 'image_path' => 'https://cdn.example.test/puding.jpg', 'sort' => 4]);
 
         $html = app(ThemeRenderer::class)->replaceSlots($this->featuredSlotHtml(), ['site' => $site, 'products' => $site->tenant->siteProducts()->orderBy('sort')->get()]);
 
-        $this->assertStringContainsString('https://cdn.example.test/takoyaki.jpg', $html);
-        $this->assertStringContainsString('href="/produk/'.$second->slug.'"', $html);
-        $this->assertStringNotContainsString('puding.jpg', $html);
+        $this->assertSame(2, substr_count($html, 'class="fb-slide"'));
+        $this->assertLessThan(strpos($html, 'puding.jpg'), strpos($html, 'takoyaki.jpg'));
+        $this->assertStringContainsString('href="/produk/'.$first->slug.'"', $html);
+        $this->assertStringNotContainsString('takoyaki-isi-8', $html);
+        $this->assertStringNotContainsString('tanpa-foto', $html);
+        $this->assertStringContainsString('@keyframes fb-hero-2', $html);
+        $this->assertStringContainsString('prefers-reduced-motion', $html);
+        $this->assertStringNotContainsString('<script', $html);
         $this->assertStringNotContainsString('Ilustrasi cadangan', $html);
+    }
+
+    public function test_featured_product_slot_shows_at_most_five_slides_and_is_static_for_one(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        foreach (range(1, 7) as $n) {
+            SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'slug' => "produk-{$n}", 'image_path' => "https://cdn.example.test/p{$n}.jpg", 'sort' => $n]);
+        }
+        $renderer = app(ThemeRenderer::class);
+        $products = SiteProduct::withoutGlobalScopes()->where('tenant_id', $tenant->id)->orderBy('sort')->get();
+
+        $many = $renderer->replaceSlots($this->featuredSlotHtml(), ['site' => $site, 'products' => $products]);
+        $this->assertSame(5, substr_count($many, 'class="fb-slide"'));
+        $this->assertSame(5, substr_count($many, '<i style='));
+        $this->assertStringNotContainsString('p6.jpg', $many);
+
+        $one = $renderer->replaceSlots($this->featuredSlotHtml(), ['site' => $site, 'products' => $products->take(1)]);
+        $this->assertSame(1, substr_count($one, 'class="fb-slide"'));
+        $this->assertStringNotContainsString('@keyframes', $one);
+        $this->assertStringNotContainsString('fb-dots"', $one);
     }
 
     public function test_featured_product_slot_keeps_the_designer_fallback_when_no_product_has_an_image(): void

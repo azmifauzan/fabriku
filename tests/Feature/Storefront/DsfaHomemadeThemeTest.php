@@ -154,12 +154,19 @@ class DsfaHomemadeThemeTest extends TestCase
 
         $this->get('https://dsfahomemade.com/')->assertOk()->assertSee('<svg class="dsfa-art"', false);
 
-        SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'title' => 'Takoyaki Original', 'slug' => 'takoyaki-original', 'image_path' => 'https://cdn.example.test/takoyaki.jpg']);
+        $photo = fn (string $name) => 'https://cdn.example.test/'.$name.'.jpg';
+        SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'title' => 'Takoyaki Original', 'slug' => 'takoyaki-original', 'image_path' => $photo('takoyaki'), 'sort' => 1]);
+        SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'title' => 'Takoyaki Besar', 'slug' => 'takoyaki-besar', 'image_path' => $photo('takoyaki'), 'sort' => 2]);
+        SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'title' => 'Jus Strawberry', 'slug' => 'jus-strawberry', 'image_path' => $photo('jus-strawberry'), 'sort' => 3]);
+        SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'title' => 'Jus Blackberry', 'slug' => 'jus-blackberry', 'image_path' => $photo('jus-blackberry'), 'sort' => 4]);
         $home = $this->get('https://dsfahomemade.com/')->assertOk()
-            ->assertSee('https://cdn.example.test/takoyaki.jpg', false)
+            ->assertSee($photo('takoyaki'), false)
             ->assertSee('href="/produk/takoyaki-original"', false)
+            ->assertSee('href="/produk/jus-blackberry"', false)
+            ->assertSee('@keyframes fb-hero-3', false)
             ->assertDontSee('<svg class="dsfa-art"', false);
         $this->assertSame(1, $this->dom($home->getContent())->query('//h1')->length);
+        $this->assertSame(3, substr_count($home->getContent(), 'class="fb-slide"')); // takoyaki variants share one photo
         if ($output = getenv('DSFA_RENDER_PHOTO_OUTPUT')) {
             file_put_contents($output, $home->getContent());
         }

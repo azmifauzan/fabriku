@@ -306,9 +306,14 @@ HTML;
         }
 
         if ($slotName === 'featured-product') {
-            // First visible product (catalog order) that has an image; no image, no slot.
-            $context['featured'] = collect($context['products'] ?? [])->first(fn ($product) => $product->getImageUrl() !== null);
-            if ($context['featured'] === null) {
+            // Up to 5 visible products (catalog order) with distinct photos: size variants that share one photo count once.
+            $context['slides'] = collect($context['products'] ?? [])
+                ->map(fn ($product) => ['product' => $product, 'image' => $product->getImageUrl()])
+                ->filter(fn (array $slide) => $slide['image'] !== null)
+                ->unique('image')
+                ->take(5)
+                ->values();
+            if ($context['slides']->isEmpty()) {
                 return '';
             }
         }
