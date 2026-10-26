@@ -128,7 +128,9 @@ class DsfaHomemadeThemeTest extends TestCase
         $this->assertStringNotContainsString('Cipagalo', implode($documents));
         $this->assertStringNotContainsString('GBA', implode($documents));
         $this->assertStringNotContainsString('Padalarang', $documents['/halaman/area-pengiriman']);
-        $this->assertStringContainsString('<svg class="dsfa-art"', $documents['/']);
+        $this->assertSame(1, substr_count($documents['/'], 'class="dsfa-slides"'));
+        $this->assertSame(6, $this->dom($documents['/'])->query('//div[@class="dsfa-slides"]/img')->length);
+        $this->assertSame(0, $this->dom($documents['/'])->query('//div[@class="dsfa-slides"]//a')->length); // slides never point at a product
         $this->assertSame(4, substr_count($documents['/'], 'class="dsfa-icon"'));
         $sitemap = $this->get('https://dsfahomemade.com/sitemap.xml')->assertOk();
         foreach ($this->payload['theme']['satsetui_pages'] as $page) {
@@ -146,30 +148,33 @@ class DsfaHomemadeThemeTest extends TestCase
         }
     }
 
-    public function test_hero_shows_the_first_catalog_photo_and_falls_back_to_the_illustration(): void
+    public function test_hero_is_a_fixed_photo_slideshow_independent_of_the_catalog(): void
     {
         $this->actingAs($this->owner)->post('/website/satsetui/publish-draft')->assertRedirect();
         $this->site->update(['status' => 'published']);
         $this->app['auth']->forgetGuards();
 
-        $this->get('https://dsfahomemade.com/')->assertOk()->assertSee('<svg class="dsfa-art"', false);
+        $slides = fn (string $html) => $this->dom($html)->query('//div[@class="dsfa-slides"]/img');
+        $before = $this->get('https://dsfahomemade.com/')->assertOk();
+        $this->assertSame(6, $slides($before->getContent())->length);
 
-        $photo = fn (string $name) => 'https://cdn.example.test/'.$name.'.jpg';
-        SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'title' => 'Takoyaki Original', 'slug' => 'takoyaki-original', 'image_path' => $photo('takoyaki'), 'sort' => 1]);
-        SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'title' => 'Takoyaki Besar', 'slug' => 'takoyaki-besar', 'image_path' => $photo('takoyaki'), 'sort' => 2]);
-        SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'title' => 'Jus Strawberry', 'slug' => 'jus-strawberry', 'image_path' => $photo('jus-strawberry'), 'sort' => 3]);
-        SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'title' => 'Jus Blackberry', 'slug' => 'jus-blackberry', 'image_path' => $photo('jus-blackberry'), 'sort' => 4]);
+        SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'title' => 'Jus Strawberry', 'slug' => 'jus-strawberry', 'image_path' => 'https://cdn.example.test/jus.jpg', 'sort' => 1]);
         $home = $this->get('https://dsfahomemade.com/')->assertOk()
-            ->assertSee($photo('takoyaki'), false)
-            ->assertSee('href="/produk/takoyaki-original"', false)
-            ->assertSee('href="/produk/jus-blackberry"', false)
-            ->assertSee('@keyframes fb-hero-3', false)
-            ->assertDontSee('<svg class="dsfa-art"', false);
-        $this->assertSame(1, $this->dom($home->getContent())->query('//h1')->length);
-        $this->assertSame(3, substr_count($home->getContent(), 'class="fb-slide"')); // takoyaki variants share one photo
-        if ($output = getenv('DSFA_RENDER_PHOTO_OUTPUT')) {
-            file_put_contents($output, $home->getContent());
+            ->assertDontSee('fb-slides', false)
+            ->assertDontSee('fb-hero', false);
+        $document = $this->dom($home->getContent());
+        $this->assertSame(6, $slides($home->getContent())->length);
+        foreach ($slides($home->getContent()) as $image) {
+            $this->assertStringStartsWith('https://is3.cloudhost.id/fabriku/tenants/7/site/hero-', $image->getAttribute('src'));
+            $this->assertSame(['1200', '900'], [$image->getAttribute('width'), $image->getAttribute('height')]);
+            $this->assertNotSame('', trim($image->getAttribute('alt')));
         }
+        $this->assertSame(1, $document->query('//h1')->length);
+        $css = $this->payload['theme']['satsetui_css'];
+        $this->assertStringContainsString('@keyframes dsfa-slide', $css);
+        $this->assertStringContainsString('prefers-reduced-motion', $css);
+        $this->assertStringContainsString('animation-delay: 20s', $css); // sixth slide of a 24s loop
+        $this->assertStringNotContainsString('<script', $home->getContent());
     }
 
     private function dom(string $html): DOMXPath
