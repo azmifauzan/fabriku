@@ -325,3 +325,7 @@ Pemilik menilai copy beranda menyalin brief ("usaha rumahan suami istri", "beren
 Versi tema 3 (ID 9) diterapkan di produksi; situs tetap terbit. Tujuh halaman live dicek: title dan H1 sesuai, tidak ada sisa teks brief atau "sedang dilengkapi".
 
 Footer dirombak (versi tema 4, ID 10): slot `footer-links` diganti tiga kolom statis (brand, Menu dengan anchor keyword "[menu] Bandung", Informasi) di latar hijau zaitun, plus baris bawah ©/Laporkan situs/Dibuat dengan Fabriku. Konsekuensi: halaman tambahan baru tidak otomatis muncul di footer; tambahkan lewat versi tema berikutnya.
+
+## Hero foto otomatis dan beranda baru (26 Oktober 2026, 14:20 WIB)
+
+Fitur platform `data-fb-slot="featured-product"` (commit `7985027`) di-deploy lewat image `261026-3` bersama beranda DSFA versi 5 (tema ID 11): hero memakai foto produk pertama berfoto di katalog (urutan tab Katalog), dengan ilustrasi takoyaki sebagai cadangan selama belum ada foto; empat kartu menu berikon; tiga langkah pesan; Tentang dipendekkan. Live: beranda dan halaman lain 200, ilustrasi cadangan tampil (katalog produksi belum punya produk berfoto). Jalur foto diuji lewat tes dan render lokal, belum dengan foto nyata di produksi.
