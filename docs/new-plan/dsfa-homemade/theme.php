@@ -111,9 +111,33 @@ HTML,
         <h3>Kabupaten Bandung</h3><p>Baleendah, Banjaran, Bojongsoang, Cangkuang, Cicalengka, Cikancung, Cileunyi, Cimenyan, Ciparay, Dayeuhkolot, Katapang, Majalaya, Margaasih, Margahayu, Nagreg, Pameungpeuk, Rancaekek, dan Solokanjeruk.</p>
         <h3>Kabupaten Sumedang</h3><p>Jatinangor dan Cimanggung.</p>
     </section>
+    <section class="dsfa-page-section"><h2>Dekat dapur kami</h2><p>Pemesan di sekitar Bojongsoang bisa membaca halaman <a href="/halaman/dessert-takoyaki-bojongsoang">takoyaki dan dessert di Bojongsoang</a>.</p></section>
     <section class="dsfa-page-section"><h2>Alamat di luar daftar</h2><p>Untuk wilayah lain, misalnya Soreang, Lembang, atau Ngamprah, tanyakan dulu ketersediaan pengantaran lewat WhatsApp sebelum memesan.</p></section>
     <section class="dsfa-page-section"><h2>Biaya antar</h2><p>Tanyakan biaya antar ke admin saat memesan. Sebutkan kecamatan tujuan Anda.</p></section>
     <div class="dsfa-actions"><a class="dsfa-button" href="/halaman/cara-pesan">Cara pesan</a><a class="dsfa-button" href="/#pilihan-menu">Lihat menu</a></div>
+</article>
+HTML,
+    ],
+    [
+        'slug' => 'dessert-takoyaki-bojongsoang',
+        'title' => 'Takoyaki dan Dessert Bojongsoang',
+        'seo_title' => 'Takoyaki & Dessert Homemade Bojongsoang | DSFA Homemade',
+        'seo_description' => 'DSFA Homemade di Bojongsoang, Kabupaten Bandung menjual takoyaki, cheesecuit, puding buah, dan jus homemade. Pesan via WhatsApp, diantar maks. 1 jam.',
+        'sort' => 7,
+        'html' => <<<HTML
+<article class="dsfa-page" id="isi">
+    <nav class="dsfa-breadcrumb"><a href="/">Beranda</a></nav>
+    <h1>Takoyaki dan dessert homemade di Bojongsoang</h1>
+    <p class="dsfa-intro">Dapur DSFA Homemade ada di Kecamatan Bojongsoang, Kabupaten Bandung. Dari sini kami membuat takoyaki, cheesecuit, puding buah, dan jus homemade, lalu mengantarnya ke rumah Anda.</p>
+    <div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="{$waLink('Halo DSFA Homemade, saya di Bojongsoang dan mau pesan.')}" rel="noopener" target="_blank">Pesan via WhatsApp</a><a class="dsfa-button" href="/#menu">Lihat harga di katalog</a></div>
+    <section class="dsfa-page-section"><h2>Menu dari dapur Bojongsoang</h2><ul><li><a href="/halaman/jual-takoyaki-bandung">Takoyaki</a>: bola adonan gurih khas Jepang dengan saus dan taburan.</li><li><a href="/halaman/cheesecuit-bandung">Cheesecuit</a>: dessert biskuit dan krim keju, disajikan dingin.</li><li><a href="/halaman/puding-buah-bandung">Puding buah</a>: puding lembut dengan potongan buah.</li><li><a href="/halaman/jus-homemade-bandung">Jus homemade</a>: jus buah buatan kami untuk teman camilan.</li></ul></section>
+    <section class="dsfa-page-section"><h2>Diantar ke Bojongsoang dan sekitarnya</h2><p>Pesanan ke Bojongsoang dan kecamatan terdekat kami antar maksimal 1 jam dalam kondisi lalu lintas normal. Kecamatan terdekat dari dapur kami antara lain Dayeuhkolot, Baleendah, Rancaekek, dan Cileunyi di Kabupaten Bandung, serta Buahbatu, Gedebage, dan Rancasari di Kota Bandung. Daftar lengkap ada di halaman <a href="/halaman/area-pengiriman">area pengiriman</a>.</p></section>
+    <section class="dsfa-page-section"><h2>Cara pesan dari Bojongsoang</h2>{$orderSteps}</section>
+    <section class="dsfa-page-section dsfa-faq"><h2>Pertanyaan dari pemesan di Bojongsoang</h2>
+        <h3>Apakah DSFA Homemade punya toko untuk dikunjungi?</h3><p>DSFA Homemade adalah usaha rumahan. Pesanan diterima lewat WhatsApp dan diantar ke alamat Anda.</p>
+        <h3>Berapa lama pesanan sampai?</h3><p>Waktu antar maksimal 1 jam dalam kondisi lalu lintas normal. Untuk tanggal tertentu, sebutkan tanggal dan jam kebutuhan Anda saat memesan.</p>
+        <h3>Berapa biaya antarnya?</h3><p>Tanyakan biaya antar ke admin saat memesan. Sebutkan kecamatan tujuan Anda.</p>
+    </section>
 </article>
 HTML,
     ],
@@ -132,7 +156,7 @@ return [
     <div class="dsfa-wrap dsfa-footer-grid">
         <div class="dsfa-footer-brand"><p class="dsfa-footer-name">DSFA Homemade</p><p>Cheesecuit, takoyaki, puding buah, dan jus homemade dari dapur rumah kami di Bandung.</p><p class="dsfa-footer-wa"><a href="{$waAdmin1}" rel="noopener" target="_blank">WhatsApp 0852-2015-0587</a><a href="{$waAdmin2}" rel="noopener" target="_blank">WhatsApp 0812-6782-2754</a></p></div>
         <nav class="dsfa-footer-col"><p class="dsfa-footer-title">Menu</p><ul><li><a href="/halaman/cheesecuit-bandung">Cheesecuit Bandung</a></li><li><a href="/halaman/jual-takoyaki-bandung">Takoyaki Bandung</a></li><li><a href="/halaman/puding-buah-bandung">Puding buah Bandung</a></li><li><a href="/halaman/jus-homemade-bandung">Jus homemade Bandung</a></li></ul></nav>
-        <nav class="dsfa-footer-col"><p class="dsfa-footer-title">Informasi</p><ul><li><a href="/halaman/cara-pesan">Cara pesan</a></li><li><a href="/halaman/area-pengiriman">Area pengiriman</a></li><li><a href="/#menu">Katalog dan harga</a></li><li><a href="/privasi">Privasi</a></li></ul></nav>
+        <nav class="dsfa-footer-col"><p class="dsfa-footer-title">Informasi</p><ul><li><a href="/halaman/cara-pesan">Cara pesan</a></li><li><a href="/halaman/area-pengiriman">Area pengiriman</a></li><li><a href="/#menu">Katalog dan harga</a></li><li><a href="/halaman/dessert-takoyaki-bojongsoang">Dessert Bojongsoang</a></li><li><a href="/privasi">Privasi</a></li></ul></nav>
     </div>
     <div class="dsfa-wrap dsfa-footer-bottom"><p>&copy; DSFA Homemade, Bandung</p><nav><a href="/lapor">Laporkan situs</a><a href="https://fabriku.id" rel="noopener">Dibuat dengan Fabriku</a></nav></div>
 </footer>

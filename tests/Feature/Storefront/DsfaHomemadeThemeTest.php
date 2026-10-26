@@ -74,7 +74,7 @@ class DsfaHomemadeThemeTest extends TestCase
         $this->assertSame('draft', $this->site->fresh()->status);
         $this->assertSame($this->version->id, $this->site->fresh()->active_theme_version_id);
         $this->assertNull($this->site->fresh()->draft_theme_version_id);
-        $this->assertSame(6, $this->site->contentPages()->count());
+        $this->assertSame(count($this->payload['theme']['satsetui_pages']), $this->site->contentPages()->count());
         $this->site->update(['status' => 'published']);
         $this->app['auth']->forgetGuards();
         $documents = [];
@@ -121,6 +121,9 @@ class DsfaHomemadeThemeTest extends TestCase
         }
         $this->assertStringContainsString('dapur DSFA Homemade di Kecamatan Bojongsoang, Kabupaten Bandung', $documents['/halaman/area-pengiriman']);
         $this->assertStringNotContainsString('dapur DSFA Homemade di Kecamatan Bandung Kidul', $documents['/halaman/area-pengiriman']);
+        $this->assertStringContainsString('Kecamatan Bojongsoang', $documents['/halaman/dessert-takoyaki-bojongsoang']);
+        $this->assertStringNotContainsString('Cipagalo', implode($documents));
+        $this->assertStringNotContainsString('GBA', implode($documents));
         $this->assertStringNotContainsString('Padalarang', $documents['/halaman/area-pengiriman']);
         $this->assertStringContainsString('<svg class="dsfa-art"', $documents['/']);
         $this->assertSame(4, substr_count($documents['/'], 'class="dsfa-icon"'));
