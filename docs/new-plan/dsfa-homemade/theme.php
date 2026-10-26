@@ -103,7 +103,7 @@ HTML,
 <article class="dsfa-page" id="isi">
     <nav class="dsfa-breadcrumb"><a href="/">Beranda</a></nav>
     <h1>Area pengiriman DSFA Homemade di Bandung</h1>
-    <p class="dsfa-intro">Kami mengantar dari dapur DSFA Homemade di Kecamatan Bandung Kidul, Kota Bandung. Waktu antar maksimal 1 jam dalam kondisi lalu lintas normal.</p>
+    <p class="dsfa-intro">Kami mengantar dari dapur DSFA Homemade di Kecamatan Bojongsoang, Kabupaten Bandung. Waktu antar maksimal 1 jam dalam kondisi lalu lintas normal.</p>
     <div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="{$waLink('Halo DSFA Homemade, apakah bisa diantar ke alamat saya?')}" rel="noopener" target="_blank">Tanya pengantaran via WhatsApp</a></div>
     <section class="dsfa-page-section dsfa-faq"><h2>Wilayah yang kami layani</h2>
         <h3>Kota Bandung</h3><p>Seluruh kecamatan: Andir, Antapani, Arcamanik, Astanaanyar, Babakan Ciparay, Bandung Kidul, Bandung Kulon, Bandung Wetan, Batununggal, Bojongloa Kaler, Bojongloa Kidul, Buahbatu, Cibeunying Kaler, Cibeunying Kidul, Cibiru, Cicendo, Cidadap, Cinambo, Coblong, Gedebage, Kiaracondong, Lengkong, Mandalajati, Panyileukan, Rancasari, Regol, Sukajadi, Sukasari, Sumur Bandung, dan Ujung Berung.</p>

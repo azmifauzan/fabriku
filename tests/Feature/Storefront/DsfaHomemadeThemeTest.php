@@ -119,6 +119,8 @@ class DsfaHomemadeThemeTest extends TestCase
         foreach (['Bandung Kidul', 'Cimahi Tengah', 'Jatinangor', 'Rancaekek'] as $area) {
             $this->assertStringContainsString($area, $documents['/halaman/area-pengiriman']);
         }
+        $this->assertStringContainsString('dapur DSFA Homemade di Kecamatan Bojongsoang, Kabupaten Bandung', $documents['/halaman/area-pengiriman']);
+        $this->assertStringNotContainsString('dapur DSFA Homemade di Kecamatan Bandung Kidul', $documents['/halaman/area-pengiriman']);
         $this->assertStringNotContainsString('Padalarang', $documents['/halaman/area-pengiriman']);
         $this->assertStringContainsString('<svg class="dsfa-art"', $documents['/']);
         $this->assertSame(4, substr_count($documents['/'], 'class="dsfa-icon"'));
