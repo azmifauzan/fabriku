@@ -93,6 +93,8 @@ p, h1, h2, h3 { margin: 0; }
 .dsfa-footer-col a, .dsfa-footer-bottom a { display: inline-flex; align-items: center; min-height: 44px; }
 .dsfa-footer-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 1.5rem; margin-top: 2.5rem; padding-top: 0.5rem; border-top: 1px solid #5d6650; font-size: 0.9rem; color: #d8d0c0; }
 .dsfa-footer-bottom nav { display: flex; flex-wrap: wrap; gap: 0 1.25rem; }
+main img[class~="h-full"] { height: 100%; }
+main a[class~="text-white"] { color: #fff; text-decoration: none; }
 main a[href="/produk"], main a[href="https://fabriku.id/privasi"] { display: inline-flex; align-items: center; min-height: 44px; }
 @media (min-width: 40rem) {
     .dsfa-wrap { width: min(100% - 3rem, 72rem); }

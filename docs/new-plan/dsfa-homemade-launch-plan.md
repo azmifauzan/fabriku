@@ -25,7 +25,7 @@ Lingkup tahap ini: pemeriksaan kode dan produksi, penyiapan akun, pemeriksaan do
 | Cloudflare | Setelah pemilik memperluas token, zone dsfahomemade.com terlihat dan aktif. Nameserver: jessica.ns.cloudflare.com dan phil.ns.cloudflare.com. |
 | DNS saat pemeriksaan | Apex A dsfahomemade.com sudah menuju 43.129.52.206 dan diproxy Cloudflare. Belum ada record www pada hasil satu halaman yang memuat seluruh record. |
 | TLS/domain Fabriku | Pengaturan SSL zone bernilai Full. Belum ada custom hostname dsfahomemade.com pada zone storefront fabriku.biz.id. Record A saja belum membuktikan routing aplikasi dan TLS origin siap. |
-| Penyimpanan logo | Produksi menyediakan disk public dan symlink public/storage. S3 belum dikonfigurasi. Gunakan disk public yang ada dan pastikan volume tetap tersimpan saat deploy. |
+| Penyimpanan logo | Produksi menyediakan disk public dan symlink public/storage; logo disimpan di sana dan bertahan melewati deploy. **Koreksi 26 Oktober:** S3 (`fabriku_s3`, bucket `fabriku`, endpoint `is3.cloudhost.id`) ternyata sudah dikonfigurasi di produksi; klaim "S3 belum dikonfigurasi" di sini keliru. Foto produk memakai S3 sesuai konvensi aplikasi. |
 | Skema tenant | Beberapa atribut di `$fillable` model Tenant, termasuk email dan logo_url, tidak mempunyai kolom pada skema produksi. Simpan kontak/logo pada `BusinessSite.profile` dan `SystemSetting`, sesuai pemilik data yang sudah tersedia. Tidak perlu migrasi kolom baru. |
 
 Pemeriksaan graph memakai Tier 2, generasi 2026-10-23T08:58:48Z, disertai pemeriksaan coverage berkas yang dipakai. Tidak ada gap tercatat pada berkas terkait; hal ini bukan jaminan graph lengkap. Trace untuk nama umum `create` menghasilkan banyak hubungan heuristik yang tidak relevan, sehingga alur domain dipastikan lewat sumber controller dan service. Hash sumber onboarding, renderer, dan BusinessSite di produksi sama dengan checkout lokal.
@@ -343,3 +343,17 @@ Pemilik memberikan dua nomor WhatsApp admin (0852-2015-0587, 0812-6782-2754), ti
 Pemilik memutuskan situs hanya menyebut kecamatan (tanpa desa, perumahan, atau alamat) dan mengizinkan penambahan halaman SEO. Ditambahkan satu halaman: `/halaman/dessert-takoyaki-bojongsoang` (tema v8, ID 14), yaitu halaman lokal untuk pencari di sekitar dapur, dengan niat pencarian yang berbeda dari halaman menu (keempat menu, kecamatan terdekat, cara pesan, FAQ). Ditautkan dari footer dan halaman Area Pengiriman; otomatis masuk sitemap. Tes menjaga agar "Cipagalo", "GBA", dan "Mengger" tidak muncul di halaman mana pun.
 
 Sengaja tidak dibuat halaman per kecamatan lain (Dayeuhkolot, Buahbatu, Rancaekek, dan sebagainya): hanya mengganti nama wilayah berarti konten tipis. Usulan: tunggu 4 sampai 8 minggu data Search Console; buat halaman wilayah baru hanya bila ada impresi pada query kecamatan itu dan ada hal nyata yang bisa ditulis (misalnya estimasi waktu antar yang diuji pemilik). Halaman acara/hampers/snack box menunggu pemilik memastikan paket itu dijual.
+
+## Produk takoyaki dan foto (26 Oktober 2026, 16:00 WIB)
+
+Pemilik memberikan foto takoyaki (sudah diedit AI dari foto asli; metadata berkas memuat tanda tangan Google C2PA) dan meminta dirapikan serta tiga produk ditambahkan. Foto dipotong 4:3 (kontainer depan di tengah, ikon bintang di pojok tidak ikut), diratakan kontras/warnanya sedikit, 1600x1200 JPEG; tidak ada gambar baru yang dibuat. Pengolahan ulang membuang metadata C2PA asli.
+
+Dibuat di produksi (stok awal **100 per varian hanya angka sementara**; HPP `unit_cost` = 0 belum diisi; keduanya perlu disesuaikan di Persediaan):
+
+| SKU | Produk | Harga |
+|---|---|---|
+| INV-FOOD-0001 | Takoyaki Kemasan Kecil (isi 4) | Rp 5.000 |
+| INV-FOOD-0002 | Takoyaki Kemasan Besar (isi 8) | Rp 10.000 |
+| INV-FOOD-0003 | Takoyaki Kemasan Besar (isi 12) | Rp 15.000 |
+
+Foto tersimpan di S3: `tenants/7/inventory/takoyaki-dsfa.jpg` (publik 200), dipasang pada ketiga item persediaan; produk website mengambilnya lewat fallback item (`site_products.image_path` kosong, sama seperti alur dashboard). Ketiga produk memakai foto yang sama; foto itu menampilkan satu kemasan (sekitar 4 buah), jadi belum menggambarkan perbedaan isi 8 dan 12. Hero beranda kini otomatis memakai produk pertama (isi 4). Tema v9 memperbaiki dua benturan CSS tema dengan markup katalog bawaan (`img {height:auto}` mengalahkan `h-full`, `a {color}` mengalahkan `text-white`), terlihat sebagai pita kosong di bawah foto dan teks tombol yang tak terbaca.

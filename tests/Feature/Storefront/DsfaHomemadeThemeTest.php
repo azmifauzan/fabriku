@@ -49,6 +49,9 @@ class DsfaHomemadeThemeTest extends TestCase
     public function test_real_draft_is_private_and_its_css_survives_the_sanitizer(): void
     {
         $this->assertSame(trim($this->payload['theme']['satsetui_css']), app(HtmlSanitizerService::class)->sanitizeCss($this->payload['theme']['satsetui_css']));
+        // Theme-wide img/a rules must not undo Tailwind's h-full and text-white on native catalog markup.
+        $this->assertStringContainsString('main img[class~="h-full"] { height: 100%; }', $this->payload['theme']['satsetui_css']);
+        $this->assertStringContainsString('main a[class~="text-white"] { color: #fff;', $this->payload['theme']['satsetui_css']);
         $this->get('/website/theme/'.$this->version->id.'/preview')->assertRedirect(route('login'));
         $preview = $this->actingAs($this->owner)->get('/website/theme/'.$this->version->id.'/preview')
             ->assertOk()->assertHeader('X-Robots-Tag', 'noindex, nofollow')
