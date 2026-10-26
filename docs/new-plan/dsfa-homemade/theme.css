@@ -28,25 +28,33 @@ p, h1, h2, h3 { margin: 0; }
 .dsfa-brand strong { display: block; font: 1.3rem Georgia, serif; color: var(--fb-text); }
 .dsfa-brand small { display: block; color: #5c5549; font-size: 0.85rem; }
 .dsfa-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem; }
-.dsfa-nav a, .dsfa-footer-links a, .dsfa-legal a, .dsfa-breadcrumb a { display: inline-flex; align-items: center; min-height: 44px; padding: 0.4rem 0.25rem; font-size: 0.95rem; }
+.dsfa-nav a, .dsfa-breadcrumb a { display: inline-flex; align-items: center; min-height: 44px; padding: 0.4rem 0.25rem; font-size: 0.95rem; }
 .dsfa-nav a { text-decoration: none; }
 .dsfa-hero { display: grid; gap: 2rem; align-items: center; }
 .dsfa-hero-copy { max-width: 47rem; }
+.dsfa-hero h1 { font-size: clamp(2rem, 1.3rem + 2vw, 3.1rem); }
 .dsfa-kicker { color: #5c5549; margin-bottom: 1rem; font-size: 0.95rem; }
 .dsfa-intro { margin-top: 1.5rem; max-width: 42rem; font-size: 1.1rem; }
 .dsfa-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
 .dsfa-button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0.7rem 1.15rem; border: 1px solid var(--fb-primary); border-radius: 0.4rem; text-decoration: none; font-weight: 600; line-height: 1.5; }
 .dsfa-button-primary { background: var(--fb-primary); color: #fff; }
 .dsfa-button:hover { background: #eee8d9; color: var(--fb-primary); }
-.dsfa-hero-logo { width: min(100%, 19rem); justify-self: center; }
 .dsfa-note { padding: 1.25rem 1.5rem; background: var(--fb-surface); color: #5c5549; border-left: 3px solid #946d50; }
 .dsfa-note p + p { margin-top: 0.5rem; }
 .dsfa-menu { border-top: 1px solid #d8d0c0; border-bottom: 1px solid #d8d0c0; }
-.dsfa-menu-list { display: grid; gap: 0 2rem; margin-top: 1.75rem; }
-.dsfa-menu-list a { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem 1rem; padding: 1.25rem 0; border-top: 1px solid #d8d0c0; text-decoration: none; }
-.dsfa-menu-list strong { font: 1.6rem Georgia, serif; }
-.dsfa-menu-list span { color: #5c5549; font-size: 0.9rem; }
-.dsfa-menu-list a:hover strong { text-decoration: underline; text-underline-offset: 0.2em; }
+.dsfa-menu-list { display: grid; gap: 1rem; margin-top: 1.75rem; }
+.dsfa-menu-list a { display: flex; flex-direction: column; gap: 0.5rem; padding: 1.5rem; border: 1px solid #d8d0c0; border-radius: 0.75rem; background: var(--fb-bg); text-decoration: none; }
+.dsfa-menu-list a:hover { border-color: var(--fb-primary); background: var(--fb-surface); }
+.dsfa-menu-list strong { font: 1.5rem Georgia, serif; }
+.dsfa-menu-list span { color: #5c5549; font-size: 0.95rem; }
+.dsfa-icon { width: 3.5rem; height: 3.5rem; margin-bottom: 0.5rem; }
+.dsfa-hero-media { border-radius: 0.75rem; overflow: hidden; background: var(--fb-surface); }
+.dsfa-hero-media a { display: block; text-decoration: none; }
+.dsfa-hero-media img, .dsfa-art { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.dsfa-steps-list { display: grid; gap: 1rem; margin: 1.75rem 0 0; padding: 0; list-style: none; counter-reset: step; }
+.dsfa-steps-list li { display: flex; flex-direction: column; gap: 0.35rem; padding: 1.25rem 1.5rem; border-left: 3px solid #946d50; background: var(--fb-surface); counter-increment: step; }
+.dsfa-steps-list li::before { content: counter(step); font: 1.4rem Georgia, serif; color: #946d50; }
+.dsfa-steps-list span { color: #5c5549; }
 .dsfa-heading-copy { margin-top: 1rem; max-width: 42rem; color: #5c5549; }
 .dsfa-catalog { margin-top: 1.5rem; }
 .dsfa-catalog .text-slate-500 { color: #5c5549; }
@@ -55,33 +63,47 @@ p, h1, h2, h3 { margin: 0; }
 .dsfa-contact { background: var(--fb-surface); }
 .dsfa-contact-inner { display: grid; gap: 2rem 4rem; }
 .dsfa-contact p { margin-top: 1rem; max-width: 42rem; }
-.dsfa-footer { padding-block: 2rem; }
-.dsfa-footer-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 1rem 3rem; }
-.dsfa-footer-name { font: 1.4rem Georgia, serif; }
-.dsfa-footer-links { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 1.25rem; }
-.dsfa-legal { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #d8d0c0; }
 .dsfa-page { width: min(100% - 2rem, 51rem); margin-inline: auto; padding-block: 1.5rem 3rem; overflow-wrap: anywhere; }
 .dsfa-breadcrumb { margin-bottom: 2rem; }
 .dsfa-page h1 { max-width: 18ch; }
 .dsfa-page .dsfa-note { margin-top: 1.5rem; }
 .dsfa-page-section { margin-top: 2.5rem; }
 .dsfa-page-section h2 { font-size: 1.65rem; }
-.dsfa-page-section p, .dsfa-page-section ul { margin-top: 1rem; }
-.dsfa-page-section ul { padding-left: 1.25rem; }
+.dsfa-page-section p, .dsfa-page-section ul, .dsfa-page-section ol { margin-top: 1rem; }
+.dsfa-page-section ul, .dsfa-page-section ol { padding-left: 1.25rem; }
+.dsfa-page-section ol { list-style: decimal; }
+.dsfa-page-section ul { list-style: disc; }
+.dsfa-faq h3 { margin-top: 1.75rem; font-size: 1.2rem; }
+.dsfa-faq h3 + p { margin-top: 0.5rem; }
+.dsfa-page-section a { text-decoration: underline; }
 .dsfa-page-section li + li { margin-top: 0.5rem; }
 .dsfa-related { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 1rem; }
 .dsfa-related a { display: inline-flex; align-items: center; min-height: 44px; padding-block: 0.4rem; }
+.dsfa-footer { padding-block: 3rem 1rem; background: #424b34; color: #e4ddcc; }
+.dsfa-footer a { color: #fcf9f0; text-decoration: none; }
+.dsfa-footer a:hover { text-decoration: underline; }
+.dsfa-footer a:focus-visible { outline-color: #fcf9f0; }
+.dsfa-footer-grid { display: grid; gap: 2rem; }
+.dsfa-footer-name { font: 1.6rem Georgia, serif; color: #fcf9f0; }
+.dsfa-footer-brand p + p { margin-top: 0.75rem; max-width: 24rem; }
+.dsfa-footer-title { font: 1.1rem Georgia, serif; color: #fcf9f0; }
+.dsfa-footer-col ul { list-style: none; margin: 0.5rem 0 0; padding: 0; }
+.dsfa-footer-col a, .dsfa-footer-bottom a { display: inline-flex; align-items: center; min-height: 44px; }
+.dsfa-footer-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 1.5rem; margin-top: 2.5rem; padding-top: 0.5rem; border-top: 1px solid #5d6650; font-size: 0.9rem; color: #d8d0c0; }
+.dsfa-footer-bottom nav { display: flex; flex-wrap: wrap; gap: 0 1.25rem; }
 main a[href="/produk"], main a[href="https://fabriku.id/privasi"] { display: inline-flex; align-items: center; min-height: 44px; }
 @media (min-width: 40rem) {
     .dsfa-wrap { width: min(100% - 3rem, 72rem); }
     .dsfa-menu-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dsfa-steps-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .dsfa-story { grid-template-columns: 1fr 1.5fr; }
+    .dsfa-footer-grid { grid-template-columns: 1.4fr 1fr 1fr; }
 }
 @media (min-width: 64rem) {
-    .dsfa-hero { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+    .dsfa-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .dsfa-menu-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .dsfa-contact-inner { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 39.99rem) {
-    .dsfa-hero-logo { display: none; }
     .dsfa-nav { width: 100%; justify-content: space-between; gap: 0.25rem; }
 }

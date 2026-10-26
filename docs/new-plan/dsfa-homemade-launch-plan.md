@@ -311,3 +311,17 @@ Review independen atas berkas lokal, tes, DB produksi, nginx, Cloudflare, dan re
 
 - Data pemilik (WhatsApp, area, harga/varian, foto) → versi tema baru dengan slot `whatsapp-button`, `cart-button`, `map`, dan `alt=""` pada logo header.
 - Terapkan draft, lalu terbitkan situs; submit sitemap di Search Console setelah fix robots ter-deploy.
+
+## Terbit (26 Oktober 2026, 13:30 WIB)
+
+Atas keputusan pemilik, situs diterbitkan dengan isi kerangka. Draft ID 8 diterapkan dengan logika `publishSatsetuiDraft` (6 halaman `is_published = true`, SEO beranda digabung), lalu `status = published`. Verifikasi publik: beranda, `/produk`, enam `/halaman/*`, dan `sitemap.xml` 200; `www` dan subdomain 301 ke apex dengan path/query; robots dari aplikasi menunjuk `https://dsfahomemade.com/sitemap.xml` (salinan lama di cache edge habis maksimal 4 jam setelah deploy); tanpa overflow di 390 px. Cloudflare menyisipkan beacon Web Analytics yang diblokir CSP storefront (`script-src 'none'`); hanya galat konsol, tidak memengaruhi halaman.
+
+Sitemap belum dikirim ke Search Console; kirim setelah isi menu, WhatsApp, dan harga lengkap.
+
+## Revisi copy (26 Oktober 2026, 13:45 WIB)
+
+Pemilik menilai copy beranda menyalin brief ("usaha rumahan suami istri", "berencana menambah dessert") dan tidak SEO. Copy seluruh situs ditulis ulang menjadi berorientasi pembeli: deskripsi tiap menu, kegunaan, tiga langkah pesan, FAQ per menu (termasuk penegasan bahwa DSFA bukan cabang toko cheesecuit lain), dan long tail Cimahi/Kabupaten Bandung/Bandung Barat sebagai pertanyaan ketersediaan, bukan klaim layanan. Kalimat "sedang dilengkapi" yang berulang dihapus; satu-satunya penanda data kosong adalah kontak WhatsApp di halaman Cara Pesan dan katalog kosong. Tidak ada harga, area, masa simpan, atau klaim bahan yang ditambahkan. `alt` logo header kini kosong.
+
+Versi tema 3 (ID 9) diterapkan di produksi; situs tetap terbit. Tujuh halaman live dicek: title dan H1 sesuai, tidak ada sisa teks brief atau "sedang dilengkapi".
+
+Footer dirombak (versi tema 4, ID 10): slot `footer-links` diganti tiga kolom statis (brand, Menu dengan anchor keyword "[menu] Bandung", Informasi) di latar hijau zaitun, plus baris bawah ©/Laporkan situs/Dibuat dengan Fabriku. Konsekuensi: halaman tambahan baru tidak otomatis muncul di footer; tambahkan lewat versi tema berikutnya.

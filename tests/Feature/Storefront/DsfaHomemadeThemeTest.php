@@ -4,6 +4,7 @@ namespace Tests\Feature\Storefront;
 
 use App\Models\BusinessSite;
 use App\Models\SiteContentPage;
+use App\Models\SiteProduct;
 use App\Models\SiteThemeVersion;
 use App\Models\Tenant;
 use App\Models\User;
@@ -106,6 +107,8 @@ class DsfaHomemadeThemeTest extends TestCase
                 }
             }
         }
+        $this->assertStringContainsString('<svg class="dsfa-art"', $documents['/']);
+        $this->assertSame(4, substr_count($documents['/'], 'class="dsfa-icon"'));
         $sitemap = $this->get('https://dsfahomemade.com/sitemap.xml')->assertOk();
         foreach ($this->payload['theme']['satsetui_pages'] as $page) {
             $sitemap->assertSee('https://dsfahomemade.com/halaman/'.$page['slug'], false);
@@ -119,6 +122,25 @@ class DsfaHomemadeThemeTest extends TestCase
         $this->get('https://dsfa-homemade.fabriku.biz.id/halaman/jual-takoyaki-bandung?ref=menu')->assertStatus(301)->assertRedirect('https://dsfahomemade.com/halaman/jual-takoyaki-bandung?ref=menu');
         if ($output = getenv('DSFA_RENDER_OUTPUT')) {
             file_put_contents($output, json_encode($documents, JSON_THROW_ON_ERROR));
+        }
+    }
+
+    public function test_hero_shows_the_first_catalog_photo_and_falls_back_to_the_illustration(): void
+    {
+        $this->actingAs($this->owner)->post('/website/satsetui/publish-draft')->assertRedirect();
+        $this->site->update(['status' => 'published']);
+        $this->app['auth']->forgetGuards();
+
+        $this->get('https://dsfahomemade.com/')->assertOk()->assertSee('<svg class="dsfa-art"', false);
+
+        SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'title' => 'Takoyaki Original', 'slug' => 'takoyaki-original', 'image_path' => 'https://cdn.example.test/takoyaki.jpg']);
+        $home = $this->get('https://dsfahomemade.com/')->assertOk()
+            ->assertSee('https://cdn.example.test/takoyaki.jpg', false)
+            ->assertSee('href="/produk/takoyaki-original"', false)
+            ->assertDontSee('<svg class="dsfa-art"', false);
+        $this->assertSame(1, $this->dom($home->getContent())->query('//h1')->length);
+        if ($output = getenv('DSFA_RENDER_PHOTO_OUTPUT')) {
+            file_put_contents($output, $home->getContent());
         }
     }
 
