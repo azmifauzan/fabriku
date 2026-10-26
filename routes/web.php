@@ -74,6 +74,7 @@ Route::get('/', function () {
 Route::get('/privasi', fn () => Inertia::render('Legal/Privacy', ['canonical' => url()->current()]))->name('legal.privacy');
 Route::get('/syarat-ketentuan', fn () => Inertia::render('Legal/Terms', ['canonical' => url()->current()]))->name('legal.terms');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/blog/{post:slug}/og-image', [BlogController::class, 'ogImage'])->name('blog.og-image');

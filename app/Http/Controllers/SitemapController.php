@@ -37,4 +37,15 @@ class SitemapController extends Controller
             ->view('sitemap', ['urls' => $urls])
             ->header('Content-Type', 'application/xml');
     }
+
+    /**
+     * Served by the app instead of a static public/robots.txt: Apache serves existing
+     * files before Laravel, so a static file would shadow every storefront's own
+     * /robots.txt (and its sitemap) on tenant subdomains and custom domains.
+     */
+    public function robots(): Response
+    {
+        return response("User-agent: *\nDisallow: /auth/\nDisallow: /login\nDisallow: /register\n\nSitemap: ".route('sitemap')."\n")
+            ->header('Content-Type', 'text/plain; charset=UTF-8');
+    }
 }
