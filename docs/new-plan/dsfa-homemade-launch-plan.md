@@ -381,3 +381,7 @@ Fitur slot `featured-product` (slideshow dari katalog, commit `e8e8e04`) tetap a
 ## Cheesecuit kecil per rasa (26 Oktober 2026, 17:15 WIB)
 
 Pemilik meminta Cheesecuit Kecil Rp 7.000, lalu menegaskan produk dibuat per varian rasa. Rasa yang dijual (jawaban pemilik): Oreo, Matcha, Coklat. Produk generik "Cheesecuit Kecil" (INV-FOOD-0009, dibuat beberapa menit sebelumnya, belum pernah dipesan) dihapus dan diganti tiga produk: INV-FOOD-0010 Oreo, 0011 Matcha, 0012 Coklat, masing-masing Rp 7.000, stok awal 100 sementara dan HPP 0, urutan katalog 9 sampai 11. Foto dipotong per cup dari satu foto (berpenanda C2PA Google) dengan cup tetangga diburamkan lembut, disimpan di S3 `tenants/7/inventory/cheesecuit-kecil-*.jpg`; foto generik di S3 dihapus. Katalog kini berisi 11 produk. Cup berstiker pink dikategorikan "Coklat" atas pilihan pemilik; dari foto sendiri isinya tidak pasti.
+
+## Puding buah coklat (26 Oktober 2026, 17:25 WIB)
+
+Pemilik menambahkan Puding Buah Coklat Rp 7.000 dengan foto gelas cokelat (dari foto berpenanda C2PA Google; gelas tetangga diburamkan lembut, tanpa gambar baru). Ditulis ke produksi lewat transaksi dengan prasyarat 11 item: INV-FOOD-0013 Puding Buah Coklat, kategori Puding Buah, stok awal 100 sementara dan HPP 0, foto di S3 `tenants/7/inventory/puding-buah-coklat.jpg`, urutan katalog 12. Katalog kini 12 produk. Puding rasa matcha yang tampak di foto sumber belum menjadi produk.
