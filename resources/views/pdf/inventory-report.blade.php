@@ -127,10 +127,12 @@
             <div class="label">Total Quantity</div>
             <div class="value">{{ $summary['total_quantity'] }}</div>
         </div>
+        @if($summary['total_value'] !== null)
         <div class="summary-item">
             <div class="label">Total Nilai</div>
             <div class="value">Rp {{ number_format($summary['total_value'], 0, ',', '.') }}</div>
         </div>
+        @endif
         <div class="summary-item">
             <div class="label">Low Stock</div>
             <div class="value">{{ $summary['low_stock_items'] }}</div>
@@ -150,8 +152,8 @@
                 <th class="text-right">Qty</th>
                 <th class="text-right">Reserved</th>
                 <th class="text-right">Available</th>
-                <th class="text-right">Unit Price</th>
-                <th class="text-right">Total Value</th>
+                @if($summary['total_value'] !== null)<th class="text-right">Unit Price</th>@endif
+                @if($summary['total_value'] !== null)<th class="text-right">Total Value</th>@endif
                 <th class="text-center">Status</th>
             </tr>
         </thead>
@@ -164,8 +166,8 @@
                     <td class="text-right">{{ $item['quantity'] }}</td>
                     <td class="text-right">{{ $item['reserved_quantity'] }}</td>
                     <td class="text-right">{{ $item['available_quantity'] }}</td>
-                    <td class="text-right">Rp {{ number_format($item['unit_price'], 0, ',', '.') }}</td>
-                    <td class="text-right">Rp {{ number_format($item['total_value'], 0, ',', '.') }}</td>
+                    @if($summary['total_value'] !== null)<td class="text-right">Rp {{ number_format($item['unit_price'], 0, ',', '.') }}</td>@endif
+                    @if($summary['total_value'] !== null)<td class="text-right">Rp {{ number_format($item['total_value'], 0, ',', '.') }}</td>@endif
                     <td class="text-center">
                         @php
                             $badgeClass = match($item['status']) {

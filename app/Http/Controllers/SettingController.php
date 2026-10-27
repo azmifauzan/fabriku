@@ -16,7 +16,18 @@ class SettingController extends Controller
 
         return Inertia::render('Settings/Index', [
             'settings' => $settings,
+            'stockSalesOnly' => auth()->user()->tenant->usesStockSalesOnly(),
         ]);
+    }
+
+    public function updateWorkflow(Request $request)
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+        $validated = $request->validate(['stock_sales_only' => ['required', 'boolean']]);
+
+        $request->user()->tenant->update(['stock_sales_only' => (bool) $validated['stock_sales_only']]);
+
+        return back()->with('success', 'Alur usaha berhasil disimpan.');
     }
 
     public function update(Request $request)

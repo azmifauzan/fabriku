@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useBusinessContext } from '@/composables/useBusinessContext';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
@@ -80,6 +81,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { tracksInventoryCost } = useBusinessContext();
 
 // Default adjustment types if not passed from server
 const adjustmentTypes = props.adjustmentTypes || {
@@ -201,7 +203,7 @@ const productionUnit = () => {
                     <div class="space-y-6 lg:col-span-2">
                         <!-- Production Order Info -->
                         <div
-                            v-if="item.production_order"
+                            v-if="item.production_order && tracksInventoryCost"
                             class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
                         >
                             <div class="border-b border-gray-200 bg-indigo-50 px-6 py-4 dark:border-gray-700 dark:bg-indigo-900/20">
@@ -298,7 +300,7 @@ const productionUnit = () => {
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Tanggal Kadaluarsa</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ formatDate(item.expiry_date) }}</dd>
                                     </div>
-                                    <div>
+                                    <div v-if="tracksInventoryCost">
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Harga Modal</dt>
                                         <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
                                             Rp {{ item.unit_cost.toLocaleString('id-ID') }}

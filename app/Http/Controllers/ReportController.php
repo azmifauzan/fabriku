@@ -127,6 +127,7 @@ class ReportController extends Controller
      */
     public function inventory(Request $request): InertiaResponse
     {
+        $trackCosts = ! $request->user()->tenant->usesStockSalesOnly();
         $query = InventoryItem::query()
             ->with([
                 'location:id,name',
@@ -160,7 +161,7 @@ class ReportController extends Controller
             });
         }
 
-        $items = $query->get()->map(function ($item) {
+        $items = $query->get()->map(function ($item) use ($trackCosts) {
             $quantity = (int) $item->current_quantity;
             $minimumStock = (int) $item->minimum_stock;
             $availableQuantity = max(0, $quantity - (int) $item->reserved_quantity);
@@ -180,8 +181,8 @@ class ReportController extends Controller
                 'reserved_quantity' => $item->reserved_quantity,
                 'available_quantity' => $availableQuantity,
                 'minimum_stock' => $minimumStock,
-                'unit_price' => (float) $item->unit_cost,
-                'total_value' => $quantity * (float) $item->unit_cost,
+                'unit_price' => $trackCosts ? (float) $item->unit_cost : null,
+                'total_value' => $trackCosts ? $quantity * (float) $item->unit_cost : null,
                 'status' => $computedStatus,
                 'location' => $item->location?->name,
                 'pattern' => $item->productionOrder?->preparationOrder?->pattern?->name,
@@ -195,7 +196,7 @@ class ReportController extends Controller
         $summary = [
             'total_items' => $items->count(),
             'total_quantity' => $items->sum('quantity'),
-            'total_value' => $items->sum('total_value'),
+            'total_value' => $trackCosts ? $items->sum('total_value') : null,
             'low_stock_items' => $items->where('is_low_stock', true)->count(),
             'out_of_stock_items' => $items->where('quantity', 0)->count(),
         ];
@@ -643,6 +644,7 @@ class ReportController extends Controller
      */
     private function getInventoryReportData(Request $request): array
     {
+        $trackCosts = ! $request->user()->tenant->usesStockSalesOnly();
         $query = InventoryItem::query()
             ->with([
                 'location:id,name',
@@ -676,7 +678,7 @@ class ReportController extends Controller
             });
         }
 
-        $items = $query->get()->map(function ($item) {
+        $items = $query->get()->map(function ($item) use ($trackCosts) {
             $quantity = (int) $item->current_quantity;
             $minimumStock = (int) $item->minimum_stock;
             $availableQuantity = max(0, $quantity - (int) $item->reserved_quantity);
@@ -696,8 +698,8 @@ class ReportController extends Controller
                 'reserved_quantity' => $item->reserved_quantity,
                 'available_quantity' => $availableQuantity,
                 'minimum_stock' => $minimumStock,
-                'unit_price' => (float) $item->unit_cost,
-                'total_value' => $quantity * (float) $item->unit_cost,
+                'unit_price' => $trackCosts ? (float) $item->unit_cost : null,
+                'total_value' => $trackCosts ? $quantity * (float) $item->unit_cost : null,
                 'status' => $computedStatus,
                 'location' => $item->location?->name,
                 'pattern' => $item->productionOrder?->preparationOrder?->pattern?->name,
@@ -710,7 +712,7 @@ class ReportController extends Controller
         $summary = [
             'total_items' => $items->count(),
             'total_quantity' => $items->sum('quantity'),
-            'total_value' => $items->sum('total_value'),
+            'total_value' => $trackCosts ? $items->sum('total_value') : null,
             'low_stock_items' => $items->where('is_low_stock', true)->count(),
             'out_of_stock_items' => $items->where('quantity', 0)->count(),
         ];

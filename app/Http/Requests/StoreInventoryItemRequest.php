@@ -37,8 +37,8 @@ class StoreInventoryItemRequest extends FormRequest
                     [
                         'location_id' => (int) $locationId,
                         'quantity' => (int) $quantity,
-                    ]
-                ]
+                    ],
+                ],
             ]);
         }
 
@@ -57,13 +57,14 @@ class StoreInventoryItemRequest extends FormRequest
     {
         $isManualEntry = empty($this->input('production_order_id'));
         $tenantId = $this->user()->tenant_id;
+        $stockSalesOnly = $this->user()->tenant->usesStockSalesOnly();
 
         return [
             // Source type for tracking
-            'source_type' => 'nullable|in:production,opening_balance,purchase,return',
+            'source_type' => $stockSalesOnly ? 'nullable|in:opening_balance,purchase,return' : 'nullable|in:production,opening_balance,purchase,return',
 
             // Production order is now optional (nullable for manual entry / opening balance)
-            'production_order_id' => ['nullable', Rule::exists('production_orders', 'id')->where('tenant_id', $tenantId)],
+            'production_order_id' => [Rule::prohibitedIf($stockSalesOnly), 'nullable', Rule::exists('production_orders', 'id')->where('tenant_id', $tenantId)],
 
             'sku' => 'nullable|string|max:100|unique:inventory_items,sku,NULL,id,tenant_id,'.$tenantId,
 
@@ -84,7 +85,7 @@ class StoreInventoryItemRequest extends FormRequest
             'category_id' => ['nullable', Rule::exists('inventory_item_categories', 'id')->where('tenant_id', $tenantId)],
 
             // Pricing - required for manual entry
-            'unit_cost' => 'required|numeric|min:0',
+            'unit_cost' => $stockSalesOnly ? 'exclude' : 'required|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',
 
             'quality_grade' => 'nullable|in:grade_a,grade_b,reject,A,B,Reject',

@@ -1,10 +1,10 @@
 <table>
     <thead>
         <tr>
-            <th colspan="9">Laporan Inventory</th>
+            <th colspan="{{ $summary['total_value'] !== null ? 9 : 7 }}">Laporan Inventory</th>
         </tr>
         <tr>
-            <th colspan="9">
+            <th colspan="{{ $summary['total_value'] !== null ? 9 : 7 }}">
                 @if(!empty($filters['status']))
                     Status: {{ ucfirst(str_replace('_', ' ', $filters['status'])) }}
                 @else
@@ -22,8 +22,8 @@
             <th>Qty</th>
             <th>Reserved</th>
             <th>Available</th>
-            <th>Unit Price</th>
-            <th>Total Value</th>
+            @if($summary['total_value'] !== null)<th>Unit Price</th>@endif
+            @if($summary['total_value'] !== null)<th>Total Value</th>@endif
             <th>Status</th>
         </tr>
     </thead>
@@ -36,8 +36,8 @@
                 <td>{{ $item['quantity'] }}</td>
                 <td>{{ $item['reserved_quantity'] }}</td>
                 <td>{{ $item['available_quantity'] }}</td>
-                <td>{{ number_format($item['unit_price'], 0, ',', '.') }}</td>
-                <td>{{ number_format($item['total_value'], 0, ',', '.') }}</td>
+                @if($summary['total_value'] !== null)<td>{{ number_format($item['unit_price'], 0, ',', '.') }}</td>@endif
+                @if($summary['total_value'] !== null)<td>{{ number_format($item['total_value'], 0, ',', '.') }}</td>@endif
                 <td>{{ ucfirst(str_replace('_', ' ', $item['status'])) }}</td>
             </tr>
         @endforeach
@@ -46,8 +46,10 @@
         <tr>
             <td colspan="3"><strong>TOTAL</strong></td>
             <td><strong>{{ $summary['total_quantity'] }}</strong></td>
-            <td colspan="3"></td>
-            <td><strong>{{ number_format($summary['total_value'], 0, ',', '.') }}</strong></td>
+            <td colspan="{{ $summary['total_value'] !== null ? 3 : 2 }}"></td>
+            @if($summary['total_value'] !== null)
+                <td><strong>{{ number_format($summary['total_value'], 0, ',', '.') }}</strong></td>
+            @endif
             <td></td>
         </tr>
     </tfoot>

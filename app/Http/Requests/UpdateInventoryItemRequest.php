@@ -55,13 +55,14 @@ class UpdateInventoryItemRequest extends FormRequest
     {
         $isManualEntry = empty($this->input('production_order_id'));
         $tenantId = $this->user()->tenant_id;
+        $stockSalesOnly = $this->user()->tenant->usesStockSalesOnly();
 
         return [
             // Source type for tracking
-            'source_type' => 'nullable|in:production,opening_balance,purchase,return',
+            'source_type' => $stockSalesOnly ? 'exclude' : 'nullable|in:production,opening_balance,purchase,return',
 
             // Production order is now optional (nullable for manual entry / opening balance)
-            'production_order_id' => ['nullable', Rule::exists('production_orders', 'id')->where('tenant_id', $tenantId)],
+            'production_order_id' => $stockSalesOnly ? ['exclude'] : ['nullable', Rule::exists('production_orders', 'id')->where('tenant_id', $tenantId)],
 
             'sku' => 'nullable|string|max:100|unique:inventory_items,sku,'.($this->route('item')?->id ?? 'NULL').',id,tenant_id,'.$tenantId,
 
@@ -73,7 +74,7 @@ class UpdateInventoryItemRequest extends FormRequest
             'inventory_location_id' => ['sometimes', Rule::exists('inventory_locations', 'id')->where('tenant_id', $tenantId)], // backwards compatibility
 
             // Quantities - required for manual entry
-            'target_quantity' => $isManualEntry ? 'nullable|integer|min:0' : 'required|integer|min:0',
+            'target_quantity' => $stockSalesOnly ? 'exclude' : ($isManualEntry ? 'nullable|integer|min:0' : 'required|integer|min:0'),
             'current_quantity' => 'required|integer|min:0',
             'current_stock' => 'sometimes|integer|min:0', // backwards compatibility
             'stock_quantity' => 'sometimes|integer|min:0', // backwards compatibility
@@ -82,7 +83,7 @@ class UpdateInventoryItemRequest extends FormRequest
             // Category
             'category_id' => ['nullable', Rule::exists('inventory_item_categories', 'id')->where('tenant_id', $tenantId)],
 
-            'unit_cost' => 'required|numeric|min:0',
+            'unit_cost' => $stockSalesOnly ? 'exclude' : 'required|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',
 
             'quality_grade' => 'nullable|in:grade_a,grade_b,reject,A,B,Reject',

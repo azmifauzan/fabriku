@@ -60,6 +60,7 @@ class Tenant extends Model
         'is_active',
         'business_category',
         'category_settings',
+        'stock_sales_only',
         'subscription_plan',
         'subscription_expires_at',
         'plan_code',
@@ -83,6 +84,7 @@ class Tenant extends Model
             'trial_reminder_1day_sent_at' => 'datetime',
             'settings' => 'array',
             'category_settings' => 'array',
+            'stock_sales_only' => 'boolean',
         ];
     }
 
@@ -265,14 +267,36 @@ class Tenant extends Model
         return $config['rules'][$module] ?? true;
     }
 
+    public function usesStockSalesOnly(): bool
+    {
+        return $this->stock_sales_only === true;
+    }
+
     /**
-     * Get category configuration
+     * Category identity stays intact; only an opted-in tenant's workflow changes.
      */
     public function getCategoryConfig(): array
     {
         $category = $this->business_category ?? config('business.default_category');
 
-        return config("business.categories.{$category}", []);
+        $config = config("business.categories.{$category}", []);
+
+        if ($this->usesStockSalesOnly()) {
+            $config['mode'] = 'simple';
+            $config['rules'] = array_replace($config['rules'] ?? [], [
+                'enable_production_flow' => false,
+                'enable_simple_production' => false,
+                'enable_material_module' => false,
+                'enable_preparation_module' => false,
+                'enable_pattern_module' => false,
+                'enable_contractor_module' => false,
+                'enable_purchase_module' => false,
+                'enable_service_module' => false,
+                'track_inventory_cost' => false,
+            ]);
+        }
+
+        return $config;
     }
 
     /**

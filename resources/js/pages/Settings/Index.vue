@@ -6,6 +6,47 @@
             <div class="mx-auto max-w-7xl">
                 <PageHeader title="Pengaturan" description="Kelola pengaturan aplikasi" />
 
+                <form
+                    v-if="(page.props.auth as any)?.user?.role === 'admin'"
+                    @submit.prevent="saveWorkflow"
+                    class="mt-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+                >
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Alur usaha</h2>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                        Kategori usaha tetap {{ (page.props.tenant as any)?.category_label }}.
+                    </p>
+                    <label class="mt-4 flex min-h-11 cursor-pointer items-start gap-3">
+                        <input
+                            v-model="workflowForm.stock_sales_only"
+                            type="checkbox"
+                            aria-describedby="stock-sales-description"
+                            class="mt-1 h-5 w-5 shrink-0 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500"
+                        />
+                        <span>
+                            <span class="block font-medium text-gray-900 dark:text-gray-100">Stok dan penjualan saja</span>
+                            <span id="stock-sales-description" class="mt-1 block text-sm text-gray-600 dark:text-gray-300">
+                                Tambah stok langsung di Persediaan, lalu jual stok yang tersedia. Produksi, bahan baku, pembelian, layanan, dan
+                                pencatatan modal/HPP tidak digunakan. Harga jual tetap dicatat.
+                            </span>
+                        </span>
+                    </label>
+                    <p class="mt-3 text-sm text-gray-600 dark:text-gray-300">
+                        Data lama tetap tersimpan. Matikan pilihan ini untuk kembali ke alur kategori semula.
+                    </p>
+                    <p v-if="workflowForm.errors.stock_sales_only" role="alert" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {{ workflowForm.errors.stock_sales_only }}
+                    </p>
+                    <div class="mt-4 flex justify-end">
+                        <button
+                            type="submit"
+                            :disabled="workflowForm.processing"
+                            class="min-h-11 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+                        >
+                            {{ workflowForm.processing ? 'Menyimpan…' : 'Simpan Alur Usaha' }}
+                        </button>
+                    </div>
+                </form>
+
                 <div class="mt-6 rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Invoice Settings</h2>
@@ -136,11 +177,21 @@ import { ref } from 'vue';
 
 const props = defineProps({
     settings: Object,
+    stockSalesOnly: Boolean,
 });
 
 const page = usePage();
 const { showSuccess } = useSweetAlert();
 const previewUrl = ref<string | null>(null);
+
+const workflowForm = useForm({ stock_sales_only: props.stockSalesOnly });
+
+function saveWorkflow() {
+    workflowForm.post('/settings/workflow', {
+        preserveScroll: true,
+        onSuccess: () => showSuccess('Berhasil!', 'Alur usaha berhasil disimpan.'),
+    });
+}
 
 const form = useForm({
     settings: {

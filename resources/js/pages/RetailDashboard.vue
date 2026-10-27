@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useBusinessContext } from '@/composables/useBusinessContext';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatNumber } from '@/lib/utils';
 import { Head, Link } from '@inertiajs/vue3';
@@ -12,7 +13,7 @@ interface Stats {
     total_inventory_items: number;
     low_stock_count: number;
     out_of_stock_count: number;
-    inventory_value: number;
+    inventory_value: number | null;
     outstanding_receivables: number;
 }
 
@@ -53,6 +54,8 @@ defineProps<{
     recentPurchases: RecentPurchase[];
 }>();
 
+const { tracksInventoryCost, isModuleEnabled } = useBusinessContext();
+
 const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { maximumFractionDigits: 0 });
 </script>
 
@@ -89,11 +92,17 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
 
                     <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                         <div class="flex items-center justify-between">
-                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Nilai Stok</p>
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                {{ tracksInventoryCost ? 'Nilai Stok' : 'Jumlah Produk' }}
+                            </p>
                             <Package :size="16" class="text-blue-500" />
                         </div>
-                        <p class="mt-2 text-xl font-bold text-gray-900 dark:text-gray-100">{{ fmt(stats.inventory_value) }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatNumber(stats.total_inventory_items) }} produk</p>
+                        <p class="mt-2 text-xl font-bold text-gray-900 dark:text-gray-100">
+                            {{ tracksInventoryCost ? fmt(stats.inventory_value ?? 0) : formatNumber(stats.total_inventory_items) }}
+                        </p>
+                        <p v-if="tracksInventoryCost" class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ formatNumber(stats.total_inventory_items) }} produk
+                        </p>
                     </div>
 
                     <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -192,7 +201,10 @@ const fmt = (value: number) => 'Rp ' + Number(value).toLocaleString('id-ID', { m
                     </div>
 
                     <!-- Recent Purchases -->
-                    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div
+                        v-if="isModuleEnabled('purchase')"
+                        class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                    >
                         <div class="mb-4 flex items-center justify-between">
                             <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Pembelian Terakhir</h2>
                             <Link href="/purchase-receipts" class="text-xs text-indigo-600 hover:underline dark:text-indigo-400">Lihat semua</Link>

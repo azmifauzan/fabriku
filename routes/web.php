@@ -51,6 +51,7 @@ use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\WebsiteDomainController;
 use App\Http\Controllers\WebsiteLeadController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\CheckBusinessWorkflow;
 use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -203,7 +204,7 @@ Route::post('logout', [LoginController::class, 'destroy'])
     ->name('logout');
 
 // Protected Routes
-Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(function () {
+Route::middleware(['auth', 'verified', 'tenant', 'subscription.check', CheckBusinessWorkflow::class])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/website', [WebsiteController::class, 'index'])->name('website.index');
     Route::post('/website', [WebsiteController::class, 'save'])->name('website.save');
@@ -349,6 +350,7 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check'])->group(f
     // Settings
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::post('settings/workflow', [SettingController::class, 'updateWorkflow'])->name('settings.workflow');
 
     // Subscription
     Route::get('subscription', [SubscriptionController::class, 'index'])->name('subscription.index');

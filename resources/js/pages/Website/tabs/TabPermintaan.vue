@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Modal from '@/components/Modal.vue';
+import { useBusinessContext } from '@/composables/useBusinessContext';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import { CheckCircle2, ChevronRight, Clock, MessageSquare, Phone, XCircle } from 'lucide-vue-next';
@@ -32,6 +33,8 @@ const props = defineProps<{
     orders: Order[];
     leads: Lead[];
 }>();
+
+const { isStockSalesOnly } = useBusinessContext();
 
 const leadFilter = ref<'all' | 'new' | 'contacted' | 'converted' | 'closed'>('all');
 const closingLead = ref<Lead | null>(null);
@@ -103,9 +106,7 @@ function submitCloseLead() {
     <div class="space-y-6">
         <div>
             <h2 class="text-xl font-bold text-slate-900 dark:text-white">Permintaan Masuk</h2>
-            <p class="text-sm text-slate-600 dark:text-slate-400">
-                Pantau pesanan produk dan prospek layanan yang dikirim melalui website Anda.
-            </p>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Pantau pesanan produk dan prospek layanan yang dikirim melalui website Anda.</p>
         </div>
 
         <div class="grid gap-6 lg:grid-cols-2">
@@ -127,22 +128,34 @@ function submitCloseLead() {
                 </div>
 
                 <ul v-else class="divide-y divide-slate-100 dark:divide-slate-800">
-                    <li v-for="order in orders" :key="order.id" class="flex flex-col gap-2 py-3.5 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+                    <li
+                        v-for="order in orders"
+                        :key="order.id"
+                        class="flex flex-col gap-2 py-3.5 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+                    >
                         <div class="space-y-1">
                             <div class="flex items-center gap-2">
                                 <Link :href="`/sales-orders/${order.id}`" class="font-semibold text-teal-700 hover:underline dark:text-teal-400">
                                     {{ order.order_number }}
                                 </Link>
-                                <span :class="['rounded px-2 py-0.5 text-xs font-medium', orderStatusMap[order.status]?.class ?? 'bg-slate-100 text-slate-700']">
+                                <span
+                                    :class="[
+                                        'rounded px-2 py-0.5 text-xs font-medium',
+                                        orderStatusMap[order.status]?.class ?? 'bg-slate-100 text-slate-700',
+                                    ]"
+                                >
                                     {{ orderStatusMap[order.status]?.label ?? order.status }}
                                 </span>
-                                <span :class="['rounded px-2 py-0.5 text-xs font-medium', paymentStatusMap[order.payment_status]?.class ?? 'bg-slate-100 text-slate-700']">
+                                <span
+                                    :class="[
+                                        'rounded px-2 py-0.5 text-xs font-medium',
+                                        paymentStatusMap[order.payment_status]?.class ?? 'bg-slate-100 text-slate-700',
+                                    ]"
+                                >
                                     {{ paymentStatusMap[order.payment_status]?.label ?? order.payment_status }}
                                 </span>
                             </div>
-                            <p class="text-xs text-slate-600 dark:text-slate-400">
-                                {{ order.customer?.name }} · {{ order.customer?.phone }}
-                            </p>
+                            <p class="text-xs text-slate-600 dark:text-slate-400">{{ order.customer?.name }} · {{ order.customer?.phone }}</p>
                             <p class="text-xs text-slate-400">
                                 {{ formatDate(order.created_at) }}
                             </p>
@@ -154,7 +167,12 @@ function submitCloseLead() {
                             </span>
                             <a
                                 v-if="order.customer?.phone"
-                                :href="whatsappLink(order.customer.phone, `Halo ${order.customer.name}, kami dari toko ingin mengonfirmasi pesanan ${order.order_number}.`)"
+                                :href="
+                                    whatsappLink(
+                                        order.customer.phone,
+                                        `Halo ${order.customer.name}, kami dari toko ingin mengonfirmasi pesanan ${order.order_number}.`,
+                                    )
+                                "
                                 target="_blank"
                                 rel="noopener"
                                 class="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
@@ -211,7 +229,12 @@ function submitCloseLead() {
                             <div>
                                 <div class="flex items-center gap-2">
                                     <strong class="font-semibold text-slate-900 dark:text-white">{{ lead.name }}</strong>
-                                    <span :class="['rounded px-2 py-0.5 text-xs font-medium', leadStatusMap[lead.status]?.class ?? 'bg-slate-100 text-slate-700']">
+                                    <span
+                                        :class="[
+                                            'rounded px-2 py-0.5 text-xs font-medium',
+                                            leadStatusMap[lead.status]?.class ?? 'bg-slate-100 text-slate-700',
+                                        ]"
+                                    >
                                         {{ leadStatusMap[lead.status]?.label ?? lead.status }}
                                     </span>
                                 </div>
@@ -232,7 +255,12 @@ function submitCloseLead() {
 
                         <div class="flex flex-wrap items-center gap-2 pt-1">
                             <a
-                                :href="whatsappLink(lead.phone, `Halo ${lead.name}, kami ingin menindaklanjuti permintaan Anda mengenai ${lead.service?.name || 'layanan kami'}.`)"
+                                :href="
+                                    whatsappLink(
+                                        lead.phone,
+                                        `Halo ${lead.name}, kami ingin menindaklanjuti permintaan Anda mengenai ${lead.service?.name || 'layanan kami'}.`,
+                                    )
+                                "
                                 target="_blank"
                                 rel="noopener"
                                 class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
@@ -252,7 +280,7 @@ function submitCloseLead() {
                             </button>
 
                             <button
-                                v-if="lead.status !== 'converted' && lead.service_id"
+                                v-if="lead.status !== 'converted' && lead.service_id && !isStockSalesOnly"
                                 type="button"
                                 class="inline-flex items-center gap-1 rounded-lg bg-teal-800 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-teal-700 dark:bg-teal-700 dark:hover:bg-teal-600"
                                 @click="convertLead(lead)"

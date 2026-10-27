@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useBusinessContext } from '@/composables/useBusinessContext';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatNumber } from '@/lib/utils';
 import { Head, router } from '@inertiajs/vue3';
@@ -14,8 +15,8 @@ interface InventoryItem {
     reserved_quantity: number;
     available_quantity: number;
     minimum_stock: number;
-    unit_price: number;
-    total_value: number;
+    unit_price: number | null;
+    total_value: number | null;
     status: string;
     location: string | null;
     pattern: string | null;
@@ -27,7 +28,7 @@ interface InventoryItem {
 interface Summary {
     total_items: number;
     total_quantity: number;
-    total_value: number;
+    total_value: number | null;
     low_stock_items: number;
     out_of_stock_items: number;
 }
@@ -48,6 +49,8 @@ const search = ref(props.filters.search || '');
 const status = ref(props.filters.status || '');
 const category = ref(props.filters.category || '');
 const showExportMenu = ref(false);
+
+const { tracksInventoryCost } = useBusinessContext();
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -166,10 +169,10 @@ const exportReport = (format: 'pdf' | 'excel') => {
                             {{ formatNumber(summary.total_quantity) }}
                         </dd>
                     </div>
-                    <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+                    <div v-if="tracksInventoryCost" class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Nilai</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ formatCurrency(summary.total_value) }}
+                            {{ formatCurrency(summary.total_value ?? 0) }}
                         </dd>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
@@ -277,10 +280,16 @@ const exportReport = (format: 'pdf' | 'excel') => {
                                     <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                                         Available
                                     </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                                    <th
+                                        v-if="tracksInventoryCost"
+                                        class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                    >
                                         Unit Price
                                     </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                                    <th
+                                        v-if="tracksInventoryCost"
+                                        class="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                                    >
                                         Total Value
                                     </th>
                                     <th class="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
@@ -290,7 +299,9 @@ const exportReport = (format: 'pdf' | 'excel') => {
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                                 <tr v-if="items.length === 0">
-                                    <td colspan="9" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data inventory</td>
+                                    <td :colspan="tracksInventoryCost ? 9 : 7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                        Tidak ada data inventory
+                                    </td>
                                 </tr>
                                 <tr v-for="item in items" :key="item.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
@@ -320,11 +331,17 @@ const exportReport = (format: 'pdf' | 'excel') => {
                                             <AlertTriangle :size="14" class="inline" />
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                                        {{ formatCurrency(item.unit_price) }}
+                                    <td
+                                        v-if="tracksInventoryCost"
+                                        class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ formatCurrency(item.unit_price ?? 0) }}
                                     </td>
-                                    <td class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white">
-                                        {{ formatCurrency(item.total_value) }}
+                                    <td
+                                        v-if="tracksInventoryCost"
+                                        class="px-6 py-4 text-right text-sm whitespace-nowrap text-gray-900 dark:text-white"
+                                    >
+                                        {{ formatCurrency(item.total_value ?? 0) }}
                                     </td>
                                     <td class="px-6 py-4 text-center whitespace-nowrap">
                                         <span

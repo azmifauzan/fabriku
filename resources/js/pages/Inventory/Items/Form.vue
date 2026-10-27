@@ -81,7 +81,7 @@ const props = defineProps<{
 
 const isEditing = !!props.item?.id;
 
-const { isRetailMode, rules } = useBusinessContext();
+const { isRetailMode, rules, tracksInventoryCost, isStockSalesOnly } = useBusinessContext();
 const isRetail = computed(() => isRetailMode.value || rules.value.enable_production_flow === false);
 
 // Entry type: 'production' or 'manual'
@@ -217,7 +217,7 @@ watch(
 
 // Auto-calculate unit cost when production order changes
 watch([() => form.production_order_id], () => {
-    if (selectedProductionOrder.value) {
+    if (tracksInventoryCost.value && selectedProductionOrder.value) {
         // Unit cost = (Material cost + Labor cost) / Quantity
         // For now, we'll use labor cost from production order
         // Material cost would need to be calculated from preparation order
@@ -427,7 +427,7 @@ const addCategory = async () => {
 
                 <!-- Source Type Selection (for Manual Entry) -->
                 <div
-                    v-if="isManualEntry && sourceTypes"
+                    v-if="isManualEntry && sourceTypes && (!isEditing || !isStockSalesOnly)"
                     class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20"
                 >
                     <h4 class="mb-3 font-medium text-blue-900 dark:text-blue-300">Tipe Sumber</h4>
@@ -656,7 +656,7 @@ const addCategory = async () => {
                 <div>
                     <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Harga</h3>
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div>
+                        <div v-if="tracksInventoryCost">
                             <label for="unit_cost" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Harga Modal (COGS) <span class="text-red-500">*</span>
                             </label>

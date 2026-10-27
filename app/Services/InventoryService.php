@@ -471,6 +471,15 @@ class InventoryService
         $locations->each(function (InventoryLocation $location) {
             $location->available_capacity = $location->available_capacity;
         });
+        if (auth()->user()->tenant->usesStockSalesOnly()) {
+            return [
+                'locations' => $locations,
+                'patterns' => collect(),
+                'productionOrders' => collect(),
+                'categories' => InventoryItemCategory::active()->orderBy('sort_order')->orderBy('name')->get(['id', 'name']),
+            ];
+        }
+
         $patterns = Pattern::orderBy('name')->get(['id', 'name', 'code', 'output_quantity']);
         $categories = InventoryItemCategory::active()->orderBy('sort_order')->orderBy('name')->get(['id', 'name']);
 

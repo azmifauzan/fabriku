@@ -441,7 +441,7 @@ class SalesOrderController extends Controller
             ->orderBy('product_name')
             ->get();
 
-        $services = Service::where('is_active', true)
+        $services = auth()->user()->tenant->usesStockSalesOnly() ? collect() : Service::where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'code', 'name', 'price', 'category']);
 
@@ -473,7 +473,7 @@ class SalesOrderController extends Controller
             'customer_id' => ['nullable', 'integer', Rule::exists('customers', 'id')->where('tenant_id', $tenantId)],
             'items' => ['required', 'array', 'min:1'],
             'items.*.inventory_item_id' => ['nullable', 'required_without:items.*.service_id', 'integer', Rule::exists('inventory_items', 'id')->where('tenant_id', $tenantId)],
-            'items.*.service_id' => ['nullable', 'required_without:items.*.inventory_item_id', 'integer', Rule::exists('services', 'id')->where('tenant_id', $tenantId)],
+            'items.*.service_id' => [Rule::prohibitedIf($request->user()->tenant->usesStockSalesOnly()), 'nullable', 'required_without:items.*.inventory_item_id', 'integer', Rule::exists('services', 'id')->where('tenant_id', $tenantId)],
             'items.*.served_by' => ['nullable', 'integer', Rule::exists('staff', 'id')->where('tenant_id', $tenantId)],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],

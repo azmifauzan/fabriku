@@ -74,6 +74,7 @@ class HandleInertiaRequests extends Middleware
                 'name' => $tenant->name,
                 'slug' => $tenant->slug,
                 'business_category' => $tenant->business_category,
+                'stock_sales_only' => $tenant->usesStockSalesOnly(),
                 'category_label' => $tenant->getCategoryLabel(),
                 'subscription_plan' => $tenant->subscription_plan,
                 'subscription_expires_at' => $tenant->subscription_expires_at?->toISOString(),

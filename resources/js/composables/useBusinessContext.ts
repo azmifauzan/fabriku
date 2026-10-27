@@ -20,6 +20,7 @@ type CategoryRules = {
 
 type TenantProps = {
     business_category?: string | null;
+    stock_sales_only?: boolean;
     category_label?: string | null;
     terminology?: Partial<Record<TerminologyKey, string>>;
     category_config?: {
@@ -59,6 +60,10 @@ export function useBusinessContext() {
         return (categoryConfig.value?.mode ?? 'full') === 'simple';
     });
 
+    const isStockSalesOnly = computed(() => tenant.value?.stock_sales_only === true);
+
+    const tracksInventoryCost = computed(() => rules.value.track_inventory_cost !== false);
+
     const isServiceMode = computed<boolean>(() => {
         return (categoryConfig.value?.mode ?? 'full') === 'service';
     });
@@ -84,6 +89,8 @@ export function useBusinessContext() {
         sizes,
         rules,
         isRetailMode,
+        tracksInventoryCost,
+        isStockSalesOnly,
         isServiceMode,
         isModuleEnabled,
         term,

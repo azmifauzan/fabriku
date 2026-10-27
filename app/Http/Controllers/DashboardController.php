@@ -272,7 +272,7 @@ class DashboardController extends Controller
                 ->whereRaw('(current_quantity - reserved_quantity) >= 0')
                 ->count(),
             'out_of_stock_count' => InventoryItem::query()->where('current_quantity', 0)->count(),
-            'inventory_value' => InventoryItem::query()->sum(DB::raw('current_quantity * unit_cost')),
+            'inventory_value' => auth()->user()->tenant->usesStockSalesOnly() ? null : InventoryItem::query()->sum(DB::raw('current_quantity * unit_cost')),
             'outstanding_receivables' => SalesOrder::query()
                 ->where('payment_status', '!=', 'paid')
                 ->where('status', '!=', 'cancelled')
@@ -312,7 +312,7 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        $recentPurchases = StockAdjustment::query()
+        $recentPurchases = auth()->user()->tenant->usesStockSalesOnly() ? collect() : StockAdjustment::query()
             ->where('adjustment_type', StockAdjustment::TYPE_PURCHASE)
             ->whereNotNull('batch_id')
             ->select('batch_id', 'supplier_name', 'created_at')

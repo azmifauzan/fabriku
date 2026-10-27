@@ -152,6 +152,10 @@ class InventoryItemController extends Controller
         $data = $request->safe()->except(['image', 'locations']);
         $locations = $request->validated('locations');
 
+        if ($request->user()->tenant->usesStockSalesOnly()) {
+            $data['unit_cost'] = 0;
+        }
+
         // Set source_type based on whether production_order_id is present
         if (empty($data['production_order_id'])) {
             $data['source_type'] = $data['source_type'] ?? 'opening_balance';
