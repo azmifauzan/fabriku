@@ -132,7 +132,9 @@ Usulan: satu landing `/aplikasi/stok-barang` yang menargetkan kelompok ini, dike
 - Di luar kategori: `kartu stok obat`/`apotek` (1,3K), `harga jual rumah`/`tanah`, `stok opname obat`.
 - Volume ~0 untuk query niche yang diuji: `hpp konveksi`, `harga jasa servis`, `catatan piutang`, `aplikasi stok opname barang gratis`. Bukan berarti tidak ada pencari, tapi tidak bisa jadi target utama. Pakai sebagai sub-topik.
 
-### Usulan swap keyword RankMySEO (keputusan pemilik)
+### Swap keyword RankMySEO (dijalankan 2026-10-27)
+
+Hasil akhir 10 keyword terlacak: `fabriku`, `aplikasi konveksi`, `laporan penjualan sederhana`, `aplikasi stok barang dan penjualan` (masih ada, belum dihapus pemilik), dan 6 yang baru: `cara menghitung hpp dan harga jual`, `contoh laporan penjualan harian`, `kartu stok barang`, `cara menghitung hpp makanan`, `contoh bill of material`, `aplikasi bengkel online`. Dihapus: `aplikasi toko`, `stok barang dan penjualan`, `aplikasi stok barang dan penjualan gratis`, `aplikasi produksi`, `software konveksi`, `stok`. Tabel di bawah adalah usulan awal.
 
 Plan Starter: 10 slot. Menghapus keyword ikut menghapus riwayatnya.
 
