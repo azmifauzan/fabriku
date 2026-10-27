@@ -26,6 +26,22 @@ if (gaMeasurementId && typeof window !== 'undefined') {
 
         const disable = () => (w[`ga-disable-${gaMeasurementId}`] = !marketingPage(page.component));
 
+        // A full page load after OAuth (Google sign-up) lands on a page without
+        // SeoHead, so gtag was never loaded; bootstrap it just for this event.
+        if (analyticsEvent && !w.gtag) {
+            const dataLayer = ((w as { dataLayer?: unknown[] }).dataLayer ??= []);
+            w.gtag = function () {
+                // eslint-disable-next-line prefer-rest-params
+                dataLayer.push(arguments);
+            };
+            w.gtag('js', new Date());
+            w.gtag('config', gaMeasurementId);
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = `https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`;
+            document.head.appendChild(script);
+        }
+
         if (analyticsEvent && w.gtag) {
             // gtag sends hits async; keep GA enabled until the conversion hit is out.
             w[`ga-disable-${gaMeasurementId}`] = false;
