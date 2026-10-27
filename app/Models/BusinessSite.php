@@ -24,6 +24,7 @@ class BusinessSite extends Model
         'draft_theme_version_id',
         'profile',
         'seo',
+        'ga_measurement_id',
         'status',
         'setup_completed_at',
         'published_at',
@@ -111,6 +112,13 @@ class BusinessSite extends Model
         $base = config('app.storefront_domain', 'fabriku.biz.id');
 
         return "https://{$this->slug}.{$base}";
+    }
+
+    public function googleAnalyticsMeasurementId(): ?string
+    {
+        $id = $this->ga_measurement_id;
+
+        return is_string($id) && preg_match('/\AG-[A-Z0-9]{4,20}\z/', $id) ? $id : null;
     }
 
     public static function isReservedSlug(string $slug): bool

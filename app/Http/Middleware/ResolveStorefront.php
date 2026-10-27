@@ -79,13 +79,18 @@ class ResolveStorefront
         // Remove storefront_host from route parameters so controller methods only receive path parameters
         $request->route()?->forgetParameter('storefront_host');
 
+        $analyticsNonce = $site->googleAnalyticsMeasurementId() ? base64_encode(random_bytes(18)) : null;
+        $request->attributes->set('storefront_analytics_nonce', $analyticsNonce);
+
         $response = $next($request);
 
         // Storefront pages can include session-backed forms and CSRF tokens.
         if ($request->isMethod('GET') && $response->isSuccessful()) {
             $response->headers->set('Cache-Control', 'private, no-store, no-cache, must-revalidate');
         }
-        $response->headers->set('Content-Security-Policy', "default-src 'none'; script-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+        $scriptPolicy = $analyticsNonce ? "'nonce-{$analyticsNonce}' https://www.googletagmanager.com/gtag/js" : "'none'";
+        $connectPolicy = $analyticsNonce ? 'https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com' : "'none'";
+        $response->headers->set('Content-Security-Policy', "default-src 'none'; script-src {$scriptPolicy}; connect-src {$connectPolicy}; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
 
         return $response;
     }

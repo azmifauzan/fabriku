@@ -18,6 +18,7 @@ type Site = {
     status: string;
     domain_status: string;
     custom_domain: string | null;
+    ga_measurement_id: string | null;
     profile: Record<string, string>;
     seo: Record<string, string> | null;
     recipients: Array<{ id: number; name: string }>;
@@ -81,6 +82,14 @@ const seoForm = useForm({
 
 function submitSeo() {
     seoForm.post('/website', { preserveScroll: true });
+}
+
+const analyticsForm = useForm({
+    ga_measurement_id: props.site.ga_measurement_id ?? '',
+});
+
+function submitAnalytics() {
+    analyticsForm.post('/website/analytics', { preserveScroll: true });
 }
 
 // Content Pages Forms
@@ -340,6 +349,39 @@ function copyToClipboard(text: string) {
                             Simpan SEO
                         </button>
                     </div>
+                </form>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Google Analytics 4</h3>
+                <p id="ga-help" class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                    Masukkan ID pengukuran GA4 untuk melihat statistik kunjungan toko. Kosongkan untuk mematikan pelacakan.
+                </p>
+                <form class="mt-4 space-y-4" @submit.prevent="submitAnalytics">
+                    <div>
+                        <label for="ga_measurement_id" class="block text-sm font-medium text-slate-700 dark:text-slate-300">ID pengukuran GA4</label>
+                        <input
+                            id="ga_measurement_id"
+                            v-model="analyticsForm.ga_measurement_id"
+                            type="text"
+                            maxlength="22"
+                            placeholder="G-XXXXXXXXXX"
+                            autocomplete="off"
+                            spellcheck="false"
+                            aria-describedby="ga-help ga-error"
+                            :aria-invalid="!!analyticsForm.errors.ga_measurement_id"
+                            class="mt-1 block min-h-11 w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 shadow-2xs focus:border-teal-600 focus:ring-teal-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        />
+                        <p id="ga-error" class="mt-1 text-sm text-rose-600" role="alert">{{ analyticsForm.errors.ga_measurement_id }}</p>
+                    </div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Gunakan ID dari Google Analytics → Admin → Aliran data → Web. Tidak perlu menempelkan kode skrip.</p>
+                    <button
+                        type="submit"
+                        :disabled="analyticsForm.processing"
+                        class="min-h-11 cursor-pointer rounded-lg bg-teal-800 px-5 py-2 text-sm font-semibold text-white hover:bg-teal-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-wait disabled:opacity-50 dark:bg-teal-700 dark:hover:bg-teal-600"
+                    >
+                        {{ analyticsForm.processing ? 'Menyimpan…' : 'Simpan Google Analytics' }}
+                    </button>
+                    <p v-if="analyticsForm.recentlySuccessful" class="text-sm text-teal-800 dark:text-teal-300" role="status">Pengaturan Google Analytics disimpan.</p>
                 </form>
             </div>
         </section>

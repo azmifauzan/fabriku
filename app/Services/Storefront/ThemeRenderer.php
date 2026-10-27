@@ -76,11 +76,15 @@ class ThemeRenderer
         $logoUrl = ($site->profile['logo_url'] ?? null) ?: $site->tenant->logo_url;
         $faviconUrl = e($logoUrl ?: '/favicon.ico');
         $touchIconUrl = e($logoUrl ?: '/apple-touch-icon.png');
+        $analytics = $site->googleAnalyticsMeasurementId() && request()->attributes->get('storefront_analytics_nonce')
+            ? View::make('storefront.analytics', ['site' => $site])->render()
+            : '';
 
         return <<<HTML
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    {$analytics}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{$title}</title>

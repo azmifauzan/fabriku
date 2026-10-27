@@ -208,6 +208,7 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check', CheckBusi
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/website', [WebsiteController::class, 'index'])->name('website.index');
     Route::post('/website', [WebsiteController::class, 'save'])->name('website.save');
+    Route::post('/website/analytics', [WebsiteController::class, 'analytics'])->name('website.analytics');
     Route::post('/website/theme', [WebsiteController::class, 'theme'])->name('website.theme');
     Route::post('/website/satsetui/launch', [WebsiteController::class, 'satsetuiLaunch'])->name('website.satsetui.launch');
     Route::get('/website/satsetui/import', [WebsiteController::class, 'satsetuiImport'])->name('website.satsetui.import');

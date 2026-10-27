@@ -42,6 +42,7 @@ type Site = {
     status: string;
     domain_status: string;
     custom_domain: string | null;
+    ga_measurement_id: string | null;
     setup_completed_at: string | null;
     profile: Record<string, string>;
     seo: Record<string, string> | null;

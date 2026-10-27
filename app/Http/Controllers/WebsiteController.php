@@ -391,6 +391,18 @@ class WebsiteController extends Controller
         return back()->with('success', 'Pengaturan website disimpan.');
     }
 
+    public function analytics(Request $request): RedirectResponse
+    {
+        $this->ensureManager($request);
+        abort_unless($request->user()->tenant->hasFeature('business_site'), 403);
+        $data = $request->validate([
+            'ga_measurement_id' => ['present', 'nullable', 'string', 'regex:/\AG-[A-Z0-9]{4,20}\z/'],
+        ]);
+        $this->site($request)->update($data);
+
+        return back()->with('success', 'Pengaturan Google Analytics disimpan.');
+    }
+
     public function theme(Request $request, ThemeRenderer $renderer): RedirectResponse
     {
         $this->ensureManager($request);
