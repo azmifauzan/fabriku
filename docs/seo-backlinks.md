@@ -35,14 +35,16 @@ Tambahkan satu tautan teks biasa di footer atau halaman "Produk kami" di `satset
 
 Footer menautkan ke `https://fabriku.id/?utm_source=<situs>&utm_medium=footer` dengan anchor "Fabriku". Sudah di-commit di repo masing-masing, **belum live** sampai di-deploy:
 
-| Situs | Repo | Commit footer |
-|---|---|---|
-| aspriai.web.id | aspri | `d3de800` |
-| santriq.web.id | santriq | `afdb9c5` |
-| satsetui.com | satsetui | `2873bff` |
-| yahoot.web.id | yahoot | `b0bf075` |
+| Situs | Repo | Commit footer | Status |
+|---|---|---|---|
+| aspriai.web.id | aspri | `d3de800` | Live 2026-10-27 (image `azmifauzan/aspri:271026-1`) |
+| yahoot.web.id | yahoot | `b0bf075` | Live 2026-10-27 (image `azmifauzan/yahoot:271026-1`) |
+| santriq.web.id | santriq | `afdb9c5` | Belum live: compose server memakai `pull_policy: never` |
+| satsetui.com | satsetui | `2873bff` | Belum live: compose server memakai `pull_policy: never` |
 
-Deploy keempatnya mengganti image `hermes-local/<app>:php-security-20261022` di server (PHP 8.4.27 untuk aspri dan yahoot, 8.5.12 untuk santriq dan satsetui) dengan image baru dari Dockerfile masing-masing. Bandingkan versi PHP image kandidat dengan yang berjalan sebelum menukar tag.
+Footer aspri dan yahoot dirender di sisi klien (Vue) dan app-nya tidak memakai SSR, jadi tautannya tidak ada di HTML mentah. Googlebot merender JavaScript sehingga tetap terbaca, tapi lebih lemah dibanding tautan di HTML server.
+
+Server menjalankan image `hermes-local/<app>:php-security-20261022` (hasil patch keamanan PHP). aspri dan yahoot sudah diganti ke image registry dengan versi PHP yang sama (8.4.27); backup compose ada di `docker-compose.yml.before-271026-1` di folder masing-masing. santriq dan satsetui sengaja hanya memakai image lokal (`pull_policy: never`), jadi belum diganti: butuh keputusan apakah image baru dimuat langsung ke server (`docker load`) atau pull_policy diubah.
 
 `satsetops.com` dan `suaranetijen.id` punya source lokal tapi tidak berjalan di server Fabriku, dan belum diubah (suaranetijen sudah menautkan ke Fabriku lewat sponsor).
 
