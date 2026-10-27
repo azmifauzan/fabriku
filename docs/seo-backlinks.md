@@ -31,6 +31,21 @@ Tambahkan satu tautan teks biasa di footer atau halaman "Produk kami" di `satset
 - URL: `https://fabriku.id`
 - Anchor: `Fabriku`, atau `Fabriku, aplikasi produksi dan stok untuk UMKM`. Jangan memakai anchor yang diulang-ulang berisi kata kunci.
 
+### Status tautan dari situs satu server (2026-10-27)
+
+Footer menautkan ke `https://fabriku.id/?utm_source=<situs>&utm_medium=footer` dengan anchor "Fabriku". Sudah di-commit di repo masing-masing, **belum live** sampai di-deploy:
+
+| Situs | Repo | Commit footer |
+|---|---|---|
+| aspriai.web.id | aspri | `d3de800` |
+| santriq.web.id | santriq | `afdb9c5` |
+| satsetui.com | satsetui | `2873bff` |
+| yahoot.web.id | yahoot | `b0bf075` |
+
+Deploy keempatnya mengganti image `hermes-local/<app>:php-security-20261022` di server (PHP 8.4.27 untuk aspri dan yahoot, 8.5.12 untuk santriq dan satsetui) dengan image baru dari Dockerfile masing-masing. Bandingkan versi PHP image kandidat dengan yang berjalan sebelum menukar tag.
+
+`satsetops.com` dan `suaranetijen.id` punya source lokal tapi tidak berjalan di server Fabriku, dan belum diubah (suaranetijen sudah menautkan ke Fabriku lewat sponsor).
+
 ## 2. Tulisan di platform artikel
 
 Gunakan topik yang sudah terbukti punya pencarian, dan tautkan ke post blog yang paling relevan, bukan ke homepage:
