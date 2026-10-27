@@ -182,10 +182,10 @@ return [
 
     'bengkel-jasa-servis' => [
         'category' => 'service',
-        'meta_title' => 'Aplikasi Bengkel & Jasa Servis: Layanan, Teknisi, Sparepart | Fabriku',
-        'meta_description' => 'Aplikasi untuk bengkel dan usaha jasa servis: katalog layanan, teknisi yang mengerjakan, pemakaian sparepart otomatis, pembayaran, dan laporan layanan.',
+        'meta_title' => 'Aplikasi Bengkel Online & Jasa Servis: Layanan, Teknisi, Sparepart | Fabriku',
+        'meta_description' => 'Aplikasi bengkel online berbasis web untuk bengkel motor, mobil, dan jasa servis: katalog layanan, teknisi, pemakaian sparepart otomatis, dan laporan layanan.',
         'eyebrow' => 'Jasa & Layanan',
-        'headline' => 'Aplikasi bengkel dan jasa servis untuk layanan, teknisi, dan sparepart.',
+        'headline' => 'Aplikasi bengkel online untuk layanan, teknisi, dan sparepart.',
         'intro' => 'Catat layanan yang dikerjakan, siapa teknisinya, dan sparepart atau bahan habis pakai yang terpakai. Stok berkurang otomatis saat transaksi selesai.',
         'pains' => [
             ['title' => 'Sparepart habis tanpa ketahuan', 'body' => 'Oli, filter, dan bahan habis pakai berkurang setiap servis, tapi tidak pernah dicatat per transaksi.'],

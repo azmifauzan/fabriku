@@ -4,11 +4,11 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use Database\Seeders\BlogSeeder;
 
-it('seeds 26 published blog posts across 4 categories with tags', function () {
+it('seeds 30 published blog posts across 4 categories with tags', function () {
     $this->seed(BlogSeeder::class);
 
-    expect(BlogPost::count())->toBe(26);
-    expect(BlogPost::where('status', 'published')->count())->toBe(26);
+    expect(BlogPost::count())->toBe(30);
+    expect(BlogPost::where('status', 'published')->count())->toBe(30);
     expect(BlogPost::whereNull('published_at')->count())->toBe(0);
     expect(BlogCategory::count())->toBe(4);
 
@@ -26,6 +26,6 @@ it('is idempotent and syncs updated content when seeded twice', function () {
     $this->seed(BlogSeeder::class);
     $this->seed(BlogSeeder::class);
 
-    expect(BlogPost::count())->toBe(26);
+    expect(BlogPost::count())->toBe(30);
     expect(BlogCategory::count())->toBe(4);
 });

@@ -290,13 +290,13 @@ MD,
             ],
             [
                 'slug' => 'cara-membuat-laporan-penjualan-umkm-sederhana',
-                'title' => 'Cara Membuat Laporan Penjualan UMKM Sederhana (Lengkap dengan Contoh Kolom)',
+                'title' => 'Cara Membuat Laporan Penjualan UMKM Sederhana: Contoh Harian, Mingguan, dan Template Excel',
                 'category' => 'Penjualan',
                 'tags' => ['Laporan Penjualan', 'UMKM', 'Excel'],
                 'days_ago' => 3,
-                'excerpt' => 'Laporan penjualan tidak harus rumit untuk mulai berguna. Ini kolom-kolom wajib dan langkah membuat laporan penjualan sederhana yang bisa langsung dipakai UMKM.',
-                'meta_title' => 'Cara Membuat Laporan Penjualan UMKM Sederhana',
-                'meta_description' => 'Cara membuat laporan penjualan UMKM sederhana lengkap dengan kolom wajib dan langkah-langkahnya, cocok untuk usaha kecil yang baru mulai mencatat.',
+                'excerpt' => 'Laporan penjualan tidak harus rumit untuk mulai berguna. Ini kolom wajib, contoh laporan penjualan harian dan mingguan, serta rumus Excel yang bisa langsung dipakai UMKM.',
+                'meta_title' => 'Contoh Laporan Penjualan Harian & Sederhana UMKM (Excel)',
+                'meta_description' => 'Contoh laporan penjualan harian dan sederhana untuk UMKM: kolom wajib, tabel siap salin ke Excel, rumus SUMIF, dan template rekap bulanan.',
                 'content' => <<<'MD'
 Banyak UMKM menunda membuat laporan penjualan karena mengira harus rumit dan butuh latar belakang akuntansi. Padahal laporan penjualan yang berguna bisa dimulai dari struktur yang sangat sederhana.
 
@@ -323,6 +323,34 @@ Sebelum mulai mencatat, siapkan struktur kolom berikut — baik di buku, Excel, 
 ## Excel vs Aplikasi Penjualan Digital
 
 Excel cocok untuk mulai karena gratis dan fleksibel. Tapi begitu transaksi harian mulai puluhan, mengisi Excel manual jadi rawan salah ketik dan lambat untuk sekadar tahu "berapa omzet hari ini". Aplikasi penjualan digital menghitung otomatis dari transaksi yang sudah tercatat di sistem, tanpa perlu input dobel.
+
+## Contoh Laporan Penjualan Harian (Siap Salin ke Excel)
+
+Laporan penjualan harian mencatat setiap transaksi dalam satu hari, satu baris per transaksi. Contoh berikut dari usaha kue rumahan yang menjual lewat toko, WhatsApp, dan reseller pada 12 Oktober:
+
+| No | Produk | Channel | Qty | Harga/Unit | Total | Pembayaran |
+|---|---|---|---|---|---|---|
+| 1 | Brownies potong | Toko | 12 | Rp8.000 | Rp96.000 | Tunai |
+| 2 | Brownies potong | WhatsApp | 20 | Rp8.000 | Rp160.000 | Transfer |
+| 3 | Bolu pisang | Toko | 5 | Rp25.000 | Rp125.000 | Tunai |
+| 4 | Bolu pisang | Reseller | 10 | Rp20.000 | Rp200.000 | Belum lunas |
+| | **Total** | | **47** | | **Rp581.000** | |
+
+Di bawah tabel, tambahkan tiga baris ringkasan supaya laporan harian langsung bisa dicocokkan dengan uang di laci dan rekening:
+
+- **Tunai**: Rp221.000 → cocokkan dengan isi laci kas.
+- **Transfer**: Rp160.000 → cocokkan dengan mutasi rekening.
+- **Belum lunas**: Rp200.000 → masuk daftar piutang reseller.
+
+Kalau tabel di atas disalin ke Excel dengan kolom A = No sampai G = Pembayaran, rumus ringkasannya:
+
+- Total omzet hari ini: `=SUM(F2:F5)`
+- Total tunai: `=SUMIF(G2:G5;"Tunai";F2:F5)`
+- Omzet per channel, misalnya reseller: `=SUMIF(C2:C5;"Reseller";F2:F5)`
+
+Untuk laporan penjualan harian di Excel, buat satu sheet per bulan dan tambahkan kolom tanggal di depan, bukan satu file per hari. Satu sheet panjang lebih mudah direkap dengan SUMIFS atau PivotTable di akhir bulan.
+
+Toko yang menjual ratusan barang kecil dengan harga grosir dan eceran butuh kolom tambahan. Lihat [contoh laporan penjualan harian toko sembako](/blog/contoh-laporan-penjualan-harian-toko-sembako).
 
 ## Contoh Laporan Penjualan Mingguan Sederhana
 
@@ -451,13 +479,13 @@ MD,
             ],
             [
                 'slug' => 'cara-menghitung-hpp-produk-umkm',
-                'title' => 'Cara Menghitung HPP Produk UMKM agar Tidak Salah Tentukan Harga Jual',
+                'title' => 'Cara Menghitung HPP dan Harga Jual Produk UMKM (Rumus per Unit, Contoh, Template Excel)',
                 'category' => 'Keuangan',
                 'tags' => ['HPP', 'Keuangan UMKM', 'UMKM'],
                 'days_ago' => 14,
-                'excerpt' => 'Harga jual yang asal tebak sering jadi penyebab UMKM rugi tanpa sadar. Ini cara menghitung HPP produk UMKM langkah demi langkah, lengkap dengan contoh perhitungan.',
-                'meta_title' => 'Cara Menghitung HPP Produk UMKM (Lengkap dengan Contoh)',
-                'meta_description' => 'Cara menghitung HPP (harga pokok produksi) produk UMKM langkah demi langkah, lengkap dengan rumus dan contoh perhitungan supaya harga jual tidak rugi.',
+                'excerpt' => 'Harga jual yang asal tebak sering jadi penyebab UMKM rugi tanpa sadar. Ini cara menghitung HPP per unit dan harga jual langkah demi langkah, lengkap dengan contoh perhitungan produksi.',
+                'meta_title' => 'Cara Menghitung HPP dan Harga Jual per Unit (Contoh UMKM)',
+                'meta_description' => 'Cara menghitung HPP produksi per unit dan harga jual untuk UMKM: rumus, komponen biaya, contoh tabel, markup vs margin, dan template Excel.',
                 'content' => <<<'MD'
 Salah satu penyebab UMKM merasa "ramai order tapi untungnya tipis" adalah harga jual yang ditentukan dari perkiraan, bukan dari perhitungan HPP (harga pokok produksi) yang sebenarnya. Tanpa tahu HPP, mustahil tahu pasti apakah harga jual sudah menutup semua biaya atau justru menggerus modal pelan-pelan.
 
@@ -474,7 +502,7 @@ Empat komponen ini wajib masuk hitungan, sekecil apa pun nilainya:
 3. **Biaya overhead produksi** — listrik, gas, penyusutan alat, dan biaya operasional lain yang terpakai selama proses produksi, meski tidak selalu terlihat langsung per unit.
 4. **Biaya kemasan** — sering terlewat padahal untuk sebagian usaha, biaya kemasan bisa cukup signifikan dibanding biaya bahan baku utamanya.
 
-## Rumus Sederhana Menghitung HPP
+## Cara Menghitung HPP per Unit: Rumus Dasar
 
 Rumus paling dasar: **HPP per unit = Total Biaya Produksi ÷ Jumlah Unit yang Dihasilkan**
 
@@ -498,9 +526,9 @@ Supaya mudah ditiru, berikut rincian contoh tas kain di atas dalam bentuk tabel.
 
 Kolom "per unit" penting karena memperlihatkan komponen mana yang paling berat. Di contoh ini bahan baku menyumbang 60% HPP, jadi kenaikan harga bahan baku 10% saja langsung menaikkan HPP Rp3.000 per tas.
 
-## Markup vs Margin: Jangan Sampai Tertukar
+## Cara Menghitung HPP dan Harga Jual: Markup vs Margin
 
-Dua istilah ini sering dipakai bergantian padahal hasilnya berbeda:
+Setelah HPP per unit diketahui, harga jual dihitung dari HPP dengan salah satu dari dua cara. Dua istilah ini sering dipakai bergantian padahal hasilnya berbeda:
 
 - **Markup** dihitung dari HPP. Markup 40% atas HPP Rp50.000 berarti harga jual Rp70.000.
 - **Margin** dihitung dari harga jual. Dengan harga jual Rp70.000 dan HPP Rp50.000, keuntungannya Rp20.000, atau margin **28,6%** dari harga jual.
@@ -525,6 +553,14 @@ Untuk usaha makanan, HPP lebih mudah dihitung per resep atau per adonan, lalu di
 HPP per potong = Rp64.200 ÷ 16 = **Rp4.013**, dibulatkan Rp4.000. Belum termasuk upah membuat. Jika satu adonan dikerjakan 1 jam dengan upah Rp15.000/jam, tambahkan Rp940 per potong sehingga HPP menjadi sekitar Rp5.000. Dengan harga jual Rp8.000 per potong, margin terhadap harga jual adalah 37,5%.
 
 Satu hal yang sering terlewat di usaha makanan adalah **susut dan gagal produksi**. Kalau rata-rata 1 dari 16 potong pecah atau tidak layak jual, HPP sebenarnya dibagi 15, bukan 16 — naik sekitar 7%.
+
+Untuk usaha kuliner yang menjual banyak menu, termasuk minuman dan pesanan lewat aplikasi ojek online, baca panduan khusus [cara menghitung HPP makanan per porsi](/blog/cara-menghitung-hpp-makanan-per-porsi).
+
+## Cara Menghitung HPP Produksi untuk Beberapa Produk Sekaligus
+
+Satu batch produksi sering menghasilkan lebih dari satu jenis produk, misalnya satu gulung kain dipotong menjadi kaos dan totebag, atau satu adonan dibagi menjadi bolu dan muffin. Biaya yang bisa ditelusuri langsung (kain untuk kaos, cup muffin) dibebankan ke produknya masing-masing. Biaya bersama seperti upah harian, listrik, dan gas dibagi berdasarkan porsi pemakaian, biasanya jumlah unit atau lama pengerjaan.
+
+Contoh: upah harian Rp300.000 dipakai untuk membuat 40 kaos (6 jam) dan 30 totebag (2 jam). Pembagian berdasarkan waktu memberi kaos Rp225.000 (Rp5.625 per kaos) dan totebag Rp75.000 (Rp2.500 per totebag). Pembagian per unit akan memberi angka yang sama untuk keduanya (Rp4.286), padahal kaos jauh lebih lama dikerjakan. Pilih dasar pembagian yang paling mendekati kenyataan, lalu pakai cara yang sama setiap bulan.
 
 ## Template HPP Sederhana di Excel
 
@@ -731,7 +767,7 @@ MD,
                 'days_ago' => 2,
                 'excerpt' => 'Usaha jasa seperti bengkel atau reparasi elektronik sering asal pasang tarif tanpa hitung biaya sebenarnya. Ini cara menghitung harga jasa servis kecil supaya untung, bukan sekadar ramai order.',
                 'meta_title' => 'Cara Menghitung Harga Jasa Servis Kecil agar Tidak Rugi',
-                'meta_description' => 'Cara menghitung harga jasa servis kecil (bengkel, laundry, reparasi elektronik) agar tidak rugi: komponen biaya waktu, bahan pendukung, dan overhead alat.',
+                'meta_description' => 'Cara menghitung HPP jasa dan harga jasa servis kecil (bengkel, laundry, reparasi elektronik) agar tidak rugi: rumus, komponen biaya, dan contoh tarif.',
                 'content' => <<<'MD'
 Usaha jasa seperti bengkel motor, reparasi elektronik, atau laundry punya tantangan hitung-hitungan yang beda dari usaha yang jual barang. Tidak ada bahan baku yang diubah jadi produk, tidak ada stok barang jadi — yang ada cuma waktu kerja, bahan pendukung yang habis pakai, dan alat yang dipakai berulang kali. Karena tidak ada "HPP produk" yang jelas seperti usaha manufaktur, banyak pemilik usaha jasa menentukan tarif dari kebiasaan atau menyamakan dengan kompetitor, tanpa benar-benar tahu apakah tarif itu menutup biaya sebenarnya.
 
@@ -757,9 +793,19 @@ Alat yang dipakai berulang kali — kompresor, mesin cuci, solder — tetap meng
 
 Setelah tiga komponen di atas dijumlahkan, tambahkan margin yang jadi keuntungan usaha. Tanpa margin yang jelas, usaha jasa bisa terus beroperasi hanya menutup biaya, tanpa benar-benar menghasilkan laba yang bisa dipakai berkembang.
 
+## Cara Menghitung HPP Jasa
+
+HPP jasa adalah biaya langsung untuk mengerjakan satu layanan, sebelum ditambah keuntungan. Tidak ada bahan baku yang berubah jadi produk, jadi komponennya adalah tiga yang pertama di atas:
+
+**HPP jasa = (waktu kerja × tarif tenaga kerja per jam) + bahan pendukung + biaya alat**
+
+**Harga jasa = HPP jasa × (1 + markup)**
+
+Sparepart atau barang yang ikut diganti tidak masuk HPP jasa. Barang itu punya HPP sendiri (harga beli) dan ditagih terpisah. Memisahkan keduanya membuat Anda tahu apakah usaha untung dari jasanya atau hanya dari jualan sparepart. Contoh di bawah memakai rumus ini.
+
 ## Contoh Perhitungan: Servis Ganti Oli dan Tune Up Motor
 
-Misalnya sebuah bengkel menghitung harga jasa tune up motor: waktu kerja 45 menit dengan tarif tenaga kerja Rp40.000/jam (setara Rp30.000), bahan pendukung seperti cairan pembersih karburator dan majun Rp10.000, biaya listrik dan penyusutan alat kompresor diperkirakan Rp5.000. Total biaya: Rp45.000.
+Misalnya sebuah bengkel menghitung harga jasa tune up motor: waktu kerja 45 menit dengan tarif tenaga kerja Rp40.000/jam (setara Rp30.000), bahan pendukung seperti cairan pembersih karburator dan majun Rp10.000, biaya listrik dan penyusutan alat kompresor diperkirakan Rp5.000. HPP jasa tune up: Rp45.000.
 
 Kalau bengkel ingin markup 50% di atas biaya, harga jasa minimal yang masuk akal adalah Rp45.000 + (50% × Rp45.000) = Rp67.500, dibulatkan jadi Rp70.000 di luar harga sparepart yang diganti (oli, busi, dll dihitung terpisah sesuai harga beli). Kalau selama ini dipatok Rp50.000 rata dengan bengkel sebelah tanpa hitungan ini, marginnya jauh lebih tipis dari yang dikira, bahkan bisa nombok kalau servisnya ternyata makan waktu lebih lama dari biasanya.
 
@@ -1110,6 +1156,8 @@ Kesalahan paling umum adalah menjadwalkan opname bergulir tapi tidak konsisten m
 
 Sebelum mulai opname bergulir, ada baiknya proses [pengelolaan retur barang](/blog/cara-kelola-stok-retur-barang-umkm-retail) di toko juga sudah rapi — retur yang tidak tercatat benar adalah salah satu penyebab paling umum selisih stok yang baru ketahuan saat opname. Prinsip dasar pencatatan stok yang konsisten ini juga berlaku untuk bahan baku, bukan cuma barang jadi retail — lihat [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi) untuk gambaran yang lebih luas.
 
+Opname bergulir paling mudah dijalankan bila setiap barang punya catatan keluar-masuk yang rapi; formatnya bisa dilihat di [contoh kartu stok barang](/blog/kartu-stok-barang-contoh-cara-mengisi-template-excel).
+
 Fabriku mencatat pergerakan stok per item dan lokasi secara real-time, sehingga opname bergulir bisa dibandingkan langsung dengan catatan sistem per zona, tanpa harus menghentikan seluruh operasional toko untuk mencocokkan angka.
 MD,
             ],
@@ -1272,10 +1320,14 @@ MD,
                 'tags' => ['Konveksi', 'Produksi', 'BOM'],
                 'days_ago' => 0,
                 'excerpt' => 'Tanpa BOM per varian, konveksi menghitung kebutuhan kain dengan kira-kira dan baru sadar kurang saat potong. Ini cara menyusun BOM per ukuran dan warna, lengkap dengan contoh.',
-                'meta_title' => 'Cara Membuat BOM Produksi Konveksi per Ukuran & Warna',
-                'meta_description' => 'Cara membuat BOM (bill of material) produksi konveksi per ukuran dan warna: komponen, konsumsi kain per size, toleransi susut, dan contoh order kaos.',
+                'meta_title' => 'Contoh Bill of Material (BOM) Konveksi + Template Excel',
+                'meta_description' => 'Apa itu bill of material (BOM), contoh BOM konveksi per ukuran dan warna, rumus kebutuhan kain dengan toleransi susut, dan template BOM sederhana di Excel.',
                 'content' => <<<'MD'
 Order 300 kaos dengan tiga warna dan lima ukuran terdengar sederhana sampai kain yang dibeli ternyata kurang untuk ukuran XL warna hitam, sementara kain putih tersisa dua roll. Masalahnya hampir selalu sama: kebutuhan bahan dihitung dari rata-rata, bukan dari daftar bahan per varian. Daftar inilah yang disebut **BOM (bill of material)**.
+
+## Apa Itu Bill of Material (BOM)
+
+Bill of material (BOM) adalah daftar lengkap bahan, komponen, dan jumlahnya yang dibutuhkan untuk membuat satu unit produk jadi. Istilah ini dipakai di semua jenis produksi, dari pabrik elektronik sampai dapur kue: resep dengan takaran juga merupakan BOM. Bedanya dengan daftar belanja, BOM ditulis per unit produk, sehingga kebutuhan untuk berapa pun jumlah order bisa dihitung dengan perkalian.
 
 ## Apa Itu BOM dalam Produksi Konveksi
 
@@ -1316,7 +1368,7 @@ Kain tidak terpakai 100%. Ada sisa potongan, kain cacat, dan susut setelah dicuc
 
 **Kebutuhan kain = konsumsi per potong × jumlah potong × (1 + toleransi)**
 
-## Contoh: Order 300 Kaos, Tiga Warna
+## Contoh Bill of Material: Order 300 Kaos, Tiga Warna
 
 Order dari pelanggan:
 
@@ -1332,9 +1384,19 @@ Kain putih: (10×0,20) + (25×0,22) + (30×0,24) + (20×0,27) + (5×0,30) = 2 + 
 
 Bandingkan jika dihitung rata-rata 0,24 kg × 120 potong = 28,8 kg untuk warna hitam. Setelah toleransi menjadi 30,2 kg — kurang sekitar 0,5 kg, setara dua potong XL yang tidak bisa dipotong.
 
-## Simpan BOM sebagai Data, Bukan Ingatan
+## Template Bill of Material Sederhana di Excel
 
-BOM yang hanya ada di kepala kepala produksi akan hilang saat orangnya cuti atau berhenti. Simpan dalam tabel dengan kolom: *Produk, Ukuran, Warna, Bahan, Jumlah, Satuan, Toleransi*. Perbarui setiap kali pola berubah atau ganti supplier kain dengan gramasi berbeda.
+BOM yang hanya ada di kepala kepala produksi akan hilang saat orangnya cuti atau berhenti. Simpan dalam tabel, satu baris per bahan per varian:
+
+| Produk | Ukuran | Warna | Bahan | Jumlah per unit | Satuan | Toleransi |
+|---|---|---|---|---|---|---|
+| Kaos basic | M | Hitam | Kain cotton combed 30s | 0,22 | kg | 5% |
+| Kaos basic | M | Hitam | Rib leher | 0,02 | kg | 5% |
+| Kaos basic | M | Hitam | Benang jahit (1 cone ≈ 40 kaos) | 0,025 | cone | 0% |
+| Kaos basic | M | Hitam | Label + hangtag | 1 | pcs | 2% |
+| Kaos basic | M | Hitam | Plastik kemasan | 1 | pcs | 2% |
+
+Di sheet kedua, tulis order per varian. Kebutuhan tiap bahan = *Jumlah per unit × qty order × (1 + Toleransi)*, lalu jumlahkan per bahan dengan `SUMIF` atau PivotTable untuk mendapat daftar belanja. Perbarui baris BOM setiap kali pola berubah atau ganti supplier kain dengan gramasi berbeda.
 
 Setelah produksi selesai, bandingkan kain yang benar-benar keluar gudang dengan kebutuhan menurut BOM. Selisih di atas toleransi adalah tanda ada pemborosan di proses potong, atau ada kain yang tidak tercatat keluar.
 
@@ -1868,6 +1930,417 @@ Catat sebagai produk tersendiri atau tambahkan baris catatan bahan tambahan untu
 Biasanya saat produk sudah lebih dari lima, pesanan datang setiap hari, atau ada lebih dari satu orang yang memproduksi. Baca [kapan usaha rumahan butuh sistem pencatatan](/blog/kapan-usaha-rumahan-butuh-sistem-pencatatan).
 
 Fabriku menyediakan pencatatan produksi sederhana untuk usaha rumahan: pilih bahan yang dipakai dan jumlah hasil jadi dalam satu form, lalu stok bahan berkurang dan stok produk bertambah otomatis, dengan biaya per unit dihitung dari bahan yang dipakai. Lihat [Fabriku untuk produksi rumahan](/aplikasi/produksi-rumahan).
+MD,
+            ],
+            [
+                'slug' => 'kartu-stok-barang-contoh-cara-mengisi-template-excel',
+                'title' => 'Kartu Stok Barang: Contoh, Cara Mengisi, dan Template Excel untuk Toko dan Gudang',
+                'category' => 'Manajemen Stok',
+                'tags' => ['Stok Barang', 'Retail', 'Excel'],
+                'days_ago' => 0,
+                'excerpt' => 'Kartu stok barang adalah catatan keluar-masuk satu barang yang menunjukkan sisa stok kapan saja. Ini contoh kartu stok barang, cara mengisinya, versi gudang, dan template Excel yang bisa langsung dipakai.',
+                'meta_title' => 'Contoh Kartu Stok Barang + Cara Mengisi & Template Excel',
+                'meta_description' => 'Contoh kartu stok barang untuk toko dan gudang, fungsi kartu stok, cara mengisi kolom masuk-keluar-sisa, dan template kartu stok barang di Excel.',
+                'content' => <<<'MD'
+Stok di catatan bilang masih 20, di rak tinggal 12. Selisih seperti ini hampir selalu terjadi karena barang masuk dan keluar tidak dicatat di satu tempat yang sama. Alat paling sederhana untuk mencegahnya adalah **kartu stok barang**.
+
+## Apa Itu Kartu Stok Barang
+
+Kartu stok barang adalah catatan semua pergerakan satu jenis barang: kapan masuk, kapan keluar, berapa jumlahnya, dan berapa sisanya setelah setiap transaksi. Satu barang punya satu kartu. Toko dengan 200 jenis barang berarti punya 200 kartu stok, baik berupa lembar kertas, sheet Excel, maupun data di aplikasi.
+
+Fungsi kartu stok:
+
+1. **Mengetahui sisa stok kapan saja** tanpa menghitung fisik setiap hari.
+2. **Menelusuri selisih.** Saat hitungan fisik berbeda dengan kartu, Anda bisa melihat transaksi mana yang mencurigakan.
+3. **Dasar belanja ulang.** Kecepatan barang keluar terlihat dari kolom keluar, jadi Anda tahu kapan harus pesan lagi.
+4. **Bukti untuk stok opname.** Hasil hitung fisik dicocokkan dengan sisa di kartu.
+
+Kartu stok hanya mencatat **jumlah**. Bila setiap baris juga mencatat nilai rupiah (harga beli per unit dan nilai sisa), namanya kartu persediaan, yang dipakai untuk menghitung nilai stok di laporan keuangan.
+
+## Kolom Wajib di Kartu Stok
+
+Bagian atas kartu berisi identitas barang: nama barang, kode/SKU, satuan, lokasi rak, dan stok minimum. Bagian tabelnya berisi:
+
+- **Tanggal** transaksi.
+- **No. bukti**: nomor nota pembelian, nomor pesanan, atau keterangan "rekap kasir".
+- **Keterangan**: dari supplier mana, untuk siapa, atau alasan keluar (terjual, rusak, retur, pindah gudang).
+- **Masuk**: jumlah barang yang bertambah.
+- **Keluar**: jumlah barang yang berkurang.
+- **Sisa**: sisa stok setelah transaksi = sisa sebelumnya + masuk − keluar.
+- **Paraf** petugas, bila lebih dari satu orang yang mengisi.
+
+## Contoh Kartu Stok Barang
+
+Contoh kartu stok untuk minyak goreng 2 liter di sebuah toko, satu minggu pertama Oktober:
+
+| Tanggal | No. Bukti | Keterangan | Masuk | Keluar | Sisa |
+|---|---|---|---|---|---|
+| 1 Okt | — | Saldo awal | | | 24 |
+| 2 Okt | PB-0012 | Pembelian dari CV Sumber Rejeki | 36 | | 60 |
+| 2 Okt | Rekap kasir | Penjualan hari ini | | 14 | 46 |
+| 3 Okt | Rekap kasir | Penjualan hari ini | | 18 | 28 |
+| 4 Okt | — | Rusak, kemasan bocor | | 2 | 26 |
+| 5 Okt | Rekap kasir | Penjualan hari ini | | 11 | 15 |
+| 5 Okt | Opname | Hitung fisik 14, selisih −1 | | 1 | 14 |
+
+Dari satu kartu ini terlihat: rata-rata terjual sekitar 14 pouch per hari, stok 14 hanya cukup untuk sekitar satu hari, dan ada satu pouch hilang yang perlu dicari penyebabnya. Tanpa kartu stok, yang diketahui hanya "minyak tinggal sedikit".
+
+## Cara Mengisi Kartu Stok Barang
+
+1. **Mulai dari saldo awal hasil hitung fisik**, bukan dari perkiraan. Kartu yang dimulai dari angka salah akan salah terus.
+2. **Catat setiap barang masuk saat diterima**, dengan nomor nota supplier. Barang yang datang tapi belum dicatat adalah penyebab paling umum stok terlihat kurang.
+3. **Catat barang keluar dengan alasannya.** Terjual, rusak, kedaluwarsa, retur ke supplier, dipakai sendiri, atau dipindah ke gudang lain dicatat sebagai baris terpisah. Alasan ini yang membuat selisih bisa ditelusuri.
+4. **Hitung sisa di setiap baris**, bukan hanya di akhir hari.
+5. **Cocokkan dengan hitung fisik secara berkala.** Selisih dicatat sebagai baris koreksi dengan keterangan "opname", bukan dengan menimpa angka sisa.
+
+Untuk toko dengan puluhan transaksi sehari, mencatat setiap struk ke kartu stok tidak realistis. Cukup tulis satu baris **rekap penjualan per barang** di akhir hari, seperti contoh di atas. Hasilnya tetap bisa dipakai, asalkan barang masuk dan barang rusak tetap dicatat per kejadian.
+
+## Kartu Stok Gudang
+
+Bila barang disimpan di lebih dari satu tempat, misalnya gudang belakang dan rak toko, buat **satu kartu per barang per lokasi**. Perpindahan barang dicatat dua kali: keluar di kartu gudang dan masuk di kartu rak toko, dengan nomor bukti yang sama. Dengan begitu stok per lokasi selalu jelas, dan barang yang "hilang di jalan" antara gudang dan toko langsung ketahuan.
+
+Tambahkan kolom **lokasi rak** di identitas kartu. Petugas yang mencari barang tidak perlu bertanya, dan hitung fisik bisa dilakukan per rak.
+
+## Template Kartu Stok Barang di Excel
+
+Ada dua cara menyusun kartu stok di Excel.
+
+**Cara 1: satu sheet per barang.** Kolom A = Tanggal, B = No. Bukti, C = Keterangan, D = Masuk, E = Keluar, F = Sisa. Isi saldo awal di F2, lalu di F3 tulis `=F2+D3-E3` dan tarik ke bawah. Cocok untuk barang yang sedikit jenisnya.
+
+**Cara 2: satu sheet transaksi untuk semua barang.** Kolom A = Tanggal, B = Kode Barang, C = Keterangan, D = Masuk, E = Keluar. Di sheet lain, buat daftar barang dan hitung sisa dengan:
+
+`=SUMIFS(Transaksi!D:D;Transaksi!B:B;A2)-SUMIFS(Transaksi!E:E;Transaksi!B:B;A2)`
+
+dengan A2 berisi kode barang. Tambahkan kolom stok minimum dan format bersyarat (merah bila sisa ≤ minimum) untuk melihat barang yang harus dipesan. Cara kedua lebih tahan lama karena menambah barang baru cukup menambah satu baris di daftar.
+
+Pemisah argumen `;` atau `,` tergantung pengaturan bahasa Excel Anda.
+
+## Kesalahan yang Membuat Kartu Stok Tidak Bisa Dipercaya
+
+- **Sisa ditimpa saat opname.** Angka lama hilang dan penyebab selisih tidak pernah ketahuan. Selalu catat koreksi sebagai baris baru.
+- **Barang rusak dan retur tidak dicatat.** Kartu terlihat benar, tapi barang di rak berkurang tanpa jejak. Baca juga [cara kelola stok retur barang](/blog/cara-kelola-stok-retur-barang-umkm-retail).
+- **Satuan tercampur.** Masuk dicatat per dus, keluar per pcs. Tetapkan satu satuan terkecil per kartu.
+- **Pengisian ditunda.** Kartu yang diisi seminggu sekali dari ingatan hampir pasti meleset.
+
+## Pertanyaan yang Sering Muncul
+
+**Apa bedanya kartu stok dengan stok opname?**
+Kartu stok adalah catatan berjalan setiap hari. Stok opname adalah kegiatan menghitung fisik barang untuk dicocokkan dengan kartu stok. Keduanya saling melengkapi; lihat [cara stok opname toko tanpa tutup toko](/blog/cara-stok-opname-toko-retail-tanpa-tutup-toko).
+
+**Apakah usaha kecil perlu kartu stok untuk semua barang?**
+Mulailah dari barang yang paling laku dan paling mahal, biasanya 20–30 barang yang menyumbang sebagian besar omzet. Barang lain cukup dicek saat opname rutin.
+
+**Kartu stok bahan baku sama dengan kartu stok barang jadi?**
+Formatnya sama. Untuk bahan baku, kolom keluar biasanya berisi pemakaian produksi. Bahan yang punya tanggal kedaluwarsa sebaiknya dicatat per penerimaan agar yang lama dipakai lebih dulu; lihat [cara mengelola stok bahan baku UMKM](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi).
+
+## Kapan Kartu Stok Manual Mulai Merepotkan
+
+Kartu stok kertas atau Excel bekerja baik selama jenis barang sedikit dan satu orang yang mengisi. Begitu barang ratusan, ada beberapa lokasi, dan penjualan datang dari toko serta online sekaligus, menjumlahkan semua kartu menjadi pekerjaan harian tersendiri.
+
+Di Fabriku, setiap item stok punya lokasi rak dan riwayat pergerakannya sendiri: pembelian dari supplier, hasil produksi, koreksi, barang rusak, hilang, retur, dan pindah rak tercatat sebagai baris riwayat, sementara stok berkurang otomatis saat pesanan selesai. Sisa stok per lokasi bisa dilihat tanpa menjumlahkan kartu satu per satu, dan laporan stok bisa diekspor ke Excel atau PDF. Lihat [Fabriku untuk toko retail](/aplikasi/toko-retail).
+MD,
+            ],
+            [
+                'slug' => 'cara-menghitung-hpp-makanan-per-porsi',
+                'title' => 'Cara Menghitung HPP Makanan per Porsi: Contoh Nasi Ayam, Minuman, dan Template Excel',
+                'category' => 'Keuangan',
+                'tags' => ['HPP', 'Kuliner Rumahan', 'UMKM'],
+                'days_ago' => 0,
+                'excerpt' => 'HPP makanan dihitung dari harga bahan per gram dikali takaran resep, ditambah kemasan, gas, tenaga kerja, dan susut. Ini cara menghitung HPP makanan per porsi lengkap dengan contoh nasi ayam dan es kopi susu.',
+                'meta_title' => 'Cara Menghitung HPP Makanan per Porsi (Contoh & Excel)',
+                'meta_description' => 'Cara menghitung HPP makanan dan minuman per porsi: harga bahan per gram, contoh nasi ayam geprek dan es kopi susu, overhead, susut, dan template Excel.',
+                'content' => <<<'MD'
+Usaha makanan sering terlihat ramai tapi uangnya tidak bertambah. Penyebab yang paling sering ditemukan: harga jual ditentukan dari harga warung sebelah, bukan dari **HPP (harga pokok penjualan) per porsi**. Artikel ini membahas cara menghitungnya khusus untuk makanan dan minuman, di mana bahan dibeli per kilo tapi dijual per porsi.
+
+## Komponen HPP Makanan
+
+1. **Bahan utama**: beras, ayam, daging, tepung, telur, susu, kopi.
+2. **Bumbu, minyak, dan pelengkap**: sering dianggap "sedikit" sehingga tidak dihitung, padahal bisa mencapai 10–20% dari biaya bahan.
+3. **Kemasan**: box, cup, sendok, plastik, stiker. Untuk pesanan antar, kemasan bisa lebih mahal dari bumbunya.
+4. **Gas dan listrik**: kompor, oven, freezer, blender.
+5. **Tenaga kerja**: termasuk waktu pemilik bila ikut memasak.
+6. **Susut dan gagal**: bahan terbuang, porsi gagal, sisa yang tidak terjual.
+
+## Langkah 1: Ubah Harga Beli Menjadi Harga per Gram atau per Butir
+
+Resep memakai gram dan mililiter, sedangkan nota belanja memakai kilo dan liter. Ubah semua ke satuan resep:
+
+| Bahan | Harga beli | Isi | Harga per satuan resep |
+|---|---|---|---|
+| Beras | Rp14.000 | 1 kg | Rp14/g |
+| Ayam potong | Rp40.000 | 1 kg | Rp40/g |
+| Tepung bumbu | Rp10.000 | 500 g | Rp20/g |
+| Minyak goreng | Rp36.000 | 2 L | Rp18/ml |
+| Susu UHT | Rp18.000 | 1 L | Rp18/ml |
+
+Pakai harga dari nota belanja terakhir, bukan harga yang diingat. Untuk ayam dan daging, hitung dari berat yang benar-benar dipakai setelah dibersihkan bila tulang dan kulit dibuang.
+
+## Contoh 1: HPP Nasi Ayam Geprek per Porsi
+
+| Komponen | Takaran per porsi | Biaya |
+|---|---|---|
+| Nasi | 100 g beras | Rp1.400 |
+| Ayam | 100 g | Rp4.000 |
+| Tepung bumbu | 30 g | Rp600 |
+| Minyak terserap | 30 ml | Rp540 |
+| Sambal (cabai, bawang, garam) | 1 porsi | Rp1.500 |
+| Lalapan | 1 porsi | Rp500 |
+| Kemasan (box, sendok, plastik) | 1 set | Rp1.800 |
+| Gas (estimasi) | — | Rp400 |
+| **Subtotal bahan + kemasan + gas** | | **Rp10.740** |
+
+Biaya sambal dihitung dari satu kali membuat sambal dibagi jumlah porsi. Misalnya cabai, bawang, dan garam Rp45.000 untuk 30 porsi berarti Rp1.500 per porsi.
+
+Tambahkan tenaga kerja. Bila satu orang dibayar Rp100.000 per hari dan menyiapkan 80 porsi, tenaga kerja per porsi Rp1.250. **HPP nasi ayam geprek = Rp10.740 + Rp1.250 = Rp11.990**, dibulatkan Rp12.000.
+
+## Contoh 2: HPP Minuman per Cup (Es Kopi Susu Gula Aren)
+
+| Komponen | Takaran per cup | Biaya |
+|---|---|---|
+| Kopi bubuk (Rp200.000/kg) | 18 g | Rp3.600 |
+| Susu UHT | 150 ml | Rp2.700 |
+| Gula aren cair (Rp40/ml) | 25 ml | Rp1.000 |
+| Es batu | 1 cup | Rp300 |
+| Cup, tutup, sedotan | 1 set | Rp1.500 |
+| **HPP bahan + kemasan** | | **Rp9.100** |
+
+Untuk minuman, kemasan sering menjadi komponen terbesar kedua setelah bahan utama. Ganti cup ke ukuran lebih besar dan HPP langsung naik, walaupun resepnya sama.
+
+## Contoh 3: Kue dan Roti per Loyang
+
+Untuk kue dan roti, hitung HPP per adonan atau per loyang, lalu bagi dengan jumlah potong yang **layak jual**. Contoh lengkap brownies per loyang ada di [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm). Bila satu dapur membuat beberapa jenis kue dengan bahan yang sama, baca [cara mencatat produksi banyak produk dalam satu dapur](/blog/cara-mencatat-produksi-banyak-produk-satu-dapur-rumahan).
+
+## Langkah 2: Bagi Gas, Listrik, dan Tenaga Kerja
+
+Gas dan listrik sulit dihitung per porsi secara langsung. Cara praktis: jumlahkan biaya gas dan listrik untuk produksi selama sebulan, lalu bagi dengan jumlah porsi yang terjual bulan itu. Bila gas dan listrik Rp600.000 sebulan dan terjual 1.500 porsi, overhead per porsi Rp400. Angka ini cukup ditinjau ulang setiap beberapa bulan.
+
+## Langkah 3: Hitung Susut dan Sisa Tidak Terjual
+
+Bila dari 80 porsi yang disiapkan rata-rata 5 tidak terjual dan dibuang, biaya 80 porsi harus ditanggung oleh 75 porsi yang terjual. HPP Rp12.000 menjadi Rp12.000 × 80 ÷ 75 = **Rp12.800**. Usaha makanan dengan sisa harian tinggi sering salah menyimpulkan menunya untung, padahal susutnya memakan margin.
+
+## Template HPP Makanan di Excel
+
+Buat satu sheet daftar bahan dengan kolom *Bahan, Harga beli, Isi, Satuan, Harga per satuan* (rumus `=Harga beli/Isi`). Lalu satu sheet per menu dengan kolom *Bahan, Takaran, Harga per satuan, Biaya*. Ambil harga per satuan dari sheet bahan dengan `VLOOKUP` atau `XLOOKUP`, sehingga saat harga ayam naik Anda cukup mengubah satu sel dan HPP semua menu ikut berubah.
+
+## Pertanyaan yang Sering Muncul
+
+**Berapa persen HPP makanan yang ideal dari harga jual?**
+Patokan yang sering dipakai usaha kuliner adalah HPP sekitar 30–40% dari harga jual, tapi ini bukan aturan. Usaha dengan sewa tempat mahal butuh persentase lebih kecil, sementara usaha rumahan tanpa sewa bisa lebih longgar. Cara mengubah HPP menjadi harga jual dibahas di [cara menentukan harga jual makanan per pcs](/blog/cara-menentukan-harga-jual-makanan-per-pcs).
+
+**Perlukah menghitung HPP setiap menu?**
+Ya, terutama menu terlaris. Menu dengan omzet besar tapi HPP tinggi bisa lebih sedikit menyumbang untung daripada menu kecil dengan HPP rendah.
+
+**Seberapa sering HPP makanan perlu dihitung ulang?**
+Setiap kali harga bahan utama berubah berarti, misalnya ayam, telur, atau cabai. Untuk bahan yang harganya sering naik-turun, tinjau bulanan.
+
+## Mencatat Bahan dan Produksi Tanpa Hitung Ulang Manual
+
+Menghitung HPP sekali itu mudah. Yang sulit adalah menjaganya tetap benar saat harga bahan berubah setiap minggu dan menu bertambah. Fabriku mencatat penerimaan bahan beserta harganya, mengurangi stok bahan dari penerimaan paling lama lebih dulu, dan menyimpan harga pokok di setiap item stok produk jadi. Untuk usaha rumahan, satu form produksi sederhana mencatat bahan yang dipakai dan jumlah hasil jadi, lalu biaya per unit dihitung dari bahan tersebut. Lihat [Fabriku untuk usaha makanan dan kue](/aplikasi/usaha-makanan-kue) dan panduan [mencatat produksi harian usaha kuliner rumahan](/blog/cara-mencatat-produksi-harian-umkm-kuliner-rumahan).
+MD,
+            ],
+            [
+                'slug' => 'cara-menentukan-harga-jual-makanan-per-pcs',
+                'title' => 'Cara Menentukan Harga Jual Makanan per Pcs, Termasuk di GoFood dan ShopeeFood',
+                'category' => 'Keuangan',
+                'tags' => ['Harga Jual', 'Kuliner Rumahan', 'UMKM'],
+                'days_ago' => 0,
+                'excerpt' => 'Harga jual makanan ditentukan dari HPP per pcs, target persentase HPP atau markup, lalu disesuaikan untuk titip warung, reseller, dan komisi aplikasi ojek online. Ini rumus dan contoh hitungannya.',
+                'meta_title' => 'Cara Menentukan Harga Jual Makanan per Pcs (+ GoFood)',
+                'meta_description' => 'Cara menentukan harga jual makanan per pcs dari HPP: rumus markup, harga titip warung dan reseller, serta harga di GoFood dan ShopeeFood setelah komisi.',
+                'content' => <<<'MD'
+Setelah HPP per porsi atau per pcs diketahui, langkah berikutnya adalah menentukan harga jual. Banyak usaha makanan berhenti di "HPP Rp3.000, jual Rp5.000 saja" tanpa memperhitungkan potongan warung, reseller, atau aplikasi ojek online. Hasilnya, harga yang terlihat untung di dapur ternyata tipis atau rugi di channel tertentu.
+
+Artikel ini melanjutkan [cara menghitung HPP makanan per porsi](/blog/cara-menghitung-hpp-makanan-per-porsi). Pastikan HPP sudah dihitung lengkap, termasuk kemasan, gas, tenaga kerja, dan susut.
+
+## Dua Rumus Dasar Harga Jual Makanan
+
+**1. Markup dari HPP**
+
+Harga jual = HPP × (1 + markup)
+
+HPP Rp12.000 dengan markup 100% berarti harga jual Rp24.000.
+
+**2. Target persentase HPP (food cost)**
+
+Harga jual = HPP ÷ target persentase HPP
+
+HPP Rp12.000 dengan target HPP 40% dari harga jual berarti harga jual Rp12.000 ÷ 0,4 = Rp30.000. Dengan target 50%, harga jual Rp24.000.
+
+Keduanya menghasilkan angka yang sama bila dikonversi dengan benar (markup 100% = HPP 50% dari harga jual). Usaha kuliner lebih sering memakai cara kedua karena langsung terlihat berapa bagian harga jual yang habis untuk biaya bahan. Penjelasan lebih lengkap tentang perbedaan markup dan margin ada di [cara menghitung HPP dan harga jual](/blog/cara-menghitung-hpp-produk-umkm).
+
+## Contoh: Harga Jual Kue per Pcs
+
+Risoles dibuat 40 pcs per adonan. Bahan, minyak, dan mika Rp88.000, sehingga bahan per pcs Rp2.200. Tenaga kerja Rp30.000 per adonan menambah Rp750 per pcs. **HPP risoles ≈ Rp2.950**, dibulatkan Rp3.000.
+
+| Target HPP dari harga jual | Harga jual per pcs | Untung kotor per pcs |
+|---|---|---|
+| 60% | Rp5.000 | Rp2.000 |
+| 50% | Rp6.000 | Rp3.000 |
+| 40% | Rp7.500 | Rp4.500 |
+
+Angka ini kemudian dicek dengan harga pasar. Bila produk serupa di sekitar Anda dijual Rp5.000, harga Rp7.500 perlu alasan yang jelas, misalnya isi lebih banyak atau ukuran lebih besar. Harga pasar dipakai untuk mengecek, bukan sebagai dasar menghitung.
+
+## Harga Titip Warung dan Reseller
+
+Saat produk dititipkan ke warung atau dijual lewat reseller, harga yang Anda terima lebih kecil dari harga yang dibayar pembeli. Hitung dari harga yang **Anda terima**, bukan harga di etalase.
+
+Contoh risoles di atas dijual Rp5.000 di warung, dan warung mengambil Rp1.000 per pcs. Anda menerima Rp4.000, untung Rp1.000 per pcs, bukan Rp2.000. Bila juga ada produk yang tidak laku dan dikembalikan, hitung sebagai susut. Tetapkan harga reseller dan titip warung sebagai daftar terpisah, dan pastikan setiap harga tetap di atas HPP.
+
+## Harga di GoFood dan ShopeeFood
+
+Aplikasi pesan-antar memotong komisi dari harga menu. Besarnya berbeda per platform dan program, dan bisa berubah, jadi pakai angka dari dashboard mitra Anda. Contoh di bawah memakai komisi 20%.
+
+Rumus agar uang yang diterima sama dengan penjualan langsung:
+
+**Harga di aplikasi = harga offline ÷ (1 − komisi)**
+
+Nasi ayam geprek dengan HPP Rp12.000 dijual Rp25.000 di tempat:
+
+| | Offline | Online, harga sama | Online, harga disesuaikan |
+|---|---|---|---|
+| Harga menu | Rp25.000 | Rp25.000 | Rp31.500 |
+| Komisi 20% | Rp0 | Rp5.000 | Rp6.300 |
+| Diterima | Rp25.000 | Rp20.000 | Rp25.200 |
+| HPP | Rp12.000 | Rp12.000 | Rp12.000 |
+| Untung kotor | Rp13.000 | Rp8.000 | Rp13.200 |
+
+Tanpa penyesuaian, setiap porsi online kehilangan Rp5.000 dibanding penjualan langsung. Perhatikan juga:
+
+- **Kemasan antar** biasanya lebih mahal (box tertutup, segel, kantong). Masukkan selisihnya ke HPP versi online.
+- **Promo yang ditanggung merchant** mengurangi uang yang diterima. Hitung harga setelah promo, bukan sebelum.
+- **Pajak atau biaya tambahan** dari platform, bila ada, ikut dikurangkan dari uang yang diterima.
+
+Sebelum menetapkan harga online yang berbeda, baca ketentuan mitra platform yang Anda pakai.
+
+## Pembulatan dan Harga Psikologis
+
+Setelah dihitung, bulatkan ke atas ke angka yang mudah: Rp31.250 menjadi Rp31.500 atau Rp32.000. Jangan membulatkan ke bawah hanya agar terlihat murah; selisih Rp500 per porsi pada 1.000 porsi sebulan adalah Rp500.000.
+
+## Kesalahan Umum Menentukan Harga Jual Makanan
+
+- **Satu harga untuk semua channel.** Warung, reseller, dan aplikasi punya potongan berbeda.
+- **HPP tidak lengkap.** Kemasan, minyak, dan gas tidak dihitung, sehingga harga terlihat untung padahal tidak.
+- **Tidak menaikkan harga saat bahan naik.** Harga cabai, ayam, dan telur berubah; HPP dan harga perlu ditinjau ulang.
+- **Mengejar harga termurah.** Usaha kecil jarang menang perang harga melawan usaha yang membeli bahan jauh lebih banyak.
+
+## Pertanyaan yang Sering Muncul
+
+**Berapa markup yang wajar untuk makanan?**
+Tidak ada angka baku. Banyak usaha kuliner menargetkan HPP 30–40% dari harga jual (markup sekitar 150–230%), tapi usaha rumahan tanpa sewa tempat sering memakai target lebih longgar. Yang penting, setelah semua potongan channel, masih ada untung.
+
+**Lebih baik jual per pcs atau per box?**
+Sediakan keduanya bila memungkinkan. Harga per box biasanya sedikit lebih murah per pcs, tapi mengurangi biaya kemasan satuan dan waktu melayani.
+
+**Bagaimana menghitung harga untuk pesanan custom atau hampers?**
+Hitung HPP setiap isi ditambah kemasan khusus dan waktu merangkai, lalu terapkan target yang sama. Pesanan custom layak diberi target untung lebih tinggi karena butuh waktu lebih banyak.
+
+## Melihat Untung per Channel
+
+Harga yang tepat baru terbukti setelah penjualan berjalan. Catat setiap penjualan dengan channel-nya, karena untung dari 100 porsi di tempat berbeda dengan 100 porsi lewat aplikasi. Fabriku mencatat setiap pesanan beserta channel-nya (offline, online, marketplace, atau reseller), sehingga omzet per channel bisa dibandingkan di laporan penjualan. Baca juga [cara mengelola pesanan online dan offline sekaligus](/blog/cara-mengelola-pesanan-online-offline-sekaligus) dan lihat [Fabriku untuk usaha makanan dan kue](/aplikasi/usaha-makanan-kue).
+MD,
+            ],
+            [
+                'slug' => 'contoh-laporan-penjualan-harian-toko-sembako',
+                'title' => 'Contoh Laporan Penjualan Harian Toko Sembako (Rekap per Barang dan Cek Uang Laci)',
+                'category' => 'Penjualan',
+                'tags' => ['Laporan Penjualan', 'Retail', 'Excel'],
+                'days_ago' => 0,
+                'excerpt' => 'Toko sembako punya ratusan transaksi kecil sehari, jadi laporan penjualan hariannya disusun dari rekap stok per barang lalu dicocokkan dengan uang laci, transfer, dan kasbon. Ini contoh lengkapnya.',
+                'meta_title' => 'Contoh Laporan Penjualan Harian Toko Sembako (Excel)',
+                'meta_description' => 'Contoh laporan penjualan harian toko sembako: rekap terjual per barang dari stok, koreksi harga grosir dan eceran, cocokkan dengan uang laci, QRIS, dan kasbon.',
+                'content' => <<<'MD'
+Toko sembako bisa melayani ratusan pembeli sehari dengan belanjaan kecil-kecil: satu bungkus mi, setengah kilo gula, satu tabung gas. Mencatat setiap transaksi dengan tangan hampir mustahil saat toko ramai. Akibatnya banyak pemilik toko hanya menghitung uang di laci, tanpa tahu barang apa yang laku dan apakah uangnya cocok dengan barang yang keluar.
+
+Artikel ini memberi contoh laporan penjualan harian yang realistis untuk toko sembako tanpa mesin kasir, dan cara mencocokkannya dengan uang yang masuk.
+
+## Dua Cara Mencatat Penjualan Harian Toko Sembako
+
+1. **Per transaksi**, setiap pembeli dicatat. Paling akurat, tapi hanya praktis bila memakai aplikasi kasir.
+2. **Rekap per barang dari stok**, dihitung sekali di akhir hari: *terjual = stok awal + barang masuk − stok akhir*. Cocok untuk toko tanpa kasir, asalkan dipakai untuk barang yang laku setiap hari.
+
+Kebanyakan toko sembako kecil memakai cara kedua untuk 20–30 barang terlaris, lalu mengecek barang lain saat stok opname mingguan atau bulanan.
+
+## Contoh Laporan Penjualan Harian Toko Sembako
+
+Rekap tanggal 14 Oktober untuk enam barang terlaris:
+
+| Barang | Satuan | Stok awal | Masuk | Stok akhir | Terjual | Harga ecer | Omzet |
+|---|---|---|---|---|---|---|---|
+| Beras 5 kg | karung | 20 | 10 | 22 | 8 | Rp75.000 | Rp600.000 |
+| Minyak goreng 2 L | pouch | 30 | 0 | 18 | 12 | Rp36.000 | Rp432.000 |
+| Gula pasir 1 kg | pak | 25 | 0 | 15 | 10 | Rp18.000 | Rp180.000 |
+| Telur | kg | 15 | 10 | 13 | 12 | Rp29.000 | Rp348.000 |
+| Mi instan | bungkus | 120 | 40 | 85 | 75 | Rp3.500 | Rp262.500 |
+| Gas 3 kg | tabung | 10 | 10 | 8 | 12 | Rp22.000 | Rp264.000 |
+| **Total** | | | | | | | **Rp2.086.500** |
+
+Kolom *masuk* diisi dari barang yang datang hari itu (sesuai nota supplier). *Stok akhir* dihitung fisik saat toko tutup. Untuk telur dan barang curah lain, pakai satuan timbang yang sama setiap hari.
+
+## Koreksi Harga Grosir dan Eceran
+
+Banyak toko sembako menjual barang yang sama dengan dua harga. Mi instan misalnya dijual Rp3.500 per bungkus atau Rp115.000 per dus isi 40.
+
+Dari 75 bungkus mi yang terjual, ternyata 40 bungkus keluar sebagai 1 dus. Omzet sebenarnya:
+
+- 1 dus × Rp115.000 = Rp115.000
+- 35 bungkus × Rp3.500 = Rp122.500
+- **Total Rp237.500**, bukan Rp262.500
+
+Selisih Rp25.000 ini sering membuat pemilik toko mengira uangnya hilang, padahal penyebabnya harga grosir. Solusinya: catat penjualan grosir sebagai baris terpisah (cukup tulis di buku kecil setiap ada pembeli per dus atau per karung), sementara stok tetap dihitung dalam satuan terkecil.
+
+Omzet hari itu setelah koreksi: Rp2.086.500 − Rp25.000 = **Rp2.061.500**.
+
+## Cocokkan dengan Uang yang Masuk
+
+Langkah terpenting dari laporan penjualan harian adalah mencocokkan omzet hitungan dengan uang:
+
+| Sumber | Jumlah |
+|---|---|
+| Uang laci (setelah dikurangi modal kembalian awal) | Rp1.650.000 |
+| QRIS dan transfer | Rp320.000 |
+| Kasbon pelanggan hari ini | Rp70.000 |
+| **Total uang + kasbon** | **Rp2.040.000** |
+| Omzet hitungan | Rp2.061.500 |
+| **Selisih** | **−Rp21.500** |
+
+Selisih kecil seperti ini biasanya berasal dari salah hitung stok akhir, barang yang diambil untuk keperluan rumah, kembalian yang salah, atau harga yang diberi diskon tanpa dicatat. Catat selisih setiap hari. Bila selalu minus di barang yang sama, periksa barang itu lebih dulu. Bila selisih membesar tiba-tiba, cek siapa yang menjaga toko hari itu.
+
+**Kasbon** (pelanggan mengambil barang dan membayar nanti) wajib dicatat dengan nama dan jumlahnya. Kasbon yang tidak dicatat terlihat seperti uang hilang di laporan hari ini, dan sering tidak tertagih. Baca [cara mencatat dan menagih piutang pelanggan](/blog/cara-mencatat-menagih-piutang-pelanggan-umkm).
+
+## Template Laporan Penjualan Harian Toko Sembako di Excel
+
+Satu sheet per bulan, satu baris per barang per hari:
+
+- Kolom: A = Tanggal, B = Barang, C = Stok awal, D = Masuk, E = Stok akhir, F = Terjual, G = Harga, H = Omzet.
+- Rumus terjual: `=C2+D2-E2`
+- Rumus omzet: `=F2*G2`
+- Stok awal hari berikutnya = stok akhir hari ini.
+
+Di bagian bawah, tambahkan tabel kecil cocok uang seperti di atas. Di akhir bulan, PivotTable dengan *Barang* di baris dan *Sum of Terjual* di nilai langsung menunjukkan barang mana yang paling laku dan perlu stok lebih banyak.
+
+Untuk format laporan yang lebih umum (per transaksi, mingguan, bulanan), lihat [cara membuat laporan penjualan UMKM sederhana](/blog/cara-membuat-laporan-penjualan-umkm-sederhana). Catatan stok per barang yang lebih rapi bisa disusun dengan [kartu stok barang](/blog/kartu-stok-barang-contoh-cara-mengisi-template-excel).
+
+## Kesalahan yang Sering Terjadi
+
+- **Barang masuk tidak dicatat**, sehingga terjual terlihat lebih sedikit dan omzet seolah kurang.
+- **Barang diambil untuk rumah** tanpa dicatat. Tulis sebagai pemakaian pribadi, jangan dicampur dengan penjualan.
+- **Stok akhir dihitung sambil melayani pembeli**, sehingga angkanya meleset. Hitung saat toko sudah tutup atau saat sepi.
+- **Hanya menghitung uang laci.** Tanpa rekap barang, Anda tidak tahu apakah uang itu sesuai dengan barang yang keluar.
+
+## Pertanyaan yang Sering Muncul
+
+**Apakah semua barang perlu direkap setiap hari?**
+Tidak. Rekap harian cukup untuk barang yang laku setiap hari dan nilainya besar. Barang lain dicek lewat [stok opname bergulir](/blog/cara-stok-opname-toko-retail-tanpa-tutup-toko).
+
+**Bagaimana jika ada barang yang dijual per gram, seperti gula curah?**
+Timbang sisa stok di akhir hari dan pakai satuan kilogram dengan satu desimal. Selisih timbangan kecil wajar; yang perlu diperhatikan adalah selisih yang terus membesar.
+
+**Kapan sebaiknya mulai pakai aplikasi kasir?**
+Saat pembeli antre dan mencari harga memperlambat pelayanan, atau saat selisih harian sulit dijelaskan. Lihat [tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula).
+
+## Laporan Harian Tanpa Hitung Stok Manual
+
+Di Fabriku, penjualan langsung di toko dicatat lewat halaman kasir cepat, dan stok barang berkurang saat transaksi selesai. Barang masuk dari supplier dicatat lewat penerimaan pembelian beserta nomor faktur, dan barang rusak, hilang, atau retur dicatat sebagai penyesuaian stok. Rekap penjualan harian dan per produk bisa dilihat dan diekspor ke Excel atau PDF, tanpa menghitung terjual dari selisih stok setiap malam. Lihat [Fabriku untuk toko retail](/aplikasi/toko-retail).
 MD,
             ],
         ];

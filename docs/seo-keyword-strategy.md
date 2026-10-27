@@ -2,6 +2,8 @@
 
 Companion to `docs/seo-audit.md`. That doc fixes the technical blockers (sitemap, canonical, indexing); this one is about what to actually rank for once Google can crawl the site properly.
 
+> **Update 2026-10-27:** keywords now have volume data from RankMySEO Keyword planner. See [Riset volume 2026-10-27](#riset-volume-2026-10-27) at the end of this doc. The list below is the original pre-launch estimate (all items published) and is kept as history.
+
 ## Methodology
 
 GSC has no usable query data yet (domain is new, 9 impressions total, only the brand term tracked) — so this isn't backed by a keyword-volume tool. It's built from:
@@ -66,3 +68,77 @@ Craft/Kerajinan is the most under-served category (zero dedicated posts) and dir
 3. Add 2–3 internal links per new post to existing related posts.
 4. Re-check GSC Performance monthly once non-brand queries start appearing — use actual query data at that point to replace this pre-launch estimate-based list.
 5. Backlinks (outside codebase scope): UMKM/business directories, komunitas UMKM Facebook/Telegram groups, guest posts on Indonesian SME/business blogs. Zero backlinks today is the single biggest gap this doc can't fix with content alone.
+
+## Riset volume 2026-10-27
+
+Sumber: RankMySEO Keyword planner (Indonesia, Bahasa Indonesia), dikumpulkan 27 Okt 2026, digabung dengan data GSC 90 hari. Rencana eksekusinya ada di [`seo-audit-2026-10-27.md`](seo-audit-2026-10-27.md).
+
+Catatan membaca angka:
+- **Volume** = estimasi pencarian per bulan dari RankMySEO.
+- **KD** (difficulty) dari RankMySEO hampir semuanya rendah (4–39) untuk pasar Indonesia. Pakai hanya sebagai perbandingan relatif, jangan dibaca sebagai peluang mutlak.
+- SERP belum dicek manual. Query di atas 1K/bulan kemungkinan dihuni blog besar (Jurnal/Mekari, Accurate, majoo), jadi target realistisnya varian 3+ kata di bawahnya.
+
+Kriteria lolos:
+1. Minimal 3 kata.
+2. Ada fitur Fabriku yang benar-benar menjawab masalahnya, supaya pembaca bisa jadi pendaftar.
+3. Intent informasional atau komersial dari pemilik usaha, bukan pelajar akuntansi atau pencari jasa pembuatan.
+4. Tidak bertabrakan dengan post lama, atau justru memperkuat post lama yang sudah dapat impresi.
+
+### A. Perkuat halaman yang sudah ada (paling cepat)
+
+| Keyword | Vol | KD | Halaman target | Alasan cocok |
+|---|---|---|---|---|
+| cara menghitung hpp dan harga jual | 590 | 14 | `/blog/cara-menghitung-hpp-produk-umkm` | Post sudah dapat 23 impresi. HPP tersimpan per item stok. |
+| cara menghitung hpp per unit | 480 | 14 | idem | Contoh per unit sudah ada di post. Frasa ini perlu masuk ke H2/FAQ. |
+| cara menghitung hpp produksi | 390 | 15 | idem | Alur produksi Fabriku: bahan terpakai → hasil jadi. |
+| contoh laporan penjualan harian | 260 | 14 | `/blog/cara-membuat-laporan-penjualan-umkm-sederhana` | Post sudah dapat 21 impresi. Laporan penjualan bisa diekspor ke Excel/PDF. |
+| laporan penjualan harian excel | 210 | 17 | idem | Template Excel sudah ada di post. |
+| contoh laporan penjualan sederhana | 140 | 15 | idem | Sesuai judul post. |
+| contoh bill of material | 260 | 15 | `/blog/cara-membuat-bom-produksi-konveksi-per-ukuran-warna` | Tabel BOM per varian sudah ada. Perlu definisi umum di awal. |
+| bill of material template | 110 | 6 | idem | KD terendah di kelompok BOM. |
+| cara menghitung hpp jasa | 70 | 6 | `/blog/cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi` | Post sudah dapat 16 impresi. Ada katalog layanan dan consumable. |
+| aplikasi bengkel online | 140 | 12 | `/aplikasi/bengkel-jasa-servis` | Intent komersial. Fabriku berbasis web, punya katalog layanan, sparepart/consumable, dan staf. |
+
+### B. Post baru
+
+| # | Keyword utama (+ varian) | Vol | KD | Kategori / landing tujuan | Prioritas |
+|---|---|---|---|---|---|
+| 1 | kartu stok barang (+ contoh kartu stok barang 720, contoh kartu stok barang excel 210, kartu stok gudang 210, contoh kartu stok barang harian 140) | 2,9K | 17 | Lintas kategori; modul stok dan riwayat penyesuaian | Tinggi. Volume terbesar yang sesuai fitur inti. Jadikan pillar. |
+| 2 | cara menghitung hpp makanan (+ hpp makanan excel 170, hpp penjualan makanan 70, hpp kue 20, hpp roti 20) | 1,9K | 14 | `/aplikasi/usaha-makanan-kue` | Tinggi. Kategori makanan belum punya post HPP khusus. |
+| 3 | cara menentukan harga jual makanan per pcs (+ harga jual makanan 480, harga jual di gofood 140, di shopee food 140) | 170 | 13 | `/aplikasi/usaha-makanan-kue` | Tinggi. Sudut pembeda: menghitung potongan komisi ojol. Bisa digabung dengan #2 bila ingin hemat tenaga. |
+| 4 | contoh laporan penjualan harian toko sembako | 720 | 14 | `/aplikasi/toko-retail` | Tinggi. Bedakan dari post laporan lama: banyak SKU kecil, harga grosir vs ecer, kasir cepat. |
+| 5 | cara menentukan harga jual produk (+ bagaimana cara menentukan harga jual suatu produk 140, harga jual barang 70) | 1,3K | 7 | Lintas kategori | Sedang. KD terendah di volume ini. Pillar markup vs margin yang menautkan ke post kerajinan, makanan, dan HPP. Jaga agar tidak tumpang tindih dengan post HPP. |
+| 6 | contoh website toko online (+ website toko online terbaik 40) | 260 | 16 | Website Usaha | Sedang. Butuh izin merchant untuk menampilkan storefront nyata. Hindari varian "jasa pembuatan" dan "gratis": intent-nya salah. |
+| 7 | contoh laporan penjualan produk makanan | 390 | 21 | `/aplikasi/usaha-makanan-kue` | Sedang. Bisa jadi bagian dari #2/#3 bila tidak ingin post terpisah. |
+| 8 | contoh laporan penjualan harian toko baju | 140 | 18 | `/aplikasi/konveksi` | Rendah. Kandidat bagian dari #4 atau dari post laporan lama. |
+| 9 | kartu persediaan metode fifo (+ contoh metode fifo 140) | 320 | 26 | Stok bahan (FIFO) | Rendah. Pencarinya kebanyakan pelajar akuntansi (contoh soal), jadi konversinya kecil. Kerjakan bila slot kosong. |
+
+### C. Halaman komersial (jangka menengah)
+
+| Keyword | Vol | KD | Catatan |
+|---|---|---|---|
+| aplikasi stok barang gudang | 2,4K | 13 | Sesuai fitur stok per rak/lokasi + QR. Kompetisi iklan rendah (6%), tapi SERP berisi vendor besar. |
+| aplikasi stok barang sederhana | 140 | 11 | Sesuai posisi Fabriku untuk UMKM. |
+| aplikasi stok barang berbasis web | 50 | 30 | Fakta produk: Fabriku berbasis web. |
+| aplikasi stok barang online | 30 | 9 | KD terendah di kelompok ini. |
+
+Usulan: satu landing `/aplikasi/stok-barang` yang menargetkan kelompok ini, dikerjakan setelah authority naik. Butuh keputusan pemilik.
+
+### Ditolak (jangan dikejar)
+
+- Head term: `aplikasi stok barang` (4,4K), `aplikasi toko`, `kartu stok`, `stok opname` (2,4K, KD 26), `laporan penjualan` (1,9K). Authority 4 tidak cukup.
+- Varian `gratis` (`aplikasi stok barang gratis` 590, `website toko online gratis` 140): Fabriku berbayar dengan trial, jadi pembaca akan kecewa.
+- Intent jasa: `jasa pembuatan website toko online` (320). Pencarinya mencari agensi.
+- Di luar kategori: `kartu stok obat`/`apotek` (1,3K), `harga jual rumah`/`tanah`, `stok opname obat`.
+- Volume ~0 untuk query niche yang diuji: `hpp konveksi`, `harga jasa servis`, `catatan piutang`, `aplikasi stok opname barang gratis`. Bukan berarti tidak ada pencari, tapi tidak bisa jadi target utama. Pakai sebagai sub-topik.
+
+### Usulan swap keyword RankMySEO (keputusan pemilik)
+
+Plan Starter: 10 slot. Menghapus keyword ikut menghapus riwayatnya.
+
+| Status | Keyword |
+|---|---|
+| Pertahankan | `fabriku`, `aplikasi konveksi`, `software konveksi` (dapat impresi GSC), `laporan penjualan sederhana` |
+| Hapus | `aplikasi toko`, `aplikasi stok barang dan penjualan`, `aplikasi stok barang dan penjualan gratis`, `stok barang dan penjualan` |
+| Tambah sekarang | `cara menghitung hpp dan harga jual`, `contoh laporan penjualan harian` |
+| Tambah setelah post terbit | `kartu stok barang`, `cara menghitung hpp makanan` (ganti `aplikasi produksi` atau slot yang kosong) |

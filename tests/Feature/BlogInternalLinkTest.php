@@ -79,6 +79,45 @@ it('publishes the seasonal and category keyword batch', function () {
     }
 });
 
+it('publishes the volume-researched keyword batch', function () {
+    $this->seed(BlogSeeder::class);
+
+    $slugs = [
+        'kartu-stok-barang-contoh-cara-mengisi-template-excel',
+        'cara-menghitung-hpp-makanan-per-porsi',
+        'cara-menentukan-harga-jual-makanan-per-pcs',
+        'contoh-laporan-penjualan-harian-toko-sembako',
+    ];
+
+    foreach ($slugs as $slug) {
+        $post = BlogPost::where('slug', $slug)->first();
+
+        expect($post)->not->toBeNull("missing post: {$slug}");
+        expect(str_word_count(strip_tags($post->content)))->toBeGreaterThan(700);
+        expect(strlen($post->meta_description))->toBeLessThanOrEqual(160);
+        expect(strlen($post->meta_title))->toBeLessThanOrEqual(60);
+    }
+});
+
+it('targets the measured search phrases in the revised posts', function () {
+    $this->seed(BlogSeeder::class);
+
+    $phrases = [
+        'cara-menghitung-hpp-produk-umkm' => ['HPP dan Harga Jual', 'HPP per Unit', 'HPP Produksi'],
+        'cara-membuat-laporan-penjualan-umkm-sederhana' => ['Contoh Laporan Penjualan Harian', 'laporan penjualan harian di Excel'],
+        'cara-membuat-bom-produksi-konveksi-per-ukuran-warna' => ['Contoh Bill of Material', 'Template Bill of Material'],
+        'cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi' => ['Cara Menghitung HPP Jasa'],
+    ];
+
+    foreach ($phrases as $slug => $expected) {
+        $content = BlogPost::where('slug', $slug)->value('content');
+
+        foreach ($expected as $phrase) {
+            expect($content)->toContain($phrase);
+        }
+    }
+});
+
 it('keeps the original publish date when re-seeding', function () {
     $this->seed(BlogSeeder::class);
     $post = BlogPost::where('slug', 'cara-menghitung-hpp-produk-umkm')->first();
