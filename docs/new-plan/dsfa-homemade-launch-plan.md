@@ -393,3 +393,9 @@ Renderer storefront memakai logo usaha sebagai favicon dan ikon Apple; situs tan
 Verifikasi lokal: 619 tes lulus, 6 dilewati; build lulus. Uji Chromium 360/390/768/1440 px mencakup tambah barang, pindah ke beranda/halaman area pengiriman, buka keranjang melalui tombol melayang, nomor WA, favicon, badge, ukuran ikon, dan posisi checkout. Tidak mengirim pesanan produksi.
 
 Uji browser live menemukan bug lama pada penghapusan item: nilai `quantity` dari form HTML berupa string, sehingga perbandingan ketat terhadap integer `0` tidak menghapus baris. Nilai sekarang dikonversi ke integer setelah validasi; checkout juga menolak jumlah nol yang mungkin tersimpan pada session lama. Ditambahkan tes untuk string `'0'` dan session lama agar tidak terbentuk pesanan tanpa item.
+
+### Terpasang di produksi
+
+Perbaikan tampilan commit `587d662` dan patch keranjang `5e6a39c` sudah di-push dan dirilis sebagai image `azmifauzan/fabriku:271026-3` (digest `sha256:1e93d763267e533dab438bbbc012823d41c6b79cb3c23118b6055231491af08e`). Tema DSFA v11, ID 17, menggantikan v10 ID 16 dengan hanya perubahan shell/CSS. Checksum sebelum/sesudah penerapan tema memastikan stok, harga, transaksi, halaman, tenant, dan situs lain tidak berubah; mode stok DSFA tetap aktif.
+
+Suite akhir 621 tes lulus, 6 dilewati. Uji live Chromium 390/1440 px lulus: favicon mengarah ke logo DSFA, keranjang berisi dua barang tetap bisa dibuka sesudah pindah ke halaman area pengiriman, badge benar, WA menuju admin `6285220150587`, dan jumlah nol mengosongkan keranjang. Barang uji hanya masuk session keranjang lalu dihapus; checkout tidak dikirim. Semua 21 halaman dan 17 gambar publik tetap HTTP 200. Container healthy, SSR/queue/scheduler berjalan, log Laravel tanpa ERROR saat verifikasi. Backup Compose/database tersedia di `/home/ubuntu/fabriku/backups/271026-2/` dan `271026-3/`.
