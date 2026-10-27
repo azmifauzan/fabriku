@@ -385,3 +385,9 @@ Pemilik meminta Cheesecuit Kecil Rp 7.000, lalu menegaskan produk dibuat per var
 ## Puding buah coklat (26 Oktober 2026, 17:25 WIB)
 
 Pemilik menambahkan Puding Buah Coklat Rp 7.000 dengan foto gelas cokelat (dari foto berpenanda C2PA Google; gelas tetangga diburamkan lembut, tanpa gambar baru). Ditulis ke produksi lewat transaksi dengan prasyarat 11 item: INV-FOOD-0013 Puding Buah Coklat, kategori Puding Buah, stok awal 100 sementara dan HPP 0, foto di S3 `tenants/7/inventory/puding-buah-coklat.jpg`, urutan katalog 12. Katalog kini 12 produk. Puding rasa matcha yang tampak di foto sumber belum menjadi produk.
+
+## Favicon dan akses belanja (27 Oktober 2026)
+
+Renderer storefront memakai logo usaha sebagai favicon dan ikon Apple; situs tanpa logo tetap memakai ikon platform. Tema DSFA menambahkan dua kontrol melayang di kanan bawah: keranjang di atas, WhatsApp admin utama di bawah. Badge keranjang dihitung dari session per tenant dan tetap tampil setelah berpindah halaman. Tombol belanja memakai kursor pointer, ikon tidak menyusut, dan aksi produk disusun agar teks tidak terjepit. Di layar kecil halaman keranjang menyisakan ruang di kanan untuk kontrol melayang supaya checkout tidak tertutup.
+
+Verifikasi lokal: 619 tes lulus, 6 dilewati; build lulus. Uji Chromium 360/390/768/1440 px mencakup tambah barang, pindah ke beranda/halaman area pengiriman, buka keranjang melalui tombol melayang, nomor WA, favicon, badge, ukuran ikon, dan posisi checkout. Tidak mengirim pesanan produksi.

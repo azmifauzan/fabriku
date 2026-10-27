@@ -73,6 +73,9 @@ class ThemeRenderer
     <meta property="og:image:alt" content="'.$title.'">
     <meta name="twitter:image" content="'.e($ogImage).'">';
         $twitterCard = $ogImage === null ? 'summary' : 'summary_large_image';
+        $logoUrl = ($site->profile['logo_url'] ?? null) ?: $site->tenant->logo_url;
+        $faviconUrl = e($logoUrl ?: '/favicon.ico');
+        $touchIconUrl = e($logoUrl ?: '/apple-touch-icon.png');
 
         return <<<HTML
 <!DOCTYPE html>
@@ -91,6 +94,8 @@ class ThemeRenderer
     {$ogImageTags}
     <meta name="twitter:card" content="{$twitterCard}">
     <link rel="canonical" href="{$canonical}">
+    <link rel="icon" href="{$faviconUrl}">
+    <link rel="apple-touch-icon" href="{$touchIconUrl}">
     {$stylesheet}
     {$cssBlock}
     {$generatedCssBlock}

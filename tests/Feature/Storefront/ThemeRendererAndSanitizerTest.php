@@ -284,4 +284,38 @@ HTML;
             ->assertSee('visible.jpg')->assertDontSee('Ilustrasi cadangan')
             ->assertDontSee('hidden.jpg')->assertDontSee('other-tenant.jpg');
     }
+
+    public function test_storefront_favicon_uses_each_sites_logo_and_keeps_platform_fallback(): void
+    {
+        foreach ([
+            ['dsfa-icons', 'https://fabriku.id/storage/logos/dsfa-homemade.png'],
+            ['other-icons', 'https://cdn.example.test/other-logo.png?size=64&v=2'],
+            ['no-logo-icons', null],
+        ] as [$slug, $logo]) {
+            $tenant = Tenant::factory()->create();
+            BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'slug' => $slug, 'profile' => ['name' => $slug, 'logo_url' => $logo]]);
+            foreach (['/', '/produk'] as $path) {
+                $response = $this->get('https://'.$slug.'.fabriku.biz.id'.$path)->assertOk();
+                $dom = new \DOMDocument;
+                @$dom->loadHTML($response->getContent());
+                $xpath = new \DOMXPath($dom);
+                $this->assertSame($logo ?? '/favicon.ico', $xpath->evaluate('string(//link[@rel="icon"]/@href)'));
+                $this->assertSame($logo ?? '/apple-touch-icon.png', $xpath->evaluate('string(//link[@rel="apple-touch-icon"]/@href)'));
+            }
+        }
+        $this->get('/login')->assertOk()->assertSee('href="/favicon.svg"', false);
+    }
+
+    public function test_cart_badge_is_server_rendered_and_scoped_to_the_current_store(): void
+    {
+        $one = BusinessSite::factory()->create(['slug' => 'cart-store-one']);
+        $two = BusinessSite::factory()->create(['slug' => 'cart-store-two']);
+        $this->withSession([
+            'storefront_cart.'.$one->tenant_id => [11 => 2, 12 => 3],
+            'storefront_cart.'.$two->tenant_id => [99 => 1],
+        ])->get('https://cart-store-one.fabriku.biz.id/')->assertOk()
+            ->assertSee('aria-label="Keranjang belanja, 5 barang"', false);
+        $this->get('https://cart-store-two.fabriku.biz.id/produk')->assertOk()
+            ->assertSee('aria-label="Keranjang belanja, 1 barang"', false);
+    }
 }

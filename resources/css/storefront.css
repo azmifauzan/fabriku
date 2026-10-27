@@ -6,3 +6,6 @@
 body { margin: 0; }
 button, input, select, textarea { font: inherit; }
 :focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+
+button:not(:disabled) { cursor: pointer; }
+button:disabled { cursor: not-allowed; }

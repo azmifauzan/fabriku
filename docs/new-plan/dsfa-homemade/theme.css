@@ -123,3 +123,17 @@ main a[href="/produk"], main a[href="https://fabriku.id/privasi"] { display: inl
 @media (max-width: 39.99rem) {
     .dsfa-nav { width: 100%; justify-content: space-between; gap: 0.25rem; }
 }
+
+.dsfa-floating-controls { position: fixed; right: max(1rem, env(safe-area-inset-right)); bottom: max(1rem, env(safe-area-inset-bottom)); z-index: 60; display: flex; flex-direction: column; gap: 0.75rem; }
+.dsfa-floating-controls a { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; padding: 0; border-radius: 50%; background: #0b6b4b; color: #fff; box-shadow: 0 3px 12px #302d2733; }
+.dsfa-floating-controls a[href="/keranjang"] { background: #fcf9f0; color: #424b34; border: 1px solid #424b34; }
+.dsfa-floating-controls a:hover { background: #064e36; color: #fff; text-decoration: none; }
+.dsfa-floating-controls a:focus-visible { outline-color: #946d50; }
+.dsfa-floating-controls a span:not(#storefront-cart-count) { display: none; }
+.dsfa-floating-controls svg { width: 26px; height: 26px; flex-shrink: 0; }
+@media (max-width: 63.99rem) {
+    #storefront-cart { padding-right: 5.5rem; }
+    .storefront-purchase-actions { margin-right: 4.25rem; }
+    .storefront-purchase-actions button { font-size: 0.875rem; padding-inline: 0.75rem; }
+    #product-quantity { width: 3rem; }
+}

@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div id="storefront-cart" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     <a href="/produk" class="text-sm text-slate-700 underline">← Kembali ke produk</a>
     <h1 class="mt-5 mb-2 text-3xl font-bold">Keranjang</h1>
     <p class="mb-8 text-slate-600">Toko akan mengonfirmasi ketersediaan, ongkir, dan cara bayar setelah Anda mengirim pesanan.</p>

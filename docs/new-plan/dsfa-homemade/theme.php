@@ -159,6 +159,10 @@ return [
         <nav class="dsfa-footer-col"><p class="dsfa-footer-title">Informasi</p><ul><li><a href="/halaman/cara-pesan">Cara pesan</a></li><li><a href="/halaman/area-pengiriman">Area pengiriman</a></li><li><a href="/#menu">Katalog dan harga</a></li><li><a href="/halaman/dessert-takoyaki-bojongsoang">Dessert Bojongsoang</a></li><li><a href="/privasi">Privasi</a></li></ul></nav>
     </div>
     <div class="dsfa-wrap dsfa-footer-bottom"><p>&copy; DSFA Homemade, Bandung</p><nav><a href="/lapor">Laporkan situs</a><a href="https://fabriku.id" rel="noopener">Dibuat dengan Fabriku</a></nav></div>
+    <div class="dsfa-floating-controls" aria-label="Pemesanan">
+        <div data-fb-slot="cart-button"></div>
+        <div data-fb-slot="whatsapp-button"></div>
+    </div>
 </footer>
 HTML,
         'satsetui_css' => file_get_contents(__DIR__.'/theme.css'),

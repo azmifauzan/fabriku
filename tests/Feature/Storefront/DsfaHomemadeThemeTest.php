@@ -3,6 +3,7 @@
 namespace Tests\Feature\Storefront;
 
 use App\Models\BusinessSite;
+use App\Models\InventoryItem;
 use App\Models\SiteContentPage;
 use App\Models\SiteProduct;
 use App\Models\SiteThemeVersion;
@@ -186,5 +187,26 @@ class DsfaHomemadeThemeTest extends TestCase
         libxml_use_internal_errors($previous);
 
         return new DOMXPath($document);
+    }
+
+    public function test_floating_cart_and_whatsapp_remain_available_after_browsing_other_pages(): void
+    {
+        $this->site->update(['active_theme_version_id' => $this->version->id, 'status' => 'published', 'profile' => [
+            ...$this->site->profile, 'whatsapp' => '085220150587',
+        ]]);
+        $item = InventoryItem::factory()->create([
+            'tenant_id' => $this->site->tenant_id, 'current_quantity' => 10, 'reserved_quantity' => 0,
+            'selling_price' => 5000, 'status' => 'available', 'expired_date' => null,
+        ]);
+        $product = SiteProduct::factory()->create(['tenant_id' => $this->site->tenant_id, 'inventory_item_id' => $item->id]);
+        $this->post('https://dsfahomemade.com/keranjang', ['product_id' => $product->id, 'quantity' => 2])->assertRedirect('/keranjang');
+        foreach (['/', '/produk', '/produk/'.$product->slug, '/keranjang'] as $path) {
+            $response = $this->get('https://dsfahomemade.com'.$path)->assertOk();
+            $dom = $this->dom($response->getContent());
+            $controls = '//*[contains(concat(" ", normalize-space(@class), " "), " dsfa-floating-controls ")]';
+            $this->assertSame(1, $dom->query($controls.'//a[@href="/keranjang"]')->length, $path);
+            $this->assertSame(1, $dom->query($controls.'//a[starts-with(@href,"https://wa.me/6285220150587")]')->length, $path);
+            $this->assertSame('2', $dom->evaluate('string(//*[@id="storefront-cart-count"])'), $path);
+        }
     }
 }
