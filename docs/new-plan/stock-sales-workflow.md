@@ -35,3 +35,15 @@ Tes tambahan memeriksa migrasi pada database berisi data, pemulihan nilai modal 
 Migrasi pengaturan diterapkan hanya ke PostgreSQL lokal (`127.0.0.1`, database `fabriku`). Checksum 57 tabel dengan 665 baris dibandingkan sebelum/sesudah migrasi di dalam transaksi: semua data lama sama, tidak ada tenant yang diaktifkan otomatis. Dua migrasi lama (`2026_10_13_000001_link_site_products_to_inventory_item_id` dan `2026_10_14_134058_add_sort_to_services_table`) sudah tertunda sebelum perubahan ini dan tidak dijalankan dalam review.
 
 Typecheck penuh masih menghasilkan 362 error yang identik dengan snapshot HEAD sebelum perubahan; tidak ada diagnostik baru. Tidak ada deploy atau perubahan data produksi.
+
+## Deploy produksi 27 Oktober 2026
+
+- Kode rilis: commit `6c2bbd0a36ca558dacd3d26ae0b71cb110e7fa5d`, sudah di-push ke `origin/main`.
+- Image: `azmifauzan/fabriku:271026-1`, digest `sha256:9d1e3ac093765aa3602a88e5612c8d1e911e390f3b28b627edb407b072a41cc9`. Dibangun dari arsip Git commit tersebut, termasuk bundle SSR.
+- Backup database PostgreSQL (format custom) dan Compose lama disimpan dengan izin 0600 di `/home/ubuntu/fabriku/backups/271026-1/`. Image sebelumnya `azmifauzan/fabriku:261026-3` tetap tersedia untuk rollback.
+- Migrasi dijalankan sebelum mengganti container, dalam transaksi dengan pembandingan checksum 57 tabel dan 659.361 baris. Seluruh data lama sama; tidak ada aktivasi mode otomatis.
+- Container `healthy`; queue worker, scheduler, dan dua proses SSR berjalan. Tidak ada ERROR Laravel atau failed job saat verifikasi.
+- Pemeriksaan read-only pada seluruh 21 tenant: semua mode tetap nonaktif, tidak ada perubahan konfigurasi default kategori. Komponen pengaturan DSFA mengembalikan `Settings/Index`, HTTP 200, `stockSalesOnly = false`.
+- DSFA tetap kategori `food`, situs terbit, domain aktif, tema v10, 12 produk terlihat, dan dapat menerima pesanan. Seluruh 21 URL sitemap dan 17 gambar publik HTTP 200; tiga redirect 301 mempertahankan path/query; robots menunjuk sitemap DSFA. Beranda dan blog Fabriku HTTP 200 dengan H1, canonical, dan description hasil SSR.
+
+Mode DSFA belum diaktifkan. Admin usaha dapat mengaktifkannya melalui **Pengaturan → Alur usaha**. Tidak ada pesanan percobaan dibuat di produksi. Jika rollback diperlukan, pulihkan Compose backup dan buat ulang hanya service Fabriku; kolom boolean tambahan dapat dipertahankan karena image lama mengabaikannya.
