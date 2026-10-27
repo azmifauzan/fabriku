@@ -2,11 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Models\BlogPost;
 use Illuminate\Console\Command;
 
 /**
- * Regenerates the 1200x630 social-preview PNGs in public/images/og/ (committed to the repo).
- * Dev-only: needs GD with FreeType and a system TTF; rerun after editing config/landing_pages.php.
+ * Regenerates the 1200x630 social-preview PNGs in public/images/og/ (committed to the repo),
+ * including one per published blog post in public/images/og/blog/.
+ * Dev-only: needs GD with FreeType and a system TTF; rerun after editing config/landing_pages.php
+ * or adding/retitling a blog post.
  */
 class GenerateOgImages extends Command
 {
@@ -35,7 +38,17 @@ class GenerateOgImages extends Command
             $this->render($font, $page['eyebrow'], $page['headline'], "{$dir}/{$slug}.png");
         }
 
-        $this->info('Gambar OG dibuat di public/images.');
+        if (! is_dir("{$dir}/blog")) {
+            mkdir("{$dir}/blog", 0755, true);
+        }
+
+        $posts = BlogPost::query()->where('status', 'published')->with('category')->get();
+
+        foreach ($posts as $post) {
+            $this->render($font, $post->category?->name ?? 'Blog Fabriku', $post->meta_title ?? $post->title, "{$dir}/blog/{$post->slug}.png");
+        }
+
+        $this->info("Gambar OG dibuat di public/images ({$posts->count()} post blog).");
 
         return self::SUCCESS;
     }

@@ -6,6 +6,7 @@ use App\Models\BusinessSite;
 use App\Models\InventoryItem;
 use App\Models\SiteProduct;
 use App\Models\Tenant;
+use Database\Seeders\BlogSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,6 +21,24 @@ it('ships a 1200x630 og image for the home page and every category landing page'
         expect(is_file($path))->toBeTrue("Missing {$path}, run php artisan og:generate-images");
         expect(array_slice(getimagesize($path), 0, 2))->toBe([1200, 630]);
     }
+});
+
+it('ships a 1200x630 title card for every seeded blog post', function () {
+    $this->seed(BlogSeeder::class);
+
+    foreach (BlogPost::where('status', 'published')->pluck('slug') as $slug) {
+        $path = public_path("images/og/blog/{$slug}.png");
+
+        expect(is_file($path))->toBeTrue("Missing {$path}, run php artisan og:generate-images");
+        expect(array_slice(getimagesize($path), 0, 2))->toBe([1200, 630]);
+    }
+});
+
+it('uses the generated title card as og image for a post without a featured image', function () {
+    $this->seed(BlogSeeder::class);
+
+    $this->get(route('blog.show', 'kartu-stok-barang-contoh-cara-mengisi-template-excel'))
+        ->assertInertia(fn ($page) => $page->where('post.og_image_url', '/images/og/blog/kartu-stok-barang-contoh-cara-mengisi-template-excel.png'));
 });
 
 it('passes the category og image to the landing page', function () {
