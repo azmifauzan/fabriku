@@ -53,4 +53,29 @@ class StorefrontCheckoutTest extends TestCase
             ->assertSessionHasErrors('cart');
         $this->assertDatabaseCount('sales_orders', 0);
     }
+
+    public function test_browser_form_zero_removes_an_item_instead_of_leaving_a_zero_quantity_line(): void
+    {
+        $tenant = Tenant::factory()->create();
+        BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'slug' => 'zero-form-shop']);
+        $item = InventoryItem::factory()->create(['tenant_id' => $tenant->id, 'selling_price' => 5000, 'current_quantity' => 10, 'reserved_quantity' => 0, 'status' => 'available']);
+        $product = SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'inventory_item_id' => $item->id]);
+        $this->post('https://zero-form-shop.fabriku.biz.id/keranjang', ['product_id' => (string) $product->id, 'quantity' => '2'])->assertRedirect();
+        $this->post('https://zero-form-shop.fabriku.biz.id/keranjang/ubah', ['product_id' => (string) $product->id, 'quantity' => '0'])->assertRedirect();
+        $this->get('https://zero-form-shop.fabriku.biz.id/keranjang')->assertOk()->assertSee('Keranjang masih kosong.')->assertDontSee('Kirim permintaan pesanan');
+        $this->assertSame([], session('storefront_cart.'.$tenant->id));
+        $this->assertDatabaseCount('sales_orders', 0);
+    }
+
+    public function test_checkout_rejects_zero_quantity_left_in_an_existing_session(): void
+    {
+        $tenant = Tenant::factory()->create();
+        BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'slug' => 'legacy-zero-shop']);
+        $item = InventoryItem::factory()->create(['tenant_id' => $tenant->id, 'selling_price' => 5000, 'current_quantity' => 10, 'reserved_quantity' => 0, 'status' => 'available']);
+        $product = SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'inventory_item_id' => $item->id]);
+        $this->withSession(['storefront_cart.'.$tenant->id => [$product->id => '0']])
+            ->post('https://legacy-zero-shop.fabriku.biz.id/checkout', ['idempotency_key' => (string) Str::uuid(), 'name' => 'Pembeli', 'phone' => '081234567890'])
+            ->assertSessionHasErrors('cart');
+        $this->assertDatabaseCount('sales_orders', 0);
+    }
 }

@@ -53,11 +53,12 @@ class CartController extends Controller
         ]);
         $key = $this->sessionKey($tenant->id);
         $cart = $request->session()->get($key, []);
-        if ($data['quantity'] === 0) {
+        $quantity = (int) $data['quantity'];
+        if ($quantity === 0) {
             unset($cart[$data['product_id']]);
         } else {
             Storefront::for($tenant)->products()->findOrFail($data['product_id']);
-            $cart[$data['product_id']] = $data['quantity'];
+            $cart[$data['product_id']] = $quantity;
         }
         $request->session()->put($key, $cart);
 
@@ -106,6 +107,9 @@ class CartController extends Controller
                     foreach ($cart as $id => $quantity) {
                         $product = $products->get((int) $id);
                         $remaining = (int) $quantity;
+                        if ($remaining < 1) {
+                            throw ValidationException::withMessages(['cart' => 'Jumlah produk harus lebih dari nol. Perbarui keranjang kembali.']);
+                        }
                         $inventory = InventoryItem::withoutGlobalScope(TenantScope::class)
                             ->where('tenant_id', $tenant->id)->where('id', $product->inventory_item_id)
                             ->where('status', 'available')->where('selling_price', '>', 0)
