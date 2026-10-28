@@ -20,6 +20,7 @@ const props = defineProps<{
         author_name: string;
         canonical: string;
     };
+    landing: { slug: string; label: string } | null;
 }>();
 
 // og_image_url is a stable redirect to the signed featured image (see BlogController::ogImage);
@@ -93,6 +94,29 @@ const jsonLd = computed(() => [
                     class="prose mt-8 max-w-none prose-slate prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-[#163761] prose-a:text-indigo-800 prose-a:underline prose-a:underline-offset-4"
                     v-html="post.content_html"
                 />
+                <aside class="mt-10 rounded-xl border border-indigo-200 bg-indigo-50 p-6 dark:border-indigo-900 dark:bg-indigo-950">
+                    <p class="text-lg font-black tracking-tight text-[#163761] dark:text-indigo-100">
+                        {{ landing ? `Kelola usaha ${landing.label} dengan Fabriku` : 'Rapikan stok, produksi, dan penjualan dengan Fabriku' }}
+                    </p>
+                    <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">
+                        Catat stok, produksi, dan penjualan dalam satu alur. Coba gratis 30 hari, tanpa kartu kredit.
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <Link
+                            href="/register"
+                            class="inline-flex min-h-11 items-center rounded-lg bg-indigo-800 px-5 text-sm font-bold text-white hover:bg-indigo-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
+                        >
+                            Coba gratis 30 hari
+                        </Link>
+                        <Link
+                            v-if="landing"
+                            :href="`/aplikasi/${landing.slug}`"
+                            class="inline-flex min-h-11 items-center rounded-lg border border-indigo-300 bg-white px-5 text-sm font-bold text-indigo-800 hover:bg-indigo-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
+                        >
+                            Lihat fitur untuk {{ landing.label }}
+                        </Link>
+                    </div>
+                </aside>
             </div>
             <div v-if="post.tags.length" class="mt-8 flex flex-wrap gap-2">
                 <Link

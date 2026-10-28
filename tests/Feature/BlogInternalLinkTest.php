@@ -127,3 +127,28 @@ it('keeps the original publish date when re-seeding', function () {
 
     expect($post->fresh()->published_at->isSameDay(now()->subYear()))->toBeTrue();
 });
+
+it('links every seeded post from at least one other post', function () {
+    $this->seed(BlogSeeder::class);
+
+    $linked = BlogPost::all()
+        ->flatMap(function (BlogPost $post) {
+            preg_match_all('#\]\(/blog/([a-z0-9-]+)\)#', $post->content, $matches);
+
+            return collect($matches[1])->reject(fn (string $slug) => $slug === $post->slug);
+        })
+        ->unique();
+
+    $orphans = BlogPost::pluck('slug')->diff($linked)->values()->all();
+
+    expect($orphans)->toBe([]);
+});
+
+it('keeps landing page titles within 60 characters', function () {
+    $long = collect(config('landing_pages'))
+        ->filter(fn (array $page) => strlen($page['meta_title']) > 60)
+        ->keys()
+        ->all();
+
+    expect($long)->toBe([]);
+});

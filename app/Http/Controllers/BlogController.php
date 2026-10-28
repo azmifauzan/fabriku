@@ -59,7 +59,36 @@ class BlogController extends Controller
                 'author_name' => $post->author->name,
                 'canonical' => url("/blog/{$post->slug}"),
             ],
+            'landing' => $this->landingFor($post),
         ]);
+    }
+
+    /**
+     * The `/aplikasi/*` landing page whose `blog_tags` overlap the post's tags the most, for the
+     * CTA box under the article. Null on a tie or no overlap, so the box falls back to a plain
+     * register link instead of pointing at a landing page that does not fit.
+     *
+     * @return array{slug: string, label: string}|null
+     */
+    private function landingFor(BlogPost $post): ?array
+    {
+        $tags = $post->tags->pluck('slug');
+
+        $scores = collect(config('landing_pages'))
+            ->map(fn (array $page): int => $tags->intersect($page['blog_tags'])->count())
+            ->filter()
+            ->sortDesc();
+
+        if ($scores->isEmpty() || $scores->count() > 1 && $scores->values()[0] === $scores->values()[1]) {
+            return null;
+        }
+
+        $slug = $scores->keys()->first();
+
+        return [
+            'slug' => $slug,
+            'label' => config('business.categories.'.config("landing_pages.{$slug}.category").'.label'),
+        ];
     }
 
     /**

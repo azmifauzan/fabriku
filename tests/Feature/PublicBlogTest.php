@@ -149,3 +149,25 @@ it('exposes the current page so paginated listings get their own title', functio
         ->where('canonical', url('/blog?page=2'))
     );
 });
+
+it('points the post CTA at the landing page whose tags match best', function () {
+    $post = BlogPost::factory()->published()->create(['slug' => 'post-jasa']);
+    $post->tags()->attach(BlogTag::factory()->create(['slug' => 'jasa-servis'])->id);
+
+    $this->get(route('blog.show', $post->slug))->assertOk()->assertInertia(fn ($page) => $page
+        ->where('landing.slug', 'bengkel-jasa-servis')
+        ->where('landing.label', config('business.categories.service.label'))
+    );
+});
+
+it('shows no landing page in the post CTA on a tie or without matching tags', function () {
+    $tied = BlogPost::factory()->published()->create(['slug' => 'post-hpp']);
+    $tied->tags()->attach(BlogTag::factory()->create(['slug' => 'hpp'])->id);
+
+    $plain = BlogPost::factory()->published()->create(['slug' => 'post-umum']);
+    $plain->tags()->attach(BlogTag::factory()->create(['slug' => 'umkm'])->id);
+
+    foreach (['post-hpp', 'post-umum'] as $slug) {
+        $this->get(route('blog.show', $slug))->assertOk()->assertInertia(fn ($page) => $page->where('landing', null));
+    }
+});

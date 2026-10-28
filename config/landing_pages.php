@@ -42,7 +42,7 @@ return [
 
     'usaha-makanan-kue' => [
         'category' => 'food',
-        'meta_title' => 'Aplikasi Usaha Makanan & Kue: Stok, Produksi, Kadaluarsa | Fabriku',
+        'meta_title' => 'Aplikasi Usaha Makanan & Kue: Stok & Produksi | Fabriku',
         'meta_description' => 'Aplikasi untuk usaha makanan dan kue: catat bahan baku dengan tanggal kadaluarsa, produksi harian, stok produk jadi, dan pesanan pelanggan.',
         'eyebrow' => 'Makanan & Kue',
         'headline' => 'Aplikasi usaha makanan dan kue yang memperhatikan tanggal kadaluarsa.',
@@ -70,7 +70,7 @@ return [
 
     'kerajinan-handmade' => [
         'category' => 'craft',
-        'meta_title' => 'Aplikasi Usaha Kerajinan & Handmade: Bahan, HPP, Pesanan | Fabriku',
+        'meta_title' => 'Aplikasi Kerajinan & Handmade: Bahan, HPP, Pesanan | Fabriku',
         'meta_description' => 'Aplikasi untuk usaha kerajinan tangan dan handmade: catat bahan baku tidak standar, produksi batch kecil dan custom order, HPP, dan penjualan.',
         'eyebrow' => 'Kerajinan & Craft',
         'headline' => 'Aplikasi usaha kerajinan untuk bahan tidak standar dan custom order.',
@@ -98,7 +98,7 @@ return [
 
     'kosmetik-skincare' => [
         'category' => 'cosmetic',
-        'meta_title' => 'Aplikasi Stok Kosmetik & Skincare: Batch, BPOM, Kadaluarsa | Fabriku',
+        'meta_title' => 'Aplikasi Stok Kosmetik: Batch, BPOM, Kadaluarsa | Fabriku',
         'meta_description' => 'Aplikasi stok kosmetik dan skincare untuk mencatat nomor batch, nomor BPOM, tanggal kadaluarsa, stok per lokasi, dan penjualan ke reseller.',
         'eyebrow' => 'Kosmetik & Skincare',
         'headline' => 'Aplikasi stok kosmetik dengan batch, BPOM, dan tanggal kadaluarsa.',
@@ -126,7 +126,7 @@ return [
 
     'toko-retail' => [
         'category' => 'retail',
-        'meta_title' => 'Aplikasi Stok Toko & Kasir Sederhana untuk UMKM Retail | Fabriku',
+        'meta_title' => 'Aplikasi Stok Toko & Kasir Sederhana UMKM | Fabriku',
         'meta_description' => 'Aplikasi toko untuk UMKM retail: catat pembelian dari supplier, stok per rak dengan QR code, penyesuaian stok, kasir cepat, dan laporan penjualan.',
         'eyebrow' => 'Toko / Retail',
         'headline' => 'Aplikasi stok toko untuk pembelian, rak, dan kasir cepat.',
@@ -154,7 +154,7 @@ return [
 
     'produksi-rumahan' => [
         'category' => 'homemade',
-        'meta_title' => 'Aplikasi Pencatatan Usaha Rumahan: Produksi & Stok Sederhana | Fabriku',
+        'meta_title' => 'Aplikasi Pencatatan Usaha Rumahan: Produksi & Stok | Fabriku',
         'meta_description' => 'Aplikasi pencatatan untuk usaha rumahan: produksi sederhana, stok bahan dan produk jadi, pesanan pelanggan, dan laporan penjualan tanpa ribet.',
         'eyebrow' => 'Produksi Rumahan',
         'headline' => 'Aplikasi pencatatan usaha rumahan yang tidak ribet.',
@@ -182,7 +182,7 @@ return [
 
     'bengkel-jasa-servis' => [
         'category' => 'service',
-        'meta_title' => 'Aplikasi Bengkel Online & Jasa Servis: Layanan, Teknisi, Sparepart | Fabriku',
+        'meta_title' => 'Aplikasi Bengkel Online & Jasa Servis | Fabriku',
         'meta_description' => 'Aplikasi bengkel online berbasis web untuk bengkel motor, mobil, dan jasa servis: katalog layanan, teknisi, pemakaian sparepart otomatis, dan laporan layanan.',
         'eyebrow' => 'Jasa & Layanan',
         'headline' => 'Aplikasi bengkel online untuk layanan, teknisi, dan sparepart.',

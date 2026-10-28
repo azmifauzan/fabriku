@@ -285,7 +285,7 @@ Tanpa catatan seperti ini, angka HPP biasanya hanya ditebak berdasarkan "kira-ki
 
 Untuk kategori usaha rumahan, Fabriku menyediakan alur pencatatan produksi sederhana yang tidak mengharuskan pencatatan berlapis seperti pabrik besar, cukup input bahan dan hasil jadi, dan laporan HPP-nya terhitung sendiri.
 
-Kalau ingin memahami perhitungan HPP lebih dalam di luar konteks dapur rumahan — termasuk komponen overhead dan tenaga kerja yang lebih kompleks — lihat juga [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm).
+Kalau ingin memahami perhitungan HPP lebih dalam di luar konteks dapur rumahan — termasuk komponen overhead dan tenaga kerja yang lebih kompleks — lihat juga [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm). Kalau dapurmu menjual musiman, baca juga [cara menyiapkan stok UMKM menjelang Ramadan dan Lebaran](/blog/cara-menyiapkan-stok-umkm-menjelang-ramadan-lebaran).
 MD,
             ],
             [
@@ -421,7 +421,7 @@ Dicatat sebagai penjualan, tapi tandai statusnya. Uang yang belum diterima adala
 **Apakah cukup memakai buku tulis?**
 Cukup untuk awal, selama kolomnya sama setiap hari. Kendalanya muncul saat ingin merekap per produk atau per bulan, karena semuanya harus dihitung ulang manual.
 
-Fabriku mencatat setiap pesanan langsung sebagai data penjualan, sehingga laporan seperti ini tidak perlu disusun manual — rekap per periode, per produk, dan status pembayaran bisa dilihat dan diekspor ke Excel atau PDF. Untuk usaha yang terutama menjual barang jadi, lihat [Fabriku untuk toko retail](/aplikasi/toko-retail).
+Fabriku mencatat setiap pesanan langsung sebagai data penjualan, sehingga laporan seperti ini tidak perlu disusun manual — rekap per periode, per produk, dan status pembayaran bisa dilihat dan diekspor ke Excel atau PDF. Untuk usaha yang terutama menjual barang jadi, lihat [Fabriku untuk toko retail](/aplikasi/toko-retail). Kalau pencatatan masih memakai Excel, [kapan usaha perlu pindah dari Excel ke aplikasi pencatatan](/blog/aplikasi-pencatatan-umkm-vs-excel-kapan-pindah) menjelaskan tanda-tandanya.
 
 Setelah laporan dasar ini rutin dibuat, langkah selanjutnya adalah membacanya lebih dalam — lihat [5 metrik laporan penjualan yang wajib dipantau UMKM setiap bulan](/blog/metrik-laporan-penjualan-wajib-dipantau-umkm). Kolom status pembayaran di atas juga berkaitan erat dengan [cara mencatat dan menagih piutang pelanggan UMKM](/blog/cara-mencatat-menagih-piutang-pelanggan-umkm) — transaksi yang belum lunas hari ini adalah piutang yang perlu ditagih besok.
 MD,
@@ -756,7 +756,7 @@ Selain risiko komplain dan iritasi pelanggan, menjual kosmetik yang sudah lewat 
 
 Fabriku mencatat tanggal kadaluarsa per item stok dan menandai item yang tanggalnya sudah lewat dengan status "expired", jadi produk yang mendekati kadaluarsa bisa dipantau lebih awal sebelum jadi masalah di tangan pelanggan. Lihat juga [Fabriku untuk kosmetik dan skincare](/aplikasi/kosmetik-skincare).
 
-Prinsip dasar pengelolaan stok di atas — minimum stock per varian, pencatatan yang konsisten, stock opname rutin — berlaku juga untuk bahan baku UMKM secara umum. Kalau ingin melihat gambaran lebih lengkap, baca [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi).
+Prinsip dasar pengelolaan stok di atas — minimum stock per varian, pencatatan yang konsisten, stock opname rutin — berlaku juga untuk bahan baku UMKM secara umum. Kalau ingin melihat gambaran lebih lengkap, baca [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi). Untuk reseller dan dropshipper, ada [cara kelola stok reseller dan dropship kosmetik](/blog/cara-kelola-stok-reseller-dropship-kosmetik).
 MD,
             ],
             [
@@ -851,9 +851,9 @@ Masukkan komisi sebagai biaya tenaga kerja per layanan. Misalnya komisi 30% dari
 **Perlukah tarif dicantumkan di tempat usaha?**
 Sangat disarankan. Daftar tarif yang jelas mengurangi tawar-menawar dan membuat semua staf memasang harga yang sama.
 
-Untuk kategori usaha jasa, Fabriku menyediakan [katalog layanan untuk bengkel dan jasa servis](/aplikasi/bengkel-jasa-servis) tanpa perlu modul material atau produksi, lengkap dengan pemetaan bahan pendukung per layanan yang otomatis terpotong dari stok setiap kali transaksi kasir cepat disimpan — jadi biaya bahan pendukung tidak lagi terlewat dari perhitungan.
+Untuk kategori usaha jasa, Fabriku menyediakan [katalog layanan untuk bengkel dan jasa servis](/aplikasi/bengkel-jasa-servis) tanpa perlu modul material atau produksi, lengkap dengan pemetaan bahan pendukung per layanan yang otomatis terpotong dari stok setiap kali transaksi kasir cepat disimpan — jadi biaya bahan pendukung tidak lagi terlewat dari perhitungan. Bahan pendukungnya sendiri bisa dilacak lewat [cara melacak sparepart dan bahan habis pakai jasa servis](/blog/cara-melacak-sparepart-bahan-habis-pakai-jasa-servis).
 
-Logika menghitung komponen biaya di atas sebenarnya sama dengan cara menghitung HPP produk fisik, hanya komponennya yang berbeda — lihat [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm) untuk pembahasan yang lebih umum.
+Logika menghitung komponen biaya di atas sebenarnya sama dengan cara menghitung HPP produk fisik, hanya komponennya yang berbeda — lihat [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm) untuk pembahasan yang lebih umum. Kalau tarifnya dihitung per jam kerja, atur dulu [jadwal teknisi supaya tidak bentrok](/blog/cara-mengatur-jadwal-teknisi-bengkel-servis-agar-tidak-bentrok).
 MD,
             ],
             [
@@ -1098,7 +1098,7 @@ Kalau sejak awal retur kaos itu dipisahkan ke kategori "rusak" dan tidak ikut di
 
 Kesalahan paling umum adalah retur barang rusak langsung masuk lagi ke rak jual tanpa pengecekan, seperti contoh di atas. Kesalahan lain adalah tidak mengaitkan retur dengan pesanan asalnya, sehingga toko kehilangan data penting: produk apa yang paling sering diretur, dan apakah polanya berkaitan dengan kualitas produk, kesalahan deskripsi, atau masalah lain yang bisa diperbaiki dari sumbernya.
 
-Retur yang dikelola rapi juga berkaitan dengan bagaimana [pesanan dari berbagai channel dikelola](/blog/cara-mengelola-pesanan-online-offline-sekaligus) — retur dari pembeli marketplace, misalnya, perlu jelas alurnya sampai kembali ke stok pusat toko, bukan hanya tercatat di sisi marketplace saja. Kalau toko masih mempertimbangkan sistem kasir yang bisa menangani ini, [tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula) bisa jadi acuan awal.
+Retur yang dikelola rapi juga berkaitan dengan bagaimana [pesanan dari berbagai channel dikelola](/blog/cara-mengelola-pesanan-online-offline-sekaligus) — retur dari pembeli marketplace, misalnya, perlu jelas alurnya sampai kembali ke stok pusat toko, bukan hanya tercatat di sisi marketplace saja. Kalau toko masih mempertimbangkan sistem kasir yang bisa menangani ini, [tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula) bisa jadi acuan awal. Retur dari reseller dan dropship punya alur sendiri; lihat [cara kelola stok reseller dan dropship kosmetik](/blog/cara-kelola-stok-reseller-dropship-kosmetik).
 
 Fabriku mencatat status inventory per item — termasuk status "rusak" yang terpisah dari stok yang tersedia untuk dijual — sehingga retur barang cacat tidak akan tercampur atau tidak sengaja ditawarkan lagi ke pelanggan berikutnya.
 MD,
@@ -1156,7 +1156,7 @@ Kesalahan paling umum adalah menjadwalkan opname bergulir tapi tidak konsisten m
 
 Sebelum mulai opname bergulir, ada baiknya proses [pengelolaan retur barang](/blog/cara-kelola-stok-retur-barang-umkm-retail) di toko juga sudah rapi — retur yang tidak tercatat benar adalah salah satu penyebab paling umum selisih stok yang baru ketahuan saat opname. Prinsip dasar pencatatan stok yang konsisten ini juga berlaku untuk bahan baku, bukan cuma barang jadi retail — lihat [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi) untuk gambaran yang lebih luas.
 
-Opname bergulir paling mudah dijalankan bila setiap barang punya catatan keluar-masuk yang rapi; formatnya bisa dilihat di [contoh kartu stok barang](/blog/kartu-stok-barang-contoh-cara-mengisi-template-excel).
+Opname bergulir paling mudah dijalankan bila setiap barang punya catatan keluar-masuk yang rapi; formatnya bisa dilihat di [contoh kartu stok barang](/blog/kartu-stok-barang-contoh-cara-mengisi-template-excel). Kalau tokomu punya lebih dari satu cabang, lihat [cara kelola stok banyak cabang dan outlet UMKM](/blog/cara-kelola-stok-banyak-cabang-outlet-umkm).
 
 Fabriku mencatat pergerakan stok per item dan lokasi secara real-time, sehingga opname bergulir bisa dibandingkan langsung dengan catatan sistem per zona, tanpa harus menghentikan seluruh operasional toko untuk mencocokkan angka.
 MD,
@@ -1244,7 +1244,7 @@ Ini gejala yang paling sering diabaikan karena tidak terasa mendesak secara hari
 
 ## Bukan Berarti Harus Langsung Pakai Sistem yang Rumit
 
-Menyadari gejala-gejala di atas bukan berarti harus langsung berlangganan sistem yang canggih dan mahal. Langkah awal yang realistis adalah memastikan pencatatan produksi harian sudah konsisten dan terstruktur — [cara mencatat produksi harian UMKM kuliner rumahan](/blog/cara-mencatat-produksi-harian-umkm-kuliner-rumahan) menunjukkan versi paling sederhana dari ini. Begitu pencatatan dasar sudah rutin, barulah pindah ke sistem yang bisa merangkum semuanya jadi lebih mudah dilihat.
+Menyadari gejala-gejala di atas bukan berarti harus langsung berlangganan sistem yang canggih dan mahal. Langkah awal yang realistis adalah memastikan pencatatan produksi harian sudah konsisten dan terstruktur — [cara mencatat produksi harian UMKM kuliner rumahan](/blog/cara-mencatat-produksi-harian-umkm-kuliner-rumahan) menunjukkan versi paling sederhana dari ini. Begitu pencatatan dasar sudah rutin, barulah pindah ke sistem yang bisa merangkum semuanya jadi lebih mudah dilihat. Kalau sudah memakai Excel dan ragu apakah saatnya pindah, baca [aplikasi pencatatan UMKM vs Excel: kapan harus pindah](/blog/aplikasi-pencatatan-umkm-vs-excel-kapan-pindah).
 
 ## Contoh Kasus: Dua Gejala yang Muncul Bersamaan
 
@@ -1498,7 +1498,7 @@ Untuk bengkel dengan 2–4 teknisi, papan jadwal di spreadsheet bersama dan konf
 Beri kabar ke pelanggan berikutnya sedini mungkin dan tawarkan geser jam. Catat penyebabnya; jika sering terjadi pada layanan yang sama, perbarui estimasi durasinya.
 
 **Bagaimana menentukan tarif setiap layanan?**
-Durasi yang sudah Anda catat untuk jadwal adalah bahan utama menghitung tarif. Lihat [cara menghitung harga jasa servis kecil agar tidak rugi](/blog/cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi).
+Durasi yang sudah Anda catat untuk jadwal adalah bahan utama menghitung tarif. Lihat [cara menghitung harga jasa servis kecil agar tidak rugi](/blog/cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi). Bahan yang terpakai di tiap pekerjaan dibahas di [cara melacak sparepart dan bahan habis pakai jasa servis](/blog/cara-melacak-sparepart-bahan-habis-pakai-jasa-servis).
 
 Fabriku belum menyediakan kalender booking, tapi setiap baris layanan di transaksi bisa diisi staf yang mengerjakannya. Laporan layanan kemudian merekap omzet per layanan dan per staf, sehingga beban kerja dan dasar komisi tiap teknisi terlihat tanpa rekap manual. Lihat [Fabriku untuk bengkel dan jasa servis](/aplikasi/bengkel-jasa-servis).
 MD,
@@ -1575,7 +1575,7 @@ Jika rata-rata pemakaian deterjen 1,5 liter/hari, supplier butuh 2 hari untuk me
 
 ## Masukkan ke Perhitungan Tarif
 
-Setelah pemakaian standar per layanan diketahui, biayanya bisa dimasukkan ke tarif jasa dengan akurat. Jika cairan pembersih Rp60.000/liter, maka 50 ml per tune up = Rp3.000. Angka ini sering hilang dari hitungan tarif. Lihat [cara menghitung harga jasa servis kecil agar tidak rugi](/blog/cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi).
+Setelah pemakaian standar per layanan diketahui, biayanya bisa dimasukkan ke tarif jasa dengan akurat. Jika cairan pembersih Rp60.000/liter, maka 50 ml per tune up = Rp3.000. Angka ini sering hilang dari hitungan tarif. Lihat [cara menghitung harga jasa servis kecil agar tidak rugi](/blog/cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi). Supaya pekerjaan tidak menumpuk di satu teknisi, baca juga [cara mengatur jadwal teknisi bengkel agar tidak bentrok](/blog/cara-mengatur-jadwal-teknisi-bengkel-servis-agar-tidak-bentrok).
 
 ## Pertanyaan yang Sering Muncul
 
@@ -2025,13 +2025,13 @@ Pemisah argumen `;` atau `,` tergantung pengaturan bahasa Excel Anda.
 ## Pertanyaan yang Sering Muncul
 
 **Apa bedanya kartu stok dengan stok opname?**
-Kartu stok adalah catatan berjalan setiap hari. Stok opname adalah kegiatan menghitung fisik barang untuk dicocokkan dengan kartu stok. Keduanya saling melengkapi; lihat [cara stok opname toko tanpa tutup toko](/blog/cara-stok-opname-toko-retail-tanpa-tutup-toko).
+Kartu stok adalah catatan berjalan setiap hari. Stok opname adalah kegiatan menghitung fisik barang untuk dicocokkan dengan kartu stok. Keduanya saling melengkapi; lihat [cara stok opname toko tanpa tutup toko](/blog/cara-stok-opname-toko-retail-tanpa-tutup-toko). Untuk toko dengan beberapa cabang, lihat [cara kelola stok banyak cabang dan outlet UMKM](/blog/cara-kelola-stok-banyak-cabang-outlet-umkm).
 
 **Apakah usaha kecil perlu kartu stok untuk semua barang?**
 Mulailah dari barang yang paling laku dan paling mahal, biasanya 20–30 barang yang menyumbang sebagian besar omzet. Barang lain cukup dicek saat opname rutin.
 
 **Kartu stok bahan baku sama dengan kartu stok barang jadi?**
-Formatnya sama. Untuk bahan baku, kolom keluar biasanya berisi pemakaian produksi. Bahan yang punya tanggal kedaluwarsa sebaiknya dicatat per penerimaan agar yang lama dipakai lebih dulu; lihat [cara mengelola stok bahan baku UMKM](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi).
+Formatnya sama. Untuk bahan baku, kolom keluar biasanya berisi pemakaian produksi. Bahan yang punya tanggal kedaluwarsa sebaiknya dicatat per penerimaan agar yang lama dipakai lebih dulu; lihat [cara mengelola stok bahan baku UMKM](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi). Untuk persiapan stok musiman, lihat [cara menyiapkan stok UMKM menjelang Ramadan dan Lebaran](/blog/cara-menyiapkan-stok-umkm-menjelang-ramadan-lebaran).
 
 ## Kapan Kartu Stok Manual Mulai Merepotkan
 
