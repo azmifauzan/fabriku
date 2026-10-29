@@ -155,7 +155,7 @@ return [
 <footer data-fb-shell="footer" class="dsfa-footer">
     <div class="dsfa-wrap dsfa-footer-grid">
         <div class="dsfa-footer-brand"><p class="dsfa-footer-name">DSFA Homemade</p><p>Cheesecuit, takoyaki, puding buah, dan jus homemade dari dapur rumah kami di Bandung.</p><p class="dsfa-footer-wa"><a href="{$waAdmin1}" rel="noopener" target="_blank">WhatsApp 0852-2015-0587</a><a href="{$waAdmin2}" rel="noopener" target="_blank">WhatsApp 0812-6782-2754</a></p></div>
-        <nav class="dsfa-footer-col"><p class="dsfa-footer-title">Menu</p><ul><li><a href="/halaman/cheesecuit-bandung">Cheesecuit Bandung</a></li><li><a href="/halaman/jual-takoyaki-bandung">Takoyaki Bandung</a></li><li><a href="/halaman/puding-buah-bandung">Puding buah Bandung</a></li><li><a href="/halaman/jus-homemade-bandung">Jus homemade Bandung</a></li></ul></nav>
+        <nav class="dsfa-footer-col"><p class="dsfa-footer-title">Menu</p><ul><li><a href="/halaman/cheesecuit-bandung">Cheesecuit Bandung</a></li><li><a href="/halaman/jual-takoyaki-bandung">Takoyaki Bandung</a></li><li><a href="/halaman/puding-buah-bandung">Puding buah Bandung</a></li><li><a href="/halaman/puding-ulang-tahun-bandung">Puding ulang tahun Bandung</a></li><li><a href="/halaman/jus-homemade-bandung">Jus homemade Bandung</a></li></ul></nav>
         <nav class="dsfa-footer-col"><p class="dsfa-footer-title">Informasi</p><ul><li><a href="/halaman/cara-pesan">Cara pesan</a></li><li><a href="/halaman/area-pengiriman">Area pengiriman</a></li><li><a href="/#menu">Katalog dan harga</a></li><li><a href="/halaman/dessert-takoyaki-bojongsoang">Dessert Bojongsoang</a></li><li><a href="/privasi">Privasi</a></li></ul></nav>
     </div>
     <div class="dsfa-wrap dsfa-footer-bottom"><p>&copy; DSFA Homemade, Bandung</p><nav><a href="/lapor">Laporkan situs</a><a href="https://fabriku.id" rel="noopener">Dibuat dengan Fabriku</a></nav></div>
@@ -193,6 +193,7 @@ HTML,
         <a href="/halaman/puding-buah-bandung"><svg class="dsfa-icon" viewbox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="56" height="56" fill="none" stroke="#424b34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 54L19 24h26l5 30z"/><line x1="17" y1="38" x2="47" y2="38"/><circle cx="32" cy="15" r="5"/></svg><strong>Puding buah</strong><span>Puding lembut dengan potongan buah, disajikan dingin.</span></a>
         <a href="/halaman/jus-homemade-bandung"><svg class="dsfa-icon" viewbox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="56" height="56" fill="none" stroke="#424b34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18h32l-4 38H20z"/><line x1="18" y1="30" x2="46" y2="30"/><line x1="38" y1="18" x2="44" y2="6"/></svg><strong>Jus homemade</strong><span>Jus buah buatan kami untuk teman camilan.</span></a>
     </nav>
+    <p class="dsfa-heading-copy">Untuk perayaan: <a href="/halaman/puding-ulang-tahun-bandung">puding ulang tahun Bandung</a>, open order dengan estimasi pengerjaan 3 hari.</p>
 </section>
 HTML,
         ],
