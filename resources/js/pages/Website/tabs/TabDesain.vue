@@ -4,6 +4,7 @@ import Modal from '@/components/Modal.vue';
 import WebsiteThemePreview from '@/components/WebsiteThemePreview.vue';
 import { Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import TemplateCard from './TemplateCard.vue';
 
 type Template = { id: number; name: string; source: string; isActive: boolean; updatedAt: string | null };
 const props = defineProps<{
@@ -53,6 +54,9 @@ const allTemplates = computed(() =>
         })),
     ].sort((a, b) => Number(b.isActive) - Number(a.isActive)),
 );
+
+const activeTemplate = computed(() => allTemplates.value.find((item) => item.isActive));
+const inactiveTemplates = computed(() => allTemplates.value.filter((item) => !item.isActive));
 
 function deleteTemplate() {
     if (!deletion.value || deleting.value) return;
@@ -117,7 +121,12 @@ function activate() {
         <p v-if="satsetuiError" role="alert" class="rounded-lg border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900">{{ satsetuiError }}</p>
         <template v-if="canManage">
             <p v-if="deleteError" role="alert" class="rounded-lg border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900">{{ deleteError }}</p>
-            <section class="grid gap-6 lg:grid-cols-2">
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <TemplateCard
+                    v-if="activeTemplate"
+                    :item="activeTemplate"
+                    @preview="preview = { name: activeTemplate.name, url: activeTemplate.previewUrl }"
+                />
                 <form
                     class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
                     @submit.prevent="uploadTemplate"
@@ -172,57 +181,16 @@ function activate() {
                         </button>
                     </form>
                 </div>
-            </section>
+            </div>
             <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                <article
-                    v-for="item in allTemplates"
+                <TemplateCard
+                    v-for="item in inactiveTemplates"
                     :key="item.key"
-                    class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
-                    :class="item.isActive ? 'sm:col-span-2 sm:grid sm:grid-cols-2 xl:col-span-3 xl:grid-cols-3' : ''"
-                >
-                    <WebsiteThemePreview :preview-url="item.previewUrl" :title="`Thumbnail ${item.name}`" :refresh-key="item.refreshKey" />
-                    <div class="space-y-4 p-4">
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <h3 class="font-semibold text-slate-950 dark:text-white">{{ item.name }}</h3>
-                                <p class="mt-1 text-xs text-slate-500">{{ item.description }}</p>
-                            </div>
-                            <span v-if="item.isActive" class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-900"
-                                >Aktif</span
-                            >
-                        </div>
-                        <div class="flex flex-wrap gap-2">
-                            <button
-                                type="button"
-                                class="min-h-11 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200"
-                                @click="preview = { name: item.name, url: item.previewUrl }"
-                            >
-                                Pratinjau
-                            </button>
-                            <Link
-                                :href="item.editUrl"
-                                class="min-h-11 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200"
-                                >Edit HTML</Link
-                            >
-                            <button
-                                v-if="!item.isActive"
-                                type="button"
-                                class="min-h-11 rounded-lg bg-teal-800 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-700"
-                                @click="activation = { name: item.name, url: item.activateUrl }"
-                            >
-                                Aktifkan
-                            </button>
-                            <button
-                                v-if="item.custom && !item.isActive"
-                                type="button"
-                                class="min-h-11 rounded-lg border border-red-300 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-950"
-                                @click="deletion = item.custom"
-                            >
-                                Hapus
-                            </button>
-                        </div>
-                    </div>
-                </article>
+                    :item="item"
+                    @preview="preview = { name: item.name, url: item.previewUrl }"
+                    @activate="activation = { name: item.name, url: item.activateUrl }"
+                    @delete="deletion = item.custom"
+                />
             </div>
         </template>
         <p v-else class="text-sm text-slate-600 dark:text-slate-400">Pengelolaan template tersedia untuk pemilik dan pengelola usaha.</p>
