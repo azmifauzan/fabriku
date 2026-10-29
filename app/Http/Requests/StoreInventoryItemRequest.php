@@ -80,6 +80,8 @@ class StoreInventoryItemRequest extends FormRequest
             // Quantities - required for manual entry
             'target_quantity' => $isManualEntry ? 'nullable|integer|min:0' : 'required|integer|min:0',
             'minimum_stock' => 'integer|min:0',
+            'is_open_order' => 'boolean',
+            'lead_time_days' => 'nullable|integer|min:1|max:90|required_if_accepted:is_open_order',
 
             // Category
             'category_id' => ['nullable', Rule::exists('inventory_item_categories', 'id')->where('tenant_id', $tenantId)],

@@ -75,8 +75,7 @@ class SiteProduct extends Model
     public function getStartingPrice(): float
     {
         $minPrice = $this->inventoryItems()
-            ->where('status', 'available')
-            ->whereColumn('current_quantity', '>', 'reserved_quantity')
+            ->sellable()
             ->whereNotNull('selling_price')
             ->where('selling_price', '>', 0)
             ->min('selling_price');
@@ -90,8 +89,7 @@ class SiteProduct extends Model
     public function hasPriceVariation(): bool
     {
         $prices = $this->inventoryItems()
-            ->where('status', 'available')
-            ->whereColumn('current_quantity', '>', 'reserved_quantity')
+            ->sellable()
             ->whereNotNull('selling_price')
             ->distinct()
             ->pluck('selling_price');
@@ -113,12 +111,17 @@ class SiteProduct extends Model
 
     /**
      * Get availability label without revealing exact stock count:
+     * - 'Open Order' (made to order, see getLeadTimeDays())
      * - 'Tersedia'
      * - 'Stok terbatas' (<= minimum_stock)
      * - 'Habis'
      */
     public function getAvailabilityStatus(): string
     {
+        if ($this->isOpenOrder()) {
+            return 'Open Order';
+        }
+
         $totalStock = $this->getTotalAvailableStock();
 
         if ($totalStock <= 0) {
@@ -135,9 +138,22 @@ class SiteProduct extends Model
         return 'Tersedia';
     }
 
+    /**
+     * Open order: made after the order, so the linked row is sellable without stock.
+     */
+    public function isOpenOrder(): bool
+    {
+        return $this->inventoryItems()->where('is_open_order', true)->where('status', 'available')->exists();
+    }
+
+    public function getLeadTimeDays(): ?int
+    {
+        return $this->inventoryItems()->where('is_open_order', true)->max('lead_time_days');
+    }
+
     public function isAvailable(): bool
     {
-        return $this->getTotalAvailableStock() > 0;
+        return $this->isOpenOrder() || $this->getTotalAvailableStock() > 0;
     }
 
     /**

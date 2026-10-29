@@ -8,9 +8,11 @@
             $price = $product->getStartingPrice();
             $hasVariation = $product->hasPriceVariation();
             $status = $product->getAvailabilityStatus();
+            $leadTime = $status === 'Open Order' ? $product->getLeadTimeDays() : null;
             $statusClass = match($status) {
                 'Tersedia' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                 'Stok terbatas' => 'bg-amber-50 text-amber-700 border-amber-200',
+                'Open Order' => 'bg-sky-50 text-sky-700 border-sky-200',
                 default => 'bg-rose-50 text-rose-700 border-rose-200',
             };
             $img = $product->getImageUrl() ?: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif">Produk</text></svg>';
@@ -22,7 +24,7 @@
             <div class="p-4 flex flex-col flex-1">
                 <div class="flex items-center justify-between gap-2 mb-2">
                     <span class="inline-flex items-center text-xs px-2 py-0.5 rounded-full border {{ $statusClass }}">
-                        {{ $status }}
+                        {{ $status }}@if($leadTime) · estimasi {{ $leadTime }} hari @endif
                     </span>
                 </div>
                 <a href="/produk/{{ $product->slug }}" class="font-medium text-[var(--fb-text)] hover:text-[var(--fb-primary)] line-clamp-2 transition mb-2">

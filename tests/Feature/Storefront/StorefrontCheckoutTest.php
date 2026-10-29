@@ -78,4 +78,42 @@ class StorefrontCheckoutTest extends TestCase
             ->assertSessionHasErrors('cart');
         $this->assertDatabaseCount('sales_orders', 0);
     }
+
+    public function test_open_order_product_is_orderable_without_stock_and_never_touches_stock(): void
+    {
+        $tenant = Tenant::factory()->create();
+        BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'slug' => 'open-order-shop', 'mode' => 'produk', 'status' => 'published']);
+        $item = InventoryItem::factory()->create([
+            'tenant_id' => $tenant->id, 'selling_price' => 200000, 'current_quantity' => 0, 'reserved_quantity' => 0,
+            'status' => 'available', 'is_open_order' => true, 'lead_time_days' => 3,
+        ]);
+        $product = SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'inventory_item_id' => $item->id, 'slug' => 'puding-po']);
+
+        $this->get('http://open-order-shop.fabriku.biz.id/produk/puding-po')
+            ->assertOk()->assertSee('Open Order')->assertSee('estimasi 3 hari')->assertSee('Tambah ke keranjang');
+
+        $this->post('http://open-order-shop.fabriku.biz.id/keranjang', ['product_id' => $product->id, 'quantity' => 2])->assertRedirect('/keranjang');
+        $this->post('http://open-order-shop.fabriku.biz.id/checkout', ['idempotency_key' => (string) Str::uuid(), 'name' => 'Pembeli', 'phone' => '081234567890'])
+            ->assertSessionHasNoErrors();
+
+        $order = SalesOrder::withoutGlobalScopes()->firstOrFail();
+        $this->assertSame('400000.00', $order->total_amount);
+
+        foreach (['confirmed', 'processing', 'completed'] as $status) {
+            $order->update(['status' => $status]);
+        }
+        $item->refresh();
+        $this->assertSame(0, (int) $item->current_quantity);
+        $this->assertSame(0, (int) $item->reserved_quantity);
+    }
+
+    public function test_out_of_stock_product_without_open_order_stays_unavailable(): void
+    {
+        $tenant = Tenant::factory()->create();
+        BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'slug' => 'sold-out-shop', 'mode' => 'produk', 'status' => 'published']);
+        $item = InventoryItem::factory()->create(['tenant_id' => $tenant->id, 'selling_price' => 5000, 'current_quantity' => 0, 'reserved_quantity' => 0, 'status' => 'available']);
+        $product = SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'inventory_item_id' => $item->id]);
+
+        $this->post('http://sold-out-shop.fabriku.biz.id/keranjang', ['product_id' => $product->id, 'quantity' => 1])->assertStatus(422);
+    }
 }

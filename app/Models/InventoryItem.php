@@ -38,6 +38,8 @@ class InventoryItem extends Model
         'expired_date',
         'notes',
         'image_path',
+        'is_open_order',
+        'lead_time_days',
     ];
 
     protected $appends = [
@@ -57,6 +59,8 @@ class InventoryItem extends Model
         return [
             'unit_cost' => 'decimal:2',
             'selling_price' => 'decimal:2',
+            'is_open_order' => 'boolean',
+            'lead_time_days' => 'integer',
             'expired_date' => 'date',
         ];
     }
@@ -354,6 +358,15 @@ class InventoryItem extends Model
         return $query->whereHas('tenant', function ($tenantQuery) use ($category) {
             $tenantQuery->where('business_category', $category);
         });
+    }
+
+    /**
+     * Rows a customer can buy now: in stock, or open order (made after the order, no stock needed).
+     */
+    public function scopeSellable($query)
+    {
+        return $query->where('status', 'available')
+            ->where(fn ($q) => $q->where('is_open_order', true)->orWhereColumn('current_quantity', '>', 'reserved_quantity'));
     }
 
     public function scopeExpiring($query, int $days = 7)

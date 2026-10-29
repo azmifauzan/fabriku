@@ -79,6 +79,8 @@ class UpdateInventoryItemRequest extends FormRequest
             'current_stock' => 'sometimes|integer|min:0', // backwards compatibility
             'stock_quantity' => 'sometimes|integer|min:0', // backwards compatibility
             'minimum_stock' => 'integer|min:0',
+            'is_open_order' => 'boolean',
+            'lead_time_days' => 'nullable|integer|min:1|max:90|required_if_accepted:is_open_order',
 
             // Category
             'category_id' => ['nullable', Rule::exists('inventory_item_categories', 'id')->where('tenant_id', $tenantId)],

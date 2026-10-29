@@ -2,9 +2,12 @@
     $price = $product->getStartingPrice();
     $hasVariation = $product->hasPriceVariation();
     $status = $product->getAvailabilityStatus();
+    $isOpenOrder = $status === 'Open Order';
+    $leadTime = $isOpenOrder ? $product->getLeadTimeDays() : null;
     $statusClass = match($status) {
         'Tersedia' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
         'Stok terbatas' => 'bg-amber-50 text-amber-700 border-amber-200',
+        'Open Order' => 'bg-sky-50 text-sky-700 border-sky-200',
         default => 'bg-rose-50 text-rose-700 border-rose-200',
     };
     $img = $product->getImageUrl() ?: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" fill="%23f1f5f9"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif">Produk</text></svg>';
@@ -13,7 +16,7 @@
     if (str_starts_with($cleanPhone, '0')) {
         $cleanPhone = '62' . substr($cleanPhone, 1);
     }
-    $waUrl = $cleanPhone ? "https://wa.me/{$cleanPhone}?text=" . urlencode("Halo, saya tertarik dengan produk {$product->title} (Rp " . number_format($price, 0, ',', '.') . "). Apakah masih ada?") : '#';
+    $waUrl = $cleanPhone ? "https://wa.me/{$cleanPhone}?text=" . urlencode("Halo, saya tertarik dengan produk {$product->title} (Rp " . number_format($price, 0, ',', '.') . "). " . ($isOpenOrder ? "Saya mau pesan open order, kapan bisa dibuat?" : "Apakah masih ada?")) : '#';
 @endphp
 
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -33,7 +36,7 @@
         <div class="flex flex-col">
             <div class="mb-3">
                 <span class="inline-flex items-center text-xs px-2.5 py-1 rounded-full border {{ $statusClass }}">
-                    {{ $status }}
+                    {{ $status }}@if($leadTime) · estimasi {{ $leadTime }} hari @endif
                 </span>
             </div>
 
@@ -49,6 +52,12 @@
                     Rp {{ number_format($price, 0, ',', '.') }}
                 </div>
             </div>
+
+            @if($isOpenOrder)
+                <p class="mb-6 text-sm text-slate-600">
+                    Produk ini dibuat setelah pesanan masuk{{ $leadTime ? ', estimasi pengerjaan '.$leadTime.' hari' : '' }}. Tim toko akan mengonfirmasi tanggal siap sebelum pembayaran.
+                </p>
+            @endif
 
             @if($product->description)
                 <div class="prose prose-sm text-slate-600 mb-8 leading-relaxed">

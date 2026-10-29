@@ -112,10 +112,12 @@ class CartController extends Controller
                         }
                         $inventory = InventoryItem::withoutGlobalScope(TenantScope::class)
                             ->where('tenant_id', $tenant->id)->where('id', $product->inventory_item_id)
-                            ->where('status', 'available')->where('selling_price', '>', 0)
+                            ->sellable()->where('selling_price', '>', 0)
                             ->orderBy('selling_price')->orderBy('id')->get();
                         foreach ($inventory as $item) {
-                            $take = min($remaining, max(0, (int) $item->current_quantity - (int) $item->reserved_quantity));
+                            $take = $item->is_open_order
+                                ? $remaining
+                                : min($remaining, max(0, (int) $item->current_quantity - (int) $item->reserved_quantity));
                             if ($take > 0) {
                                 $subtotal = $take * (float) $item->selling_price;
                                 $lines[] = ['inventory_item_id' => $item->id, 'quantity' => $take, 'unit_price' => $item->selling_price, 'discount_amount' => 0, 'subtotal' => $subtotal];

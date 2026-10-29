@@ -100,8 +100,7 @@ class WebsiteController extends Controller
         $existingItemIds = $canManage ? SiteProduct::where('tenant_id', $tenantId)->pluck('inventory_item_id') : collect();
         $catalog = $canManage ? InventoryItem::query()
             ->where('tenant_id', $tenantId)
-            ->where('status', 'available')
-            ->whereColumn('current_quantity', '>', 'reserved_quantity')
+            ->sellable()
             ->whereNotIn('id', $existingItemIds)
             ->orderBy('product_name')
             ->get()

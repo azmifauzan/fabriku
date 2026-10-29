@@ -85,6 +85,10 @@ class SalesOrderObserver
                 if ($item->inventory_item_id) {
                     $inventoryItem = $this->inventoryItemFor($item, $salesOrder);
 
+                    if ($inventoryItem->is_open_order) {
+                        continue;
+                    }
+
                     if (! $inventoryItem->reserveStock($item->quantity)) {
                         throw new InsufficientStockException(
                             "Stok tidak cukup untuk reservasi item {$inventoryItem->sku} (butuh {$item->quantity}) pada pesanan {$salesOrder->order_number}."
@@ -102,6 +106,10 @@ class SalesOrderObserver
                 if ($item->inventory_item_id) {
                     // Deduct from current_quantity AND reserved_quantity
                     $inventoryItem = $this->inventoryItemFor($item, $salesOrder);
+
+                    if ($inventoryItem->is_open_order) {
+                        continue;
+                    }
 
                     // Reduce reserved quantity (releasing the reservation)
                     if (! $inventoryItem->releaseReservedStock($item->quantity)) {
@@ -127,6 +135,10 @@ class SalesOrderObserver
             foreach ($salesOrder->items()->get() as $item) {
                 if ($item->inventory_item_id) {
                     $inventoryItem = $this->inventoryItemFor($item, $salesOrder);
+
+                    if ($inventoryItem->is_open_order) {
+                        continue;
+                    }
 
                     if (! $inventoryItem->releaseReservedStock($item->quantity)) {
                         throw new InsufficientStockException(

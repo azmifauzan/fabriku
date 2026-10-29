@@ -64,6 +64,8 @@ interface Item {
     reserved_stock: number;
     unit_cost: string;
     selling_price: string;
+    is_open_order?: boolean;
+    lead_time_days?: number | null;
     production_date?: string;
     status: string;
     notes?: string;
@@ -104,6 +106,8 @@ const form = useForm({
     locations: (isEditing ? [] : [{ location_id: null, quantity: 0 }]) as LocationSplit[],
     unit_cost: props.item?.unit_cost || '0',
     selling_price: props.item?.selling_price || '0',
+    is_open_order: props.item?.is_open_order ?? false,
+    lead_time_days: props.item?.lead_time_days ?? null,
     notes: props.item?.notes || '',
     image: null as File | null,
 });
@@ -707,6 +711,31 @@ const addCategory = async () => {
                             <p v-if="form.errors.selling_price" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors.selling_price }}
                             </p>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <input v-model="form.is_open_order" type="checkbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                                Open order (dibuat setelah pesanan masuk, tanpa stok)
+                            </label>
+                            <div v-if="form.is_open_order" class="mt-3 max-w-xs">
+                                <label for="lead_time_days" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Estimasi pengerjaan (hari) <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    id="lead_time_days"
+                                    v-model="form.lead_time_days"
+                                    type="number"
+                                    min="1"
+                                    max="90"
+                                    required
+                                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    :class="{ 'border-red-300': form.errors.lead_time_days }"
+                                />
+                                <p v-if="form.errors.lead_time_days" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                    {{ form.errors.lead_time_days }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
