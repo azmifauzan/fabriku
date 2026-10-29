@@ -22,14 +22,14 @@ const emit = defineEmits<{ preview: []; activate: []; delete: [] }>();
             <div class="flex flex-wrap gap-2">
                 <button
                     type="button"
-                    class="min-h-11 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200"
+                    class="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200"
                     @click="emit('preview')"
                 >
                     Pratinjau
                 </button>
                 <Link
                     :href="item.editUrl"
-                    class="min-h-11 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200"
+                    class="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200"
                     >Edit HTML</Link
                 >
                 <button
