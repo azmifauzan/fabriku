@@ -6,6 +6,7 @@ use App\Http\Middleware\CheckSubscriptionStatus;
 use App\Http\Middleware\EnsureTenantContext;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ResolveStorefront;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -59,10 +60,15 @@ return Application::configure(basePath: dirname(__DIR__))
             Request::HEADER_X_FORWARDED_AWS_ELB);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->header('X-Inertia') && ! $request->expectsJson() && ! $request->isMethod('GET')) {
+                return redirect()->guest($e->redirectTo($request) ?? route('login'), 303);
+            }
+        });
         $exceptions->render(function (HttpException $e, Request $request) {
             if ($e->getStatusCode() === 419) {
                 if ($request->header('X-Inertia')) {
-                    return redirect()->route('login')
+                    return redirect()->route('login', [], $request->isMethod('GET') ? 302 : 303)
                         ->with('error', 'Sesi Anda telah berakhir. Silakan masuk kembali.');
                 }
 
