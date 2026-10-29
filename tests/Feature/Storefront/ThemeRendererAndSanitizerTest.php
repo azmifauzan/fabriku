@@ -318,4 +318,25 @@ HTML;
         $this->get('https://cart-store-two.fabriku.biz.id/produk')->assertOk()
             ->assertSee('aria-label="Keranjang belanja, 1 barang"', false);
     }
+
+    public function test_products_slot_can_be_limited_to_listed_slugs_in_that_order_and_survives_the_sanitizer(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        foreach (['takoyaki-isi-4' => 1, 'puding-buah' => 2, 'puding-besar' => 3] as $slug => $sort) {
+            SiteProduct::factory()->create(['tenant_id' => $tenant->id, 'title' => 'T '.$slug, 'slug' => $slug, 'sort' => $sort]);
+        }
+        $context = ['site' => $site, 'products' => $site->tenant->siteProducts()->orderBy('sort')->get()];
+        $source = '<div data-fb-slot="products" data-fb-products="puding-besar,puding-buah,tidak-ada"></div>';
+
+        $html = app(ThemeRenderer::class)->replaceSlots(app(HtmlSanitizerService::class)->sanitize($source), $context);
+
+        $this->assertStringContainsString('/produk/puding-besar', $html);
+        $this->assertStringContainsString('/produk/puding-buah', $html);
+        $this->assertLessThan(strpos($html, '/produk/puding-buah"'), strpos($html, '/produk/puding-besar'));
+        $this->assertStringNotContainsString('takoyaki-isi-4', $html);
+
+        $none = app(ThemeRenderer::class)->replaceSlots('<div data-fb-slot="products" data-fb-products="tidak-ada"></div>', $context);
+        $this->assertSame('', $none);
+    }
 }

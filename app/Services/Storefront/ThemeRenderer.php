@@ -294,7 +294,10 @@ HTML;
                     }
                 }
 
-                $rendered = $this->renderSlot($slotName, $context);
+                $only = $slotName === 'products' && preg_match('/^<[^>]*data-fb-products="([a-z0-9,-]+)"/i', $matches[0], $only)
+                    ? explode(',', $only[1])
+                    : [];
+                $rendered = $this->renderSlot($slotName, $context, $only);
 
                 // Slots that can legitimately be empty keep the designer's fallback markup.
                 if ($rendered === '' && $slotName === 'featured-product') {
@@ -309,12 +312,21 @@ HTML;
 
     /**
      * Render a specific slot view.
+     *
+     * @param  list<string>  $onlySlugs  `products` slot only: show just these product slugs, in this order.
      */
-    public function renderSlot(string $slotName, array $context): string
+    public function renderSlot(string $slotName, array $context, array $onlySlugs = []): string
     {
         $site = $context['site'] ?? null;
         if ($site && in_array($slotName, ['products', 'featured-product'], true) && ! isset($context['products'])) {
             $context['products'] = $site->mode === 'jasa' ? collect() : Storefront::for($site->tenant)->products()->get();
+        }
+        if ($slotName === 'products' && $onlySlugs !== []) {
+            $bySlug = collect($context['products'] ?? [])->keyBy('slug');
+            $context['products'] = collect($onlySlugs)->map(fn (string $slug) => $bySlug->get($slug))->filter()->values();
+            if ($context['products']->isEmpty()) {
+                return '';
+            }
         }
         if ($site && $slotName === 'services' && ! isset($context['services'])) {
             $context['services'] = $site->mode === 'produk' ? collect() : Storefront::for($site->tenant)->services()->get();

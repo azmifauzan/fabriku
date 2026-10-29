@@ -11,12 +11,25 @@ use App\Models\User;
 use App\Services\Storefront\ThemeRenderer;
 use App\Services\Storefront\UploadedTheme;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class WebsiteTemplateEditorTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_expired_inertia_delete_redirects_to_login_with_get(): void
+    {
+        $this->delete('/website/templates/123', [], ['X-Inertia' => 'true'])
+            ->assertStatus(303)->assertRedirect(route('login'));
+
+        Route::middleware('web')->delete('/test-expired-template-session', function () {
+            abort(419);
+        });
+        $this->delete('/test-expired-template-session', [], ['X-Inertia' => 'true'])
+            ->assertStatus(303)->assertRedirect(route('login'));
+    }
 
     private function managerSite(): BusinessSite
     {

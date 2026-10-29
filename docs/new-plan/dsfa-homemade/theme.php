@@ -14,7 +14,9 @@ HTML;
 
 $deliveryAnswer = 'Kami mengantar ke Kota Bandung, Cimahi, dan sebagian Kabupaten Bandung. Waktu antar maksimal 1 jam dalam kondisi lalu lintas normal. Daftar kecamatan ada di halaman <a href="/halaman/area-pengiriman">area pengiriman</a>.';
 
-$menuPage = fn (string $slug, string $title, string $seoTitle, string $seoDescription, int $sort, string $h1, string $intro, string $useHeading, string $useText, string $stepsHeading, string $waText, string $faqSubject, string $faqAnswer, string $related): array => [
+$catalog = fn (string $slugs): string => $slugs === '' ? '' : '<section class="dsfa-page-section"><h2>Pilihan di katalog</h2><div data-fb-slot="products" data-fb-products="'.$slugs.'"></div></section>';
+
+$menuPage = fn (string $slug, string $title, string $seoTitle, string $seoDescription, int $sort, string $h1, string $intro, string $useHeading, string $useText, string $stepsHeading, string $waText, string $faqSubject, string $faqAnswer, string $related, string $slugs = ''): array => [
     'slug' => $slug,
     'title' => $title,
     'seo_title' => $seoTitle,
@@ -27,6 +29,7 @@ $menuPage = fn (string $slug, string $title, string $seoTitle, string $seoDescri
     <p class="dsfa-intro">{$intro}</p>
     <div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="{$waLink($waText)}" rel="noopener" target="_blank">Pesan via WhatsApp</a><a class="dsfa-button" href="/#menu">Lihat harga di katalog</a></div>
     <section class="dsfa-page-section"><h2>{$useHeading}</h2><p>{$useText}</p></section>
+    {$catalog($slugs)}
     <section class="dsfa-page-section"><h2>{$stepsHeading}</h2>{$orderSteps}</section>
     <section class="dsfa-page-section dsfa-faq"><h2>Pertanyaan tentang {$faqSubject}</h2>
         {$faqAnswer}
@@ -46,7 +49,8 @@ $pages = [
         'Cheesecuit pas sebagai penutup makan, teman minum teh sore, atau suguhan saat keluarga dan teman berkunjung. Pilihan rasa dan ukurannya tercantum di katalog menu.',
         'Cara pesan cheesecuit di Bandung', 'Halo DSFA Homemade, saya mau pesan cheesecuit.', 'cheesecuit DSFA',
         '<h3>Apakah DSFA Homemade cabang toko cheesecuit lain?</h3><p>Bukan. DSFA Homemade adalah usaha rumahan sendiri di Bandung, dan cheesecuit adalah salah satu menu dessert kami.</p>',
-        'Ada. Kami juga menjual <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, <a href="/halaman/puding-buah-bandung">puding buah</a>, dan <a href="/halaman/jus-homemade-bandung">jus homemade</a>.'),
+        'Ada. Kami juga menjual <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, <a href="/halaman/puding-buah-bandung">puding buah</a>, dan <a href="/halaman/jus-homemade-bandung">jus homemade</a>.',
+        'cheesecuit-besar-coklat,cheesecuit-besar-oreo,cheesecuit-kecil-coklat,cheesecuit-kecil-matcha,cheesecuit-kecil-oreo'),
     $menuPage('jual-takoyaki-bandung', 'Takoyaki Bandung', 'Jual Takoyaki Bandung | DSFA Homemade',
         'Jual takoyaki homemade di Bandung. DSFA Homemade membuat takoyaki sendiri di dapur rumah. Pesan via WhatsApp, diantar maks. 1 jam.', 2,
         'Jual takoyaki homemade di Bandung',
@@ -55,16 +59,18 @@ $pages = [
         'Takoyaki paling enak dimakan hangat: untuk camilan sore, teman nonton di rumah, atau suguhan saat kumpul keluarga. Pilihan isian dan jumlah per porsi tercantum di katalog menu.',
         'Cara pesan takoyaki di Bandung', 'Halo DSFA Homemade, saya mau pesan takoyaki.', 'takoyaki DSFA',
         '<h3>Apakah takoyakinya buatan rumahan?</h3><p>Ya. Kami membuat adonan dan memasaknya sendiri di dapur DSFA Homemade di Bandung.</p>',
-        'Ada. Pesan takoyaki bersama <a href="/halaman/jus-homemade-bandung">jus homemade</a>, <a href="/halaman/puding-buah-bandung">puding buah</a>, atau <a href="/halaman/cheesecuit-bandung">cheesecuit</a>.'),
+        'Ada. Pesan takoyaki bersama <a href="/halaman/jus-homemade-bandung">jus homemade</a>, <a href="/halaman/puding-buah-bandung">puding buah</a>, atau <a href="/halaman/cheesecuit-bandung">cheesecuit</a>.',
+        'takoyaki-kemasan-kecil-isi-4,takoyaki-kemasan-besar-isi-8,takoyaki-kemasan-besar-isi-12'),
     $menuPage('puding-buah-bandung', 'Puding Buah Bandung', 'Puding Buah Bandung | Pesan di DSFA Homemade',
         'Pesan puding buah homemade di Bandung dari DSFA Homemade. Puding lembut dengan potongan buah, disajikan dingin. Pesan via WhatsApp.', 3,
         'Puding buah homemade di Bandung',
         'Puding buah DSFA Homemade adalah puding lembut dengan potongan buah, kami buat di dapur rumah di Bandung dan disajikan dingin.',
         'Puding buah untuk keluarga dan tamu',
-        'Puding buah cocok untuk hidangan penutup di rumah, camilan anak, atau suguhan saat ada tamu. Pilihan buah dan ukurannya tercantum di katalog menu.',
+        'Puding buah cocok untuk hidangan penutup di rumah, camilan anak, atau suguhan saat ada tamu. Pilihan buah dan ukurannya tercantum di katalog menu. Untuk perayaan, Puding Buah Coklat Besar dibuat lewat open order dengan estimasi pengerjaan 3 hari; untuk puding bertema ulang tahun, lihat <a href="/halaman/puding-ulang-tahun-bandung">puding ulang tahun Bandung</a>.',
         'Cara pesan puding buah di Bandung', 'Halo DSFA Homemade, saya mau pesan puding buah.', 'puding buah DSFA',
         '<h3>Apakah pudingnya buatan rumahan?</h3><p>Ya. Kami memasak dan mencetak puding buah sendiri di dapur DSFA Homemade di Bandung.</p>',
-        'Ada. Kami juga menjual <a href="/halaman/cheesecuit-bandung">cheesecuit</a>, <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, dan <a href="/halaman/jus-homemade-bandung">jus homemade</a>.'),
+        'Ada. Kami juga menjual <a href="/halaman/cheesecuit-bandung">cheesecuit</a>, <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, dan <a href="/halaman/jus-homemade-bandung">jus homemade</a>.',
+        'puding-buah-coklat,puding-buah-coklat-besar'),
     $menuPage('jus-homemade-bandung', 'Jus Homemade Bandung', 'Jus Homemade Bandung | DSFA Homemade',
         'Jus buah homemade di Bandung dari DSFA Homemade. Pesan bersama takoyaki, cheesecuit, atau puding buah lewat WhatsApp, diantar maks. 1 jam.', 4,
         'Jus homemade di Bandung',
@@ -73,7 +79,8 @@ $pages = [
         'Pesan jus bersama takoyaki, cheesecuit, atau puding buah supaya camilan dan minuman datang sekaligus. Pilihan buah dan ukurannya tercantum di katalog menu.',
         'Cara pesan jus di Bandung', 'Halo DSFA Homemade, saya mau pesan jus.', 'jus DSFA',
         '<h3>Apakah jusnya dibuat sendiri?</h3><p>Ya. Kami membuat jus di dapur DSFA Homemade di Bandung.</p>',
-        'Ada. Lihat <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, <a href="/halaman/cheesecuit-bandung">cheesecuit</a>, dan <a href="/halaman/puding-buah-bandung">puding buah</a>.'),
+        'Ada. Lihat <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, <a href="/halaman/cheesecuit-bandung">cheesecuit</a>, dan <a href="/halaman/puding-buah-bandung">puding buah</a>.',
+        'jus-strawberry,jus-blackberry,jus-mix-berry'),
     [
         'slug' => 'cara-pesan',
         'title' => 'Cara Pesan',
@@ -137,6 +144,29 @@ HTML,
         <h3>Apakah DSFA Homemade punya toko untuk dikunjungi?</h3><p>DSFA Homemade adalah usaha rumahan. Pesanan diterima lewat WhatsApp dan diantar ke alamat Anda.</p>
         <h3>Berapa lama pesanan sampai?</h3><p>Waktu antar maksimal 1 jam dalam kondisi lalu lintas normal. Untuk tanggal tertentu, sebutkan tanggal dan jam kebutuhan Anda saat memesan.</p>
         <h3>Berapa biaya antarnya?</h3><p>Tanyakan biaya antar ke admin saat memesan. Sebutkan kecamatan tujuan Anda.</p>
+    </section>
+</article>
+HTML,
+    ],
+    [
+        'slug' => 'puding-ulang-tahun-bandung',
+        'title' => 'Puding Ulang Tahun Bandung',
+        'seo_title' => 'Puding Ulang Tahun Bandung | Pesan di DSFA Homemade',
+        'seo_description' => 'Pesan puding ulang tahun homemade di Bandung dari DSFA Homemade. Open order, estimasi pengerjaan 3 hari. Pesan via WhatsApp.',
+        'sort' => 8,
+        'html' => <<<HTML
+<article class="dsfa-page" id="isi">
+    <nav class="dsfa-breadcrumb"><a href="/">Beranda</a></nav>
+    <h1>Puding ulang tahun di Bandung</h1>
+    <p class="dsfa-intro">DSFA Homemade membuat puding ulang tahun di dapur rumah kami di Bandung. Puding dibuat setelah pesanan masuk (open order) dengan estimasi pengerjaan 3 hari.</p>
+    <div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="{$waLink('Halo DSFA Homemade, saya mau pesan puding ulang tahun.')}" rel="noopener" target="_blank">Pesan via WhatsApp</a><a class="dsfa-button" href="/#menu">Lihat harga di katalog</a></div>
+    <section class="dsfa-page-section"><h2>Puding untuk perayaan ulang tahun</h2><p>Puding ulang tahun cocok sebagai pengganti kue untuk perayaan keluarga atau acara anak. Foto, harga, dan tombol pesan ada di pilihan katalog di bawah ini.</p></section>
+    {$catalog('puding-ulang-tahun,puding-buah-coklat-besar')}
+    <section class="dsfa-page-section"><h2>Cara pesan puding ulang tahun di Bandung</h2><ol><li>Pilih puding di katalog di atas atau tanyakan lewat WhatsApp.</li><li>Tentukan tanggal acara dan alamat tujuan. Pesan minimal 3 hari sebelum tanggal yang Anda butuhkan.</li><li>Admin kami mengonfirmasi pesanan dan pembayaran lewat WhatsApp.</li></ol></section>
+    <section class="dsfa-page-section dsfa-faq"><h2>Pertanyaan tentang puding ulang tahun DSFA</h2>
+        <h3>Kenapa harus pesan dulu?</h3><p>Puding ulang tahun kami dibuat setelah pesanan masuk (open order), bukan stok siap ambil. Estimasi pengerjaannya 3 hari.</p>
+        <h3>Bisa diantar ke mana?</h3><p>{$deliveryAnswer}</p>
+        <h3>Ada puding lain?</h3><p>Ada. Lihat <a href="/halaman/puding-buah-bandung">puding buah Bandung</a>, atau menu lain seperti <a href="/halaman/cheesecuit-bandung">cheesecuit</a> dan <a href="/halaman/jus-homemade-bandung">jus homemade</a>.</p>
     </section>
 </article>
 HTML,

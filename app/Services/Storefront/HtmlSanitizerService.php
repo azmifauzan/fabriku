@@ -18,6 +18,7 @@ class HtmlSanitizerService
             ->allowAttribute('data-fb-shell', '*')
             ->allowAttribute('data-fb-section', '*')
             ->allowAttribute('data-fb-slot', '*')
+            ->allowAttribute('data-fb-products', ['div'])
             ->allowAttribute('data-fb-text', '*')
             ->allowAttribute('data-fb-image', '*')
             ->allowAttribute('data-fb-link', '*')
