@@ -232,7 +232,9 @@ class UploadedTheme
             return '';
         }
         $clean = $this->sanitizer->sanitizeCss($css);
-        if (trim($css) !== '' && ($clean === '' || preg_match('~https?:|//|image-set\s*\(|@font-face~i', $clean))) {
+        // Attribute selectors match links; their values do not load network resources.
+        $forSafetyCheck = preg_replace('~\[\s*href\s*=\s*(["\'])[^"\'\[\]<>]*\1\s*\]~i', '[href=""]', $clean) ?? '';
+        if (trim($css) !== '' && ($clean === '' || preg_match('~https?:|//|image-set\s*\(|@font-face~i', $forSafetyCheck))) {
             $this->invalid('CSS tidak aman atau melebihi 100 KB. URL, @import, font eksternal dan escape CSS tidak diperbolehkan.');
         }
 

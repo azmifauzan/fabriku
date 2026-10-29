@@ -10,6 +10,8 @@ use App\Models\SiteThemeVersion;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\Storefront\HtmlSanitizerService;
+use App\Services\Storefront\ThemeRenderer;
+use App\Services\Storefront\UploadedTheme;
 use DOMDocument;
 use DOMXPath;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,6 +72,18 @@ class DsfaHomemadeThemeTest extends TestCase
             $this->get('https://dsfahomemade.com'.$path)->assertNotFound();
             $this->get('https://dsfa-homemade.fabriku.biz.id'.$path)->assertNotFound();
         }
+    }
+
+    public function test_existing_design_can_be_previewed_in_the_template_editor(): void
+    {
+        $files = app(UploadedTheme::class)->editorFiles($this->site, $this->version, app(ThemeRenderer::class));
+        $this->actingAs($this->owner)->postJson('/website/templates/preview', [
+            'name' => 'DSFA Homemade', 'files' => $files,
+        ])->assertOk()->assertSee('DSFA Homemade');
+        $this->patch('/website/templates/'.$this->version->id, [
+            'name' => 'DSFA Homemade', 'files' => $files, 'revision' => $this->version->editorRevision(),
+        ])->assertSessionHasNoErrors();
+        $this->assertStringContainsString('a[href="https://fabriku.id/privasi"]', $this->version->fresh()->theme['satsetui_css']);
     }
 
     public function test_applying_the_real_draft_preserves_correct_pages_links_and_sitemap(): void

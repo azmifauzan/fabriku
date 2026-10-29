@@ -63,6 +63,7 @@ class WebsiteTemplateEditorTest extends TestCase
             ['index.html' => '<script>alert(1)</script>'],
             ['index.html' => '<h1>Aman</h1>', '../escape.html' => '<p>x</p>'],
             ['index.html' => '<p>x</p>', 'theme.css' => 'p{background:image-set("https://evil.test" 1x)}'],
+            ['index.html' => '<p>x</p>', 'theme.css' => 'a[href="https://safe.test"]{color:red} p{background:image-set("https://evil.test" 1x)}'],
             ['index.html' => '<div data-fb-slot="products"><div data-fb-slot="services"></div></div>'],
         ] as $files) {
             $this->patch('/website/templates/'.$template->id, ['name' => 'Unsafe', 'files' => $files, 'revision' => $template->fresh()->editorRevision()])->assertSessionHasErrors('template');
