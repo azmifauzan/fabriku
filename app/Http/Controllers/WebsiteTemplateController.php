@@ -109,6 +109,24 @@ class WebsiteTemplateController extends Controller
         return back()->with('success', 'Template diaktifkan.');
     }
 
+    public function destroy(Request $request, SiteThemeVersion $template): RedirectResponse
+    {
+        $site = $this->site($request, $template);
+        DB::transaction(function () use ($site, $template) {
+            $site = BusinessSite::whereKey($site->id)->lockForUpdate()->firstOrFail();
+            $template = SiteThemeVersion::whereKey($template->id)->lockForUpdate()->firstOrFail();
+            if ($site->active_theme_version_id === $template->id || isset($template->theme['builtin_preset'])) {
+                throw ValidationException::withMessages(['templateDelete' => 'Template aktif atau bawaan Fabriku tidak dapat dihapus.']);
+            }
+            if ($site->draft_theme_version_id === $template->id) {
+                $site->update(['draft_theme_version_id' => null]);
+            }
+            $template->delete();
+        });
+
+        return back()->with('success', 'Template dihapus.');
+    }
+
     public function activatePreset(Request $request, string $preset, ThemeRenderer $renderer): RedirectResponse
     {
         $site = $this->site($request);

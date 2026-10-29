@@ -215,6 +215,7 @@ Route::middleware(['auth', 'verified', 'tenant', 'subscription.check', CheckBusi
     Route::post('/website/templates', [WebsiteTemplateController::class, 'store'])->name('website.templates.store');
     Route::get('/website/templates/{template}/edit', [WebsiteTemplateController::class, 'edit'])->name('website.templates.edit');
     Route::patch('/website/templates/{template}', [WebsiteTemplateController::class, 'update'])->name('website.templates.update');
+    Route::delete('/website/templates/{template}', [WebsiteTemplateController::class, 'destroy'])->name('website.templates.destroy');
     Route::post('/website/templates/{template}/activate', [WebsiteTemplateController::class, 'activate'])->name('website.templates.activate');
     Route::post('/website', [WebsiteController::class, 'save'])->name('website.save');
     Route::post('/website/analytics', [WebsiteController::class, 'analytics'])->name('website.analytics');

@@ -89,11 +89,33 @@ class WebsiteTemplateEditorTest extends TestCase
         $this->actingAs($other)->get('/website/templates/'.$template->id.'/edit')->assertNotFound();
         $this->patch('/website/templates/'.$template->id, [])->assertNotFound();
         $this->post('/website/templates/'.$template->id.'/activate')->assertNotFound();
+        $this->delete('/website/templates/'.$template->id)->assertNotFound();
         $staff = User::factory()->forTenant($site->tenant_id)->create(['role' => 'staff']);
         $this->actingAs($staff)->get('/website/templates/'.$template->id.'/edit')->assertForbidden();
         $this->post('/website/templates/preview', [])->assertForbidden();
         $this->patch('/website/templates/'.$template->id, [])->assertForbidden();
         $this->post('/website/templates/'.$template->id.'/activate')->assertForbidden();
+        $this->delete('/website/templates/'.$template->id)->assertForbidden();
+    }
+
+    public function test_only_inactive_custom_templates_can_be_deleted(): void
+    {
+        $site = $this->managerSite();
+        $active = $this->createTemplate(['index.html' => '<h1>Aktif</h1>']);
+        $draft = $this->createTemplate(['index.html' => '<h1>Draft</h1>']);
+        $site->update(['active_theme_version_id' => $active->id, 'draft_theme_version_id' => $draft->id]);
+
+        $this->delete('/website/templates/'.$active->id)->assertSessionHasErrors('templateDelete');
+        $this->assertDatabaseHas('site_theme_versions', ['id' => $active->id]);
+        $this->delete('/website/templates/'.$draft->id)->assertSessionHasNoErrors();
+        $this->assertDatabaseMissing('site_theme_versions', ['id' => $draft->id]);
+        $this->assertNull($site->fresh()->draft_theme_version_id);
+
+        $this->post('/website/templates/presets/ruang/activate')->assertSessionHasNoErrors();
+        $builtin = $site->fresh()->activeThemeVersion;
+        $this->post('/website/templates/'.$active->id.'/activate')->assertSessionHasNoErrors();
+        $this->delete('/website/templates/'.$builtin->id)->assertSessionHasErrors('templateDelete');
+        $this->assertDatabaseHas('site_theme_versions', ['id' => $builtin->id]);
     }
 
     public function test_builtin_templates_remain_available_and_repeated_activation_does_not_create_versions(): void
