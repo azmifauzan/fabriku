@@ -179,7 +179,7 @@ function useDefaultDesignAndProceed() {
     <AppLayout>
         <Head title="Website Usaha" />
 
-        <main class="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
+        <main class="mx-auto box-content max-w-7xl space-y-6 px-6 py-6">
             <!-- Header Situs (Selalu Terlihat) -->
             <header class="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
                 <div class="space-y-1">

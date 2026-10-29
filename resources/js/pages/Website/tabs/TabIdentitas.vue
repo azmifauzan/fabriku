@@ -58,7 +58,7 @@ function submitSave() {
 </script>
 
 <template>
-    <div class="max-w-3xl space-y-6">
+    <div class="space-y-6">
         <div>
             <h2 class="text-xl font-bold text-slate-900 dark:text-white">Identitas Website</h2>
             <p class="text-sm text-slate-600 dark:text-slate-400">

@@ -164,7 +164,7 @@ function copyToClipboard(text: string) {
         </div>
 
         <!-- Bagian 1: Domain Kustom -->
-        <section v-if="activeSubSection === 'domain'" class="max-w-3xl space-y-6">
+        <section v-if="activeSubSection === 'domain'" class="space-y-6">
             <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                 <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Hubungkan Domain Sendiri</h3>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -282,7 +282,7 @@ function copyToClipboard(text: string) {
         </section>
 
         <!-- Bagian 2: SEO Google -->
-        <section v-if="activeSubSection === 'seo'" class="max-w-3xl space-y-6">
+        <section v-if="activeSubSection === 'seo'" class="space-y-6">
             <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                 <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Pengaturan SEO Website</h3>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -387,7 +387,7 @@ function copyToClipboard(text: string) {
         </section>
 
         <!-- Bagian 3: Halaman Tambahan -->
-        <section v-if="activeSubSection === 'pages'" class="max-w-3xl space-y-6">
+        <section v-if="activeSubSection === 'pages'" class="space-y-6">
             <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                 <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Halaman Tambahan</h3>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -460,7 +460,7 @@ function copyToClipboard(text: string) {
         </section>
 
         <!-- Bagian 4: Tim & Notifikasi -->
-        <section v-if="activeSubSection === 'team'" class="max-w-3xl space-y-6">
+        <section v-if="activeSubSection === 'team'" class="space-y-6">
             <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
                 <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Penerima Notifikasi Permintaan</h3>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
