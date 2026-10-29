@@ -310,7 +310,7 @@ const checkout = () => {
                             <p
                                 class="mt-0.5 text-xs"
                                 :class="
-                                    availableQty(item) !== null && availableQty(item) <= 5 ? 'text-orange-500' : 'text-gray-400 dark:text-gray-500'
+                                    (availableQty(item) ?? Infinity) <= 5 ? 'text-orange-500' : 'text-gray-400 dark:text-gray-500'
                                 "
                             >
                                 {{ availableQty(item) !== null ? `Stok: ${availableQty(item)}` : 'Unlimited' }}

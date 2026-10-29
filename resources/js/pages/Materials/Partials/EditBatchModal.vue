@@ -103,7 +103,7 @@ const clearImage = () => {
 const submit = () => {
     if (!props.batch) return;
 
-    form.post(update(props.batch.id), {
+    form.transform((data) => ({ ...data, _method: 'PUT' })).post(update.url(props.batch.id), {
         preserveScroll: true,
         forceFormData: true,
         onSuccess: () => {

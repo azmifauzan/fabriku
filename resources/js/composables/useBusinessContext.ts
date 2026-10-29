@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/vue3';
+import type { AppPageProps } from '@/types';
 import { computed } from 'vue';
 
 type TerminologyKey = 'material' | 'pattern' | 'preparation' | 'preparation_order' | 'production' | 'production_order' | 'contractor' | 'service';
@@ -32,7 +33,7 @@ type TenantProps = {
 } | null;
 
 export function useBusinessContext() {
-    const page = usePage<{ tenant?: TenantProps }>();
+    const page = usePage<AppPageProps<{ tenant?: TenantProps }>>();
 
     const tenant = computed(() => page.props.tenant ?? null);
 

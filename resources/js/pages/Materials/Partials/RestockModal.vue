@@ -78,7 +78,7 @@ const clearImage = () => {
 };
 
 const submit = () => {
-    form.post(store(), {
+    form.post(store.url(), {
         preserveScroll: true,
         forceFormData: true,
         onSuccess: () => {

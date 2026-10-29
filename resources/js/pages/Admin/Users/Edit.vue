@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import type { NamedOption } from '@/types/admin';
+import type { PropType } from 'vue';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({
-    user: Object,
-    tenants: Array,
-    roles: Array,
+    user: { type: Object, required: true },
+    tenants: { type: Array as PropType<NamedOption[]>, required: true },
+    roles: { type: Array as PropType<NamedOption[]>, required: true },
 });
 
 const form = useForm({
@@ -16,7 +18,7 @@ const form = useForm({
     role: props.user.role,
     phone: props.user.phone || '',
     is_active: props.user.is_active,
-    role_ids: props.user.roles?.map((r) => r.id) || [],
+    role_ids: props.user.roles?.map((r: { id: number }) => r.id) || [],
 });
 
 const submit = () => {

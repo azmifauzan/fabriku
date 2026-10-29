@@ -12,13 +12,63 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Services\Storefront\Storefront;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Tests\TestCase;
+use ZipArchive;
 
 class WebsiteManagementTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_uploaded_template_can_be_previewed_and_activated_without_changing_the_existing_design_on_upload(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id, 'slug' => 'template-test', 'status' => 'published']);
+        $this->actingAs($manager)->post('/website/theme/upload', [
+            'name' => 'Toko saya',
+            'template' => $this->themeZip(['index.html' => '<html><head><style>.hero{color:red}</style></head><body><h1 class="hero">Halo</h1><div data-fb-slot="products"></div></body></html>', 'tentang.html' => '<h1>Tentang kami</h1>']),
+        ])->assertSessionHasNoErrors();
+        $version = $site->themeVersions()->firstOrFail();
+        $this->assertNull($site->fresh()->active_theme_version_id);
+        $this->assertSame('Toko saya', $version->theme['name']);
+        $this->get('/website/theme/'.$version->id.'/preview')->assertOk()->assertSee('Halo')->assertSee('.hero{color:red}', false);
+        $this->post('/website/theme/'.$version->id.'/restore')->assertRedirect();
+        $this->assertSame($version->id, $site->fresh()->active_theme_version_id);
+        $this->get('http://template-test.fabriku.biz.id/')->assertOk()->assertSee('Halo');
+        $this->get('http://template-test.fabriku.biz.id/halaman/tentang')->assertOk()->assertSee('Tentang kami');
+        $this->get('http://template-test.fabriku.biz.id/sitemap.xml')->assertOk()->assertSee('/halaman/tentang');
+    }
+
+    public function test_uploaded_template_rejects_unsafe_and_unknown_content_and_requires_manager(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        $site = BusinessSite::factory()->create(['tenant_id' => $tenant->id]);
+        foreach (['<script>alert(1)</script>', '<div onclick="alert(1)">x</div>', '<style>@import "https://evil.test";</style><p>x</p>', '<style>p{background:image-set("https://evil.test/x" 1x)}</style><p>x</p>', '<div data-fb-slot="unknown"></div>'] as $html) {
+            $this->actingAs($manager)->post('/website/theme/upload', ['name' => 'Invalid', 'template' => $this->themeZip(['index.html' => $html])])
+                ->assertSessionHasErrors('template');
+        }
+        $this->actingAs($manager)->post('/website/theme/upload', ['name' => 'Invalid', 'template' => $this->themeZip(['index.html' => '<p>x</p>', '../escape.html' => '<p>x</p>'])])->assertSessionHasErrors('template');
+        $staff = User::factory()->forTenant($tenant->id)->create(['role' => 'staff']);
+        $this->actingAs($staff)->post('/website/theme/upload', ['name' => 'Invalid', 'template' => $this->themeZip(['index.html' => '<p>x</p>'])])->assertForbidden();
+        $this->assertSame(0, $site->themeVersions()->count());
+    }
+
+    private function themeZip(array $files): UploadedFile
+    {
+        $path = tempnam(sys_get_temp_dir(), 'theme');
+        $zip = new ZipArchive;
+        $zip->open($path, ZipArchive::OVERWRITE);
+        foreach ($files as $name => $content) {
+            $zip->addFromString($name, $content);
+        }
+        $zip->close();
+
+        return new UploadedFile($path, 'tema.zip', 'application/zip', null, true);
+    }
 
     public function test_manager_can_preview_each_saved_design_without_changing_the_active_version(): void
     {

@@ -14,8 +14,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import CustomerForm from './Form.vue';
+import type { Customer } from '@/types/customer';
 
-defineProps({
-    customer: Object,
-});
+defineProps<{ customer: Customer }>();
 </script>

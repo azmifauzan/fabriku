@@ -6,17 +6,13 @@ import LocationForm from './Form.vue';
 interface Location {
     id: number;
     name: string;
-    zone: string;
-    rack: string;
-    description?: string;
-    capacity?: number;
-    status: string;
+    code: string;
+    capacity: number | null;
+    is_active: boolean;
 }
 
 interface Props {
     location: Location;
-    zones: string[];
-    statuses: Record<string, string>;
 }
 
 defineProps<Props>();
@@ -28,7 +24,7 @@ defineProps<Props>();
 
         <div class="px-6 py-6">
             <div class="mx-auto max-w-4xl">
-                <LocationForm :location="location" :zones="zones" :statuses="statuses" />
+                <LocationForm :location="location" />
             </div>
         </div>
     </AppLayout>

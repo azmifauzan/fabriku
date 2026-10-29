@@ -20,6 +20,8 @@ interface Pattern {
 
 interface PreparationOrder {
     pattern: Pattern;
+    output_quantity: number;
+    output_unit: string;
 }
 
 interface ProductionOrder {

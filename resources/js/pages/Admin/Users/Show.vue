@@ -4,7 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft, Edit, Shield } from 'lucide-vue-next';
 
 defineProps({
-    user: Object,
+    user: { type: Object, required: true },
 });
 </script>
 

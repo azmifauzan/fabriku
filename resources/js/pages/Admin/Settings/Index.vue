@@ -6,7 +6,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { Plus, Trash2 } from 'lucide-vue-next';
 
 const props = defineProps({
-    settings: Object,
+    settings: { type: Object, required: true },
 });
 
 const { showSuccess, showError } = useSweetAlert();
@@ -42,7 +42,7 @@ const addBankAccount = () => {
     form.bank_accounts.push({ bank_name: '', account_number: '', account_holder: '' });
 };
 
-const removeBankAccount = (index) => {
+const removeBankAccount = (index: number) => {
     if (form.bank_accounts.length > 1) {
         form.bank_accounts.splice(index, 1);
     }
@@ -60,7 +60,7 @@ const submit = () => {
     });
 };
 
-const formatCurrency = (value) => {
+const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',

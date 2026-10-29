@@ -4,7 +4,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({
-    role: Object,
+    role: { type: Object, required: true },
     permissions: Object,
 });
 
@@ -12,7 +12,7 @@ const form = useForm({
     name: props.role.name,
     slug: props.role.slug,
     description: props.role.description || '',
-    permission_ids: props.role.permissions?.map((p) => p.id) || [],
+    permission_ids: props.role.permissions?.map((p: { id: number }) => p.id) || [],
 });
 
 const submit = () => {

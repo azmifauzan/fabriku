@@ -69,7 +69,7 @@ const getBatchesForMaterial = (materialId: number) => {
 const getSelectedBatch = (materialId: number, batchId: number | null) => {
     if (!materialId || !batchId) return null;
     const batches = getBatchesForMaterial(materialId);
-    return batches.find((b) => b.id === batchId);
+    return batches.find((b: { id: number }) => b.id === batchId);
 };
 
 const formatCurrency = (value: number) => {

@@ -2,13 +2,14 @@
 import { approve as approveAction, reject as rejectAction } from '@/actions/App/Http/Controllers/Admin/AdminPaymentController';
 import { useSweetAlert } from '@/composables/useSweetAlert';
 import AdminLayout from '@/layouts/AdminLayout.vue';
+import type { SubscriptionPayment } from '@/types/admin';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { CheckCircle, Clock, Eye, Search, XCircle } from 'lucide-vue-next';
 import Swal from 'sweetalert2';
 import { ref } from 'vue';
 
 const props = defineProps({
-    payments: Object,
+    payments: { type: Object, required: true },
     filters: Object,
     stats: Object,
 });
@@ -43,15 +44,15 @@ const clearFilters = () => {
 };
 
 // Actions
-const approving = ref(null);
-const rejecting = ref(null);
+const approving = ref<number | null>(null);
+const rejecting = ref<number | null>(null);
 const rejectionReason = ref('');
 const showRejectModal = ref(false);
-const selectedPayment = ref(null);
+const selectedPayment = ref<SubscriptionPayment | null>(null);
 const showProofModal = ref(false);
 const proofUrl = ref('');
 
-const approve = async (payment) => {
+const approve = async (payment: SubscriptionPayment) => {
     const result = await confirm(
         'Approve Pembayaran',
         `Approve pembayaran dari ${payment.tenant.name} sebesar ${formatCurrency(payment.amount)}?`,
@@ -65,7 +66,7 @@ const approve = async (payment) => {
     approving.value = payment.id;
     const form = useForm({});
 
-    form.post(approveAction(payment.id), {
+    form.post(approveAction.url(payment.id), {
         onSuccess: () => {
             showSuccess('Berhasil!', 'Pembayaran berhasil diapprove');
         },
@@ -76,7 +77,7 @@ const approve = async (payment) => {
     });
 };
 
-const openRejectModal = async (payment) => {
+const openRejectModal = async (payment: SubscriptionPayment) => {
     const result = await Swal.fire({
         title: 'Reject Pembayaran',
         text: `Reject pembayaran dari ${payment.tenant.name}?`,
@@ -103,7 +104,7 @@ const openRejectModal = async (payment) => {
             reason: result.value,
         });
 
-        form.post(rejectAction(payment.id), {
+        form.post(rejectAction.url(payment.id), {
             onSuccess: () => {
                 showSuccess('Berhasil!', 'Pembayaran berhasil direject');
             },
@@ -123,7 +124,7 @@ const reject = () => {
         reason: rejectionReason.value,
     });
 
-    form.post(rejectAction(selectedPayment.value.id), {
+    form.post(rejectAction.url(selectedPayment.value.id), {
         onSuccess: () => {
             showRejectModal.value = false;
             selectedPayment.value = null;
@@ -132,20 +133,20 @@ const reject = () => {
     });
 };
 
-const viewProof = (payment) => {
+const viewProof = (payment: SubscriptionPayment) => {
     proofUrl.value = payment.proof_url;
     showProofModal.value = true;
 };
 
-const formatCurrency = (amount) => {
+const formatCurrency = (amount: number | string) => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
         minimumFractionDigits: 0,
-    }).format(amount);
+    }).format(Number(amount));
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('id-ID', {
         day: 'numeric',
         month: 'short',
@@ -155,8 +156,8 @@ const formatDate = (date) => {
     });
 };
 
-const getStatusColor = (status) => {
-    const colors = {
+const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
         pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
         approved: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
         rejected: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',

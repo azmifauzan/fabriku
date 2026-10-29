@@ -4,7 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft, Edit, Shield, Users } from 'lucide-vue-next';
 
 defineProps({
-    role: Object,
+    role: { type: Object, required: true },
 });
 </script>
 
@@ -146,9 +146,11 @@ defineProps({
 </template>
 
 <script lang="ts">
+import type { Permission } from '@/types/admin';
+
 export default {
     methods: {
-        groupPermissionsByModule(permissions) {
+        groupPermissionsByModule(permissions: Permission[]) {
             return permissions.reduce((groups, permission) => {
                 const module = permission.module || 'other';
                 if (!groups[module]) {
@@ -156,7 +158,7 @@ export default {
                 }
                 groups[module].push(permission);
                 return groups;
-            }, {});
+            }, {} as Record<string, Permission[]>);
         },
     },
 };

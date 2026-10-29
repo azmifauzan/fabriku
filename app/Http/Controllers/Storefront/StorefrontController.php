@@ -66,7 +66,23 @@ class StorefrontController extends Controller
             ->where('business_site_id', $site->id)
             ->where('slug', $slug)
             ->where('is_published', true)
-            ->firstOrFail();
+            ->first();
+        $theme = $site->activeThemeVersion;
+        $uploadedPage = $page && ! ($theme?->theme['uses_template_pages'] ?? false) ? null : ($theme?->templatePages()[$slug] ?? null);
+        if (is_array($uploadedPage)) {
+            $html = $renderer->render($site, $site->activeThemeVersion, [
+                'page' => 'content_page',
+                'page_content' => $uploadedPage['html'],
+                'page_css' => $uploadedPage['css'] ?? $theme?->theme['satsetui_css'] ?? '',
+                'content_page' => (object) ['slug' => $slug],
+                'title' => $uploadedPage['title'] ?? str_replace('-', ' ', ucfirst($slug)),
+                'seo_title' => $uploadedPage['seo_title'] ?? null,
+                'seo_description' => $uploadedPage['seo_description'] ?? null,
+            ]);
+
+            return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
+        }
+        abort_unless($page, 404);
 
         $html = $renderer->render($site, $site->activeThemeVersion, [
             'page' => 'content_page',
@@ -353,6 +369,11 @@ class StorefrontController extends Controller
 
         foreach ($contentPages as $page) {
             $urls[] = ['loc' => $baseUrl.'/halaman/'.$page->slug, 'priority' => '0.6'];
+        }
+        foreach (array_keys($site->activeThemeVersion?->templatePages() ?? []) as $slug) {
+            if (! $contentPages->contains('slug', $slug)) {
+                $urls[] = ['loc' => $baseUrl.'/halaman/'.$slug, 'priority' => '0.6'];
+            }
         }
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';

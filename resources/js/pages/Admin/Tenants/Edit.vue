@@ -4,7 +4,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({
-    tenant: Object,
+    tenant: { type: Object, required: true },
 });
 
 const form = useForm({

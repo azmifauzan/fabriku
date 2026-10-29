@@ -461,9 +461,9 @@ import { ref, watch } from 'vue';
 import StatusUpdateModal from './StatusUpdateModal.vue';
 
 const props = defineProps({
-    orders: Object,
-    stats: Object,
-    filters: Object,
+    orders: { type: Object, required: true },
+    stats: { type: Object, required: true },
+    filters: { type: Object, required: true },
 });
 
 const { confirmDelete, showSuccess } = useSweetAlert();
@@ -527,7 +527,7 @@ function clearFilters() {
     router.get('/sales-orders');
 }
 
-async function deleteOrder(order) {
+async function deleteOrder(order: { id: number; order_number: string }) {
     const result = await confirmDelete('Hapus Sales Order', `Apakah Anda yakin ingin menghapus pesanan ${order.order_number}?`);
 
     if (result.isConfirmed) {

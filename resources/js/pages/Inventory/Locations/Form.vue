@@ -5,7 +5,7 @@ interface Location {
     id?: number;
     code?: string;
     name: string;
-    capacity?: number;
+    capacity?: number | null;
     is_active: boolean;
 }
 

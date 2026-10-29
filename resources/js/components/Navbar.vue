@@ -33,7 +33,14 @@ onMounted(() => document.addEventListener('click', handleClickOutsideUserMenu));
 onBeforeUnmount(() => document.removeEventListener('click', handleClickOutsideUserMenu));
 
 const page = usePage();
-const tenant = computed(() => page.props.tenant as any);
+const tenant = computed(() => page.props.tenant as {
+    subscription_expires_at?: string | null;
+    subscription_plan?: string;
+    is_expired?: boolean;
+    company_name?: string | null;
+    name?: string;
+    logo?: string | null;
+} | null);
 
 const daysRemaining = computed(() => {
     if (!tenant.value?.subscription_expires_at) return 0;

@@ -15,7 +15,7 @@ import { ref } from 'vue';
 
 const props = defineProps({
     tab: String,
-    overview: Object,
+    overview: { type: Object, required: true },
     schedules: Object,
     emails: Object,
     jobs: Object,
@@ -32,7 +32,7 @@ const tabs = [
     { id: 'server', name: 'Server', icon: Server },
 ];
 
-const switchTab = (tabId) => {
+const switchTab = (tabId: string) => {
     activeTab.value = tabId;
     router.get(
         monitoringIndex.url(),
@@ -44,13 +44,13 @@ const switchTab = (tabId) => {
     );
 };
 
-const retryJob = (uuid) => {
+const retryJob = (uuid: string) => {
     if (confirm('Retry this failed job?')) {
         router.post(retryJobAction.url(uuid));
     }
 };
 
-const deleteJob = (uuid) => {
+const deleteJob = (uuid: string) => {
     if (confirm('Delete this failed job?')) {
         router.delete(deleteJobAction.url(uuid));
     }
@@ -68,7 +68,7 @@ const flushJobs = () => {
     }
 };
 
-const runCommand = (command) => {
+const runCommand = (command: string) => {
     if (confirm(`Run "${command}" command now?`)) {
         router.post(runCommandAction.url(), { command });
     }
@@ -78,7 +78,7 @@ const testTelegram = () => {
     router.post(testTelegramAction.url());
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string | null | undefined) => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleString('id-ID', {
         day: '2-digit',
@@ -89,7 +89,7 @@ const formatDate = (date) => {
     });
 };
 
-const statusColor = (status) => {
+const statusColor = (status: string) => {
     switch (status) {
         case 'sent':
         case 'completed':

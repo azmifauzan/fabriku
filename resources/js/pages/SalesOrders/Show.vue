@@ -461,7 +461,7 @@
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Quantity</dt>
                                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                            {{ Number(salesOrder.items.reduce((sum, item) => sum + item.quantity, 0)).toLocaleString('id-ID') }}
+                                            {{ totalQuantity(salesOrder.items).toLocaleString('id-ID') }}
                                         </dd>
                                     </div>
                                     <div>
@@ -499,6 +499,7 @@
 <script setup lang="ts">
 import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { totalQuantity } from '@/lib/sales';
 import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import PaymentUpdateModal from './PaymentUpdateModal.vue';

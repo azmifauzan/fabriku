@@ -30,6 +30,11 @@ class ThemeRenderer
     {
         $context['site'] = $site;
         $context['contentPages'] ??= $site->contentPages()->where('is_published', true)->get(['id', 'business_site_id', 'slug', 'title', 'show_in_footer']);
+        foreach ($themeVersion?->templatePages() ?? [] as $slug => $templatePage) {
+            $context['contentPages'] = $context['contentPages']->reject(fn ($page) => $page->slug === $slug)->push((object) [
+                'slug' => $slug, 'title' => $templatePage['title'] ?? ucfirst(str_replace('-', ' ', $slug)), 'show_in_footer' => true,
+            ]);
+        }
         $page = $context['page'] ?? 'home';
 
         // 1. Resolve CSS variables
@@ -171,7 +176,7 @@ HTML;
     /**
      * Resolve CSS variables from theme or fallbacks.
      */
-    protected function resolveCssVariables(BusinessSite $site, ?SiteThemeVersion $themeVersion): array
+    public function resolveCssVariables(BusinessSite $site, ?SiteThemeVersion $themeVersion): array
     {
         $defaults = [
             '--fb-primary' => '#2563eb',
@@ -307,6 +312,13 @@ HTML;
      */
     public function renderSlot(string $slotName, array $context): string
     {
+        $site = $context['site'] ?? null;
+        if ($site && in_array($slotName, ['products', 'featured-product'], true) && ! isset($context['products'])) {
+            $context['products'] = $site->mode === 'jasa' ? collect() : Storefront::for($site->tenant)->products()->get();
+        }
+        if ($site && $slotName === 'services' && ! isset($context['services'])) {
+            $context['services'] = $site->mode === 'produk' ? collect() : Storefront::for($site->tenant)->services()->get();
+        }
         if ($slotName === 'footer-links') {
             return collect($context['contentPages'] ?? [])
                 ->where('show_in_footer', true)

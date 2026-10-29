@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import type { NamedOption } from '@/types/admin';
+import type { PropType } from 'vue';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Plus, Search } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const props = defineProps({
-    users: Object,
-    tenants: Array,
+    users: { type: Object, required: true },
+    tenants: { type: Array as PropType<NamedOption[]>, required: true },
     filters: Object,
 });
 

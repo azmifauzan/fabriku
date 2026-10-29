@@ -173,10 +173,10 @@
                                     :model-value="item.inventory_item_id"
                                     @update:model-value="(val) => selectInventoryItem(index, val)"
                                     :items="inventoryItems"
-                                    :error="!!form.errors[`items.${index}.inventory_item_id`]"
+                                    :error="!!itemError(index, 'inventory_item_id')"
                                 />
-                                <p v-if="form.errors[`items.${index}.inventory_item_id`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
-                                    {{ form.errors[`items.${index}.inventory_item_id`] }}
+                                <p v-if="itemError(index, 'inventory_item_id')" class="mt-1 text-xs text-red-600 dark:text-red-400">
+                                    {{ itemError(index, 'inventory_item_id') }}
                                 </p>
                             </div>
 
@@ -189,10 +189,10 @@
                                         type="number"
                                         min="1"
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-right text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                        :class="{ 'border-red-500': form.errors[`items.${index}.quantity`] }"
+                                        :class="{ 'border-red-500': itemError(index, 'quantity') }"
                                     />
-                                    <p v-if="form.errors[`items.${index}.quantity`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
-                                        {{ form.errors[`items.${index}.quantity`] }}
+                                    <p v-if="itemError(index, 'quantity')" class="mt-1 text-xs text-red-600 dark:text-red-400">
+                                        {{ itemError(index, 'quantity') }}
                                     </p>
                                 </div>
                                 <div>
@@ -203,10 +203,10 @@
                                         type="number"
                                         min="0"
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-right text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                        :class="{ 'border-red-500': form.errors[`items.${index}.unit_price`] }"
+                                        :class="{ 'border-red-500': itemError(index, 'unit_price') }"
                                     />
-                                    <p v-if="form.errors[`items.${index}.unit_price`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
-                                        {{ form.errors[`items.${index}.unit_price`] }}
+                                    <p v-if="itemError(index, 'unit_price')" class="mt-1 text-xs text-red-600 dark:text-red-400">
+                                        {{ itemError(index, 'unit_price') }}
                                     </p>
                                 </div>
                             </div>
@@ -283,10 +283,10 @@
                                         :model-value="item.inventory_item_id"
                                         @update:model-value="(val) => selectInventoryItem(index, val)"
                                         :items="inventoryItems"
-                                        :error="!!form.errors[`items.${index}.inventory_item_id`]"
+                                        :error="!!itemError(index, 'inventory_item_id')"
                                     />
-                                    <p v-if="form.errors[`items.${index}.inventory_item_id`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
-                                        {{ form.errors[`items.${index}.inventory_item_id`] }}
+                                    <p v-if="itemError(index, 'inventory_item_id')" class="mt-1 text-xs text-red-600 dark:text-red-400">
+                                        {{ itemError(index, 'inventory_item_id') }}
                                     </p>
                                 </td>
                                 <td class="px-4 py-3">
@@ -296,10 +296,10 @@
                                         type="number"
                                         min="1"
                                         class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-right text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                        :class="{ 'border-red-500': form.errors[`items.${index}.quantity`] }"
+                                        :class="{ 'border-red-500': itemError(index, 'quantity') }"
                                     />
-                                    <p v-if="form.errors[`items.${index}.quantity`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
-                                        {{ form.errors[`items.${index}.quantity`] }}
+                                    <p v-if="itemError(index, 'quantity')" class="mt-1 text-xs text-red-600 dark:text-red-400">
+                                        {{ itemError(index, 'quantity') }}
                                     </p>
                                 </td>
                                 <td class="px-4 py-3">
@@ -309,10 +309,10 @@
                                         type="number"
                                         min="0"
                                         class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-right text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                        :class="{ 'border-red-500': form.errors[`items.${index}.unit_price`] }"
+                                        :class="{ 'border-red-500': itemError(index, 'unit_price') }"
                                     />
-                                    <p v-if="form.errors[`items.${index}.unit_price`]" class="mt-1 text-xs text-red-600 dark:text-red-400">
-                                        {{ form.errors[`items.${index}.unit_price`] }}
+                                    <p v-if="itemError(index, 'unit_price')" class="mt-1 text-xs text-red-600 dark:text-red-400">
+                                        {{ itemError(index, 'unit_price') }}
                                     </p>
                                 </td>
                                 <td class="px-4 py-3">
@@ -509,18 +509,20 @@ import { Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import ProductSelect from '@/components/ProductSelect.vue';
 import QuickCustomerModal from './QuickCustomerModal.vue';
+import type { SalesCustomer, SalesOrderForEdit, SalesProduct } from '@/types/sales';
+import type { PropType } from 'vue';
 
 const props = defineProps({
     salesOrder: {
-        type: Object,
+        type: Object as PropType<SalesOrderForEdit | null>,
         default: null,
     },
     customers: {
-        type: Array,
+        type: Array as PropType<SalesCustomer[]>,
         required: true,
     },
     inventoryItems: {
-        type: Array as () => any[],
+        type: Array as PropType<SalesProduct[]>,
         required: true,
     },
 });
@@ -565,7 +567,7 @@ const form = useForm({
     notes: props.salesOrder?.notes || '',
     items: props.salesOrder?.items
         ? props.salesOrder.items.map((item) => ({
-              inventory_item_id: item.inventory_item_id,
+              inventory_item_id: item.inventory_item_id ?? '',
               quantity: item.quantity,
               unit_price: item.unit_price,
               discount_amount: item.discount_amount || 0,
@@ -588,14 +590,18 @@ const calculatedSubtotal = computed(() => {
 
 const calculatedDiscountAmount = computed(() => {
     if (!form.discount_percentage) return 0;
-    return Math.round(calculatedSubtotal.value * (form.discount_percentage / 100));
+    return Math.round(calculatedSubtotal.value * (Number(form.discount_percentage) / 100));
 });
 
 const calculatedTotal = computed(() => {
     return calculatedSubtotal.value - calculatedDiscountAmount.value + (Number(form.tax_amount) || 0) + (Number(form.shipping_cost) || 0);
 });
 
-function calculateItemSubtotal(index) {
+function itemError(index: number, field: 'inventory_item_id' | 'quantity' | 'unit_price') {
+    return (form.errors as Record<string, string | undefined>)[`items.${index}.${field}`];
+}
+
+function calculateItemSubtotal(index: number) {
     const item = form.items[index];
     const quantity = Number(item.quantity) || 0;
     const unitPrice = Number(item.unit_price) || 0;
@@ -609,7 +615,7 @@ function calculateTotals() {
     // Computed properties automatically handle the recalculation
 }
 
-function selectInventoryItem(index, inventoryItemId) {
+function selectInventoryItem(index: number, inventoryItemId: number | string) {
     const item = form.items[index];
     item.inventory_item_id = inventoryItemId;
 
@@ -630,7 +636,7 @@ function addItem() {
     });
 }
 
-function removeItem(index) {
+function removeItem(index: number) {
     if (form.items.length > 1) {
         form.items.splice(index, 1);
     }
@@ -640,7 +646,7 @@ function openQuickCustomerModal() {
     showQuickCustomerModal.value = true;
 }
 
-function onCustomerCreated(newCustomer) {
+function onCustomerCreated(newCustomer: SalesCustomer) {
     customerList.value.push(newCustomer);
     form.customer_id = newCustomer.id;
     // Optionally sort list?

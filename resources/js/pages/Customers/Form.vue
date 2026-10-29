@@ -3,18 +3,7 @@ import FormField from '@/components/FormField.vue';
 import FormSection from '@/components/FormSection.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
-interface Customer {
-    id?: number;
-    code: string;
-    name: string;
-    phone: string;
-    email: string;
-    address: string;
-    city: string;
-    province: string;
-    is_active: boolean;
-    notes: string;
-}
+import type { Customer } from '@/types/customer';
 
 const props = defineProps<{
     customer?: Customer;

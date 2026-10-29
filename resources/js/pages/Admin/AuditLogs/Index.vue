@@ -4,7 +4,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const props = defineProps({
-    logs: Object,
+    logs: { type: Object, required: true },
     filters: Object,
 });
 
@@ -37,8 +37,8 @@ const clearFilters = () => {
     applyFilters();
 };
 
-const getEventColor = (eventType) => {
-    const colors = {
+const getEventColor = (eventType: string) => {
+    const colors: Record<string, string> = {
         created: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
         updated: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
         deleted: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',

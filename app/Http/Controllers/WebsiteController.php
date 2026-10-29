@@ -17,11 +17,13 @@ use App\Services\Storefront\CloudflareDomains;
 use App\Services\Storefront\HtmlSanitizerService;
 use App\Services\Storefront\Storefront;
 use App\Services\Storefront\ThemeRenderer;
+use App\Services\Storefront\UploadedTheme;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
@@ -35,13 +37,27 @@ class WebsiteController extends Controller
         $tenantId = $request->user()->tenant_id;
         $site = BusinessSite::where('tenant_id', $tenantId)->with([
             'activeThemeVersion.creator:id,name',
-            'themeVersions' => fn ($query) => $query->select(['id', 'tenant_id', 'business_site_id', 'version', 'source', 'created_by', 'created_at'])->with('creator:id,name')->latest('version'),
+            'themeVersions' => fn ($query) => $query->select(['id', 'tenant_id', 'business_site_id', 'version', 'source', 'created_by', 'created_at', 'updated_at'])
+                ->addSelect(['theme->name as template_name', 'theme->preset as template_preset', 'theme->builtin_preset as builtin_preset'])
+                ->latest('version'),
             'recipients:id,name,email',
         ])->first();
         $draftVersion = $site?->draftThemeVersion()->first(['id', 'version', 'source', 'theme']);
+        $templates = $site?->themeVersions
+            ->sortByDesc(fn ($version) => $site->active_theme_version_id === $version->id)
+            ->reject(fn ($version) => isset($version->builtin_preset))
+            ->unique(fn ($version) => in_array($version->source, ['manual', 'catalog'], true) ? $version->source.':'.($version->template_preset ?? 'ruang') : 'template:'.$version->id)
+            ->map(fn ($version) => [
+                'id' => $version->id,
+                'name' => $version->template_name ?? ($version->source === 'satsetui' ? 'Desain Satsetui' : ucfirst($version->template_preset ?? 'Desain Fabriku')),
+                'source' => $version->source,
+                'isActive' => $site->active_theme_version_id === $version->id,
+                'updatedAt' => $version->updated_at?->toIso8601String(),
+            ])->values() ?? collect();
+        $site?->unsetRelation('themeVersions');
         if ($site?->activeThemeVersion) {
             $activeVersion = $site->activeThemeVersion;
-            $activeVersion->setAttribute('theme', array_intersect_key($activeVersion->theme ?? [], array_flip(['preset', 'css_variables', 'satsetui_generation_id'])));
+            $activeVersion->setAttribute('theme', array_intersect_key($activeVersion->theme ?? [], array_flip(['preset', 'builtin_preset', 'css_variables', 'satsetui_generation_id', 'name'])));
             $activeVersion->setAttribute('sections', collect($activeVersion->sections ?? [])->map(fn ($section) => [
                 'type' => $section['type'] ?? '',
                 'variables' => $section['variables'] ?? [],
@@ -145,6 +161,7 @@ class WebsiteController extends Controller
             ->get(['id', 'name', 'slug', 'is_public', 'is_active', 'sort', 'price', 'price_label', 'image_path']) : [];
 
         return Inertia::render('Website/Index', [
+            'templates' => $templates,
             'site' => $site,
             'draftThemeVersion' => $draftVersion?->source === 'satsetui' ? [
                 'id' => $draftVersion->id,
@@ -264,6 +281,7 @@ class WebsiteController extends Controller
                     'version' => ($site->themeVersions()->max('version') ?? 0) + 1,
                     'theme' => [
                         'preset' => 'ruang',
+                        'name' => $homeSeo['title'] ?? 'Desain Satsetui',
                         'satsetui_css' => $css,
                         'satsetui_generation_id' => $generationId,
                         'satsetui_home_seo' => $homeSeo,
@@ -282,7 +300,7 @@ class WebsiteController extends Controller
                 $site->update(['draft_theme_version_id' => $version->id]);
             });
 
-            return redirect()->route('website.index', ['tab' => 'desain'])->with('success', 'Template Satsetui masuk sebagai draf desain. Periksa halaman dan SEO sebelum menerbitkan website.');
+            return redirect()->route('website.index', ['tab' => 'desain'])->with('success', 'Template Satsetui tersedia di daftar template. Pratinjau atau edit sebelum mengaktifkannya.');
         } catch (Throwable $exception) {
             report($exception);
 
@@ -455,12 +473,54 @@ class WebsiteController extends Controller
         return back()->with('success', 'Desain website disimpan sebagai versi baru.');
     }
 
+    public function uploadTheme(Request $request, UploadedTheme $parser): RedirectResponse
+    {
+        $this->ensureManager($request);
+        $site = $this->site($request);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'template' => ['required', 'file', 'extensions:zip', 'max:2048'],
+        ]);
+        $parsed = $parser->parseArchive($data['template']->getRealPath());
+        if ($site->contentPages()->whereIn('slug', array_keys($parsed['pages']))->exists()) {
+            throw ValidationException::withMessages(['template' => 'Nama halaman dalam ZIP bertabrakan dengan halaman tambahan yang sudah ada.']);
+        }
+
+        DB::transaction(function () use ($site, $request, $data, $parsed, $parser) {
+            $site = BusinessSite::whereKey($site->id)->lockForUpdate()->firstOrFail();
+            SiteThemeVersion::create(array_merge($parser->attributes($parsed, $data['name']), [
+                'tenant_id' => $site->tenant_id,
+                'business_site_id' => $site->id,
+                'source' => 'upload',
+                'version' => ($site->themeVersions()->max('version') ?? 0) + 1,
+                'created_by' => $request->user()->id,
+            ]));
+        });
+
+        return back()->with('success', 'Template berhasil diperiksa dan disimpan. Pratinjau sebelum mengaktifkannya.');
+    }
+
     public function previewTheme(Request $request, SiteThemeVersion $version, ThemeRenderer $renderer): HttpResponse
     {
         $this->ensureManager($request);
         $site = $this->site($request);
         abort_unless($version->business_site_id === $site->id && $version->tenant_id === $site->tenant_id, 404);
 
+        return $this->themePreviewResponse($site, $version, $renderer);
+    }
+
+    public function previewPreset(Request $request, string $preset, ThemeRenderer $renderer): HttpResponse
+    {
+        $this->ensureManager($request);
+        abort_unless(in_array($preset, ['ruang', 'etalase', 'studio'], true), 404);
+        $site = $this->site($request);
+        $version = new SiteThemeVersion(['theme' => ['preset' => $preset], 'sections' => $renderer->sectionsForPreset($site, $preset)]);
+
+        return $this->themePreviewResponse($site, $version, $renderer);
+    }
+
+    private function themePreviewResponse(BusinessSite $site, SiteThemeVersion $version, ThemeRenderer $renderer): HttpResponse
+    {
         $html = $renderer->render($site, $version, [
             'page' => 'home',
             'products' => $site->mode === 'jasa' ? collect() : Storefront::for($site->tenant)->products()->get(),

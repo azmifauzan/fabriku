@@ -146,7 +146,7 @@
 import { onMounted } from 'vue';
 
 defineProps({
-    salesOrder: Object,
+    salesOrder: { type: Object, required: true },
     settings: Object,
 });
 

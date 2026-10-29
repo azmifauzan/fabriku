@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import type { SubscriptionPayment } from '@/types/admin';
+import type { PropType } from 'vue';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowLeft, CreditCard, Edit, Power, PowerOff } from 'lucide-vue-next';
 
 const props = defineProps({
-    tenant: Object,
-    stats: Object,
-    payments: Array,
+    tenant: { type: Object, required: true },
+    stats: { type: Object, required: true },
+    payments: { type: Array as PropType<SubscriptionPayment[]>, required: true },
 });
 
 const suspend = () => {
@@ -19,15 +21,15 @@ const activate = () => {
     router.post(`/admin/tenants/${props.tenant.id}/activate`);
 };
 
-const formatCurrency = (amount) => {
+const formatCurrency = (amount: number | string) => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
         minimumFractionDigits: 0,
-    }).format(amount);
+    }).format(Number(amount));
 };
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('id-ID', {
         day: 'numeric',
         month: 'short',
@@ -35,8 +37,8 @@ const formatDate = (date) => {
     });
 };
 
-const getStatusColor = (status) => {
-    const colors = {
+const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
         pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
         approved: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
         rejected: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',

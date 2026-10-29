@@ -3,7 +3,7 @@ import { computed } from 'vue';
 
 interface Props {
     label: string;
-    modelValue?: string | number | boolean;
+    modelValue?: string | number | boolean | null;
     type?: 'text' | 'email' | 'tel' | 'number' | 'date' | 'textarea' | 'select' | 'checkbox';
     placeholder?: string;
     required?: boolean;
@@ -28,7 +28,7 @@ const emit = defineEmits<{
 const inputValue = computed({
     get: () => props.modelValue,
     set: (value) => {
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
             emit('update:modelValue', value);
         }
     },

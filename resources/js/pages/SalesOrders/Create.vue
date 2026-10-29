@@ -21,9 +21,7 @@ import PageHeader from '@/components/PageHeader.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import SalesOrderForm from './Form.vue';
+import type { SalesCustomer, SalesProduct } from '@/types/sales';
 
-defineProps({
-    customers: Array,
-    inventoryItems: Array,
-});
+defineProps<{ customers: SalesCustomer[]; inventoryItems: SalesProduct[] }>();
 </script>

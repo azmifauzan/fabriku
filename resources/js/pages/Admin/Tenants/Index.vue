@@ -5,7 +5,7 @@ import { Plus, Search } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const props = defineProps({
-    tenants: Object,
+    tenants: { type: Object, required: true },
     filters: Object,
 });
 

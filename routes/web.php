@@ -50,6 +50,7 @@ use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\WebsiteDomainController;
 use App\Http\Controllers\WebsiteLeadController;
+use App\Http\Controllers\WebsiteTemplateController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CheckBusinessWorkflow;
 use App\Models\SystemSetting;
@@ -207,9 +208,19 @@ Route::post('logout', [LoginController::class, 'destroy'])
 Route::middleware(['auth', 'verified', 'tenant', 'subscription.check', CheckBusinessWorkflow::class])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/website', [WebsiteController::class, 'index'])->name('website.index');
+    Route::get('/website/template-guide', fn () => Inertia::render('Website/TemplateGuide'))->name('website.template-guide');
+    Route::get('/website/templates/presets/{preset}/edit', [WebsiteTemplateController::class, 'editPreset'])->name('website.templates.presets.edit');
+    Route::post('/website/templates/presets/{preset}/activate', [WebsiteTemplateController::class, 'activatePreset'])->name('website.templates.presets.activate');
+    Route::post('/website/templates/preview', [WebsiteTemplateController::class, 'preview'])->middleware('throttle:30,1')->name('website.templates.preview');
+    Route::post('/website/templates', [WebsiteTemplateController::class, 'store'])->name('website.templates.store');
+    Route::get('/website/templates/{template}/edit', [WebsiteTemplateController::class, 'edit'])->name('website.templates.edit');
+    Route::patch('/website/templates/{template}', [WebsiteTemplateController::class, 'update'])->name('website.templates.update');
+    Route::post('/website/templates/{template}/activate', [WebsiteTemplateController::class, 'activate'])->name('website.templates.activate');
     Route::post('/website', [WebsiteController::class, 'save'])->name('website.save');
     Route::post('/website/analytics', [WebsiteController::class, 'analytics'])->name('website.analytics');
     Route::post('/website/theme', [WebsiteController::class, 'theme'])->name('website.theme');
+    Route::post('/website/theme/upload', [WebsiteController::class, 'uploadTheme'])->name('website.theme.upload');
+    Route::get('/website/theme/preset/{preset}/preview', [WebsiteController::class, 'previewPreset'])->name('website.theme.preset.preview');
     Route::post('/website/satsetui/launch', [WebsiteController::class, 'satsetuiLaunch'])->name('website.satsetui.launch');
     Route::get('/website/satsetui/import', [WebsiteController::class, 'satsetuiImport'])->name('website.satsetui.import');
     Route::post('/website/satsetui/publish-draft', [WebsiteController::class, 'publishSatsetuiDraft'])->name('website.satsetui.publishDraft');

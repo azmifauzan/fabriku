@@ -36,7 +36,7 @@ const handlePlanChange = () => {
 };
 
 const submit = () => {
-    form.post(store(), {
+    form.post(store.url(), {
         preserveScroll: true,
         onError: () => {
             showError('Gagal!', 'Pembayaran belum dapat diproses. Silakan coba lagi.');

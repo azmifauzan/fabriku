@@ -686,7 +686,7 @@ const getStatusBadgeClass = (status: string) => {
                                 <div class="flex items-end justify-between text-sm">
                                     <span class="text-gray-500 dark:text-gray-400">{{ formatNumber(location.item_count) }} items</span>
                                     <span v-if="!location.is_unlimited" class="text-gray-900 dark:text-white">
-                                        {{ formatNumber(location.used_capacity) }} / {{ formatNumber(location.capacity) }}
+                                        {{ formatNumber(location.used_capacity) }} / {{ location.capacity === null ? '—' : formatNumber(location.capacity) }}
                                     </span>
                                 </div>
                                 <div

@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import type { DashboardTenant } from '@/types/admin';
+import type { PropType } from 'vue';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { Building2, Package, ShoppingCart, Users } from 'lucide-vue-next';
 
 defineProps({
-    stats: Object,
-    recentTenants: Array,
+    stats: { type: Object, required: true },
+    recentTenants: { type: Array as PropType<DashboardTenant[]>, required: true },
     tenantGrowth: Array,
 });
 </script>

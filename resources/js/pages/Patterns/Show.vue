@@ -96,7 +96,7 @@
                                                 {{ order.preparation_date ? new Date(order.preparation_date).toLocaleDateString('id-ID') : '-' }}
                                             </td>
                                             <td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                                {{ formatNumber(order.quantity) }}
+                                                {{ formatNumber(order.output_quantity) }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span
@@ -173,8 +173,8 @@ interface Pattern {
 interface PreparationOrder {
     id: number;
     order_number: string;
-    order_date: string;
-    quantity: number;
+    preparation_date: string | null;
+    output_quantity: number;
     status: string;
 }
 

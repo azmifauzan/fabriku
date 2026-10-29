@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import type { RoleSummary } from '@/types/admin';
+import type { PropType } from 'vue';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { Plus } from 'lucide-vue-next';
 
 defineProps({
-    roles: Array,
+    roles: { type: Array as PropType<RoleSummary[]>, required: true },
 });
 </script>
 

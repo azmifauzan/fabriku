@@ -80,7 +80,7 @@
                 <div class="flex justify-between border-t-2 border-gray-300 py-3">
                     <span class="font-bold text-gray-900">Total Qty</span>
                     <span class="font-bold text-gray-900">
-                        {{ formatNumber(salesOrder.items.reduce((sum, item) => sum + item.quantity, 0)) }} pcs
+                        {{ formatNumber(totalQuantity(salesOrder.items)) }} pcs
                     </span>
                 </div>
             </div>
@@ -143,9 +143,10 @@
 
 <script setup lang="ts">
 import { formatNumber } from '@/lib/utils';
+import { totalQuantity } from '@/lib/sales';
 
 defineProps({
-    salesOrder: Object,
+    salesOrder: { type: Object, required: true },
     settings: Object,
 });
 

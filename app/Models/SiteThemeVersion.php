@@ -76,4 +76,21 @@ class SiteThemeVersion extends Model
     {
         return $this->theme['shell_html'] ?? '';
     }
+
+    public function templatePages(bool $includeLegacy = false): array
+    {
+        if (isset($this->theme['uploaded_pages'])) {
+            return $this->theme['uploaded_pages'];
+        }
+        if (! $includeLegacy && ! ($this->theme['uses_template_pages'] ?? false)) {
+            return [];
+        }
+
+        return collect($this->theme['satsetui_pages'] ?? [])->mapWithKeys(fn ($page) => [$page['slug'] => $page])->all();
+    }
+
+    public function editorRevision(): string
+    {
+        return hash('sha256', json_encode([$this->theme, $this->sections, $this->css_path]));
+    }
 }

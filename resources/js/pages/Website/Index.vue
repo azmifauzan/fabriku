@@ -25,7 +25,7 @@ type ThemeVersion = {
     created_at: string;
     created_by?: number | null;
     creator?: { id: number; name: string } | null;
-    theme?: { preset?: string; css_variables?: Record<string, string> };
+    theme?: { preset?: string; builtin_preset?: string; css_variables?: Record<string, string> };
     sections?: Array<{ type: string; variables?: Record<string, string> }>;
 };
 
@@ -67,6 +67,7 @@ const props = defineProps<{
     leads: any[];
     orders: any[];
     contentPages: any[];
+    templates: Array<{ id: number; name: string; source: string; isActive: boolean; updatedAt: string | null }>;
 }>();
 
 const page = usePage();
@@ -326,8 +327,8 @@ function useDefaultDesignAndProceed() {
                     <TabDesain
                         v-if="site"
                         :site="site"
-                        :draft-theme-version="draftThemeVersion"
-                        :last-manual-theme="lastManualTheme"
+                        :can-manage="canManage"
+                        :templates="templates"
                         :csrf-token="csrfToken"
                     />
                 </div>
@@ -426,8 +427,8 @@ function useDefaultDesignAndProceed() {
                     <TabDesain
                         v-else-if="activeTab === 'desain'"
                         :site="site"
-                        :draft-theme-version="draftThemeVersion"
-                        :last-manual-theme="lastManualTheme"
+                        :can-manage="canManage"
+                        :templates="templates"
                         :csrf-token="csrfToken"
                     />
 

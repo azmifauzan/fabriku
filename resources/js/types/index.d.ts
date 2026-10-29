@@ -1,10 +1,9 @@
 export interface Auth {
-    user: User;
+    user: (Pick<User, 'id' | 'name' | 'email' | 'role'> & { permissions: string[] }) | null;
+    admin: { id: number; name: string; email: string; role: string } | null;
 }
 
 export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
-    name: string;
-    quote: { message: string; author: string };
     auth: Auth;
 };
 

@@ -55,7 +55,6 @@ interface Material {
     materialType?: {
         id: number;
         name: string;
-        name: string;
         code: string;
     };
     image_url?: string;

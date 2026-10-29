@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import type { NamedOption } from '@/types/admin';
+import type { PropType } from 'vue';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ArrowLeft } from 'lucide-vue-next';
 
 defineProps({
-    tenants: Array,
-    roles: Array,
+    tenants: { type: Array as PropType<NamedOption[]>, required: true },
+    roles: { type: Array as PropType<NamedOption[]>, required: true },
 });
 
 const form = useForm({

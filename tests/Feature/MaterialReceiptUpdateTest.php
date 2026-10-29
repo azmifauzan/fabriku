@@ -6,6 +6,8 @@ use App\Models\MaterialType;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -59,6 +61,29 @@ test('can update material receipt batch data', function () {
         'notes' => 'Updated notes',
         'total_cost' => 100 * 15000, // quantity * new price
     ]);
+});
+
+test('can update a batch with an uploaded image using form method override', function () {
+    config(['filesystems.uploads_disk' => 'fabriku_s3']);
+    Storage::fake('fabriku_s3');
+    $material = Material::factory()->create(['tenant_id' => $this->tenant->id, 'material_type_id' => $this->materialType->id]);
+    $receipt = MaterialReceipt::factory()->create([
+        'tenant_id' => $this->tenant->id, 'material_id' => $material->id, 'quantity' => 50, 'remaining_quantity' => 50,
+    ]);
+
+    $this->post(route('material-receipts.update', $receipt), [
+        '_method' => 'PUT',
+        'supplier_name' => 'Supplier Baru',
+        'quantity' => 50,
+        'price_per_unit' => 12000,
+        'receipt_date' => '2026-01-15',
+        'image' => UploadedFile::fake()->image('receipt.jpg'),
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    $receipt->refresh();
+    expect($receipt->supplier_name)->toBe('Supplier Baru');
+    expect($receipt->image_path)->not->toBeNull();
+    Storage::disk('fabriku_s3')->assertExists($receipt->image_path);
 });
 
 test('cannot update material receipt with invalid data', function () {
