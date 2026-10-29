@@ -121,77 +121,98 @@ function activate() {
         <p v-if="satsetuiError" role="alert" class="rounded-lg border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900">{{ satsetuiError }}</p>
         <template v-if="canManage">
             <p v-if="deleteError" role="alert" class="rounded-lg border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900">{{ deleteError }}</p>
-            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                <TemplateCard
-                    v-if="activeTemplate"
-                    :item="activeTemplate"
-                    @preview="preview = { name: activeTemplate.name, url: activeTemplate.previewUrl }"
-                />
-                <form
-                    class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
-                    @submit.prevent="uploadTemplate"
-                >
-                    <div>
-                        <h3 class="font-semibold text-slate-950 dark:text-white">Unggah Template ZIP</h3>
-                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Sertakan index.html, halaman HTML lain, dan CSS. Maksimal 2 MB. Template diperiksa sebelum masuk ke daftar.
-                        </p>
-                    </div>
-                    <div>
-                        <label for="template-name" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Nama template</label>
-                        <input
-                            id="template-name"
-                            v-model="uploadForm.name"
-                            required
-                            maxlength="100"
-                            class="mt-1 block min-h-11 w-full rounded-lg border border-slate-300 p-2.5 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                        />
-                        <p v-if="uploadForm.errors.name" class="mt-1 text-sm text-rose-600" role="alert">{{ uploadForm.errors.name }}</p>
-                    </div>
-                    <div>
-                        <label for="template-file" class="block text-sm font-medium text-slate-700 dark:text-slate-300">File ZIP</label>
-                        <input
-                            id="template-file"
-                            ref="fileInput"
-                            type="file"
-                            accept=".zip,application/zip"
-                            required
-                            class="mt-2 block min-h-11 w-full text-sm text-slate-700 dark:text-slate-300"
-                            @change="uploadForm.template = ($event.target as HTMLInputElement).files?.[0] ?? null"
-                        />
-                        <p v-if="uploadForm.errors.template" class="mt-1 text-sm text-rose-600" role="alert">{{ uploadForm.errors.template }}</p>
-                    </div>
-                    <button
-                        type="submit"
-                        :disabled="uploadForm.processing"
-                        class="min-h-11 rounded-lg bg-teal-800 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+            <section
+                aria-labelledby="manage-templates-heading"
+                class="space-y-4 rounded-2xl border border-teal-200 bg-teal-50/70 p-4 sm:p-5 dark:border-teal-900 dark:bg-teal-950/30"
+            >
+                <div>
+                    <h3 id="manage-templates-heading" class="text-base font-semibold text-slate-950 dark:text-white">Kelola desain website</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Lihat desain yang aktif atau tambahkan desain baru.</p>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <TemplateCard
+                        v-if="activeTemplate"
+                        :item="activeTemplate"
+                        @preview="preview = { name: activeTemplate.name, url: activeTemplate.previewUrl }"
+                    />
+                    <form
+                        class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
+                        @submit.prevent="uploadTemplate"
                     >
-                        {{ uploadForm.processing ? 'Memeriksa…' : 'Periksa dan simpan' }}
-                    </button>
-                </form>
-                <div class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-                    <h3 class="font-semibold text-slate-950 dark:text-white">Buat di Satsetui</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">
-                        Buat desain di Satsetui dan kirim ke Fabriku. Hasilnya masuk ke daftar template untuk dipratinjau, diedit, dan diaktifkan.
-                    </p>
-                    <form action="/website/satsetui/launch" method="post" target="_blank" rel="noopener">
-                        <input type="hidden" name="_token" :value="csrfToken" />
-                        <button type="submit" class="min-h-11 rounded-lg bg-teal-800 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700">
-                            Buka Satsetui ↗
+                        <div>
+                            <h3 class="font-semibold text-slate-950 dark:text-white">Unggah Template ZIP</h3>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                                Sertakan index.html, halaman HTML lain, dan CSS. Maksimal 2 MB. Template diperiksa sebelum masuk ke daftar.
+                            </p>
+                        </div>
+                        <div>
+                            <label for="template-name" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Nama template</label>
+                            <input
+                                id="template-name"
+                                v-model="uploadForm.name"
+                                required
+                                maxlength="100"
+                                class="mt-1 block min-h-11 w-full rounded-lg border border-slate-300 p-2.5 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                            />
+                            <p v-if="uploadForm.errors.name" class="mt-1 text-sm text-rose-600" role="alert">{{ uploadForm.errors.name }}</p>
+                        </div>
+                        <div>
+                            <label for="template-file" class="block text-sm font-medium text-slate-700 dark:text-slate-300">File ZIP</label>
+                            <input
+                                id="template-file"
+                                ref="fileInput"
+                                type="file"
+                                accept=".zip,application/zip"
+                                required
+                                class="mt-2 block min-h-11 w-full text-sm text-slate-700 dark:text-slate-300"
+                                @change="uploadForm.template = ($event.target as HTMLInputElement).files?.[0] ?? null"
+                            />
+                            <p v-if="uploadForm.errors.template" class="mt-1 text-sm text-rose-600" role="alert">{{ uploadForm.errors.template }}</p>
+                        </div>
+                        <button
+                            type="submit"
+                            :disabled="uploadForm.processing"
+                            class="min-h-11 rounded-lg bg-teal-800 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+                        >
+                            {{ uploadForm.processing ? 'Memeriksa…' : 'Periksa dan simpan' }}
                         </button>
                     </form>
+                    <div class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+                        <h3 class="font-semibold text-slate-950 dark:text-white">Buat di Satsetui</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">
+                            Buat desain di Satsetui dan kirim ke Fabriku. Hasilnya masuk ke daftar template untuk dipratinjau, diedit, dan diaktifkan.
+                        </p>
+                        <form action="/website/satsetui/launch" method="post" target="_blank" rel="noopener">
+                            <input type="hidden" name="_token" :value="csrfToken" />
+                            <button
+                                type="submit"
+                                class="min-h-11 rounded-lg bg-teal-800 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700"
+                            >
+                                Buka Satsetui ↗
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                <TemplateCard
-                    v-for="item in inactiveTemplates"
-                    :key="item.key"
-                    :item="item"
-                    @preview="preview = { name: item.name, url: item.previewUrl }"
-                    @activate="activation = { name: item.name, url: item.activateUrl }"
-                    @delete="deletion = item.custom"
-                />
-            </div>
+            </section>
+            <section
+                aria-labelledby="other-templates-heading"
+                class="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5 dark:border-slate-800 dark:bg-slate-900/40"
+            >
+                <div>
+                    <h3 id="other-templates-heading" class="text-base font-semibold text-slate-950 dark:text-white">Pilihan desain lainnya</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Pratinjau dan aktifkan desain untuk website Anda.</p>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <TemplateCard
+                        v-for="item in inactiveTemplates"
+                        :key="item.key"
+                        :item="item"
+                        @preview="preview = { name: item.name, url: item.previewUrl }"
+                        @activate="activation = { name: item.name, url: item.activateUrl }"
+                        @delete="deletion = item.custom"
+                    />
+                </div>
+            </section>
         </template>
         <p v-else class="text-sm text-slate-600 dark:text-slate-400">Pengelolaan template tersedia untuk pemilik dan pengelola usaha.</p>
         <Modal :show="preview !== null" @close="preview = null">
