@@ -601,7 +601,7 @@ Setiap kali membeli bahan dengan harga berbeda. Minimal tinjau sebulan sekali bi
 
 Modul produksi dan stok bahan baku Fabriku mencatat biaya per bahan secara otomatis dari setiap penerimaan bahan, sehingga perhitungan HPP bisa mengikuti harga bahan yang aktual, bukan asumsi harga lama yang sudah berubah. Lihat cara kerjanya untuk [usaha konveksi](/aplikasi/konveksi) atau [usaha makanan dan kue](/aplikasi/usaha-makanan-kue).
 
-Untuk produk yang lebih personal seperti kerajinan tangan, komponen biayanya sedikit berbeda dan skill jadi faktor tambahan — lihat [cara menentukan harga jual produk kerajinan handmade](/blog/cara-menentukan-harga-jual-produk-kerajinan-handmade). Untuk usaha jasa yang tidak punya produk fisik sama sekali, logikanya mirip tapi komponennya berbeda — baca [cara menghitung harga jasa servis kecil agar tidak rugi](/blog/cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi).
+Untuk produk yang lebih personal seperti kerajinan tangan, komponen biayanya sedikit berbeda dan skill jadi faktor tambahan — lihat [cara menentukan harga jual produk kerajinan handmade](/blog/cara-menentukan-harga-jual-produk-kerajinan-handmade). Untuk usaha jasa yang tidak punya produk fisik sama sekali, logikanya mirip tapi komponennya berbeda — baca [cara menghitung harga jasa servis kecil agar tidak rugi](/blog/cara-menghitung-harga-jasa-servis-kecil-agar-tidak-rugi). Setelah HPP diketahui, langkah memilih markup atau margin dan menyesuaikan harga per channel dibahas di [cara menentukan harga jual produk](/blog/cara-menentukan-harga-jual-produk-markup-vs-margin).
 MD,
             ],
             [
@@ -650,7 +650,7 @@ Kesalahan lain adalah tidak membedakan harga atau ongkos antar channel dalam pen
 
 Fabriku mencatat channel penjualan (offline, online, marketplace, reseller) di setiap pesanan, dengan stok yang sama-sama terpotong dari satu sumber data pusat — jadi tidak ada lagi risiko barang yang sama ditawarkan dua kali ke pembeli berbeda.
 
-Kalau belum punya sistem kasir yang bisa menangani banyak channel sekaligus, [7 tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula) bisa jadi acuan sebelum memutuskan. Multi-channel juga berarti lebih banyak kemungkinan retur dari berbagai sumber — lihat [cara mengelola stok retur barang UMKM retail](/blog/cara-kelola-stok-retur-barang-umkm-retail) supaya retur dari channel mana pun tetap tercatat rapi.
+Kalau belum punya sistem kasir yang bisa menangani banyak channel sekaligus, [7 tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula) bisa jadi acuan sebelum memutuskan. Multi-channel juga berarti lebih banyak kemungkinan retur dari berbagai sumber — lihat [cara mengelola stok retur barang UMKM retail](/blog/cara-kelola-stok-retur-barang-umkm-retail) supaya retur dari channel mana pun tetap tercatat rapi. Bila ingin menambah website sendiri sebagai channel, lihat [contoh website toko online UMKM](/blog/contoh-website-toko-online-umkm) yang sudah berjalan.
 MD,
             ],
             [
@@ -987,7 +987,7 @@ Berbeda dari produk pabrikan yang harga jualnya cenderung mepet dengan HPP karen
 
 Kesalahan paling sering adalah menghargai jam kerja sendiri sebagai Rp0 karena dianggap "hobi" atau "dikerjakan pas senggang", padahal waktu itu bisa dipakai untuk hal lain yang menghasilkan. Kesalahan lain adalah ikut-ikutan harga kompetitor tanpa tahu apakah kompetitor itu sendiri sudah menghitung biayanya dengan benar — bisa jadi kompetitor juga sama-sama rugi tanpa sadar, dan mengikuti harganya berarti ikut menjebak diri sendiri di harga yang tidak sehat.
 
-Sebelum menentukan harga jual, ada baiknya juga menata dulu bagaimana [bahan baku kerajinan yang tidak standar](/blog/cara-mengelola-bahan-baku-kerajinan-tidak-standar) — seperti sisa kain, manik lepasan, atau potongan kayu — dicatat dan dihitung nilainya, karena tanpa itu komponen biaya bahan di atas hanya jadi perkiraan kasar. Untuk pembahasan HPP yang lebih mendalam di luar konteks kerajinan tangan, lihat juga [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm).
+Sebelum menentukan harga jual, ada baiknya juga menata dulu bagaimana [bahan baku kerajinan yang tidak standar](/blog/cara-mengelola-bahan-baku-kerajinan-tidak-standar) — seperti sisa kain, manik lepasan, atau potongan kayu — dicatat dan dihitung nilainya, karena tanpa itu komponen biaya bahan di atas hanya jadi perkiraan kasar. Untuk pembahasan HPP yang lebih mendalam di luar konteks kerajinan tangan, lihat juga [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm). Perbedaan markup dan margin dijelaskan di [cara menentukan harga jual produk](/blog/cara-menentukan-harga-jual-produk-markup-vs-margin).
 
 ## Pertanyaan yang Sering Muncul
 
@@ -1929,7 +1929,7 @@ Catat sebagai produk tersendiri atau tambahkan baris catatan bahan tambahan untu
 **Kapan pencatatan manual ini sudah tidak cukup?**
 Biasanya saat produk sudah lebih dari lima, pesanan datang setiap hari, atau ada lebih dari satu orang yang memproduksi. Baca [kapan usaha rumahan butuh sistem pencatatan](/blog/kapan-usaha-rumahan-butuh-sistem-pencatatan).
 
-Fabriku menyediakan pencatatan produksi sederhana untuk usaha rumahan: pilih bahan yang dipakai dan jumlah hasil jadi dalam satu form, lalu stok bahan berkurang dan stok produk bertambah otomatis, dengan biaya per unit dihitung dari bahan yang dipakai. Lihat [Fabriku untuk produksi rumahan](/aplikasi/produksi-rumahan).
+Fabriku menyediakan pencatatan produksi sederhana untuk usaha rumahan: pilih bahan yang dipakai dan jumlah hasil jadi dalam satu form, lalu stok bahan berkurang dan stok produk bertambah otomatis, dengan biaya per unit dihitung dari bahan yang dipakai. Lihat [Fabriku untuk produksi rumahan](/aplikasi/produksi-rumahan). Untuk menjual hasil produksi lewat website sendiri, lihat [contoh website toko online UMKM](/blog/contoh-website-toko-online-umkm) dari usaha camilan rumahan di Bandung.
 MD,
             ],
             [
@@ -2341,6 +2341,190 @@ Saat pembeli antre dan mencari harga memperlambat pelayanan, atau saat selisih h
 ## Laporan Harian Tanpa Hitung Stok Manual
 
 Di Fabriku, penjualan langsung di toko dicatat lewat halaman kasir cepat, dan stok barang berkurang saat transaksi selesai. Barang masuk dari supplier dicatat lewat penerimaan pembelian beserta nomor faktur, dan barang rusak, hilang, atau retur dicatat sebagai penyesuaian stok. Rekap penjualan harian dan per produk bisa dilihat dan diekspor ke Excel atau PDF, tanpa menghitung terjual dari selisih stok setiap malam. Lihat [Fabriku untuk toko retail](/aplikasi/toko-retail).
+MD,
+            ],
+            [
+                'slug' => 'cara-menentukan-harga-jual-produk-markup-vs-margin',
+                'title' => 'Cara Menentukan Harga Jual Produk: Markup vs Margin, Lengkap dengan Contoh',
+                'category' => 'Keuangan',
+                'tags' => ['Harga Jual', 'HPP', 'UMKM'],
+                'days_ago' => 0,
+                'excerpt' => 'Markup dan margin sama-sama persen keuntungan, tapi dihitung dari angka yang berbeda. Salah pakai rumus membuat harga jual lebih murah dari target. Ini cara menentukan harga jual produk langkah demi langkah.',
+                'meta_title' => 'Cara Menentukan Harga Jual Produk: Markup vs Margin',
+                'meta_description' => 'Cara menentukan harga jual produk UMKM: hitung HPP, pilih markup atau margin, cek harga pasar dan potongan channel. Rumus, tabel konversi, dan contoh angka.',
+                'content' => <<<'MD'
+Banyak pemilik usaha menentukan harga jual dengan satu kalimat: "modal ditambah 30%". Masalahnya, 30% itu sering dibaca sebagai margin di laporan, padahal dihitung sebagai markup saat membuat harga. Selisihnya kecil per produk, tapi terasa besar setelah ratusan penjualan.
+
+Artikel ini membahas cara menentukan harga jual suatu produk dalam lima langkah, dengan fokus pada perbedaan markup dan margin.
+
+## Langkah 1: Hitung HPP per Unit
+
+Harga jual selalu dimulai dari HPP (harga pokok produksi): bahan, tenaga kerja, kemasan, dan bagian dari biaya overhead untuk satu unit produk. Tanpa HPP, persen keuntungan apa pun hanya tebakan.
+
+Cara menghitung HPP per unit, lengkap dengan tabel dan template Excel, ada di [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm). Untuk makanan per porsi, lihat [cara menghitung HPP makanan per porsi](/blog/cara-menghitung-hpp-makanan-per-porsi).
+
+Contoh di artikel ini memakai HPP **Rp20.000** per unit.
+
+## Langkah 2: Pahami Beda Markup dan Margin
+
+| | Markup | Margin |
+|---|---|---|
+| Dihitung dari | HPP | Harga jual |
+| Rumus persen | (Harga jual − HPP) ÷ HPP | (Harga jual − HPP) ÷ Harga jual |
+| Rumus harga jual | HPP × (1 + markup) | HPP ÷ (1 − margin) |
+| Contoh 30% dari HPP Rp20.000 | Rp26.000 | Rp28.571 |
+
+Dengan markup 30%, untung per unit Rp6.000. Tapi kalau dilihat dari harga jual, Rp6.000 ÷ Rp26.000 hanya **23%**. Jadi kalau target Anda "untung 30% dari omzet", rumus markup membuat harga terlalu murah sekitar Rp2.600 per unit.
+
+Aturan praktis: **pakai margin bila target keuntungan dibandingkan dengan omzet** (misalnya laporan laba rugi), **pakai markup bila Anda berpikir dari modal**. Keduanya benar, asalkan tidak dicampur.
+
+## Tabel Konversi Markup ke Margin
+
+| Markup | Margin setara |
+|---|---|
+| 25% | 20% |
+| 50% | 33,3% |
+| 67% | 40% |
+| 100% | 50% |
+| 150% | 60% |
+
+Rumusnya: margin = markup ÷ (1 + markup). Sebaliknya, markup = margin ÷ (1 − margin).
+
+## Langkah 3: Tambahkan Potongan Channel
+
+Harga jual yang sama bisa menghasilkan untung berbeda di setiap channel:
+
+- Marketplace dan aplikasi pesan antar memotong komisi dari harga jual.
+- Reseller mendapat harga khusus.
+- Penjualan langsung tidak terpotong, tapi mungkin ada biaya kemasan atau ongkir yang Anda tanggung.
+
+Karena komisi dipotong dari harga jual, hitung dengan cara margin: **Harga jual = HPP ÷ (1 − margin − komisi)**.
+
+Contoh: HPP Rp20.000, target margin 30%, komisi 20%. Harga jual = Rp20.000 ÷ (1 − 0,3 − 0,2) = **Rp40.000**. Angka ini terasa tinggi, dan itulah alasan banyak penjual menetapkan harga berbeda di aplikasi pesan antar. Contoh lengkapnya untuk makanan ada di [cara menentukan harga jual makanan per pcs](/blog/cara-menentukan-harga-jual-makanan-per-pcs).
+
+## Langkah 4: Bandingkan dengan Harga Pasar
+
+Hasil hitungan adalah harga minimum yang masih sehat, bukan harga final. Bandingkan dengan 3–5 produk sejenis:
+
+- **Harga Anda jauh di atas pasar:** cari komponen HPP yang bisa ditekan (beli bahan lebih banyak, kemasan lebih sederhana), atau tonjolkan nilai yang membedakan produk Anda.
+- **Harga Anda jauh di bawah pasar:** jangan buru-buru senang. Periksa apakah ada biaya yang lupa dihitung, terutama upah sendiri dan overhead.
+- **Mirip pasar:** pakai hasil hitungan, lalu bulatkan ke angka yang mudah dibayar (Rp27.500 jadi Rp28.000, bukan Rp27.000).
+
+Produk handmade dan custom punya pertimbangan tambahan, misalnya tingkat kesulitan dan waktu pengerjaan. Lihat [cara menentukan harga jual produk kerajinan handmade](/blog/cara-menentukan-harga-jual-produk-kerajinan-handmade).
+
+## Langkah 5: Tinjau Ulang Secara Berkala
+
+Harga jual yang tepat hari ini bisa merugi tiga bulan lagi bila harga bahan naik. Tinjau ulang HPP dan harga jual setiap kali harga bahan utama berubah, atau minimal sebulan sekali untuk bahan yang harganya sering naik turun.
+
+## Contoh Lengkap
+
+Sebuah usaha sambal kemasan punya HPP Rp15.000 per botol dan menjual di tiga tempat dengan target margin 35%:
+
+| Channel | Potongan | Rumus | Harga minimum | Harga dipasang |
+|---|---|---|---|---|
+| Langsung (WhatsApp, bazar) | 0% | 15.000 ÷ 0,65 | Rp23.077 | Rp24.000 |
+| Reseller (diskon 15%) | 15% | 15.000 ÷ 0,50 | Rp30.000 harga katalog | Rp30.000, reseller bayar Rp25.500 |
+| Marketplace (komisi 10%) | 10% | 15.000 ÷ 0,55 | Rp27.273 | Rp28.000 |
+
+Perhatikan bahwa harga katalog reseller Rp30.000 lebih tinggi dari harga langsung. Bila harga langsung dibuat sama dengan harga katalog reseller, pembeli langsung membayar lebih mahal dari yang perlu; bila diskon reseller dihitung dari harga langsung Rp24.000, reseller hanya membayar Rp20.400 dan untung Anda turun dari Rp10.500 menjadi Rp5.400 per botol. Putuskan dulu struktur harga mana yang dipakai, lalu hitung mundur.
+
+## Pertanyaan yang Sering Muncul
+
+**Berapa margin yang wajar untuk UMKM?**
+Tidak ada angka baku karena tergantung jenis produk dan biaya tetap. Yang penting, margin kotor harus cukup menutup biaya tetap bulanan (sewa, listrik, gaji) pada volume penjualan normal, lalu masih menyisakan laba.
+
+**Apakah ongkos kirim masuk HPP?**
+Ongkir yang Anda tanggung (gratis ongkir) masuk sebagai biaya per pesanan. Ongkir yang dibayar pembeli tidak perlu dimasukkan.
+
+**Lebih baik untung tipis tapi laku banyak, atau sebaliknya?**
+Untung tipis hanya aman bila volume benar-benar tinggi dan stabil. Untuk usaha kecil dengan kapasitas produksi terbatas, margin yang cukup biasanya lebih aman daripada mengejar volume.
+
+## Menjaga Harga Tetap Sehat
+
+Fabriku mencatat biaya bahan dari setiap penerimaan dan harga jual per produk, serta channel setiap pesanan (offline, online, marketplace, atau reseller). Dengan begitu omzet per channel bisa dibandingkan di laporan penjualan, dan harga bisa disesuaikan saat biaya bahan berubah. Lihat cara kerjanya untuk [usaha makanan dan kue](/aplikasi/usaha-makanan-kue) atau [kerajinan dan handmade](/aplikasi/kerajinan-handmade).
+MD,
+            ],
+            [
+                'slug' => 'contoh-website-toko-online-umkm',
+                'title' => 'Contoh Website Toko Online UMKM: Bedah Website Usaha Camilan Rumahan',
+                'category' => 'Penjualan',
+                'tags' => ['Website Usaha', 'Produksi Rumahan', 'Kuliner Rumahan'],
+                'days_ago' => 0,
+                'excerpt' => 'Contoh website toko online UMKM yang sudah berjalan: DSFA Homemade, usaha camilan rumahan di Bandung. Bagian demi bagian, dari judul halaman sampai cara pesan, dan apa yang bisa Anda tiru.',
+                'meta_title' => 'Contoh Website Toko Online UMKM yang Sudah Berjalan',
+                'meta_description' => 'Contoh website toko online UMKM nyata: DSFA Homemade Bandung. Bedah beranda, katalog, cara pesan, area kirim, dan halaman SEO, plus checklist untuk website Anda.',
+                'content' => <<<'MD'
+Saat mencari contoh website toko online, kebanyakan yang muncul adalah toko besar dengan tim desain sendiri. Contohnya bagus, tapi sulit ditiru oleh usaha rumahan yang dikelola satu atau dua orang.
+
+Artikel ini membedah satu website usaha kecil yang sudah berjalan: [dsfahomemade.com](https://dsfahomemade.com), milik DSFA Homemade, usaha camilan dan dessert rumahan di Bandung yang menjual cheesecuit, takoyaki, puding buah, dan jus. Websitenya dibuat dengan fitur Website Usaha di Fabriku. Isi dan harga di bawah dicatat pada akhir Oktober 2026 dan bisa berubah.
+
+## 1. Judul Halaman yang Menjawab "Apa dan di Mana"
+
+Judul halaman (yang tampil di tab browser dan hasil pencarian Google) berbunyi *DSFA Homemade Bandung | Cheesecuit, Takoyaki, Puding & Jus*. Dalam satu baris, calon pembeli tahu nama usaha, kotanya, dan menunya.
+
+**Yang bisa ditiru:** sebutkan nama usaha, kota, dan 2–4 produk utama. Hindari judul seperti "Beranda" atau "Selamat Datang", yang tidak membantu pembeli maupun Google.
+
+## 2. Bagian Atas: Satu Kalimat Penjelasan dan Satu Tombol
+
+Bagian paling atas menjelaskan siapa mereka (dapur rumah di Bandung), cara memesan (WhatsApp), dan janji pengantaran (maksimal 1 jam dalam kondisi lalu lintas normal). Di bawahnya ada dua tombol: pesan via WhatsApp dan lihat menu. Foto produk tampil bergantian di samping teks.
+
+**Yang bisa ditiru:** jawab tiga pertanyaan pertama pembeli sebelum mereka menggulir: jual apa, di mana, dan bagaimana cara pesannya.
+
+## 3. Katalog dengan Harga dan Status yang Jelas
+
+Katalog menampilkan setiap varian sebagai produk tersendiri dengan foto dan harga: takoyaki isi 4 seharga Rp5.000, isi 8 seharga Rp10.000, cheesecuit kecil dalam tiga rasa, jus dalam tiga rasa, dan seterusnya. Setiap kartu punya label status: *Tersedia* untuk barang yang siap, atau *Open Order · estimasi 3 hari* untuk puding ulang tahun yang dibuat sesuai pesanan.
+
+**Yang bisa ditiru:**
+- Cantumkan harga. Pembeli yang harus bertanya harga lewat chat sering tidak jadi bertanya.
+- Pisahkan varian ukuran dan rasa, jangan satu produk dengan keterangan "harga mulai dari".
+- Bedakan barang siap kirim dan barang pesanan khusus, sekaligus waktu pengerjaannya.
+
+## 4. Cara Pesan dalam Tiga Langkah
+
+DSFA menulis alur pemesanan sebagai tiga langkah singkat: pilih menu, tentukan jumlah dan tanggal, lalu kirim pesanan. Pembeli juga bisa memasukkan produk ke keranjang dan mengirim pesanan langsung dari website.
+
+**Yang bisa ditiru:** tulis alur pemesanan maksimal tiga sampai empat langkah. Bila pembayaran dikonfirmasi manual (transfer atau QRIS setelah dihubungi admin), katakan dengan jelas supaya pembeli tidak menunggu halaman pembayaran yang tidak ada.
+
+## 5. Area Pengiriman dan Kontak yang Mudah Ditemukan
+
+Ada halaman khusus area pengiriman (Kota Bandung, Cimahi, dan sebagian Kabupaten Bandung) dan dua nomor WhatsApp admin di bagian bawah setiap halaman.
+
+**Yang bisa ditiru:** untuk makanan dan produk yang diantar sendiri, area kirim adalah pertanyaan kedua setelah harga. Jawab di website, bukan satu per satu di chat.
+
+## 6. Halaman Khusus untuk Setiap Pencarian Lokal
+
+Selain beranda, DSFA punya halaman terpisah untuk setiap menu dan lokasi, misalnya *cheesecuit Bandung*, *jual takoyaki Bandung*, *puding buah Bandung*, *puding ulang tahun Bandung*, dan *dessert takoyaki Bojongsoang*. Setiap halaman membahas satu menu, menampilkan kartu produk yang terkait, dan menautkan kembali ke beranda.
+
+**Yang bisa ditiru:** orang mencari "puding ulang tahun Bandung", bukan "DSFA Homemade". Satu halaman per menu utama per kota memberi peluang muncul di pencarian lokal. Isi setiap halaman dengan informasi yang berbeda (varian, harga, waktu pengerjaan, cara pesan), bukan teks yang sama dengan nama kota diganti.
+
+## Checklist Website Toko Online UMKM
+
+Sebelum website Anda diterbitkan, pastikan:
+
+- [ ] Judul halaman memuat nama usaha, kota, dan produk utama
+- [ ] Bagian atas menjawab: jual apa, di mana, cara pesan
+- [ ] Setiap produk punya foto asli, harga, dan status ketersediaan
+- [ ] Alur pemesanan dan cara bayar ditulis jelas
+- [ ] Area pengiriman dan kontak mudah ditemukan
+- [ ] Ada halaman kebijakan privasi
+- [ ] Halaman terbuka dengan cepat dan rapi di ponsel
+
+## Pertanyaan yang Sering Muncul
+
+**Apakah usaha kecil perlu website kalau sudah punya Instagram dan WhatsApp?**
+Instagram bagus untuk dilihat, tapi sulit dicari lewat Google dan katalognya cepat tenggelam. Website memberi satu alamat tetap yang memuat menu, harga, dan cara pesan, lalu bisa ditautkan dari bio Instagram dan status WhatsApp.
+
+**Apakah harus memakai domain sendiri?**
+Tidak wajib di awal, tapi domain sendiri (seperti dsfahomemade.com) lebih mudah diingat dan terlihat lebih meyakinkan saat dibagikan.
+
+**Bagaimana kalau stok sering habis?**
+Website yang terhubung dengan catatan stok akan menyembunyikan atau menandai barang yang habis. Website yang diperbarui manual sering masih menampilkan barang yang sudah tidak ada, dan itu membuat pembeli kecewa.
+
+## Website yang Terhubung dengan Stok dan Pesanan
+
+Website DSFA dibuat dengan fitur Website Usaha di Fabriku. Katalognya diambil dari data barang di Fabriku, sehingga foto, harga, dan status ketersediaan mengikuti stok. Barang yang dibuat sesuai pesanan bisa ditandai open order beserta estimasi pengerjaannya. Pesanan dari keranjang website masuk sebagai pesanan baru di Fabriku, pemilik mendapat notifikasi, lalu admin menghubungi pembeli untuk konfirmasi dan pembayaran. Halaman tambahan seperti area pengiriman dan halaman menu per kota bisa dibuat dari dashboard yang sama.
+
+Untuk menyiapkan stok dan catatan produksinya, baca [cara mencatat produksi banyak produk dalam satu dapur rumahan](/blog/cara-mencatat-produksi-banyak-produk-satu-dapur-rumahan) dan lihat [Fabriku untuk produksi rumahan](/aplikasi/produksi-rumahan). Bila Anda juga menjual lewat marketplace atau toko langsung, baca [cara mengelola pesanan online dan offline sekaligus](/blog/cara-mengelola-pesanan-online-offline-sekaligus).
 MD,
             ],
         ];
