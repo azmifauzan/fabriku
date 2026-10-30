@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminBlogController;
 use App\Http\Controllers\Admin\AdminCampaignController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminMonitoringController;
+use App\Http\Controllers\Admin\AdminPasswordController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminSettingController;
@@ -133,6 +134,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('payments/{payment}/reject', [AdminPaymentController::class, 'reject'])->name('payments.reject');
 
         // Settings
+        Route::get('account/password', [AdminPasswordController::class, 'edit'])->name('account.password.edit');
+        Route::put('account/password', [AdminPasswordController::class, 'update'])->name('account.password.update');
+
         Route::get('settings', [AdminSettingController::class, 'index'])->name('settings.index');
         Route::post('settings', [AdminSettingController::class, 'update'])->name('settings.update');
 

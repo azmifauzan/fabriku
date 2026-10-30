@@ -1,6 +1,23 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Activity, Building2, ChevronDown, CreditCard, FileText, Globe2, LayoutDashboard, LogOut, Mail, Menu, Newspaper, Settings, Shield, Users, X } from 'lucide-vue-next';
+import {
+    Activity,
+    Building2,
+    ChevronDown,
+    CreditCard,
+    FileText,
+    Globe2,
+    KeyRound,
+    LayoutDashboard,
+    LogOut,
+    Mail,
+    Menu,
+    Newspaper,
+    Settings,
+    Shield,
+    Users,
+    X,
+} from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const page = usePage();
@@ -55,7 +72,7 @@ const logout = () => {
                         <img src="/images/fabriku-logo-only.png?v=3" alt="Fabriku Logo" class="h-full w-full object-contain" />
                     </div>
                     <div>
-                        <img src="/images/fabriku-word.png?v=3" alt="Fabriku" class="h-5 brightness-0 invert object-contain" />
+                        <img src="/images/fabriku-word.png?v=3" alt="Fabriku" class="h-5 object-contain brightness-0 invert" />
                         <p class="mt-0.5 text-xs text-purple-200">Admin Panel</p>
                     </div>
                 </div>
@@ -101,6 +118,13 @@ const logout = () => {
 
                     <!-- Dropdown -->
                     <div v-show="userMenuOpen" class="absolute right-0 bottom-full left-0 mb-2 rounded-lg bg-white py-1 shadow-lg dark:bg-gray-800">
+                        <Link
+                            href="/admin/account/password"
+                            class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                        >
+                            <KeyRound class="mr-2 h-4 w-4" />
+                            Ubah Password
+                        </Link>
                         <button
                             @click="logout"
                             class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
