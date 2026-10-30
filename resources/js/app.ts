@@ -1,5 +1,6 @@
 import '../css/app.css';
 
+import { pageTitle } from '@/lib/pageTitle';
 import { createInertiaApp, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -53,7 +54,7 @@ if (gaMeasurementId && typeof window !== 'undefined') {
 }
 
 createInertiaApp({
-    title: (title) => (title && !title.includes(appName) ? `${title} - ${appName}` : title || appName),
+    title: (title) => pageTitle(title, appName),
     resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })

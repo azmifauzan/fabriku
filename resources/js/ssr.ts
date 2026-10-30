@@ -1,3 +1,4 @@
+import { pageTitle } from '@/lib/pageTitle';
 import { createInertiaApp } from '@inertiajs/vue3';
 import createServer from '@inertiajs/vue3/server';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -11,7 +12,7 @@ createServer(
         createInertiaApp({
             page,
             render: renderToString,
-            title: (title) => (title && !title.includes(appName) ? `${title} - ${appName}` : title || appName),
+            title: (title) => pageTitle(title, appName),
             resolve: resolvePage,
             setup: ({ App, props, plugin }) => createSSRApp({ render: () => h(App, props) }).use(plugin),
         }),

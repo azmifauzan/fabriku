@@ -7,7 +7,7 @@ defineProps<{ canonical: string }>();
 
 <template>
     <SeoHead
-        title="Kebijakan Privasi Fabriku"
+        title="Kebijakan Privasi Fabriku: Data Akun dan Website Usaha"
         description="Pelajari data akun, data bisnis, dan data permintaan yang dikumpulkan melalui website usaha Fabriku serta cara penggunaannya."
         :canonical="canonical"
     />
