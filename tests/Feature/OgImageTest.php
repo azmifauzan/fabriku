@@ -10,6 +10,10 @@ use Database\Seeders\BlogSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
+beforeEach(function () {
+    AdminUser::factory()->create(['email' => 'admin@fabriku.id']);
+});
+
 it('ships a 1200x630 og image for the home page and every category landing page', function () {
     $paths = [public_path('images/og-default.png')];
 

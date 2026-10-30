@@ -1,7 +1,12 @@
 <?php
 
+use App\Models\AdminUser;
 use App\Models\BlogPost;
 use Database\Seeders\BlogSeeder;
+
+beforeEach(function () {
+    AdminUser::factory()->create(['email' => 'admin@fabriku.id']);
+});
 
 it('gives every seeded post at least one link to another post', function () {
     $this->seed(BlogSeeder::class);

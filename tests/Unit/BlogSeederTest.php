@@ -1,8 +1,13 @@
 <?php
 
+use App\Models\AdminUser;
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use Database\Seeders\BlogSeeder;
+
+beforeEach(function () {
+    AdminUser::factory()->create(['email' => 'admin@fabriku.id']);
+});
 
 it('seeds 32 published blog posts across 4 categories with tags', function () {
     $this->seed(BlogSeeder::class);

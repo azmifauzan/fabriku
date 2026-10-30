@@ -17,11 +17,13 @@ class BlogSeeder extends Seeder
      * pengelolaan pesanan multi-channel. Keyed by slug/email, so re-running this
      * seeder syncs post content to whatever is defined in posts() below — treat
      * this file as the source of truth for these article bodies.
+     *
+     * Posts are authored by the existing admin@fabriku.id account. This seeder
+     * never creates it: AdminUserSeeder (run by DatabaseSeeder) seeds the
+     * documented default password, which must not be re-created on production.
      */
     public function run(): void
     {
-        $this->call(AdminUserSeeder::class);
-
         $author = AdminUser::where('email', 'admin@fabriku.id')->firstOrFail();
 
         $categories = collect([
