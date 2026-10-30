@@ -34,7 +34,38 @@ class BlogController extends Controller
             // Canonical alone does not stop Google from spending crawl budget on the
             // unbounded tag x page combinations — 13 of 17 unindexed URLs were these.
             'noindex' => $isFiltered,
+            'groups' => $isFiltered || $page > 1 ? [] : $this->groupsByBusiness(),
         ]);
+    }
+
+    /**
+     * Per `/aplikasi/*` landing page, its newest posts (tag overlap with `blog_tags`) so `/blog`
+     * links down to each money page. A post matching two landings shows under both. Landings
+     * with no matching post are left out.
+     *
+     * @return list<array{slug: string, label: string, total: int, posts: list<array{slug: string, title: string}>}>
+     */
+    private function groupsByBusiness(): array
+    {
+        $posts = BlogPost::where('status', 'published')
+            ->with('tags:id,slug')
+            ->latest('published_at')
+            ->get(['id', 'slug', 'title']);
+
+        return collect(config('landing_pages'))
+            ->map(function (array $page, string $slug) use ($posts): array {
+                $matching = $posts->filter(fn (BlogPost $post): bool => $post->tags->pluck('slug')->intersect($page['blog_tags'])->isNotEmpty());
+
+                return [
+                    'slug' => $slug,
+                    'label' => config("business.categories.{$page['category']}.label"),
+                    'total' => $matching->count(),
+                    'posts' => $matching->take(3)->map->only(['slug', 'title'])->values()->all(),
+                ];
+            })
+            ->filter(fn (array $group): bool => $group['total'] > 0)
+            ->values()
+            ->all();
     }
 
     public function show(BlogPost $post)

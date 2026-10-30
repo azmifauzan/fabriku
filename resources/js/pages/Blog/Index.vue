@@ -19,6 +19,7 @@ const props = defineProps<{
     };
     categories: Array<{ name: string; slug: string }>;
     activeCategory: string | null;
+    groups: Array<{ slug: string; label: string; total: number; posts: Array<{ slug: string; title: string }> }>;
     canonical: string;
     noindex: boolean;
 }>();
@@ -40,7 +41,32 @@ const pageSuffix = computed(() => (props.posts.current_page > 1 ? ` - Halaman ${
                 <h1 class="max-w-2xl text-3xl leading-tight font-black tracking-[-0.04em] text-[#163761] sm:text-5xl">Blog</h1>
             </header>
 
-            <nav aria-label="Kategori artikel" class="mt-9 flex flex-wrap gap-2">
+            <section v-if="groups.length" aria-labelledby="blog-by-business" class="mt-9">
+                <h2 id="blog-by-business" class="text-xl font-black text-[#163761]">Panduan sesuai jenis usaha Anda</h2>
+                <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <div v-for="group in groups" :key="group.slug" class="rounded-lg border border-slate-300 bg-white p-5">
+                        <h3 class="font-bold text-[#163761]">{{ group.label }}</h3>
+                        <ul class="mt-3 space-y-2 text-sm leading-6">
+                            <li v-for="post in group.posts" :key="post.slug">
+                                <Link
+                                    :href="`/blog/${post.slug}`"
+                                    class="text-slate-800 underline decoration-slate-300 underline-offset-4 hover:text-indigo-800"
+                                >
+                                    {{ post.title }}
+                                </Link>
+                            </li>
+                        </ul>
+                        <Link
+                            :href="`/aplikasi/${group.slug}`"
+                            class="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-indigo-800 underline decoration-indigo-300 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
+                        >
+                            Lihat fitur Fabriku untuk {{ group.label }}
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            <nav aria-label="Kategori artikel" class="mt-12 flex flex-wrap gap-2">
                 <Link
                     href="/blog"
                     class="inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"

@@ -171,3 +171,17 @@ it('shows no landing page in the post CTA on a tie or without matching tags', fu
         $this->get(route('blog.show', $slug))->assertOk()->assertInertia(fn ($page) => $page->where('landing', null));
     }
 });
+
+it('groups the blog index by business type with a link to each landing page', function () {
+    $post = BlogPost::factory()->published()->create(['title' => 'Cara Hitung Kain']);
+    $post->tags()->attach(BlogTag::factory()->create(['slug' => 'konveksi']));
+
+    $this->get(route('blog.index'))->assertInertia(fn ($page) => $page
+        ->has('groups', 1)
+        ->where('groups.0.slug', 'konveksi')
+        ->where('groups.0.total', 1)
+        ->where('groups.0.posts.0.slug', $post->slug)
+    );
+
+    $this->get(route('blog.index', ['tag' => 'konveksi']))->assertInertia(fn ($page) => $page->where('groups', []));
+});
