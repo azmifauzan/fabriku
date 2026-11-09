@@ -613,8 +613,8 @@ MD,
                 'tags' => ['Omnichannel', 'Penjualan', 'UMKM'],
                 'days_ago' => 16,
                 'excerpt' => 'Jualan di toko, marketplace, dan reseller sekaligus sering bikin stok dan pesanan berantakan. Ini cara mengelola pesanan online dan offline dari satu alur tanpa dobel kerja.',
-                'meta_title' => 'Cara Mengelola Pesanan Online dan Offline Sekaligus',
-                'meta_description' => 'Cara mengelola pesanan online dan offline sekaligus untuk UMKM tanpa stok bentrok atau dobel input, dari toko fisik, marketplace, sampai reseller.',
+                'meta_title' => 'Kelola Pesanan Online & Offline: Manual atau Pakai Sistem?',
+                'meta_description' => 'Perbandingan mencatat pesanan online dan offline secara manual vs dengan sistem: risiko stok bentrok, dobel input, dan kapan UMKM perlu beralih.',
                 'content' => <<<'MD'
 Begitu UMKM mulai jualan di lebih dari satu tempat — toko fisik, marketplace, dan lewat reseller — masalah baru muncul: stok yang sama harus dipantau dari beberapa sumber sekaligus, dan gampang terjadi barang yang sudah terjual online ternyata juga ditawarkan ke pembeli offline karena datanya tidak sinkron.
 
