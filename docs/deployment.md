@@ -83,6 +83,10 @@ grep "image:" docker-compose.yml   # verifikasi
 
 ## 5. Recreate ulang docker compose
 
+Pertahankan `APP_KEY` produksi di `.env` server dan teruskan melalui Compose. Jangan memakai kunci baru yang dibuat saat build image: sesi lama dan data terenkripsi memerlukan kunci produksi yang sama. Jika ada kunci sebelumnya, pertahankan `APP_PREVIOUS_KEYS` untuk kompatibilitas dekripsi. Jangan menampilkan nilai kunci pada log.
+
+Entrypoint sudah membersihkan dan membangun cache saat container mulai. Tunggu proses tersebut selesai sebelum menjalankan perintah cache tambahan agar `view:clear` tidak berlomba dengan `view:cache`.
+
 ```bash
 sudo docker compose pull
 sudo docker compose up -d --force-recreate
