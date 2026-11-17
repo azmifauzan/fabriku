@@ -9,7 +9,7 @@ it('renders every configured category landing page', function (string $slug) {
         ->assertInertia(fn ($page) => $page
             ->component('Landing/Category')
             ->where('canonical', url("/aplikasi/{$slug}"))
-            ->has('page.faqs', 3)
+            ->has('page.faqs', count(config("landing_pages.{$slug}.faqs")))
             ->has('otherPages', count(config('landing_pages')) - 1)
         );
 })->with(array_keys(require __DIR__.'/../../config/landing_pages.php'));

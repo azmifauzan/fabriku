@@ -14,8 +14,8 @@
 return [
     'konveksi' => [
         'category' => 'garment',
-        'meta_title' => 'Aplikasi Produksi & Stok Konveksi untuk UMKM | Fabriku',
-        'meta_description' => 'Aplikasi konveksi untuk mencatat stok kain, pola, produksi internal maupun maklun, stok barang jadi per ukuran, dan penjualan dalam satu alur.',
+        'meta_title' => 'Aplikasi Konveksi: Stok Kain, Produksi & Maklun | Fabriku',
+        'meta_description' => 'Software konveksi untuk UMKM: catat stok kain, pola, produksi internal maupun maklun, stok barang jadi per ukuran, dan penjualan dalam satu alur.',
         'eyebrow' => 'Garment & Konveksi',
         'headline' => 'Aplikasi konveksi untuk stok kain, produksi, dan maklun.',
         'intro' => 'Catat kain masuk, potong sesuai pola, kirim ke penjahit internal atau maklun, lalu terima barang jadi ke gudang. Semua tercatat tanpa rekap ulang di Excel.',
@@ -36,6 +36,7 @@ return [
             ['question' => 'Apakah Fabriku bisa mencatat penjahit maklun?', 'answer' => 'Bisa. Daftarkan penjahit atau konveksi luar sebagai kontraktor, lalu pilih kontraktor tersebut saat membuat order produksi. Jumlah yang dikirim dan tenggatnya tercatat di order produksi.'],
             ['question' => 'Apakah stok kain berkurang otomatis?', 'answer' => 'Ya. Bahan yang dipakai di order persiapan mengurangi stok bahan baku, dengan urutan pemakaian FIFO dari penerimaan paling lama.'],
             ['question' => 'Apakah cocok untuk konveksi kecil dengan 2-3 orang?', 'answer' => 'Cocok. Anda bisa mulai dari stok bahan dan penjualan dulu, lalu memakai modul produksi saat alurnya sudah rapi. Masa uji coba gratis tersedia tanpa kartu kredit.'],
+            ['question' => 'Apakah Fabriku bisa dipakai untuk pembukuan konveksi?', 'answer' => 'Sebagian. Fabriku mencatat penjualan, pembayaran sebagian, dan piutang per order, dan laporannya bisa diekspor ke Excel atau PDF. Fabriku bukan aplikasi akuntansi: jurnal, neraca, dan laporan pajak tetap dikerjakan di aplikasi pembukuan.'],
         ],
         'blog_tags' => ['konveksi', 'maklun', 'bom'],
     ],

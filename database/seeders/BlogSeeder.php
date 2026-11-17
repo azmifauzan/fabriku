@@ -287,7 +287,7 @@ Tanpa catatan seperti ini, angka HPP biasanya hanya ditebak berdasarkan "kira-ki
 
 Untuk kategori usaha rumahan, Fabriku menyediakan alur pencatatan produksi sederhana yang tidak mengharuskan pencatatan berlapis seperti pabrik besar, cukup input bahan dan hasil jadi, dan laporan HPP-nya terhitung sendiri.
 
-Kalau ingin memahami perhitungan HPP lebih dalam di luar konteks dapur rumahan — termasuk komponen overhead dan tenaga kerja yang lebih kompleks — lihat juga [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm). Kalau dapurmu menjual musiman, baca juga [cara menyiapkan stok UMKM menjelang Ramadan dan Lebaran](/blog/cara-menyiapkan-stok-umkm-menjelang-ramadan-lebaran).
+Kalau ingin memahami perhitungan HPP lebih dalam di luar konteks dapur rumahan — termasuk komponen overhead dan tenaga kerja yang lebih kompleks — lihat juga [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm). Kalau dapurmu menjual musiman, baca juga [cara menyiapkan stok UMKM menjelang Ramadan dan Lebaran](/blog/cara-menyiapkan-stok-umkm-menjelang-ramadan-lebaran). Untuk menu yang dijual per porsi, hitungan lengkapnya ada di [cara menghitung HPP makanan per porsi](/blog/cara-menghitung-hpp-makanan-per-porsi).
 MD,
             ],
             [
@@ -476,7 +476,7 @@ Dari sini, keputusan yang lebih tepat bukan sekadar "kejar omzet lebih tinggi la
 
 Laporan Fabriku sudah memecah data penjualan berdasarkan channel dan status pembayaran secara otomatis, jadi metrik-metrik ini bisa langsung dilihat tanpa harus menyusun ulang dari data mentah setiap bulan.
 
-Kelima metrik ini baru bisa dipantau kalau laporan dasarnya sudah rapi sejak awal — lihat [cara membuat laporan penjualan UMKM sederhana](/blog/cara-membuat-laporan-penjualan-umkm-sederhana) kalau belum punya strukturnya. Metrik pertama soal omzet juga akan lebih bermakna kalau dibandingkan dengan biaya produksi sebenarnya — baca [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm).
+Kelima metrik ini baru bisa dipantau kalau laporan dasarnya sudah rapi sejak awal — lihat [cara membuat laporan penjualan UMKM sederhana](/blog/cara-membuat-laporan-penjualan-umkm-sederhana) kalau belum punya strukturnya. Metrik pertama soal omzet juga akan lebih bermakna kalau dibandingkan dengan biaya produksi sebenarnya — baca [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm). Toko sembako yang belum memakai kasir bisa menyusun angka hariannya dari stok, seperti di [contoh laporan penjualan harian toko sembako](/blog/contoh-laporan-penjualan-harian-toko-sembako).
 MD,
             ],
             [
@@ -758,7 +758,7 @@ Selain risiko komplain dan iritasi pelanggan, menjual kosmetik yang sudah lewat 
 
 Fabriku mencatat tanggal kadaluarsa per item stok dan menandai item yang tanggalnya sudah lewat dengan status "expired", jadi produk yang mendekati kadaluarsa bisa dipantau lebih awal sebelum jadi masalah di tangan pelanggan. Lihat juga [Fabriku untuk kosmetik dan skincare](/aplikasi/kosmetik-skincare).
 
-Prinsip dasar pengelolaan stok di atas — minimum stock per varian, pencatatan yang konsisten, stock opname rutin — berlaku juga untuk bahan baku UMKM secara umum. Kalau ingin melihat gambaran lebih lengkap, baca [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi). Untuk reseller dan dropshipper, ada [cara kelola stok reseller dan dropship kosmetik](/blog/cara-kelola-stok-reseller-dropship-kosmetik).
+Prinsip dasar pengelolaan stok di atas — minimum stock per varian, pencatatan yang konsisten, stock opname rutin — berlaku juga untuk bahan baku UMKM secara umum. Kalau ingin melihat gambaran lebih lengkap, baca [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi). Untuk reseller dan dropshipper, ada [cara kelola stok reseller dan dropship kosmetik](/blog/cara-kelola-stok-reseller-dropship-kosmetik). Kalau pencatatan masih manual, mulai dari satu kartu per varian: formatnya ada di [contoh kartu stok barang](/blog/kartu-stok-barang-contoh-cara-mengisi-template-excel).
 MD,
             ],
             [
@@ -1100,7 +1100,7 @@ Kalau sejak awal retur kaos itu dipisahkan ke kategori "rusak" dan tidak ikut di
 
 Kesalahan paling umum adalah retur barang rusak langsung masuk lagi ke rak jual tanpa pengecekan, seperti contoh di atas. Kesalahan lain adalah tidak mengaitkan retur dengan pesanan asalnya, sehingga toko kehilangan data penting: produk apa yang paling sering diretur, dan apakah polanya berkaitan dengan kualitas produk, kesalahan deskripsi, atau masalah lain yang bisa diperbaiki dari sumbernya.
 
-Retur yang dikelola rapi juga berkaitan dengan bagaimana [pesanan dari berbagai channel dikelola](/blog/cara-mengelola-pesanan-online-offline-sekaligus) — retur dari pembeli marketplace, misalnya, perlu jelas alurnya sampai kembali ke stok pusat toko, bukan hanya tercatat di sisi marketplace saja. Kalau toko masih mempertimbangkan sistem kasir yang bisa menangani ini, [tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula) bisa jadi acuan awal. Retur dari reseller dan dropship punya alur sendiri; lihat [cara kelola stok reseller dan dropship kosmetik](/blog/cara-kelola-stok-reseller-dropship-kosmetik).
+Retur yang dikelola rapi juga berkaitan dengan bagaimana [pesanan dari berbagai channel dikelola](/blog/cara-mengelola-pesanan-online-offline-sekaligus) — retur dari pembeli marketplace, misalnya, perlu jelas alurnya sampai kembali ke stok pusat toko, bukan hanya tercatat di sisi marketplace saja. Kalau toko masih mempertimbangkan sistem kasir yang bisa menangani ini, [tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula) bisa jadi acuan awal. Retur dari reseller dan dropship punya alur sendiri; lihat [cara kelola stok reseller dan dropship kosmetik](/blog/cara-kelola-stok-reseller-dropship-kosmetik). Di toko yang mencatat stok dengan kartu, barang retur yang layak jual ditulis sebagai baris masuk tersendiri; lihat [contoh kartu stok barang](/blog/kartu-stok-barang-contoh-cara-mengisi-template-excel).
 
 Fabriku mencatat status inventory per item — termasuk status "rusak" yang terpisah dari stok yang tersedia untuk dijual — sehingga retur barang cacat tidak akan tercampur atau tidak sengaja ditawarkan lagi ke pelanggan berikutnya.
 MD,
@@ -1158,7 +1158,7 @@ Kesalahan paling umum adalah menjadwalkan opname bergulir tapi tidak konsisten m
 
 Sebelum mulai opname bergulir, ada baiknya proses [pengelolaan retur barang](/blog/cara-kelola-stok-retur-barang-umkm-retail) di toko juga sudah rapi — retur yang tidak tercatat benar adalah salah satu penyebab paling umum selisih stok yang baru ketahuan saat opname. Prinsip dasar pencatatan stok yang konsisten ini juga berlaku untuk bahan baku, bukan cuma barang jadi retail — lihat [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi) untuk gambaran yang lebih luas.
 
-Opname bergulir paling mudah dijalankan bila setiap barang punya catatan keluar-masuk yang rapi; formatnya bisa dilihat di [contoh kartu stok barang](/blog/kartu-stok-barang-contoh-cara-mengisi-template-excel). Kalau tokomu punya lebih dari satu cabang, lihat [cara kelola stok banyak cabang dan outlet UMKM](/blog/cara-kelola-stok-banyak-cabang-outlet-umkm).
+Opname bergulir paling mudah dijalankan bila setiap barang punya catatan keluar-masuk yang rapi; formatnya bisa dilihat di [contoh kartu stok barang](/blog/kartu-stok-barang-contoh-cara-mengisi-template-excel). Kalau tokomu punya lebih dari satu cabang, lihat [cara kelola stok banyak cabang dan outlet UMKM](/blog/cara-kelola-stok-banyak-cabang-outlet-umkm). Selisih opname juga lebih cepat ditelusuri bila penjualan harian direkap per barang, seperti di [contoh laporan penjualan harian toko sembako](/blog/contoh-laporan-penjualan-harian-toko-sembako).
 
 Fabriku mencatat pergerakan stok per item dan lokasi secara real-time, sehingga opname bergulir bisa dibandingkan langsung dengan catatan sistem per zona, tanpa harus menghentikan seluruh operasional toko untuk mencocokkan angka.
 MD,
