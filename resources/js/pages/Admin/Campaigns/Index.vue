@@ -55,6 +55,13 @@ const props = defineProps<{
         has_api_key: boolean;
         campaign_is_active: boolean;
         campaign_system_prompt: string;
+        schedule: {
+            frequency: 'daily' | 'weekly' | 'monthly';
+            day_of_week: number;
+            day_of_month: number;
+            time: string;
+            timezone: string;
+        };
         schedule_info: string;
     };
     features: Record<string, Array<any>>;
@@ -103,7 +110,20 @@ const settingsForm = useForm({
     llm_max_tokens: props.settings.llm_max_tokens ?? 1200,
     campaign_is_active: props.settings.campaign_is_active ?? true,
     campaign_system_prompt: props.settings.campaign_system_prompt || '',
+    schedule_frequency: props.settings.schedule?.frequency ?? 'weekly',
+    schedule_day_of_week: props.settings.schedule?.day_of_week ?? 1,
+    schedule_day_of_month: props.settings.schedule?.day_of_month ?? 1,
+    schedule_time: props.settings.schedule?.time ?? '10:00',
+    schedule_timezone: props.settings.schedule?.timezone ?? 'Asia/Jakarta',
 });
+
+const scheduleDays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+const scheduleErrorFields = ['schedule_frequency', 'schedule_day_of_week', 'schedule_day_of_month', 'schedule_time', 'schedule_timezone'] as const;
+const scheduleTimezones = [
+    { value: 'Asia/Jakarta', label: 'WIB (Asia/Jakarta)' },
+    { value: 'Asia/Makassar', label: 'WITA (Asia/Makassar)' },
+    { value: 'Asia/Jayapura', label: 'WIT (Asia/Jayapura)' },
+];
 
 const saveSettings = () => {
     settingsForm.post('/admin/campaigns/settings', {
@@ -429,7 +449,7 @@ const formatDate = (dateString: string | null) => {
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Jadwal Otomatis</p>
-                            <p class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">Senin 10:00 WIB</p>
+                            <p class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">{{ settings.schedule_info }}</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">
                                 {{ settings.campaign_is_active ? 'Status: Aktif' : 'Status: Nonaktif' }}
                             </p>
@@ -789,6 +809,97 @@ const formatDate = (dateString: string | null) => {
                             placeholder="Instruksi kepribadian copywriter..."
                             class="mt-1.5 w-full rounded-lg border border-gray-300 p-3 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         ></textarea>
+                    </div>
+
+                    <!-- Jadwal Pengiriman -->
+                    <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                        <h3 class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+                            <Clock class="h-4 w-4 text-indigo-600" />
+                            Jadwal Pengiriman Otomatis
+                        </h3>
+                        <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                            Campaign dikirim otomatis oleh scheduler sesuai jadwal ini (selama status kampanye aktif).
+                        </p>
+
+                        <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-4">
+                            <div>
+                                <label for="schedule_frequency" class="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                                    Frekuensi
+                                </label>
+                                <select
+                                    id="schedule_frequency"
+                                    v-model="settingsForm.schedule_frequency"
+                                    class="mt-1.5 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                >
+                                    <option value="daily">Harian</option>
+                                    <option value="weekly">Mingguan</option>
+                                    <option value="monthly">Bulanan</option>
+                                </select>
+                            </div>
+
+                            <div v-if="settingsForm.schedule_frequency === 'weekly'">
+                                <label for="schedule_day_of_week" class="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                                    Hari
+                                </label>
+                                <select
+                                    id="schedule_day_of_week"
+                                    v-model.number="settingsForm.schedule_day_of_week"
+                                    class="mt-1.5 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                >
+                                    <option v-for="(day, index) in scheduleDays" :key="index" :value="index">{{ day }}</option>
+                                </select>
+                            </div>
+
+                            <div v-if="settingsForm.schedule_frequency === 'monthly'">
+                                <label for="schedule_day_of_month" class="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                                    Tanggal
+                                </label>
+                                <select
+                                    id="schedule_day_of_month"
+                                    v-model.number="settingsForm.schedule_day_of_month"
+                                    class="mt-1.5 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                >
+                                    <option v-for="d in 28" :key="d" :value="d">{{ d }}</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="schedule_time" class="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                                    Jam
+                                </label>
+                                <input
+                                    id="schedule_time"
+                                    v-model="settingsForm.schedule_time"
+                                    type="time"
+                                    required
+                                    class="mt-1.5 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+
+                            <div>
+                                <label for="schedule_timezone" class="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                                    Zona Waktu
+                                </label>
+                                <select
+                                    id="schedule_timezone"
+                                    v-model="settingsForm.schedule_timezone"
+                                    class="mt-1.5 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                >
+                                    <option v-for="tz in scheduleTimezones" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p v-if="settingsForm.schedule_frequency === 'monthly'" class="mt-2 text-[11px] text-gray-500">
+                            Tanggal dibatasi 1–28 agar jadwal tetap berjalan di bulan Februari.
+                        </p>
+                        <p
+                            v-for="field in scheduleErrorFields"
+                            v-show="settingsForm.errors[field]"
+                            :key="field"
+                            class="mt-1 text-xs text-rose-600"
+                        >
+                            {{ settingsForm.errors[field] }}
+                        </p>
                     </div>
 
                     <!-- Live Test Output Result -->

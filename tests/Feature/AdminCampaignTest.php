@@ -6,8 +6,9 @@ use App\Models\CampaignLog;
 use App\Models\SystemSetting;
 use App\Models\Tenant;
 use App\Models\User;
-use App\Services\Campaign\CampaignLlmService;
+use App\Services\Campaign\CampaignSchedule;
 use App\Services\Campaign\FabrikuFeatureCatalog;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -64,9 +65,20 @@ test('admin can update LLM and campaign settings', function () {
         'llm_max_tokens' => 1500,
         'campaign_is_active' => true,
         'campaign_system_prompt' => 'Custom system prompt',
+        'schedule_frequency' => 'weekly',
+        'schedule_day_of_week' => 4,
+        'schedule_time' => '08:30',
+        'schedule_timezone' => 'Asia/Makassar',
     ]);
 
     $response->assertRedirect()->assertSessionHas('success');
+
+    expect(app(CampaignSchedule::class)->config())->toMatchArray([
+        'frequency' => 'weekly',
+        'day_of_week' => 4,
+        'time' => '08:30',
+        'timezone' => 'Asia/Makassar',
+    ]);
 
     expect(SystemSetting::get('llm_base_url'))->toBe('https://api.deepseek.com/v1');
     expect(SystemSetting::get('llm_api_key'))->toBe('sk-deepseek-test-key');
@@ -263,11 +275,11 @@ test('campaign email contains signed unsubscribe link and List-Unsubscribe heade
         'intro' => 'Tingkatkan omset kue Anda.',
     ]);
 
-    expect($mailable->unsubscribeUrl)->toContain('/campaign/unsubscribe/' . $user->id);
+    expect($mailable->unsubscribeUrl)->toContain('/campaign/unsubscribe/'.$user->id);
     expect($mailable->unsubscribeUrl)->toContain('signature=');
 
     $rendered = $mailable->render();
-    expect($rendered)->toContain('/campaign/unsubscribe/' . $user->id);
+    expect($rendered)->toContain('/campaign/unsubscribe/'.$user->id);
     expect($rendered)->toContain('berhenti berlangganan');
 });
 
@@ -361,4 +373,40 @@ test('RFC 8058 one-click unsubscribe POST request unsubscribes user', function (
     expect($user->fresh()->isCampaignUnsubscribed())->toBeTrue();
 });
 
+test('campaign schedule settings are validated', function () {
+    campaignActingAsAdmin();
 
+    $this->post(route('admin.campaigns.settings.update'), [
+        'llm_base_url' => 'https://api.openai.com/v1',
+        'llm_model' => 'gpt-4o-mini',
+        'llm_temperature' => 0.7,
+        'llm_max_tokens' => 1200,
+        'campaign_is_active' => true,
+        'schedule_frequency' => 'monthly',
+        'schedule_day_of_month' => 31,
+        'schedule_time' => '25:00',
+        'schedule_timezone' => 'Europe/London',
+    ])->assertSessionHasErrors(['schedule_day_of_month', 'schedule_time', 'schedule_timezone']);
+});
+
+test('campaign schedule defaults to monday 10:00 WIB', function () {
+    $schedule = app(CampaignSchedule::class);
+
+    expect($schedule->describe())->toBe('Setiap Senin, 10:00 WIB');
+    expect($schedule->isDue(Carbon::parse('2026-11-16 10:00', 'Asia/Jakarta')))->toBeTrue();
+    expect($schedule->isDue(Carbon::parse('2026-11-16 10:01', 'Asia/Jakarta')))->toBeFalse();
+    expect($schedule->isDue(Carbon::parse('2026-11-17 10:00', 'Asia/Jakarta')))->toBeFalse();
+});
+
+test('campaign schedule follows admin configured time and timezone', function () {
+    $schedule = app(CampaignSchedule::class);
+
+    $schedule->save(['frequency' => 'daily', 'day_of_week' => 1, 'day_of_month' => 1, 'time' => '07:15', 'timezone' => 'Asia/Jayapura']);
+    expect($schedule->isDue(Carbon::parse('2026-11-18 07:15', 'Asia/Jayapura')))->toBeTrue();
+    expect($schedule->isDue(Carbon::parse('2026-11-18 07:15', 'Asia/Jakarta')))->toBeFalse();
+
+    $schedule->save(['frequency' => 'monthly', 'day_of_week' => 1, 'day_of_month' => 15, 'time' => '09:00', 'timezone' => 'Asia/Jakarta']);
+    expect($schedule->describe())->toBe('Setiap tanggal 15, 09:00 WIB');
+    expect($schedule->isDue(Carbon::parse('2026-12-15 09:00', 'Asia/Jakarta')))->toBeTrue();
+    expect($schedule->isDue(Carbon::parse('2026-12-16 09:00', 'Asia/Jakarta')))->toBeFalse();
+});

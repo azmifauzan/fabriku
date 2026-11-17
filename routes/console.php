@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\Campaign\CampaignSchedule;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
@@ -25,10 +26,10 @@ Schedule::command('trial:send-reminders')
         Log::error('Scheduled trial:send-reminders failed');
     });
 
-// Send weekly campaign emails to tenant admins every Monday at 10:00 WIB
+// Campaign emails to tenant admins; schedule is configured in the admin panel (CampaignSchedule)
 Schedule::command('campaign:send-weekly')
-    ->weeklyOn(1, '10:00')
-    ->timezone('Asia/Jakarta')
+    ->everyMinute()
+    ->when(fn () => app(CampaignSchedule::class)->isDue())
     ->withoutOverlapping()
     ->onSuccess(function () {
         Log::info('Scheduled campaign:send-weekly completed successfully');
@@ -36,4 +37,3 @@ Schedule::command('campaign:send-weekly')
     ->onFailure(function () {
         Log::error('Scheduled campaign:send-weekly failed');
     });
-

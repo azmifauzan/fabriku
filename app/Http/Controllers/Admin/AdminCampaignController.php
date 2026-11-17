@@ -7,11 +7,13 @@ use App\Models\CampaignLog;
 use App\Models\SystemSetting;
 use App\Models\User;
 use App\Services\Campaign\CampaignLlmService;
+use App\Services\Campaign\CampaignSchedule;
 use App\Services\Campaign\CampaignSenderService;
 use App\Services\Campaign\FabrikuFeatureCatalog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,7 +21,8 @@ class AdminCampaignController extends Controller
 {
     public function __construct(
         protected CampaignLlmService $llmService,
-        protected CampaignSenderService $senderService
+        protected CampaignSenderService $senderService,
+        protected CampaignSchedule $schedule
     ) {}
 
     /**
@@ -76,7 +79,8 @@ class AdminCampaignController extends Controller
             'has_api_key' => ! empty($apiKey),
             'campaign_is_active' => (bool) SystemSetting::get('campaign_is_active', true),
             'campaign_system_prompt' => (string) SystemSetting::get('campaign_system_prompt', $this->llmService->getSystemPrompt()),
-            'schedule_info' => 'Setiap Hari Senin, Jam 10:00 WIB (Asia/Jakarta)',
+            'schedule' => $this->schedule->config(),
+            'schedule_info' => $this->schedule->describe(),
         ];
 
         $categories = config('business.categories', []);
@@ -108,6 +112,20 @@ class AdminCampaignController extends Controller
             'llm_max_tokens' => 'required|integer|min:100|max:8000',
             'campaign_is_active' => 'required|boolean',
             'campaign_system_prompt' => 'nullable|string|max:2000',
+            'schedule_frequency' => ['required', Rule::in(CampaignSchedule::FREQUENCIES)],
+            'schedule_day_of_week' => 'required_if:schedule_frequency,weekly|nullable|integer|between:0,6',
+            'schedule_day_of_month' => 'required_if:schedule_frequency,monthly|nullable|integer|between:1,28',
+            'schedule_time' => 'required|date_format:H:i',
+            'schedule_timezone' => ['required', Rule::in(array_keys(CampaignSchedule::TIMEZONES))],
+        ]);
+
+        $current = $this->schedule->config();
+        $this->schedule->save([
+            'frequency' => $request->schedule_frequency,
+            'day_of_week' => $request->input('schedule_day_of_week') ?? $current['day_of_week'],
+            'day_of_month' => $request->input('schedule_day_of_month') ?? $current['day_of_month'],
+            'time' => $request->schedule_time,
+            'timezone' => $request->schedule_timezone,
         ]);
 
         SystemSetting::set('llm_base_url', $request->llm_base_url, 'string');
@@ -150,7 +168,7 @@ class AdminCampaignController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage(),
+                'message' => 'Terjadi kesalahan sistem: '.$e->getMessage(),
                 'latency_ms' => 0,
             ]);
         }
