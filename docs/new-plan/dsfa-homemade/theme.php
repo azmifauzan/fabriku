@@ -46,7 +46,7 @@ $pages = [
         'Cheesecuit homemade di Bandung',
         'Cheesecuit adalah dessert lapisan biskuit dan krim keju yang biasa disajikan dingin. Di DSFA Homemade, cheesecuit kami buat sendiri di dapur rumah di Bandung.',
         'Cheesecuit untuk penutup makan dan suguhan',
-        'Cheesecuit pas sebagai penutup makan, teman minum teh sore, atau suguhan saat keluarga dan teman berkunjung. Pilihan rasa dan ukurannya tercantum di katalog menu.',
+        'Pilihan cup kecil tersedia dalam rasa Oreo, Matcha, dan Coklat. Untuk ukuran besar, pilih Coklat atau Oreo. Foto, harga, dan tombol pesan setiap varian ada di katalog berikut. Sebutkan jumlah cup atau wadah saat memesan; untuk ukuran dalam gram dan informasi bahan atau alergen, tanyakan kepada admin sebelum membeli.',
         'Cara pesan cheesecuit di Bandung', 'Halo DSFA Homemade, saya mau pesan cheesecuit.', 'cheesecuit DSFA',
         '<h3>Apakah DSFA Homemade cabang toko cheesecuit lain?</h3><p>Bukan. DSFA Homemade adalah usaha rumahan sendiri di Bandung, dan cheesecuit adalah salah satu menu dessert kami.</p>',
         'Ada. Kami juga menjual <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, <a href="/halaman/puding-buah-bandung">puding buah</a>, dan <a href="/halaman/jus-homemade-bandung">jus homemade</a>.',
@@ -66,7 +66,7 @@ $pages = [
         'Puding buah homemade di Bandung',
         'Puding buah DSFA Homemade adalah puding lembut dengan potongan buah, kami buat di dapur rumah di Bandung dan disajikan dingin.',
         'Puding buah untuk keluarga dan tamu',
-        'Puding buah cocok untuk hidangan penutup di rumah, camilan anak, atau suguhan saat ada tamu. Pilihan buah dan ukurannya tercantum di katalog menu. Untuk perayaan, Puding Buah Coklat Besar dibuat lewat open order dengan estimasi pengerjaan 3 hari; untuk puding bertema ulang tahun, lihat <a href="/halaman/puding-ulang-tahun-bandung">puding ulang tahun Bandung</a>.',
+        'Pilih Puding Buah Coklat dengan kemasan puding berkapasitas 150 ml atau Puding Buah Coklat Besar dengan hiasan stroberi dan anggur serta kemasan berpita. Foto dan harga masing-masing ada di katalog berikut. Versi besar dibuat melalui open order dengan estimasi pengerjaan 3 hari. Untuk perayaan dengan topper, lihat <a href="/halaman/puding-ulang-tahun-bandung">puding ulang tahun Bandung</a>. Tanyakan ukuran, jumlah porsi, bahan, dan alergen kepada admin sebelum memesan.',
         'Cara pesan puding buah di Bandung', 'Halo DSFA Homemade, saya mau pesan puding buah.', 'puding buah DSFA',
         '<h3>Apakah pudingnya buatan rumahan?</h3><p>Ya. Kami memasak dan mencetak puding buah sendiri di dapur DSFA Homemade di Bandung.</p>',
         'Ada. Kami juga menjual <a href="/halaman/cheesecuit-bandung">cheesecuit</a>, <a href="/halaman/jual-takoyaki-bandung">takoyaki</a>, dan <a href="/halaman/jus-homemade-bandung">jus homemade</a>.',
@@ -160,9 +160,10 @@ HTML,
     <h1>Puding ulang tahun di Bandung</h1>
     <p class="dsfa-intro">DSFA Homemade membuat puding ulang tahun di dapur rumah kami di Bandung. Puding dibuat setelah pesanan masuk (open order) dengan estimasi pengerjaan 3 hari.</p>
     <div class="dsfa-actions"><a class="dsfa-button dsfa-button-primary" href="{$waLink('Halo DSFA Homemade, saya mau pesan puding ulang tahun.')}" rel="noopener" target="_blank">Pesan via WhatsApp</a><a class="dsfa-button" href="/#menu">Lihat harga di katalog</a></div>
-    <section class="dsfa-page-section"><h2>Puding untuk perayaan ulang tahun</h2><p>Puding ulang tahun cocok sebagai pengganti kue untuk perayaan keluarga atau acara anak. Foto, harga, dan tombol pesan ada di pilihan katalog di bawah ini.</p></section>
+    <section class="dsfa-page-section"><h2>Pilih puding untuk perayaan</h2><p>Puding Ulang Tahun memakai hiasan topper. Pilihan lainnya adalah Puding Buah Coklat Besar dengan hiasan stroberi dan anggur serta kemasan berpita. Kedua produk dibuat melalui open order dengan estimasi pengerjaan 3 hari. Bandingkan foto dan harga di katalog berikut, lalu tanyakan ukuran, jumlah porsi, bahan, alergen, dan pilihan hiasan kepada admin sebelum memesan.</p></section>
     {$catalog('puding-ulang-tahun,puding-buah-coklat-besar')}
     <section class="dsfa-page-section"><h2>Cara pesan puding ulang tahun di Bandung</h2><ol><li>Pilih puding di katalog di atas atau tanyakan lewat WhatsApp.</li><li>Tentukan tanggal acara dan alamat tujuan. Pesan minimal 3 hari sebelum tanggal yang Anda butuhkan.</li><li>Admin kami mengonfirmasi pesanan dan pembayaran lewat WhatsApp.</li></ol></section>
+    <section class="dsfa-page-section"><h2>Jadwal pembuatan dan pengiriman</h2><p>Estimasi pengerjaan 3 hari adalah waktu membuat pesanan. Waktu antar maksimal 1 jam dalam kondisi lalu lintas normal dihitung terpisah. Sampaikan tanggal dan jam acara, jumlah puding, serta kecamatan tujuan saat menghubungi admin. Periksa <a href="/halaman/area-pengiriman">area pengiriman</a> dan <a href="/halaman/cara-pesan">cara pesan DSFA Homemade</a> sebelum mengonfirmasi pesanan.</p></section>
     <section class="dsfa-page-section dsfa-faq"><h2>Pertanyaan tentang puding ulang tahun DSFA</h2>
         <h3>Kenapa harus pesan dulu?</h3><p>Puding ulang tahun kami dibuat setelah pesanan masuk (open order), bukan stok siap ambil. Estimasi pengerjaannya 3 hari.</p>
         <h3>Bisa diantar ke mana?</h3><p>{$deliveryAnswer}</p>
@@ -184,7 +185,12 @@ return [
 </header>
 <footer data-fb-shell="footer" class="dsfa-footer">
     <div class="dsfa-wrap dsfa-footer-grid">
-        <div class="dsfa-footer-brand"><p class="dsfa-footer-name">DSFA Homemade</p><p>Cheesecuit, takoyaki, puding buah, dan jus homemade dari dapur rumah kami di Bandung.</p><p class="dsfa-footer-wa"><a href="{$waAdmin1}" rel="noopener" target="_blank">WhatsApp 0852-2015-0587</a><a href="{$waAdmin2}" rel="noopener" target="_blank">WhatsApp 0812-6782-2754</a></p></div>
+        <div class="dsfa-footer-brand"><p class="dsfa-footer-name">DSFA Homemade</p><p>Cheesecuit, takoyaki, puding buah, dan jus homemade dari dapur rumah kami di Bandung.</p><p class="dsfa-footer-wa"><a href="{$waAdmin1}" rel="noopener" target="_blank">WhatsApp 0852-2015-0587</a><a href="{$waAdmin2}" rel="noopener" target="_blank">WhatsApp 0812-6782-2754</a></p>
+            <nav class="dsfa-footer-social" aria-label="Media sosial DSFA Homemade">
+                <a href="https://www.instagram.com/dsfa.homemade/" target="_blank" rel="me noopener noreferrer"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"></circle></svg><span>Instagram</span></a>
+                <a href="https://www.threads.com/@dsfa.homemade" target="_blank" rel="me noopener noreferrer"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.263 11.097c-.03-3.486-1.92-5.586-5.111-5.586-2.13 0-3.922.963-4.863 2.499l2.062 1.438c.535-.843 1.272-1.543 2.628-1.543 1.528 0 2.318.85 2.544 2.431a15 15 0 0 0-2.236-.173c-4.125 0-6.068 1.867-6.068 4.336s1.943 3.99 4.804 3.99c3.139 0 5.013-2.115 5.781-4.735.798.361 1.348 1.204 1.348 2.47 0 3.387-3.907 5.232-7.22 5.232-4.885 0-8.077-3.207-8.077-8.424 0-6.392 4.223-10.487 9.9-10.487 3.808 0 5.69 1.671 6.97 3.914l2.108-1.475C21.44 2.078 18.331 0 13.663 0 6.227 0 1.168 5.277 1.168 12.934c0 7 4.953 11.066 10.856 11.066 4.878 0 9.809-2.846 9.809-7.716 0-2.545-1.46-4.231-3.569-5.187m-6.33 4.855c-1.077 0-2.026-.512-2.026-1.453 0-1.483 1.822-1.934 3.606-1.934.678 0 1.34.045 1.927.173-.422 1.927-1.671 3.215-3.508 3.214Z"></path></svg><span>Threads</span></a>
+            </nav>
+        </div>
         <nav class="dsfa-footer-col"><p class="dsfa-footer-title">Menu</p><ul><li><a href="/halaman/cheesecuit-bandung">Cheesecuit Bandung</a></li><li><a href="/halaman/jual-takoyaki-bandung">Takoyaki Bandung</a></li><li><a href="/halaman/puding-buah-bandung">Puding buah Bandung</a></li><li><a href="/halaman/puding-ulang-tahun-bandung">Puding ulang tahun Bandung</a></li><li><a href="/halaman/jus-homemade-bandung">Jus homemade Bandung</a></li></ul></nav>
         <nav class="dsfa-footer-col"><p class="dsfa-footer-title">Informasi</p><ul><li><a href="/halaman/cara-pesan">Cara pesan</a></li><li><a href="/halaman/area-pengiriman">Area pengiriman</a></li><li><a href="/#menu">Katalog dan harga</a></li><li><a href="/halaman/dessert-takoyaki-bojongsoang">Dessert Bojongsoang</a></li><li><a href="/privasi">Privasi</a></li></ul></nav>
     </div>

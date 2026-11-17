@@ -87,7 +87,7 @@ HTML;
             ->assertSee('name="description" content="Informasi pemesanan kue rumahan."', false)
             ->assertSee('Pesan di sini')
             ->assertSee('/halaman/kebijakan-pemesanan')
-            ->assertDontSee('<script', false)
+            ->assertDontSee('<script nonce=', false)
             ->assertDontSee('<form', false)
             ->assertDontSee('alert(1)', false);
 

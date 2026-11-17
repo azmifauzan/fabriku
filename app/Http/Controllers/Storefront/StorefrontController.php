@@ -15,6 +15,7 @@ use App\Services\Storefront\ThemeRenderer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class StorefrontController extends Controller
@@ -119,6 +120,7 @@ class StorefrontController extends Controller
             'page_content' => $pageContent,
             'products' => $products,
             'title' => "Semua Produk - {$siteName}",
+            'seo_description' => "Katalog {$siteName}: lihat pilihan produk, harga, dan ketersediaan. Pilih produk lalu hubungi toko atau kirim permintaan pesanan.",
         ]);
 
         return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
@@ -134,10 +136,17 @@ class StorefrontController extends Controller
 
         $product = Storefront::for($tenant)->products()->where('slug', $slug)->firstOrFail();
         $siteName = $site->profile['name'] ?? $tenant->name ?? 'Toko';
+        $relatedPages = $site->contentPages()->where('is_published', true)->get(['slug', 'title', 'html'])
+            ->filter(function (SiteContentPage $page) use ($product): bool {
+                preg_match_all('/data-fb-products="([a-z0-9,-]+)"/i', $page->html, $matches);
+
+                return collect($matches[1])->contains(fn (string $slugs) => in_array($product->slug, explode(',', $slugs), true));
+            });
 
         $pageContent = view('storefront.pages.product-detail', [
             'product' => $product,
             'site' => $site,
+            'relatedPages' => $relatedPages,
         ])->render();
 
         $html = $renderer->render($site, $site->activeThemeVersion, [
@@ -145,6 +154,7 @@ class StorefrontController extends Controller
             'page_content' => $pageContent,
             'product' => $product,
             'title' => "{$product->title} - {$siteName}",
+            'seo_description' => Str::limit(trim(preg_replace('/\s+/u', ' ', strip_tags($product->description ?: "{$product->title} dari {$siteName}."))), 155),
         ]);
 
         return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
@@ -286,6 +296,7 @@ class StorefrontController extends Controller
             'page' => 'privacy',
             'page_content' => view('storefront.pages.privacy', ['site' => $site])->render(),
             'title' => 'Privasi - '.($site->profile['name'] ?? 'Website Usaha'),
+            'seo_description' => 'Informasi privasi pengunjung '.($site->profile['name'] ?? 'website usaha').': data pemesanan, statistik kunjungan, dan cara menghubungi pengelola.',
         ]);
 
         return response($html)->header('Content-Type', 'text/html; charset=UTF-8');

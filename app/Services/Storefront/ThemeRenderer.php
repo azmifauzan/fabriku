@@ -82,7 +82,10 @@ class ThemeRenderer
         $faviconUrl = e($logoUrl ?: '/favicon.ico');
         $touchIconUrl = e($logoUrl ?: '/apple-touch-icon.png');
         $analytics = $site->googleAnalyticsMeasurementId() && request()->attributes->get('storefront_analytics_nonce')
-            ? View::make('storefront.analytics', ['site' => $site])->render()
+            ? View::make('storefront.analytics', ['site' => $site, 'product' => $context['product'] ?? null])->render()
+            : '';
+        $structuredData = request()->attributes->get('storefront_site')?->id === $site->id && ! in_array($page, ['cart', 'report'], true)
+            ? View::make('storefront.structured-data', ['site' => $site, 'context' => $context, 'canonical' => html_entity_decode($canonical, ENT_QUOTES, 'UTF-8')])->render()
             : '';
 
         return <<<HTML
@@ -101,6 +104,7 @@ class ThemeRenderer
     <meta property="og:site_name" content="{$siteName}">
     <meta property="og:locale" content="id_ID">
     {$ogImageTags}
+    {$structuredData}
     <meta name="twitter:card" content="{$twitterCard}">
     <link rel="canonical" href="{$canonical}">
     <link rel="icon" href="{$faviconUrl}">
@@ -122,12 +126,15 @@ HTML;
     }
 
     /**
-     * Picks the social-preview image: the product/service on a detail page, else the
-     * site logo, else the first catalog image, so a shared link always gets a thumbnail
-     * when the tenant has any image at all.
+     * Prefer the site's social banner, then the product/service, logo or catalog image.
      */
     protected function resolveOgImage(BusinessSite $site, array $context): ?string
     {
+        $banner = $site->seo['og_image_url'] ?? null;
+        if (is_string($banner) && filter_var($banner, FILTER_VALIDATE_URL) && in_array(parse_url($banner, PHP_URL_SCHEME), ['http', 'https'], true)) {
+            return $banner;
+        }
+
         $image = ($context['product'] ?? null)?->getImageUrl()
             ?? ($context['service'] ?? null)?->getImageUrl()
             ?? $site->profile['logo_url']

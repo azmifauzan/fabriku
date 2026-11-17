@@ -98,7 +98,7 @@ class DsfaHomemadeThemeTest extends TestCase
         $documents = [];
         foreach (['/', '/produk', '/keranjang', '/privasi', '/lapor', ...array_map(fn ($page) => '/halaman/'.$page['slug'], $this->payload['theme']['satsetui_pages'])] as $path) {
             $response = $this->get('https://dsfahomemade.com'.$path)->assertOk()
-                ->assertDontSee('href="#"', false)->assertDontSee('<script', false);
+                ->assertDontSee('href="#"', false)->assertDontSee('<script nonce=', false);
             $documents[$path] = $response->getContent();
         }
         foreach ($this->payload['theme']['satsetui_pages'] as $page) {
@@ -114,7 +114,7 @@ class DsfaHomemadeThemeTest extends TestCase
             foreach ($this->dom($html)->query('//a/@href') as $href) {
                 $url = parse_url($href->nodeValue);
                 if (isset($url['host'])) {
-                    $this->assertContains($url['host'], ['fabriku.id', 'wa.me'], $path.': '.$href->nodeValue);
+                    $this->assertContains($url['host'], ['fabriku.id', 'wa.me', 'www.instagram.com', 'www.threads.com'], $path.': '.$href->nodeValue);
                     if ($url['host'] === 'wa.me') {
                         $this->assertContains($url['path'], ['/6285220150587', '/6281267822754'], $href->nodeValue);
                         $this->assertStringStartsWith('text=Halo%20DSFA%20Homemade', $url['query']);
@@ -132,6 +132,15 @@ class DsfaHomemadeThemeTest extends TestCase
         foreach (['/', '/halaman/cara-pesan'] as $path) {
             $this->assertStringContainsString('0852-2015-0587', $documents[$path]);
             $this->assertStringContainsString('0812-6782-2754', $documents[$path]);
+        }
+        foreach ($documents as $html) {
+            foreach (['https://www.instagram.com/dsfa.homemade/', 'https://www.threads.com/@dsfa.homemade'] as $socialUrl) {
+                $links = $this->dom($html)->query('//footer//nav[@aria-label="Media sosial DSFA Homemade"]/a[@href="'.$socialUrl.'"]');
+                $this->assertSame(1, $links->length);
+                $this->assertSame(1, $this->dom($html)->query('//footer//a[@href="'.$socialUrl.'"]/svg[@aria-hidden="true"]')->length);
+                $this->assertSame('_blank', $links->item(0)->getAttribute('target'));
+                $this->assertStringContainsString('noopener', $links->item(0)->getAttribute('rel'));
+            }
         }
         $this->assertStringContainsString('maksimal 1 jam', $documents['/halaman/area-pengiriman']);
         foreach (['Bandung Kidul', 'Cimahi Tengah', 'Jatinangor', 'Rancaekek'] as $area) {
@@ -189,7 +198,7 @@ class DsfaHomemadeThemeTest extends TestCase
         $this->assertStringContainsString('@keyframes dsfa-slide', $css);
         $this->assertStringContainsString('prefers-reduced-motion', $css);
         $this->assertStringContainsString('animation-delay: 20s', $css); // sixth slide of a 24s loop
-        $this->assertStringNotContainsString('<script', $home->getContent());
+        $this->assertSame(0, $document->query('//script[not(@type="application/ld+json")]')->length);
     }
 
     private function dom(string $html): DOMXPath

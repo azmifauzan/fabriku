@@ -4,6 +4,7 @@ use App\Models\AdminUser;
 use App\Models\BlogPost;
 use App\Models\BusinessSite;
 use App\Models\InventoryItem;
+use App\Models\SiteContentPage;
 use App\Models\SiteProduct;
 use App\Models\Tenant;
 use Database\Seeders\BlogSeeder;
@@ -123,3 +124,41 @@ it('falls back to a text card when a storefront has no image at all', function (
         ->assertDontSee('og:image', false)
         ->assertSee('<meta name="twitter:card" content="summary">', false);
 });
+
+it('uses a site social banner across storefront pages without changing product schema images', function () {
+    $banner = 'https://cdn.example.com/brand-banner.jpg';
+    $site = BusinessSite::factory()->create([
+        'slug' => 'banner-shop', 'status' => 'published', 'mode' => 'produk',
+        'profile' => ['name' => 'Banner Shop', 'logo_url' => 'https://cdn.example.com/logo.png'],
+        'seo' => ['og_image_url' => $banner],
+    ]);
+    SiteProduct::factory()->create([
+        'tenant_id' => $site->tenant_id, 'slug' => 'oreo',
+        'image_path' => 'https://cdn.example.com/oreo.jpg',
+    ]);
+    SiteContentPage::create([
+        'tenant_id' => $site->tenant_id, 'business_site_id' => $site->id,
+        'slug' => 'cara-pesan', 'title' => 'Cara Pesan', 'html' => '<h1>Cara Pesan</h1>',
+        'is_published' => true,
+    ]);
+
+    foreach (['/', '/produk', '/produk/oreo', '/halaman/cara-pesan', '/privasi', '/keranjang', '/lapor'] as $path) {
+        $this->get('https://banner-shop.fabriku.biz.id'.$path)->assertOk()
+            ->assertSee('<meta property="og:image" content="'.$banner.'">', false)
+            ->assertSee('<meta name="twitter:image" content="'.$banner.'">', false)
+            ->assertSee('<meta name="twitter:card" content="summary_large_image">', false);
+    }
+    $this->get('https://banner-shop.fabriku.biz.id/produk/oreo')
+        ->assertSee('https:\/\/cdn.example.com\/oreo.jpg', false);
+});
+
+it('ignores invalid social banners and retains the existing image fallback', function ($banner) {
+    BusinessSite::factory()->create([
+        'slug' => 'invalid-banner', 'status' => 'published',
+        'profile' => ['logo_url' => 'https://cdn.example.com/logo.png'],
+        'seo' => ['og_image_url' => $banner],
+    ]);
+
+    $this->get('https://invalid-banner.fabriku.biz.id/')->assertOk()
+        ->assertSee('<meta property="og:image" content="https://cdn.example.com/logo.png">', false);
+})->with([null, '', '/relative.jpg', 'data:image/png;base64,abc', 'javascript:alert(1)', 'ftp://example.com/image.jpg', 'https://', ['invalid']]);

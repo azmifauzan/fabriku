@@ -398,7 +398,7 @@ class WebsiteController extends Controller
         $site ??= new BusinessSite(['tenant_id' => $tenant->id, 'status' => 'draft']);
         $modeChanged = $site->exists && $site->mode !== $data['mode'];
         $site->fill(['slug' => strtolower($data['slug']), 'mode' => $data['mode'], 'profile' => $profile,
-            'seo' => ['title' => $data['seo_title'] ?? null, 'description' => $data['seo_description'] ?? null],
+            'seo' => array_merge($site->seo ?? [], ['title' => $data['seo_title'] ?? null, 'description' => $data['seo_description'] ?? null]),
         ]);
         if ($modeChanged) {
             $site->active_theme_version_id = null;

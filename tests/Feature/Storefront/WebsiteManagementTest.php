@@ -145,6 +145,28 @@ class WebsiteManagementTest extends TestCase
         $this->assertSame(1, $site->fresh()->themeVersions()->count());
     }
 
+    public function test_saving_website_settings_preserves_the_social_banner(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $manager = User::factory()->forTenant($tenant->id)->manager()->create();
+        $site = BusinessSite::factory()->create([
+            'tenant_id' => $tenant->id, 'slug' => 'banner-settings', 'mode' => 'produk',
+            'seo' => ['og_image_url' => 'https://cdn.example.test/banner.jpg', 'title' => 'Old title'],
+        ]);
+
+        $this->actingAs($manager)->post('/website', [
+            'slug' => $site->slug, 'mode' => 'produk', 'name' => 'Banner Shop',
+            'seo_title' => 'New title', 'seo_description' => 'New description',
+            'og_image_url' => 'https://untrusted.example.test/banner.jpg',
+            'seo' => ['og_image_url' => 'https://untrusted.example.test/banner.jpg'],
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->assertSame([
+            'og_image_url' => 'https://cdn.example.test/banner.jpg',
+            'title' => 'New title', 'description' => 'New description',
+        ], $site->fresh()->seo);
+    }
+
     public function test_manager_can_launch_satsetui_and_import_a_sanitized_template(): void
     {
         $tenant = Tenant::factory()->create();

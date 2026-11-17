@@ -65,6 +65,17 @@
                 </div>
             @endif
 
+            @if($relatedPages->isNotEmpty())
+                <nav aria-label="Menu terkait" class="mb-6 text-sm">
+                    <h2 class="font-semibold mb-2">Menu terkait</h2>
+                    <ul class="flex flex-wrap gap-x-4 gap-y-2">
+                        @foreach($relatedPages as $page)
+                            <li><a class="underline text-[var(--fb-primary)]" href="/halaman/{{ $page->slug }}">{{ $page->title }}</a></li>
+                        @endforeach
+                    </ul>
+                </nav>
+            @endif
+
             <div class="storefront-purchase-actions mt-auto pt-6 border-t border-slate-100 flex flex-col gap-3">
                 @if($status !== 'Habis' && $price > 0 && $site->canAcceptOrders())
                     <form method="POST" action="/keranjang" class="flex-1 flex gap-2">

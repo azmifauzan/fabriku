@@ -37,8 +37,19 @@ class CartController extends Controller
         if (count($cart) >= 20 && ! isset($cart[$product->id])) {
             throw ValidationException::withMessages(['product_id' => 'Keranjang maksimal 20 produk.']);
         }
-        $cart[$product->id] = min(50, ($cart[$product->id] ?? 0) + $data['quantity']);
+        $before = $cart[$product->id] ?? 0;
+        $cart[$product->id] = min(50, $before + $data['quantity']);
         $request->session()->put($key, $cart);
+        $added = $cart[$product->id] - $before;
+        if ($site->googleAnalyticsMeasurementId() && $added > 0) {
+            $price = $product->getStartingPrice();
+            $request->session()->flash('storefront_analytics.'.$site->id, [
+                'name' => 'add_to_cart',
+                'params' => ['currency' => 'IDR', 'value' => $price * $added, 'items' => [
+                    ['item_id' => (string) $product->id, 'item_name' => $product->title, 'price' => $price, 'quantity' => $added],
+                ]],
+            ]);
+        }
 
         return redirect('/keranjang')->with('success', 'Produk ditambahkan ke keranjang.');
     }
@@ -175,6 +186,12 @@ class CartController extends Controller
         $request->session()->forget($this->sessionKey($tenant->id));
         if ($created) {
             NotifyStorefrontRequest::dispatch($site->id, 'order', $order->id)->afterCommit();
+            if ($site->googleAnalyticsMeasurementId()) {
+                $request->session()->flash('storefront_analytics.'.$site->id, [
+                    'name' => 'order_request',
+                    'params' => ['currency' => 'IDR', 'value' => (float) $order->total_amount],
+                ]);
+            }
         }
 
         return redirect('/keranjang')->with('success', 'Pesanan '.$order->order_number.' diterima. Tim toko akan menghubungi Anda untuk konfirmasi dan pembayaran.');
