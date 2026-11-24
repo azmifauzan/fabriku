@@ -1593,8 +1593,8 @@ MD,
                 'tags' => ['Stok Musiman', 'Retail', 'UMKM'],
                 'days_ago' => 4,
                 'excerpt' => 'Permintaan saat Ramadan dan Lebaran bisa naik berkali lipat, tapi supplier juga sibuk dan harga bahan naik. Ini cara memperkirakan dan menyiapkan stok musiman UMKM dari data tahun lalu.',
-                'meta_title' => 'Cara Menyiapkan Stok UMKM Menjelang Ramadan & Lebaran',
-                'meta_description' => 'Cara menyiapkan stok UMKM menjelang Ramadan dan Lebaran: data penjualan tahun lalu, hitung kebutuhan, jadwal belanja bahan, dan sisa stok.',
+                'meta_title' => 'Cara Siapkan Stok UMKM Menjelang Ramadan (+ Jadwal)',
+                'meta_description' => 'Panduan praktis menyiapkan stok UMKM menjelang Ramadan dan Lebaran: hitung lonjakan dari data tahun lalu, jadwal belanja bahan 6 minggu, dan kelola sisa stok.',
                 'content' => <<<'MD'
 Bagi banyak UMKM, Ramadan dan Lebaran adalah musim penjualan terbesar dalam setahun. Konveksi kebanjiran pesanan baju muslim, usaha kue menerima pesanan hampers dan kue kering, toko kelontong menjual sirup dan biskuit kaleng berlipat-lipat. Masalahnya, persiapan sering dilakukan terlambat: bahan baku dibeli saat harga sudah naik, supplier kehabisan stok, dan produksi kejar tayang di minggu terakhir.
 
@@ -1682,8 +1682,8 @@ MD,
                 'tags' => ['Multi Cabang', 'Retail', 'UMKM'],
                 'days_ago' => 5,
                 'excerpt' => 'Membuka cabang kedua sering membuat stok kacau: cabang A kehabisan barang yang menumpuk di cabang B. Ini cara mengelola stok banyak outlet UMKM dari satu pusat data.',
-                'meta_title' => 'Cara Kelola Stok Banyak Cabang/Outlet UMKM',
-                'meta_description' => 'Cara kelola stok banyak cabang atau outlet UMKM: satu sumber data, kode barang seragam, transfer antar cabang, stok minimum, dan opname bergilir.',
+                'meta_title' => 'Cara Kelola Stok Banyak Cabang UMKM tanpa Selisih',
+                'meta_description' => 'Cara mengelola stok banyak cabang atau outlet UMKM agar tidak selisih: satu kode SKU seragam, aturan transfer antar cabang, stok minimum, dan opname bergilir.',
                 'content' => <<<'MD'
 Membuka cabang kedua adalah tanda usaha tumbuh. Tapi bagi banyak UMKM, cabang kedua juga awal kekacauan stok. Setiap cabang punya buku catatan sendiri, pemilik harus menelepon satu per satu untuk tahu stok, dan barang yang habis di satu cabang ternyata menumpuk di cabang lain. Semakin banyak cabang, semakin besar modal yang tertahan di barang yang tidak bergerak.
 
