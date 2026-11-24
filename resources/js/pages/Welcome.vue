@@ -24,7 +24,7 @@ const props = withDefaults(
 );
 
 const description =
-    'Kelola produksi, stok, dan penjualan di Fabriku. Buat website usaha untuk menampilkan produk atau layanan, menerima pesanan, dan mengelola permintaan pelanggan.';
+    'Aplikasi stok, produksi, kasir cepat, dan website usaha untuk UMKM Indonesia. Uji coba gratis 30 hari tanpa kartu kredit, paket mulai Rp25.000/bulan.';
 
 const jsonLd = computed(() => {
     const origin = props.canonical ?? 'https://fabriku.id';
@@ -72,10 +72,48 @@ const formatCurrency = (value: number) =>
 const includedFeatures = [
     'Bahan baku dan inventaris',
     'Produksi internal dan outsourcing',
-    'Penjualan dan sales order',
+    'Kasir cepat, sales order, dan cetak invoice',
     'Website usaha dan katalog produk',
     'Pesanan produk dan permintaan jasa',
     'Export laporan Excel dan PDF',
+];
+
+const businessWorkflows = [
+    {
+        slug: 'konveksi',
+        label: 'Garment & Konveksi',
+        summary: 'Catat stok kain, pola potong, produksi internal atau maklun, dan stok barang jadi per ukuran.',
+    },
+    {
+        slug: 'usaha-makanan-kue',
+        label: 'Makanan & Kue',
+        summary: 'Pantau tanggal kadaluarsa bahan dan produk jadi dengan urutan pemakaian FIFO serta pesanan custom.',
+    },
+    {
+        slug: 'kerajinan-handmade',
+        label: 'Kerajinan & Handmade',
+        summary: 'Catat bahan tidak standar, biaya per produk, dan detail pesanan custom dalam satu daftar.',
+    },
+    {
+        slug: 'kosmetik-skincare',
+        label: 'Kosmetik & Skincare',
+        summary: 'Simpan nomor batch, nomor BPOM, tanggal kadaluarsa per varian, dan pisahkan penjualan reseller.',
+    },
+    {
+        slug: 'toko-retail',
+        label: 'Toko / Retail',
+        summary: 'Fokus pada pembelian supplier, stok per rak dengan QR code, kasir cepat, dan rekap penjualan.',
+    },
+    {
+        slug: 'produksi-rumahan',
+        label: 'Produksi Rumahan',
+        summary: 'Alur produksi ringkas dalam satu form untuk mencatat bahan terpakai dan hasil jadi tanpa menu pabrik.',
+    },
+    {
+        slug: 'bengkel-jasa-servis',
+        label: 'Bengkel & Jasa Servis',
+        summary: 'Katalog layanan, pencatatan teknisi, dan pengurangan sparepart atau bahan habis pakai otomatis.',
+    },
 ];
 </script>
 
@@ -218,11 +256,48 @@ const includedFeatures = [
                         </article>
                         <article class="grid gap-2 border-b border-slate-300 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
                             <h3 class="font-bold text-[#163761]">Penjualan</h3>
-                            <p class="leading-7 text-slate-700">Kelola sales order dan tindak lanjut pesanan dari website.</p>
+                            <p class="leading-7 text-slate-700">
+                                Catat transaksi lewat kasir cepat, kelola sales order, cetak invoice atau surat jalan, dan tindak lanjuti pesanan dari
+                                website.
+                            </p>
                         </article>
                         <article class="grid gap-2 border-b border-slate-300 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
                             <h3 class="font-bold text-[#163761]">Laporan</h3>
                             <p class="leading-7 text-slate-700">Baca ringkasan usaha dan unduh laporan Excel atau PDF.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="jenis-usaha" class="scroll-mt-6 border-b border-slate-200 bg-[#eef2f7]">
+                <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20 lg:px-10">
+                    <div class="max-w-2xl">
+                        <p class="text-sm font-bold text-indigo-800">Sesuai jenis usaha Anda</p>
+                        <h2 class="mt-3 text-3xl leading-tight font-black tracking-[-0.04em] text-[#163761] sm:text-4xl">
+                            Menu menyesuaikan alur kerja usaha, bukan sebaliknya.
+                        </h2>
+                        <p class="mt-4 leading-7 text-slate-700">
+                            Setiap kategori bisnis memakai modul yang relevan. Toko retail menyembunyikan menu produksi, sementara usaha makanan dan
+                            kosmetik mewajibkan pencatatan batch serta tanggal kadaluarsa.
+                        </p>
+                    </div>
+
+                    <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <article
+                            v-for="workflow in businessWorkflows"
+                            :key="workflow.slug"
+                            class="flex flex-col justify-between rounded-lg border border-slate-300 bg-white p-5"
+                        >
+                            <div>
+                                <h3 class="text-lg font-bold text-[#163761]">{{ workflow.label }}</h3>
+                                <p class="mt-2 text-sm leading-6 text-slate-700">{{ workflow.summary }}</p>
+                            </div>
+                            <Link
+                                :href="`/aplikasi/${workflow.slug}`"
+                                class="mt-4 inline-flex min-h-11 w-fit items-center text-sm font-bold text-indigo-800 underline decoration-indigo-300 underline-offset-4 hover:text-indigo-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
+                            >
+                                Lihat alur {{ workflow.label }}
+                            </Link>
                         </article>
                     </div>
                 </div>

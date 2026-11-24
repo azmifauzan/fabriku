@@ -104,7 +104,7 @@ defineProps<{ canonical: string }>();
             <h2>11. Kontak</h2>
             <p>
                 Pertanyaan seputar Syarat & Ketentuan ini dapat disampaikan ke
-                <a href="mailto:hello@fabriku.id">hello@fabriku.id</a>.
+                <span class="font-semibold text-[#163761]">hello<span>&#64;</span>fabriku.id</span>.
             </p>
         </section>
     </LegalLayout>

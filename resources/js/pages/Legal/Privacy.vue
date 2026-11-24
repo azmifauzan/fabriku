@@ -131,7 +131,7 @@ defineProps<{ canonical: string }>();
             <h2>10. Kontak</h2>
             <p>
                 Pertanyaan seputar privasi dan data Anda dapat disampaikan ke
-                <a href="mailto:hello@fabriku.id">hello@fabriku.id</a>.
+                <span class="font-semibold text-[#163761]">hello<span>&#64;</span>fabriku.id</span>.
             </p>
         </section>
     </LegalLayout>

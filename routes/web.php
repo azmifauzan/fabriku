@@ -79,6 +79,10 @@ Route::get('/syarat-ketentuan', fn () => Inertia::render('Legal/Terms', ['canoni
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+// Permanent 301 redirects for merged competing blog posts (keep at least 1 year; added 2026-11-24)
+Route::permanentRedirect('/blog/kapan-usaha-rumahan-butuh-sistem-pencatatan', '/blog/aplikasi-pencatatan-umkm-vs-excel-kapan-pindah');
+Route::permanentRedirect('/blog/aplikasi-pencatatan-produksi-usaha-kecil-menengah', '/blog/aplikasi-pencatatan-umkm-vs-excel-kapan-pindah');
+Route::permanentRedirect('/blog/cara-mencatat-produksi-harian-umkm-kuliner-rumahan', '/blog/cara-mencatat-produksi-banyak-produk-satu-dapur-rumahan');
 Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/blog/{post:slug}/og-image', [BlogController::class, 'ogImage'])->name('blog.og-image');
 Route::get('/aplikasi/{slug}', [LandingPageController::class, 'show'])->name('landing.category');

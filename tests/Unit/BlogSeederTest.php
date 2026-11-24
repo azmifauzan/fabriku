@@ -9,11 +9,11 @@ beforeEach(function () {
     AdminUser::factory()->create(['email' => 'admin@fabriku.id']);
 });
 
-it('seeds 32 published blog posts across 4 categories with tags', function () {
+it('seeds 29 published blog posts across 4 categories with tags', function () {
     $this->seed(BlogSeeder::class);
 
-    expect(BlogPost::count())->toBe(32);
-    expect(BlogPost::where('status', 'published')->count())->toBe(32);
+    expect(BlogPost::count())->toBe(29);
+    expect(BlogPost::where('status', 'published')->count())->toBe(29);
     expect(BlogPost::whereNull('published_at')->count())->toBe(0);
     expect(BlogCategory::count())->toBe(4);
 
@@ -31,6 +31,6 @@ it('is idempotent and syncs updated content when seeded twice', function () {
     $this->seed(BlogSeeder::class);
     $this->seed(BlogSeeder::class);
 
-    expect(BlogPost::count())->toBe(32);
+    expect(BlogPost::count())->toBe(29);
     expect(BlogCategory::count())->toBe(4);
 });

@@ -38,7 +38,15 @@ const pageSuffix = computed(() => (props.posts.current_page > 1 ? ` - Halaman ${
     <PublicLayout>
         <div class="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
             <header class="border-b border-slate-300 pb-8">
-                <h1 class="max-w-2xl text-3xl leading-tight font-black tracking-[-0.04em] text-[#163761] sm:text-5xl">Blog</h1>
+                <h1 class="max-w-2xl text-3xl leading-tight font-black tracking-[-0.04em] text-[#163761] sm:text-5xl">Blog Fabriku</h1>
+                <p class="mt-4 max-w-3xl text-base leading-7 text-slate-700">
+                    Kumpulan panduan praktis operasional UMKM Indonesia: cara mencatat stok bahan baku, menyusun bill of material dan jadwal produksi,
+                    menghitung HPP serta harga jual per produk, membuat laporan penjualan harian di Excel, hingga membangun website toko online sendiri.
+                </p>
+                <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                    Setiap artikel ditulis untuk pemilik konveksi, usaha makanan dan kue, kerajinan handmade, kosmetik, toko retail, produksi rumahan,
+                    serta bengkel dan jasa servis yang ingin merapikan catatan usaha sehari-hari.
+                </p>
             </header>
 
             <section v-if="groups.length" aria-labelledby="blog-by-business" class="mt-9">

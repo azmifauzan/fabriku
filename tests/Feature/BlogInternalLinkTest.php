@@ -26,7 +26,6 @@ it('publishes the next keyword batch', function () {
     $slugs = [
         'cara-stok-opname-toko-retail-tanpa-tutup-toko',
         'cara-mengelola-kontraktor-maklun-konveksi-agar-tidak-telat',
-        'kapan-usaha-rumahan-butuh-sistem-pencatatan',
         'aplikasi-pencatatan-umkm-vs-excel-kapan-pindah',
     ];
 
@@ -38,6 +37,32 @@ it('publishes the next keyword batch', function () {
         expect(str_word_count(strip_tags($post->content)))->toBeGreaterThan(500);
         expect($post->meta_description)->not->toBeNull();
         expect(strlen($post->meta_description))->toBeLessThanOrEqual(160);
+    }
+});
+
+it('redirects merged competing posts with 301 and excludes them from sitemap', function () {
+    $redirects = [
+        'kapan-usaha-rumahan-butuh-sistem-pencatatan' => '/blog/aplikasi-pencatatan-umkm-vs-excel-kapan-pindah',
+        'aplikasi-pencatatan-produksi-usaha-kecil-menengah' => '/blog/aplikasi-pencatatan-umkm-vs-excel-kapan-pindah',
+        'cara-mencatat-produksi-harian-umkm-kuliner-rumahan' => '/blog/cara-mencatat-produksi-banyak-produk-satu-dapur-rumahan',
+    ];
+
+    // Simulate pre-existing rows in production before re-seeding
+    foreach (array_keys($redirects) as $oldSlug) {
+        BlogPost::factory()->published()->create(['slug' => $oldSlug]);
+    }
+
+    $this->seed(BlogSeeder::class);
+
+    $sitemap = $this->get('/sitemap.xml')->assertOk()->getContent();
+
+    foreach ($redirects as $oldSlug => $targetPath) {
+        expect(BlogPost::where('slug', $oldSlug)->exists())->toBeFalse("retired post still exists: {$oldSlug}");
+        expect($sitemap)->not->toContain("/blog/{$oldSlug}");
+
+        $this->get("/blog/{$oldSlug}")
+            ->assertStatus(301)
+            ->assertRedirect($targetPath);
     }
 });
 

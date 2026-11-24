@@ -12,6 +12,18 @@ use Illuminate\Support\Str;
 class BlogSeeder extends Seeder
 {
     /**
+     * Retired slugs merged into stronger owner posts with 301 redirects in routes/web.php.
+     * Deleting them on re-seed ensures they leave the blog index and sitemap.xml on deploy.
+     *
+     * @var list<string>
+     */
+    private const RETIRED_SLUGS = [
+        'kapan-usaha-rumahan-butuh-sistem-pencatatan',
+        'aplikasi-pencatatan-produksi-usaha-kecil-menengah',
+        'cara-mencatat-produksi-harian-umkm-kuliner-rumahan',
+    ];
+
+    /**
      * Seeds/updates blog posts covering researched Indonesian long-tail keywords
      * around stok bahan baku, pencatatan produksi, laporan penjualan, HPP, dan
      * pengelolaan pesanan multi-channel. Keyed by slug/email, so re-running this
@@ -64,6 +76,8 @@ class BlogSeeder extends Seeder
 
             $post->tags()->sync($tagIds);
         }
+
+        BlogPost::whereIn('slug', self::RETIRED_SLUGS)->delete();
 
         $this->command->info('Blog seeded: '.count($posts).' posts across '.$categories->count().' categories.');
     }
@@ -180,114 +194,7 @@ Kelima kesalahan di atas punya akar masalah yang sama: stok tidak dicatat secara
 
 Fitur multi-rack di Fabriku memungkinkan setiap gulungan kain atau batch aksesoris dicatat sebagai item terpisah dengan lokasi rak masing-masing, jadi sisa stok per roll dan riwayat pemakaiannya tetap jelas meski dicek oleh siapa pun, kapan pun.
 
-Kelima kesalahan di atas berlaku juga untuk bahan baku UMKM di luar konveksi — pola dasarnya sama, lihat [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi). Kalau kesalahan kelima (data stok hanya ada di kepala satu orang) terasa familiar, itu biasanya tanda sudah waktunya lihat [kapan usaha butuh aplikasi pencatatan produksi](/blog/aplikasi-pencatatan-produksi-usaha-kecil-menengah), bukan cuma stoknya saja yang dibenahi.
-MD,
-            ],
-            [
-                'slug' => 'aplikasi-pencatatan-produksi-usaha-kecil-menengah',
-                'title' => 'Aplikasi Pencatatan Produksi Usaha Kecil Menengah: Kapan Harus Pindah dari Manual ke Digital?',
-                'category' => 'Produksi',
-                'tags' => ['Produksi', 'Aplikasi UMKM', 'Digitalisasi'],
-                'days_ago' => 7,
-                'excerpt' => 'Catatan produksi di buku atau grup WhatsApp cukup untuk skala kecil, tapi ada titik di mana cara ini mulai berisiko. Kenali tandanya dan apa yang harus ada di aplikasi pengganti.',
-                'meta_title' => 'Aplikasi Pencatatan Produksi Usaha Kecil Menengah',
-                'meta_description' => 'Kapan UMKM perlu aplikasi pencatatan produksi? Kenali tanda-tandanya dan fitur wajib yang harus ada di aplikasi pencatatan produksi usaha kecil menengah.',
-                'content' => <<<'MD'
-Banyak UMKM memulai pencatatan produksi dengan cara paling sederhana: buku tulis, spreadsheet, atau grup WhatsApp untuk koordinasi tim. Cara ini efektif di awal, tapi seiring bisnis berkembang, ada titik di mana cara manual justru menghambat.
-
-## Tanda-Tanda UMKM Sudah Butuh Aplikasi Pencatatan Produksi
-
-- **Skala order mulai naik** dan sulit dipantau satu per satu secara manual.
-- **Sering salah hitung kebutuhan bahan baku** karena perhitungan manual rawan human error.
-- **Tidak tahu progress produksi secara real-time** — pemilik harus tanya langsung ke lapangan setiap kali ingin tahu status pesanan.
-- **Sulit melacak siapa mengerjakan apa**, terutama saat ada beberapa tim atau kontraktor yang terlibat dalam satu alur produksi.
-
-Kalau satu atau lebih tanda di atas sudah terasa, itu sinyal cara pencatatan lama mulai jadi bottleneck, bukan lagi solusi.
-
-## Apa yang Harus Ada di Aplikasi Pencatatan Produksi UMKM
-
-Tidak semua aplikasi pencatatan cocok untuk kebutuhan produksi UMKM. Beberapa hal ini sebaiknya jadi standar minimal:
-
-1. **Tracking status per tahapan produksi** — dari bahan disiapkan, dikerjakan, sampai selesai dan siap jual, bukan cuma status "selesai/belum".
-2. **Otomatis memotong stok bahan baku** saat produksi berjalan, supaya stok bahan dan progress produksi selalu sinkron tanpa pencatatan ganda.
-3. **Riwayat siapa dan kapan** setiap tahapan dikerjakan, penting untuk melacak kalau ada masalah kualitas atau keterlambatan.
-4. **Terhubung langsung ke stok barang jadi**, sehingga begitu produksi selesai, stok yang siap dijual otomatis bertambah tanpa input manual dua kali.
-
-## Manual vs Digital: Perbandingan Singkat
-
-| Aspek | Manual (buku/WA) | Aplikasi Digital |
-|---|---|---|
-| Kecepatan cek status | Harus tanya langsung | Bisa dicek kapan saja |
-| Risiko human error | Tinggi, terutama hitung bahan | Lebih rendah, terhitung otomatis |
-| Ketergantungan satu orang | Tinggi | Rendah, data tersimpan terpusat |
-| Riwayat produksi | Sulit ditelusuri | Tercatat otomatis |
-
-Perbandingan ini bukan berarti cara manual selalu buruk — untuk usaha yang masih sangat kecil, manual masih masuk akal. Tapi begitu kompleksitas bertambah, biaya "tetap manual" biasanya lebih mahal daripada biaya pindah ke sistem digital.
-
-## Contoh Skenario: Berapa Waktu yang Hilang karena Pencatatan Manual
-
-Bayangkan sebuah UMKM konveksi dengan 3 kontraktor jahit yang mengerjakan pesanan berbeda-beda tiap minggu. Setiap kali pemilik ingin tahu progress, dia harus telepon atau chat satu per satu, menunggu balasan, lalu mencatat ulang di buku. Kalau proses ini butuh 10-15 menit per kontraktor dan dilakukan setiap hari, itu sudah 30-45 menit sehari hanya untuk mengumpulkan informasi yang seharusnya bisa dilihat sekali klik.
-
-Belum lagi risiko salah catat: progress yang disampaikan lewat chat gampang campur dengan obrolan lain, atau informasi jumlah bahan yang dipakai kontraktor tidak selalu dilaporkan akurat karena dihitung dari ingatan, bukan dicatat langsung saat produksi berjalan. Selisih kecil di setiap laporan, kalau diakumulasi selama sebulan, bisa membuat perhitungan stok bahan baku meleset cukup jauh dari kondisi nyata.
-
-Dengan aplikasi yang mencatat status produksi secara terpusat, waktu yang tadinya habis untuk "menagih laporan" bisa dipakai untuk hal lain yang lebih produktif — dan datanya pun lebih bisa diandalkan karena dicatat langsung di sumbernya, bukan diteruskan berlapis-lapis lewat obrolan.
-
-Modul produksi Fabriku dirancang khusus untuk alur ini: setiap tahapan produksi tercatat, stok bahan baku terpotong otomatis, dan hasil produksi langsung masuk ke stok barang jadi tanpa input berulang.
-
-Untuk usaha kuliner rumahan yang skalanya masih kecil, kebutuhan pencatatan produksinya sedikit berbeda dan lebih sederhana — lihat [cara mencatat produksi harian UMKM kuliner rumahan](/blog/cara-mencatat-produksi-harian-umkm-kuliner-rumahan) untuk pendekatan yang lebih ringan.
-MD,
-            ],
-            [
-                'slug' => 'cara-mencatat-produksi-harian-umkm-kuliner-rumahan',
-                'title' => 'Cara Mencatat Produksi Harian UMKM Kuliner Rumahan Tanpa Ribet',
-                'category' => 'Produksi',
-                'tags' => ['Kuliner Rumahan', 'Produksi', 'UMKM'],
-                'days_ago' => 5,
-                'excerpt' => 'Usaha kuliner rumahan sering terlalu sibuk untuk mencatat produksi. Padahal tanpa catatan, sulit tahu resep mana yang paling untung. Ini cara mencatatnya secara simpel.',
-                'meta_title' => 'Cara Mencatat Produksi Harian UMKM Kuliner Rumahan',
-                'meta_description' => 'Cara simpel mencatat produksi harian untuk usaha kuliner rumahan: dari resep, bahan yang keluar, sampai hasil jadi, tanpa bikin repot rutinitas dapur.',
-                'content' => <<<'MD'
-Usaha kuliner rumahan — katering, kue, atau snack — punya tantangan khusus: pemiliknya biasanya merangkap jadi juru masak, jadi pencatatan sering terlewat karena tangan sudah penuh dengan adonan atau bumbu.
-
-## Kenapa Pencatatan Produksi Tetap Penting Buat Usaha Kuliner Rumahan
-
-Meski terasa merepotkan, pencatatan produksi punya manfaat yang langsung terasa di dompet:
-
-- **Kontrol HPP (harga pokok produksi)** — tanpa catatan bahan yang dipakai, sulit tahu apakah harga jual sudah menutup biaya produksi atau justru rugi diam-diam.
-- **Tahu kapan bahan mendekati kadaluarsa**, terutama untuk bahan basah atau setengah jadi yang mudah rusak.
-- **Tahu resep mana yang paling untung**, karena bisa dibandingkan biaya bahan versus harga jual per produk.
-
-## Cara Simpel Mencatat Produksi Harian
-
-Tidak perlu sistem rumit untuk mulai. Lima langkah ini cukup untuk usaha rumahan skala kecil-menengah:
-
-1. **Catat resep dan takaran per produk** sekali di awal, supaya setiap kali produksi tinggal pakai acuan yang sama, tidak menghitung ulang dari nol.
-2. **Catat bahan yang keluar setiap kali produksi**, walau hanya beberapa item — ini yang jadi dasar hitung HPP.
-3. **Catat jumlah hasil jadi**, termasuk kalau ada hasil yang gagal atau reject, supaya efisiensi produksi juga ikut terlihat.
-4. **Catat tanggal produksi dan kadaluarsa** kalau produknya punya masa simpan terbatas.
-5. **Review catatan seminggu sekali**, bukan setiap hari — cukup untuk melihat pola tanpa menyita waktu produksi harian.
-
-## Tools yang Bisa Dipakai
-
-Untuk mulai, catatan di notes HP atau buku kecil di dapur sudah cukup. Yang penting konsisten dicatat, bukan alat yang dipakai. Begitu skala order mulai naik dan pencatatan manual mulai terasa membebani — misalnya sering lupa catat atau sulit menghitung HPP total dalam sebulan — itu saatnya mempertimbangkan aplikasi yang bisa merangkum semua catatan ini secara otomatis.
-
-## Kesalahan yang Sering Terjadi di Usaha Rumahan
-
-Beberapa kesalahan ini paling sering bikin pencatatan produksi berantakan di usaha kuliner rumahan. Pertama, mencampur bahan untuk keperluan pribadi (misalnya masak untuk keluarga) dengan bahan untuk produksi tanpa dipisah — akibatnya perhitungan HPP jadi tidak akurat karena bahan yang sebenarnya bukan untuk dijual ikut terhitung sebagai biaya produksi. Kedua, tidak mencatat hasil yang gagal atau reject, padahal bahan untuk hasil gagal itu tetap keluar biaya dan seharusnya tetap masuk perhitungan.
-
-Ketiga, menyamaratakan takaran resep padahal dalam praktiknya sering ada penyesuaian kecil setiap produksi — kalau penyesuaian ini tidak dicatat, resep acuan lama-lama meleset dari kenyataan dan HPP yang dihitung jadi tidak mencerminkan biaya yang sebenarnya dikeluarkan.
-
-## Contoh Sederhana Menghitung HPP dari Catatan Produksi Harian
-
-Misalnya dalam satu kali produksi, seorang pemilik usaha kue kering membuat 20 toples nastar dengan rincian bahan: tepung terigu Rp30.000, mentega Rp45.000, gula halus Rp15.000, kacang mede Rp60.000, dan kemasan toples Rp50.000 (Rp2.500 × 20 toples). Total biaya bahan untuk satu batch produksi ini adalah Rp200.000.
-
-Dari total tersebut, HPP per toples dihitung dengan membagi total biaya dengan jumlah hasil jadi: Rp200.000 ÷ 20 toples = Rp10.000 per toples. Angka ini yang jadi dasar menentukan harga jual — kalau dijual Rp15.000 per toples, marginnya Rp5.000 per toples sebelum dikurangi biaya tenaga kerja dan operasional lain.
-
-Tanpa catatan seperti ini, angka HPP biasanya hanya ditebak berdasarkan "kira-kira", yang rawan meleset terutama saat harga bahan baku naik-turun. Dengan catatan bahan yang konsisten di setiap produksi, pemilik usaha bisa dengan cepat tahu kapan harga jual perlu disesuaikan supaya margin tetap aman, tanpa harus menunggu sampai akhir bulan baru sadar untung tipis.
-
-Untuk kategori usaha rumahan, Fabriku menyediakan alur pencatatan produksi sederhana yang tidak mengharuskan pencatatan berlapis seperti pabrik besar, cukup input bahan dan hasil jadi, dan laporan HPP-nya terhitung sendiri.
-
-Kalau ingin memahami perhitungan HPP lebih dalam di luar konteks dapur rumahan — termasuk komponen overhead dan tenaga kerja yang lebih kompleks — lihat juga [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm). Kalau dapurmu menjual musiman, baca juga [cara menyiapkan stok UMKM menjelang Ramadan dan Lebaran](/blog/cara-menyiapkan-stok-umkm-menjelang-ramadan-lebaran). Untuk menu yang dijual per porsi, hitungan lengkapnya ada di [cara menghitung HPP makanan per porsi](/blog/cara-menghitung-hpp-makanan-per-porsi).
+Kelima kesalahan di atas berlaku juga untuk bahan baku UMKM di luar konveksi — pola dasarnya sama, lihat [cara mengelola stok bahan baku UMKM agar tidak rugi](/blog/cara-mengelola-stok-bahan-baku-umkm-agar-tidak-rugi). Kalau kesalahan kelima (data stok hanya ada di kepala satu orang) terasa familiar, itu biasanya tanda sudah waktunya lihat [kapan usaha perlu pindah dari manual/Excel ke aplikasi pencatatan](/blog/aplikasi-pencatatan-umkm-vs-excel-kapan-pindah), bukan cuma stoknya saja yang dibenahi.
 MD,
             ],
             [
@@ -298,7 +205,7 @@ MD,
                 'days_ago' => 3,
                 'excerpt' => 'Laporan penjualan tidak harus rumit untuk mulai berguna. Ini kolom wajib, contoh laporan penjualan harian dan mingguan, serta rumus Excel yang bisa langsung dipakai UMKM.',
                 'meta_title' => 'Contoh Laporan Penjualan Harian & Sederhana UMKM (Excel)',
-                'meta_description' => 'Contoh laporan penjualan harian dan sederhana untuk UMKM: kolom wajib, tabel siap salin ke Excel, rumus SUMIF, dan template rekap bulanan.',
+                'meta_description' => 'Contoh laporan penjualan harian, mingguan, dan bulanan UMKM di Excel: 7 kolom wajib, tabel siap salin, rumus SUMIF, dan cara rekap cepat tanpa akuntansi.',
                 'content' => <<<'MD'
 Banyak UMKM menunda membuat laporan penjualan karena mengira harus rumit dan butuh latar belakang akuntansi. Padahal laporan penjualan yang berguna bisa dimulai dari struktur yang sangat sederhana.
 
@@ -614,7 +521,7 @@ MD,
                 'days_ago' => 16,
                 'excerpt' => 'Jualan di toko, marketplace, dan reseller sekaligus sering bikin stok dan pesanan berantakan. Ini cara mengelola pesanan online dan offline dari satu alur tanpa dobel kerja.',
                 'meta_title' => 'Kelola Pesanan Online & Offline: Manual atau Pakai Sistem?',
-                'meta_description' => 'Perbandingan mencatat pesanan online dan offline secara manual vs dengan sistem: risiko stok bentrok, dobel input, dan kapan UMKM perlu beralih.',
+                'meta_description' => 'Perbandingan sistem order online dan manual untuk UMKM: tabel risiko stok bentrok, salah kirim, waktu rekap harian, dan tanda kapan perlu pindah ke sistem.',
                 'content' => <<<'MD'
 Begitu UMKM mulai jualan di lebih dari satu tempat — toko fisik, marketplace, dan lewat reseller — masalah baru muncul: stok yang sama harus dipantau dari beberapa sumber sekaligus, dan gampang terjadi barang yang sudah terjual online ternyata juga ditawarkan ke pembeli offline karena datanya tidak sinkron.
 
@@ -639,6 +546,18 @@ Kalau ada lebih dari satu orang yang menangani penjualan (misalnya satu orang pe
 ### 4. Prioritaskan Channel dengan Margin Terbaik saat Stok Terbatas
 
 Kalau stok sebuah produk sedang menipis dan permintaan datang dari beberapa channel sekaligus, punya data channel mana yang paling menguntungkan membantu memutuskan mana yang diprioritaskan, alih-alih asal memenuhi siapa yang order duluan.
+
+## Perbandingan Sistem Order Online dan Manual untuk UMKM
+
+Untuk memudahkan keputusan, tabel berikut merangkum perbedaan mencatat pesanan secara manual dibanding memakai sistem order terpusat:
+
+| Aspek Operasional | Sistem Order Manual (Buku / Chat / Excel Terpisah) | Sistem Order Terpusat |
+|---|---|---|
+| Sinkronisasi stok online & toko | Harus dikurangi manual setelah transaksi, rawan bentrok | Stok langsung dipotong atau dicadangkan di satu data |
+| Risiko pesanan terlewat | Tinggi saat chat WhatsApp dan marketplace ramai bersamaan | Semua channel masuk ke satu daftar pesanan berstatus |
+| Waktu rekap penjualan harian | Perlu gabungkan nota toko, mutasi transfer, dan ekspor marketplace | Rekap per periode dan per channel langsung siap diunduh |
+| Pelacakan pembayaran & piutang | Harus cek ulang bukti transfer di chat satu per satu | Status lunas, DP, dan sisa tagihan tercatat per order |
+| Biaya awal | Gratis, cocok saat order masih di bawah 10 transaksi per hari | Berlangganan bulanan, hemat waktu begitu order multi-channel naik |
 
 ## Tanda Sudah Saatnya Pakai Sistem Terpusat
 
@@ -705,7 +624,7 @@ Aplikasi kasir yang tepat bukan yang paling banyak fiturnya, tapi yang paling pa
 
 Fabriku menyediakan pencatatan transaksi, stok, produksi, sampai laporan dalam satu sistem yang menyesuaikan kategori usaha — jadi UMKM pemula tidak perlu berlangganan beberapa aplikasi terpisah hanya untuk mencatat hal-hal dasar ini.
 
-Kalau usahamu juga punya proses produksi, bukan cuma jual-beli barang jadi, pertimbangan yang perlu dicek sedikit berbeda — lihat [aplikasi pencatatan produksi usaha kecil menengah](/blog/aplikasi-pencatatan-produksi-usaha-kecil-menengah) untuk kebutuhan yang lebih spesifik itu.
+Kalau usahamu juga punya proses produksi, bukan cuma jual-beli barang jadi, pertimbangan yang perlu dicek sedikit berbeda — lihat [aplikasi pencatatan UMKM vs Excel: kapan harus pindah](/blog/aplikasi-pencatatan-umkm-vs-excel-kapan-pindah) untuk tanda-tanda dan fitur wajib pencatatan produksi.
 MD,
             ],
             [
@@ -715,8 +634,8 @@ MD,
                 'tags' => ['Kosmetik', 'Stok Bahan Baku', 'UMKM'],
                 'days_ago' => 4,
                 'excerpt' => 'Kosmetik kadaluarsa bukan cuma kerugian modal, tapi juga risiko keamanan buat pelanggan. Ini cara mengelola stok kosmetik rumahan supaya tidak ada yang tertinggal sampai lewat tanggal aman pakai.',
-                'meta_title' => 'Cara Mengelola Stok Produk Kosmetik agar Tidak Kadaluarsa',
-                'meta_description' => 'Cara mengelola stok produk kosmetik rumahan agar tidak kadaluarsa: FEFO per batch, minimum stock per varian, dan cara memantau tanggal expired secara rutin.',
+                'meta_title' => 'Cara Kelola Stok Kosmetik & No Batch agar Tidak Expired',
+                'meta_description' => 'Cara mencatat nomor batch kosmetik, menerapkan FEFO, dan mengatur minimum stock per varian agar produk skincare tidak kadaluarsa sebelum terjual di toko.',
                 'content' => <<<'MD'
 Usaha kosmetik dan skincare rumahan punya satu risiko yang tidak dimiliki kebanyakan produk lain: barangnya dipakai langsung ke kulit dan wajah pelanggan. Kalau produk fashion yang telat terjual paling banter cuma ketinggalan tren, kosmetik yang terjual lewat tanggal aman pakai bisa berarti risiko iritasi, komplain, sampai masalah reputasi yang jauh lebih mahal daripada nilai stoknya sendiri.
 
@@ -741,6 +660,18 @@ Karena kosmetik biasanya punya banyak varian shade dan ukuran, tetapkan minimum 
 ### 4. Review Tanggal Kadaluarsa Secara Rutin, Bukan Cuma Saat Stock Opname Tahunan
 
 Idealnya, produk dengan sisa masa simpan di bawah 2-3 bulan ditandai untuk diprioritaskan dijual, misalnya lewat promo atau bundling, sebelum benar-benar mendekati tanggal kadaluarsa. Kalau baru disadari saat sudah H-1 minggu dari expired, pilihan yang tersisa biasanya cuma dua: jual rugi besar-besaran atau buang total.
+
+## Format Tabel Pencatatan Nomor Batch dan Tanggal Kadaluarsa Kosmetik
+
+Agar nomor batch kosmetik mudah dilacak saat stok opname atau jika ada keluhan pelanggan, pisahkan satu baris untuk setiap kedatangan batch meskipun variannya sama:
+
+| SKU / Varian | No. Batch | No. BPOM | Tanggal Masuk | Tanggal Expired | Sisa Stok | Urutan Keluar |
+|---|---|---|---|---|---|---|
+| Serum Vit C 20ml | B2604A | NA18240100001 | 10 Apr 2026 | 10 Apr 2027 | 12 pcs | Prioritas 1 (FEFO) |
+| Serum Vit C 20ml | B2608C | NA18240100001 | 15 Agu 2026 | 15 Agu 2027 | 25 pcs | Prioritas 2 |
+| Sunscreen SPF50 | S2602B | NA18241700002 | 05 Feb 2026 | 05 Feb 2027 | 8 pcs | Promo 3 bulan sebelum ED |
+
+Dengan tabel terpisah per batch seperti ini, staf gudang dan kasir selalu tahu batch mana yang harus keluar lebih dulu tanpa membuka kardus satu per satu.
 
 ## Contoh Sederhana Melacak Batch Kosmetik
 
@@ -928,8 +859,8 @@ MD,
                 'tags' => ['Kerajinan', 'Harga Jual', 'UMKM'],
                 'days_ago' => 2,
                 'excerpt' => 'Harga jual produk handmade yang cuma "ikut-ikutan" harga kompetitor sering bikin pengrajin rugi tanpa sadar, karena jam kerja dan skill tidak pernah dihitung sebagai biaya.',
-                'meta_title' => 'Cara Menentukan Harga Jual Produk Kerajinan Handmade',
-                'meta_description' => 'Cara menentukan harga jual produk kerajinan tangan handmade agar untung: komponen biaya yang wajib dihitung, rumus sederhana, dan contoh perhitungannya.',
+                'meta_title' => 'Cara Menentukan Harga Jual Kerajinan Handmade (+ Contoh)',
+                'meta_description' => 'Rumus menentukan harga jual kerajinan handmade agar tidak rugi: hitung bahan, jam kerja pengrajin, kemasan, contoh tas rajut, serta harga reseller dan bazar.',
                 'content' => <<<'MD'
 Banyak pengrajin menentukan harga jual produk handmade dengan cara yang sama: lihat harga produk sejenis di marketplace, lalu pasang harga sedikit di bawahnya supaya "lebih laku". Cara ini terasa aman di awal, tapi sering berujung rugi diam-diam karena biaya yang sebenarnya dikeluarkan — terutama jam kerja dan skill — tidak pernah masuk hitungan.
 
@@ -1207,63 +1138,16 @@ Sebuah usaha konveksi kecil menyepakati dengan maklun bahwa 200 potong kemeja ha
 
 Kesalahan paling sering adalah menyerahkan seluruh pesanan ke satu maklun tanpa kesepakatan tenggat tertulis, lalu berharap semuanya selesai sesuai perkiraan sendiri. Kesalahan lain adalah tidak mencatat jumlah bahan yang diserahkan secara presisi, sehingga saat hasil jadi diterima, tidak ada cara memastikan apakah semua bahan sudah dipakai dengan benar atau ada yang hilang di tengah proses.
 
-Masalah stok bahan yang sering muncul dalam kerja sama dengan maklun ini sebenarnya berakar dari kebiasaan pencatatan yang sama dengan [kesalahan mengelola stok bahan baku yang bikin UMKM konveksi rugi](/blog/kesalahan-mengelola-stok-bahan-baku-umkm-konveksi) — kalau kesalahan itu terasa familiar, pembenahannya bisa dimulai dari sana. Untuk melacak progress produksi dari beberapa maklun sekaligus tanpa harus menelepon satu per satu, lihat juga [aplikasi pencatatan produksi usaha kecil menengah](/blog/aplikasi-pencatatan-produksi-usaha-kecil-menengah).
+Masalah stok bahan yang sering muncul dalam kerja sama dengan maklun ini sebenarnya berakar dari kebiasaan pencatatan yang sama dengan [kesalahan mengelola stok bahan baku yang bikin UMKM konveksi rugi](/blog/kesalahan-mengelola-stok-bahan-baku-umkm-konveksi) — kalau kesalahan itu terasa familiar, pembenahannya bisa dimulai dari sana. Untuk melacak progress produksi dari beberapa maklun sekaligus tanpa harus menelepon satu per satu, lihat juga [aplikasi pencatatan UMKM vs Excel: kapan harus pindah](/blog/aplikasi-pencatatan-umkm-vs-excel-kapan-pindah).
 
 Fabriku mencatat pesanan produksi dan kontraktor sebagai data terpisah namun terhubung, sehingga progress tiap maklun, bahan yang diserahkan, dan tenggat masing-masing pesanan bisa dipantau dari satu tempat tanpa harus menghubungi satu per satu untuk sekadar tahu statusnya.
-MD,
-            ],
-            [
-                'slug' => 'kapan-usaha-rumahan-butuh-sistem-pencatatan',
-                'title' => 'Kapan Usaha Rumahan Butuh Sistem Pencatatan, Bukan Buku Lagi',
-                'category' => 'Produksi',
-                'tags' => ['Produksi Rumahan', 'UMKM', 'Digitalisasi'],
-                'days_ago' => 2,
-                'excerpt' => 'Patokan "kapan pindah ke sistem pencatatan" bukan soal omzet, tapi gejala operasional sehari-hari. Kenali empat tandanya sebelum masalahnya membesar.',
-                'meta_title' => 'Kapan Usaha Rumahan Butuh Sistem Pencatatan',
-                'meta_description' => 'Kapan usaha rumahan butuh sistem pencatatan? Kenali gejalanya: banyak pencatat, stok sering hilang, pesanan tercecer, dan sulit tahu produk paling untung.',
-                'content' => <<<'MD'
-Pertanyaan "kapan usaha rumahan butuh sistem pencatatan digital" sering dijawab dengan patokan omzet — misalnya "kalau sudah tembus sekian juta sebulan". Padahal ukuran omzet kurang relevan dibanding gejala operasional yang sebenarnya lebih mudah dikenali sehari-hari.
-
-## Kenapa Patokan Omzet Kurang Tepat
-
-Dua usaha rumahan dengan omzet yang sama bisa punya kompleksitas operasional yang jauh berbeda — satu dijalankan sendirian dengan produk tunggal, satu lagi dikerjakan bersama beberapa orang dengan puluhan varian produk. Yang kedua jelas lebih butuh sistem pencatatan meski omzetnya sama, karena kompleksitas koordinasinya jauh lebih tinggi. Jadi gejala operasional, bukan angka omzet, yang jadi indikator lebih akurat.
-
-## Gejala 1: Lebih dari Satu Orang Mulai Ikut Mencatat
-
-Selama pencatatan dipegang satu orang, catatan di buku atau memori kepala masih bisa konsisten. Begitu ada orang kedua yang ikut mencatat — pasangan, anak, karyawan pertama — mulai muncul celah: dua orang mencatat dengan format berbeda, atau salah satu lupa mencatat transaksi yang ditanganinya sendiri. Inkonsistensi ini adalah tanda paling awal bahwa cara pencatatan lama mulai kewalahan.
-
-## Gejala 2: Stok "Hilang" Berulang Tanpa Penjelasan Jelas
-
-Kalau sudah beberapa kali terjadi selisih stok yang tidak bisa dijelaskan — bahan yang menurut catatan masih ada tapi ternyata sudah habis, atau sebaliknya — dan ini terjadi berulang, bukan sesekali, itu tanda pencatatan manual sudah tidak bisa mengikuti kecepatan transaksi yang sebenarnya terjadi.
-
-## Gejala 3: Pesanan Terlewat karena Tercecer di Chat
-
-Usaha rumahan yang menerima pesanan lewat WhatsApp atau media sosial rawan kehilangan jejak pesanan di tengah obrolan lain. Kalau sudah pernah terjadi pesanan yang terlewat diproses karena chatnya "tenggelam" di antara obrolan pribadi atau pesan pelanggan lain, ini bukan kesalahan orang yang mencatat, tapi tanda bahwa medium pencatatannya sudah tidak cocok lagi dengan volume pesanan yang masuk.
-
-## Gejala 4: Tidak Bisa Menjawab "Produk Mana yang Paling Untung"
-
-Ini gejala yang paling sering diabaikan karena tidak terasa mendesak secara harian. Tapi kalau ditanya "dari semua produk yang dijual, mana yang sebenarnya paling menguntungkan setelah dikurangi biaya bahan dan waktu kerja", dan jawabannya cuma perkiraan kasar, itu tanda catatan yang ada selama ini tidak dirancang untuk menjawab pertanyaan bisnis yang sebenarnya penting — hanya mencatat transaksi tanpa bisa dianalisis lebih jauh.
-
-## Bukan Berarti Harus Langsung Pakai Sistem yang Rumit
-
-Menyadari gejala-gejala di atas bukan berarti harus langsung berlangganan sistem yang canggih dan mahal. Langkah awal yang realistis adalah memastikan pencatatan produksi harian sudah konsisten dan terstruktur — [cara mencatat produksi harian UMKM kuliner rumahan](/blog/cara-mencatat-produksi-harian-umkm-kuliner-rumahan) menunjukkan versi paling sederhana dari ini. Begitu pencatatan dasar sudah rutin, barulah pindah ke sistem yang bisa merangkum semuanya jadi lebih mudah dilihat. Kalau sudah memakai Excel dan ragu apakah saatnya pindah, baca [aplikasi pencatatan UMKM vs Excel: kapan harus pindah](/blog/aplikasi-pencatatan-umkm-vs-excel-kapan-pindah).
-
-## Contoh Kasus: Dua Gejala yang Muncul Bersamaan
-
-Sebuah usaha kue rumahan yang tadinya dikerjakan sendiri mulai dibantu dua orang keluarga. Dalam sebulan, pemilik usaha menyadari dua hal: pertama, catatan stok tepung dan gula sering tidak cocok karena masing-masing orang mencatat pembelian dan pemakaian dengan caranya sendiri. Kedua, saat ditanya varian kue mana yang paling untung, jawabannya hanya "kayaknya yang cokelat, soalnya paling laku" — padahal laku belum tentu berarti paling untung kalau biaya bahannya juga lebih mahal. Kedua gejala ini muncul bersamaan justru karena akar masalahnya sama: tidak ada satu sumber catatan yang konsisten dan bisa dianalisis, bukan cuma dicatat.
-
-## Kesalahan yang Sering Terjadi
-
-Kesalahan paling umum adalah menunggu sampai masalahnya terasa sangat mengganggu baru mempertimbangkan pindah ke sistem pencatatan, padahal gejala-gejala di atas biasanya sudah muncul jauh lebih awal dalam bentuk kecil. Kesalahan lain adalah berpikir sistem pencatatan hanya soal mencatat transaksi, padahal manfaat sebenarnya baru terasa saat data itu dianalisis — misalnya untuk menjawab produk mana yang paling untung, sesuatu yang berkaitan erat dengan [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm) yang sudah dibahas lebih detail di artikel lain.
-
-Untuk kategori usaha rumahan, Fabriku menyediakan pencatatan produksi dan stok yang bisa diakses lebih dari satu orang sekaligus, dengan riwayat siapa mencatat apa dan kapan — jadi gejala-gejala di atas bisa dicegah sebelum benar-benar mengganggu operasional harian.
 MD,
             ],
             [
                 'slug' => 'aplikasi-pencatatan-umkm-vs-excel-kapan-pindah',
                 'title' => 'Aplikasi Pencatatan UMKM vs Excel: Kapan Harus Pindah',
                 'category' => 'Produksi',
-                'tags' => ['UMKM', 'Digitalisasi', 'Aplikasi UMKM'],
+                'tags' => ['UMKM', 'Digitalisasi', 'Aplikasi UMKM', 'Produksi Rumahan'],
                 'days_ago' => 1,
                 'excerpt' => 'Excel murah dan fleksibel, tapi ada titik di mana kelebihan itu berbalik jadi kelemahan. Ini cara jujur menilai kapan waktunya pindah ke aplikasi pencatatan.',
                 'meta_title' => 'Aplikasi Pencatatan UMKM vs Excel: Kapan Harus Pindah',
@@ -1293,6 +1177,31 @@ Di Excel, stok yang berkurang karena penjualan biasanya harus diinput manual ter
 
 Spreadsheet yang sudah berkembang jadi rumit — dengan banyak rumus antar-sheet — rawan rusak tanpa peringatan. Satu baris yang salah dihapus atau satu sel yang tidak sengaja diisi manual bisa merusak rumus di sel lain, dan kerusakan ini sering baru ketahuan berminggu-minggu kemudian saat angka yang keluar terlihat janggal, bukan saat kerusakannya terjadi.
 
+## Patokan Pindah Bukan Soal Omzet, Melainkan Gejala Operasional
+
+Banyak pemilik usaha rumahan menunda pindah dengan alasan "omzet belum besar". Padahal dua usaha dengan omzet sama bisa punya kerumitan yang jauh berbeda. Gejala operasional berikut jauh lebih akurat daripada angka omzet:
+
+- **Pesanan mulai tercecer di chat** — pesanan dari WhatsApp atau media sosial tenggelam di antara obrolan pribadi hingga terlewat diproses.
+- **Stok hilang berulang tanpa penjelasan jelas** — catatan bahan baku dan barang jadi sering meleset dari rak, lalu baru ketahuan saat stok opname.
+- **Tidak tahu progress produksi tanpa bertanya satu per satu** — misalnya konveksi dengan tiga kontraktor jahit yang menghabiskan 30–45 menit setiap hari hanya untuk menagih status lewat chat.
+- **Tidak bisa menjawab produk mana yang paling untung** — hanya menebak dari produk yang paling laku tanpa data biaya bahan per produk (pelajari juga [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm)).
+
+## Fitur Minimal yang Harus Ada Saat Pindah ke Aplikasi
+
+Kalau usaha Anda juga memiliki proses produksi (bukan sekadar jual-beli barang jadi), pastikan aplikasi pengganti Excel atau buku tulis memenuhi empat standar minimal ini:
+
+1. **Tracking status per tahapan produksi** — dari bahan disiapkan, dikerjakan tim atau maklun, sampai selesai dan siap jual.
+2. **Potong stok bahan baku otomatis** saat produksi berjalan agar stok bahan dan progress selalu sinkron tanpa input ganda.
+3. **Riwayat siapa mencatat apa dan kapan** sehingga data tidak bergantung pada satu orang saja.
+4. **Terhubung langsung ke stok barang jadi dan penjualan** sehingga hasil produksi langsung siap dijual tanpa menyalin ulang.
+
+| Aspek | Manual (Buku / WA / Excel) | Aplikasi Pencatatan Terpusat |
+|---|---|---|
+| Cek status produksi & stok | Harus tanya atau cek file terpisah | Terlihat real-time oleh tim terkait |
+| Risiko salah hitung bahan | Tinggi saat transaksi ramai | Lebih rendah karena terhitung otomatis |
+| Ketergantungan satu orang | Tinggi | Rendah, ada riwayat per pengguna |
+| Analisis margin per produk | Harus rekap ulang tiap bulan | Tersedia dari data bahan & penjualan |
+
 ## Cara Pindah Tanpa Kehilangan Data
 
 Pindah dari Excel ke aplikasi tidak harus dilakukan sekaligus dan langsung menghapus semua kebiasaan lama. Langkah yang lebih aman:
@@ -1310,7 +1219,7 @@ Waktu paling tepat bukan menunggu sampai Excel benar-benar tidak sanggup menanga
 
 Kesalahan paling umum adalah memindahkan semua data dan fungsi sekaligus dalam satu hari, lalu berharap tim langsung terbiasa tanpa masa transisi. Kesalahan lain adalah tidak menguji aplikasi baru dengan skenario nyata sebelum benar-benar berkomitmen — baru menyadari ada fitur penting yang ternyata tidak ada setelah semua data dipindahkan, bukan sebelum memutuskan.
 
-Kalau kebutuhan utamanya soal pencatatan transaksi penjualan, [7 tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula) bisa membantu menyaring opsi sebelum memutuskan. Dan kalau masih ragu apakah sudah waktunya pindah sama sekali, gejala-gejala yang lebih spesifik untuk usaha rumahan sudah dibahas di [kapan usaha rumahan butuh sistem pencatatan](/blog/kapan-usaha-rumahan-butuh-sistem-pencatatan).
+Kalau kebutuhan utamanya soal pencatatan transaksi penjualan di toko, [7 tips memilih aplikasi kasir untuk UMKM pemula](/blog/tips-memilih-aplikasi-kasir-umkm-pemula) bisa membantu menyaring opsi sebelum memutuskan. Untuk panduan mencatat produksi harian di dapur skala kecil sebelum beralih ke sistem, lihat [cara mencatat produksi banyak produk dalam satu dapur rumahan](/blog/cara-mencatat-produksi-banyak-produk-satu-dapur-rumahan).
 
 Fabriku bisa dipakai bertahap seperti ini — mulai dari mencatat stok awal (opening balance) dan penjualan, lalu menambah modul lain saat sudah terbiasa. Data yang sudah tercatat tetap bisa diekspor ke Excel kapan saja.
 MD,
@@ -1512,8 +1421,8 @@ MD,
                 'tags' => ['Jasa Servis', 'Sparepart', 'UMKM'],
                 'days_ago' => 2,
                 'excerpt' => 'Oli, lem, cairan pembersih, dan sparepart kecil berkurang setiap hari tanpa tercatat. Ini cara melacak sparepart dan bahan habis pakai di bengkel, laundry, atau reparasi agar stok dan biaya tidak bocor.',
-                'meta_title' => 'Cara Melacak Sparepart & Bahan Habis Pakai Jasa Servis',
-                'meta_description' => 'Cara melacak sparepart dan bahan habis pakai di usaha jasa servis: pisahkan jenis stok, tetapkan pemakaian standar per layanan, dan cek selisih mingguan.',
+                'meta_title' => 'Cara Catat Stok Sparepart Bengkel & Bahan Habis Pakai',
+                'meta_description' => 'Cara melacak stok sparepart bengkel dan bahan habis pakai jasa servis: pisahkan barang jual vs consumable, hitung selisih mingguan, dan atur titik pesan ulang.',
                 'content' => <<<'MD'
 Usaha jasa jarang menganggap dirinya punya masalah stok. Yang dijual adalah keahlian dan waktu. Padahal setiap servis memakai sesuatu: oli dan busi di bengkel, deterjen dan plastik di laundry, timah solder dan thermal paste di reparasi elektronik. Karena nilainya kecil per transaksi, pemakaian ini jarang dicatat — sampai tiba-tiba stok habis di tengah hari atau pengeluaran belanja bahan bulan ini dua kali lipat tanpa tahu sebabnya.
 
@@ -1920,6 +1829,15 @@ Dari contoh ini, bolu pandan omzetnya paling kecil dan marginnya juga paling tip
 
 Dengan beberapa produk dalam satu dapur, urutan produksi memengaruhi efisiensi. Kelompokkan produk yang memakai suhu oven sama di hari yang sama, buat adonan yang perlu didiamkan lebih dulu, dan hindari membuat produk bertekstur basah dan kering bergantian tanpa jeda membersihkan peralatan.
 
+## Kesalahan yang Sering Membuat Catatan Dapur Rumahan Meleset
+
+- **Mencampur bahan pribadi dan bahan produksi** — bahan dapur keluarga yang ikut terambil membuat biaya produksi tampak lebih besar dari kenyataan. Pisahkan tempat dan catatannya.
+- **Tidak mencatat tanggal produksi dan kadaluarsa** — terutama untuk bahan basah atau setengah jadi yang cepat rusak.
+- **Lupa memperbarui resep saat takaran berubah** — penyesuaian kecil yang tidak dicatat membuat hitungan HPP meleset saat harga bahan naik.
+- **Mengabaikan hasil gagal/reject** — padahal bahan yang dipakai untuk hasil gagal tetap keluar modal dan harus masuk hitungan biaya batch.
+
+Sebagai gambaran cepat, jika satu batch menghasilkan 20 toples nastar dengan total bahan dan kemasan Rp200.000, maka HPP dasarnya Rp10.000 per toples. Untuk perhitungan HPP yang lebih lengkap termasuk overhead, baca [cara menghitung HPP produk UMKM](/blog/cara-menghitung-hpp-produk-umkm) atau [cara menghitung HPP makanan per porsi](/blog/cara-menghitung-hpp-makanan-per-porsi). Bila dapur Anda juga mengejar lonjakan pesanan musiman, lihat [cara menyiapkan stok UMKM menjelang Ramadan dan Lebaran](/blog/cara-menyiapkan-stok-umkm-menjelang-ramadan-lebaran).
+
 ## Pertanyaan yang Sering Muncul
 
 **Perlukah menimbang bahan setiap kali produksi?**
@@ -1929,7 +1847,7 @@ Tidak, jika resep standar sudah akurat. Cukup timbang ulang sesekali, misalnya s
 Catat sebagai produk tersendiri atau tambahkan baris catatan bahan tambahan untuk pesanan tersebut.
 
 **Kapan pencatatan manual ini sudah tidak cukup?**
-Biasanya saat produk sudah lebih dari lima, pesanan datang setiap hari, atau ada lebih dari satu orang yang memproduksi. Baca [kapan usaha rumahan butuh sistem pencatatan](/blog/kapan-usaha-rumahan-butuh-sistem-pencatatan).
+Biasanya saat produk sudah lebih dari lima, pesanan datang setiap hari, atau ada lebih dari satu orang yang memproduksi. Baca [aplikasi pencatatan UMKM vs Excel: kapan harus pindah](/blog/aplikasi-pencatatan-umkm-vs-excel-kapan-pindah).
 
 Fabriku menyediakan pencatatan produksi sederhana untuk usaha rumahan: pilih bahan yang dipakai dan jumlah hasil jadi dalam satu form, lalu stok bahan berkurang dan stok produk bertambah otomatis, dengan biaya per unit dihitung dari bahan yang dipakai. Lihat [Fabriku untuk produksi rumahan](/aplikasi/produksi-rumahan). Untuk menjual hasil produksi lewat website sendiri, lihat [contoh website toko online UMKM](/blog/contoh-website-toko-online-umkm) dari usaha camilan rumahan di Bandung.
 MD,
@@ -2137,7 +2055,7 @@ Setiap kali harga bahan utama berubah berarti, misalnya ayam, telur, atau cabai.
 
 ## Mencatat Bahan dan Produksi Tanpa Hitung Ulang Manual
 
-Menghitung HPP sekali itu mudah. Yang sulit adalah menjaganya tetap benar saat harga bahan berubah setiap minggu dan menu bertambah. Fabriku mencatat penerimaan bahan beserta harganya, mengurangi stok bahan dari penerimaan paling lama lebih dulu, dan menyimpan harga pokok di setiap item stok produk jadi. Untuk usaha rumahan, satu form produksi sederhana mencatat bahan yang dipakai dan jumlah hasil jadi, lalu biaya per unit dihitung dari bahan tersebut. Lihat [Fabriku untuk usaha makanan dan kue](/aplikasi/usaha-makanan-kue) dan panduan [mencatat produksi harian usaha kuliner rumahan](/blog/cara-mencatat-produksi-harian-umkm-kuliner-rumahan).
+Menghitung HPP sekali itu mudah. Yang sulit adalah menjaganya tetap benar saat harga bahan berubah setiap minggu dan menu bertambah. Fabriku mencatat penerimaan bahan beserta harganya, mengurangi stok bahan dari penerimaan paling lama lebih dulu, dan menyimpan harga pokok di setiap item stok produk jadi. Untuk usaha rumahan, satu form produksi sederhana mencatat bahan yang dipakai dan jumlah hasil jadi, lalu biaya per unit dihitung dari bahan tersebut. Lihat [Fabriku untuk usaha makanan dan kue](/aplikasi/usaha-makanan-kue) dan panduan [mencatat produksi banyak produk dalam satu dapur rumahan](/blog/cara-mencatat-produksi-banyak-produk-satu-dapur-rumahan).
 MD,
             ],
             [
