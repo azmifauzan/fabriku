@@ -1,6 +1,6 @@
 # Perbaikan SEO DSFA Homemade — 24 November 2026
 
-**Status:** Selesai diterapkan di kode lokal & lulus pengujian otomatis (`Storefront` + `SitemapTest` + `Pint`). Menunggu deploy ke production dan sinkronisasi data tenant `dsfahomemade.com` (`theme.php` + `seo-products.php`) sebelum pengajuan indeks ulang.
+**Status:** **Live di production & terverifikasi (`2026-11-24`)** — image `azmifauzan/fabriku:241126-3` (commit `1df0ec1`, digest `sha256:898f72dd3e448fb6bc6f40c2cc5ad4ad795e8828de61c3b7b14173f931eea401`), site 1 / tenant 7 diperbarui ke `active_theme_version_id = 22` (rollback tema: `21`, rollback image: `241126-2`, backup: `/home/ubuntu/fabriku/backups/241126-3/`). Seluruh 28 URL `dsfahomemade.com` dan SSR `fabriku.id` lulus verifikasi live. Siap untuk pengajuan indeks ulang oleh pemilik.
 
 ---
 
@@ -15,11 +15,13 @@
 
 ---
 
-## 2. Langkah Deploy & Sinkronisasi Tenant (Belum Dijalankan ke Production)
+## 2. Rilis, Verifikasi Live, dan Rollback (`2026-11-24`)
 
-1. Build & deploy image baru Fabriku yang memuat perubahan `StorefrontController.php`, `products.blade.php`, dan `product-detail.blade.php`.
-2. Terapkan pembaruan `docs/new-plan/dsfa-homemade/theme.php` (tema & 8 halaman `/halaman/*`) dan `docs/new-plan/dsfa-homemade/seo-products.php` (14 deskripsi produk) pada tenant `dsfahomemade.com` (site 1, tenant 7) dengan backup terlebih dahulu seperti prosedur rilis 9 November 2026.
-3. Hapus manual keyword typo `cheseecuit homemade bandung` di dashboard RankMySEO untuk membebaskan 1 slot tambahan.
+- **Rilis kode:** `azmifauzan/fabriku:241126-3` (`Up (healthy)`, `NO_PENDING_MIGRATIONS`, proses `inertia:start-ssr`, `queue:work`, dan `schedule:work` aktif; `fabriku.id` `/` dan `/blog` keduanya merender `<h1>` dan `canonical` SSR).
+- **Sinkronisasi tenant `dsfahomemade.com` (site 1, tenant 7):** `active_theme_version_id` naik dari `21` ke `22`, `8` halaman `/halaman/*` diperbarui (`9` total halaman terbit termasuk `camilan-homemade-vs-kemasan-pabrik`), `14` deskripsi produk diperbarui tanpa mengubah harga/stok/pesanan/tenant lain.
+- **Verifikasi live 28 URL:** seluruh 25 URL sitemap + `/privasi`, `/keranjang`, `/lapor` menjawab HTTP `200` (0 error), seluruh 26 halaman terindeks memiliki judul 33–58 karakter, 1 `<h1>`, self-canonical, dan JSON-LD valid; `/` menaut ke `/produk`, `/produk` menaut ke `/halaman/camilan-homemade-vs-kemasan-pabrik`, produk varian saling tertaut, dan `/keranjang` + `/lapor` tetap `X-Robots-Tag: noindex, nofollow`.
+- **Backup & rollback:** `/home/ubuntu/fabriku/backups/241126-3/docker-compose.yml.before` dan `dsfa-before.json`. Rollback kode ke `azmifauzan/fabriku:241126-2`; rollback tema DSFA ke `active_theme_version_id = 21`.
+- **Langkah manual RankMySEO:** hapus keyword typo `cheseecuit homemade bandung` di dashboard RankMySEO untuk membebaskan 1 slot tambahan.
 
 ---
 
