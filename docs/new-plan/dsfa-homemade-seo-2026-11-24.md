@@ -62,8 +62,16 @@
 3. **Bing Webmaster Tools:** pastikan situs terverifikasi dan sitemap `https://dsfahomemade.com/sitemap.xml` sudah dikirim.
 4. *(Jangan gunakan Google Indexing API karena dibatasi hanya untuk lowongan kerja dan livestream.)*
 
-### Jadwal Cek Ulang (Setelah Tanggal Submit Live `T`)
-- **Hari ke-3 (`T+3`):** cek URL Inspection untuk URL prioritas utama.
-- **Hari ke-7 (`T+7`):** cek status Sitemaps di GSC dan status indeks di Bing.
-- **Hari ke-14 (`T+14`, target `2026-12-08` bila deploy hari ini):** cek RankMySEO `list_keywords`, `site_issues`, dan Search Console untuk 4 keyword baru & halaman yang di-refresh.
-- **Hari ke-21 (`T+21`):** bila ada halaman yang belum terindeks, jalankan diagnosis `seo-go-live-check` tanpa mengulang submit dalam loop.
+### Status Pengajuan & Jadwal Cek Ulang (Tanggal Submit `T = 2026-11-24`)
+
+| Layanan | Isi yang Diajukan | Pelaksana | Tanggal | Status | Cek Berikutnya |
+| --- | --- | --- | --- | --- | --- |
+| **Google Search Console** | Sitemap `https://dsfahomemade.com/sitemap.xml` & *Request indexing* batch 10 URL prioritas | Pemilik | 2026-11-24 | **implemented but unverified** | **2026-11-27** (Hari ke-3) |
+| **Bing Webmaster Tools** | Sitemap `https://dsfahomemade.com/sitemap.xml` | Pemilik | — | **blocked** *(menunggu submit pemilik)* | Setelah submit pemilik |
+| **IndexNow** | Batch 10 URL prioritas | Agen / Pemilik | — | **blocked** *(menunggu file kunci `/{key}.txt` & izin pemilik)* | Opsional |
+| **Google Business Profile** | Penyesuaian mode Service-Area / alamat, verifikasi klaim, & ulasan (`/g/11z_cldz3p`) | Pemilik | — | **blocked** *(butuh akses pemilik di `business.google.com`)* | Bulanan |
+
+- **Hari ke-3 (`2026-11-27`):** cek URL Inspection di Google Search Console untuk URL prioritas utama (`/` , `/produk`, `/produk/cheesecuit-kecil-oreo`, `/halaman/cheesecuit-bandung`, `/halaman/camilan-homemade-vs-kemasan-pabrik`).
+- **Hari ke-7 (`2026-12-01`):** cek status laporan Sitemaps di GSC dan status indeks di Bing.
+- **Hari ke-14 (`2026-12-08`):** jalankan `/seo check dsfahomemade.com` untuk mengevaluasi 4 keyword baru di RankMySEO (`cheesecuit oreo`, `harga cheesecuit`, `cheesecuit kecil`, `jus homemade bandung`), status `site_issues`, dan impresi Search Console (setelah 2 pemeriksaan mingguan).
+- **Hari ke-21 (`2026-12-15`):** bila ada halaman yang belum terindeks, jalankan diagnosis `seo-go-live-check` tanpa mengulang submit dalam loop. Google menyatakan pengindeksan halaman baru/diperbarui memerlukan 1–2 hari hingga beberapa minggu.
