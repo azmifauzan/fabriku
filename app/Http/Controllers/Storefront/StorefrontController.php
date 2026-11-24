@@ -109,18 +109,28 @@ class StorefrontController extends Controller
 
         $products = Storefront::for($tenant)->products()->get();
         $siteName = $site->profile['name'] ?? $tenant->name ?? 'Toko';
+        $contentPages = $site->contentPages()
+            ->where('is_published', true)
+            ->orderBy('sort')
+            ->orderBy('id')
+            ->get(['slug', 'title']);
 
         $pageContent = view('storefront.pages.products', [
             'products' => $products,
             'site' => $site,
+            'contentPages' => $contentPages,
         ])->render();
+
+        $seoDescription = $products->isNotEmpty()
+            ? "Lihat {$products->count()} pilihan produk, varian, dan harga di katalog {$siteName}. Pilih produk lalu pesan lewat WhatsApp atau kirim permintaan pesanan."
+            : "Katalog produk {$siteName}: lihat pilihan produk, harga, dan ketersediaan. Pilih produk lalu hubungi toko atau kirim permintaan pesanan.";
 
         $html = $renderer->render($site, $site->activeThemeVersion, [
             'page' => 'products',
             'page_content' => $pageContent,
             'products' => $products,
-            'title' => "Semua Produk - {$siteName}",
-            'seo_description' => "Katalog {$siteName}: lihat pilihan produk, harga, dan ketersediaan. Pilih produk lalu hubungi toko atau kirim permintaan pesanan.",
+            'title' => "Katalog Produk & Harga - {$siteName}",
+            'seo_description' => $seoDescription,
         ]);
 
         return response($html)->header('Content-Type', 'text/html; charset=UTF-8');
@@ -136,24 +146,49 @@ class StorefrontController extends Controller
 
         $product = Storefront::for($tenant)->products()->where('slug', $slug)->firstOrFail();
         $siteName = $site->profile['name'] ?? $tenant->name ?? 'Toko';
+        $siblingSlugs = collect();
         $relatedPages = $site->contentPages()->where('is_published', true)->get(['slug', 'title', 'html'])
-            ->filter(function (SiteContentPage $page) use ($product): bool {
+            ->filter(function (SiteContentPage $page) use ($product, $siblingSlugs): bool {
                 preg_match_all('/data-fb-products="([a-z0-9,-]+)"/i', $page->html, $matches);
+                $matched = false;
 
-                return collect($matches[1])->contains(fn (string $slugs) => in_array($product->slug, explode(',', $slugs), true));
+                foreach ($matches[1] as $slotSlugs) {
+                    $items = array_filter(explode(',', $slotSlugs));
+                    if (in_array($product->slug, $items, true)) {
+                        $matched = true;
+                        foreach ($items as $itemSlug) {
+                            if ($itemSlug !== $product->slug) {
+                                $siblingSlugs->push($itemSlug);
+                            }
+                        }
+                    }
+                }
+
+                return $matched;
             });
+
+        $siblingSlugs = $siblingSlugs->unique()->values();
+        $siblingProducts = $siblingSlugs->isNotEmpty()
+            ? Storefront::for($tenant)->products()->whereIn('slug', $siblingSlugs->all())->get()
+            : collect();
 
         $pageContent = view('storefront.pages.product-detail', [
             'product' => $product,
             'site' => $site,
             'relatedPages' => $relatedPages,
+            'siblingProducts' => $siblingProducts,
         ])->render();
+
+        $title = "{$product->title} - {$siteName}";
+        if (mb_strlen($title) < 32) {
+            $title = "{$product->title} - Katalog {$siteName}";
+        }
 
         $html = $renderer->render($site, $site->activeThemeVersion, [
             'page' => 'product_detail',
             'page_content' => $pageContent,
             'product' => $product,
-            'title' => "{$product->title} - {$siteName}",
+            'title' => $title,
             'seo_description' => Str::limit(trim(preg_replace('/\s+/u', ' ', strip_tags($product->description ?: "{$product->title} dari {$siteName}."))), 155),
         ]);
 
@@ -295,7 +330,7 @@ class StorefrontController extends Controller
         $html = $renderer->render($site, $site->activeThemeVersion, [
             'page' => 'privacy',
             'page_content' => view('storefront.pages.privacy', ['site' => $site])->render(),
-            'title' => 'Privasi - '.($site->profile['name'] ?? 'Website Usaha'),
+            'title' => 'Kebijakan Privasi - '.($site->profile['name'] ?? 'Website Usaha'),
             'seo_description' => 'Informasi privasi pengunjung '.($site->profile['name'] ?? 'website usaha').': data pemesanan, statistik kunjungan, dan cara menghubungi pengelola.',
         ]);
 

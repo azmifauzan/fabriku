@@ -1,0 +1,67 @@
+# Perbaikan SEO DSFA Homemade — 24 November 2026
+
+**Status:** Selesai diterapkan di kode lokal & lulus pengujian otomatis (`Storefront` + `SitemapTest` + `Pint`). Menunggu deploy ke production dan sinkronisasi data tenant `dsfahomemade.com` (`theme.php` + `seo-products.php`) sebelum pengajuan indeks ulang.
+
+---
+
+## 1. Ringkasan Perubahan (Change Log)
+
+| Tanggal | Halaman / Berkas | Apa yang Diubah | Alasan (Bukti) | Efek yang Diharapkan | Metrik yang Dicek | Tanggal Cek Ulang | Hasil |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-11-24 | RankMySEO (`dsfahomemade.com`) | Menambahkan 4 keyword pelacakan baru (`cheesecuit oreo`, `harga cheesecuit`, `cheesecuit kecil`, `jus homemade bandung`, `id`/`id`) | `cheesecuit oreo` punya 17 impresi tertinggi di GSC (pos. 39 RankMySEO, vol. 720); `harga cheesecuit` (8.100) & `cheesecuit kecil` (480) adalah celah kompetitor non-merek; kategori jus belum terpantau | Visibilitas peringkat mingguan untuk 4 keyword niat beli utama | RankMySEO `list_keywords` (slot terpakai 47/50) | 2026-12-08 | |
+| 2026-11-24 | `/produk`, `/privasi`, `/produk/{slug}` (`StorefrontController.php`, `products.blade.php`, `product-detail.blade.php`) | Perpanjang judul `/produk` (`Katalog Produk & Harga - DSFA Homemade`), `/privasi` (`Kebijakan Privasi - DSFA Homemade`), dan judul produk <32 karakter (`Jus Mix Berry - Katalog DSFA Homemade`); tambahkan intro katalog + tautan halaman terbit di `/produk` (mengatasi orphan page `/halaman/camilan-homemade-vs-kemasan-pabrik`); tambahkan paragraf rapi & tautan silang `"Pilihan varian lain"` di halaman produk | Audit RankMySEO 2026-11-20 menandai `title_short` di 3 halaman, `/produk` tipis (92 kata) & 0 tautan dari `/`, `/halaman/camilan-homemade-vs-kemasan-pabrik` 0 tautan masuk, dan varian terpisah butuh tautan silang | Hilangnya 3 warning `title_short`, terindeksnya artikel orphan, dan peningkatan sinyal internal antar-varian | RankMySEO `site_issues`, GSC impresi `/produk` & `/halaman/camilan-homemade-vs-kemasan-pabrik` | 2026-12-08 *(setelah deploy)* | |
+| 2026-11-24 | 6 halaman `/halaman/*` + shell header/footer (`docs/new-plan/dsfa-homemade/theme.php`, `theme.css`) | Refresh `cheesecuit-bandung` (tabel 150 ml Rp 7.000 vs 250 ml Rp 10.000, daya tahan 12 jam/48 jam/7 hari), `jual-takoyaki-bandung` (tabel porsi isi 4/8/12 tanpa fokus `"kemasan"`), `puding-buah-bandung` (perbandingan cup 150 ml vs besar open order 3 hari), `jus-homemade-bandung` (tabel 3 varian), `cara-pesan` (format WA + beda siap antar vs open order), `area-pengiriman` (catatan antar & suhu ruang); tautkan `/produk` dari header, hero, & footer | 4 halaman `/halaman/*` ditandai `content_count_words` (112–181 kata), `cheesecuit-bandung` menarget keyword 12.100 vol/bln dengan 8 impresi & 0 klik, dan celah konten utama dibanding `bandungcheesecuit.com` adalah tabel harga + daya tahan | Seluruh halaman `/halaman/*` melewati 220+ kata faktual dan meningkatkan relevansi untuk pencarian harga/menu/daya tahan | GSC impresi & CTR 28 hari, RankMySEO `site_issues` & `list_keywords` | 2026-12-08 *(2 cek mingguan pasca-deploy)* | |
+| 2026-11-24 | 14 deskripsi produk (`docs/new-plan/dsfa-homemade/seo-products.php`) | Memperbarui seluruh 14 deskripsi produk dengan fakta terkonfirmasi (cheesecuit 150 ml / 250 ml & daya tahan 12 jam/48 jam/7 hari, porsi takoyaki 4/8/12 dibedakan per kebutuhan, puding cup 150 ml vs open order 3 hari, 3 jus botol) dan ringkasan 155 karakter pertama untuk meta description | Semua 14 halaman produk ditandai `content_count_words` (40–124 kata), `/produk/cheesecuit-kecil-oreo` adalah halaman impresi tertinggi (17 impr) dan muncul di pos. 39 untuk `cheesecuit oreo` | Konten produk unik per varian tanpa duplikasi tipis dan meta description yang jelas | GSC impresi/klik halaman `/produk/*` & RankMySEO `cheesecuit oreo` | 2026-12-08 *(2 cek mingguan pasca-deploy)* | |
+
+---
+
+## 2. Langkah Deploy & Sinkronisasi Tenant (Belum Dijalankan ke Production)
+
+1. Build & deploy image baru Fabriku yang memuat perubahan `StorefrontController.php`, `products.blade.php`, dan `product-detail.blade.php`.
+2. Terapkan pembaruan `docs/new-plan/dsfa-homemade/theme.php` (tema & 8 halaman `/halaman/*`) dan `docs/new-plan/dsfa-homemade/seo-products.php` (14 deskripsi produk) pada tenant `dsfahomemade.com` (site 1, tenant 7) dengan backup terlebih dahulu seperti prosedur rilis 9 November 2026.
+3. Hapus manual keyword typo `cheseecuit homemade bandung` di dashboard RankMySEO untuk membebaskan 1 slot tambahan.
+
+---
+
+## 3. Handoff Indeksasi (`seo-indexing` — Jalankan Setelah Batch Live di Production)
+
+**Sitemap:** `https://dsfahomemade.com/sitemap.xml`  
+**Batch URL prioritas yang diperbarui (`10` halaman utama dari 22 halaman refresh):**
+- `https://dsfahomemade.com/`
+- `https://dsfahomemade.com/produk`
+- `https://dsfahomemade.com/produk/cheesecuit-kecil-oreo`
+- `https://dsfahomemade.com/produk/cheesecuit-besar-oreo`
+- `https://dsfahomemade.com/halaman/cheesecuit-bandung`
+- `https://dsfahomemade.com/halaman/jual-takoyaki-bandung`
+- `https://dsfahomemade.com/halaman/puding-buah-bandung`
+- `https://dsfahomemade.com/halaman/jus-homemade-bandung`
+- `https://dsfahomemade.com/halaman/cara-pesan`
+- `https://dsfahomemade.com/halaman/camilan-homemade-vs-kemasan-pabrik` *(kini tertaut dari `/produk`)*
+
+### Daftar Kemampuan (Dicek 2026-11-24)
+
+| Langkah | Bisa dilakukan agen? | Pelaksana |
+| --- | --- | --- |
+| Google Search Console: submit sitemap | Tidak (RankMySEO `search_console` hanya baca) | Pemilik |
+| Google Search Console: Request indexing | Tidak (alasan yang sama) | Pemilik |
+| Bing Webmaster Tools: submit sitemap | Tidak (tidak ada konektor Bing) | Pemilik |
+| IndexNow: kirim batch URL | Ya, dengan kunci IndexNow di root situs (`/{key}.txt`) & persetujuan pemilik | Agen (atas izin) atau Pemilik |
+| Google Business Profile | Tidak *(profil `/g/11z_cldz3p` sudah terverifikasi sebelumnya)* | Pemilik |
+
+### Pengecekan Pra-Submit (Jalankan Begitu Deploy Live)
+- Setiap URL batch menjawab HTTP `200` (tanpa redirect chain / 404).
+- Tidak ada `noindex`, canonical menunjuk ke URL sendiri, dan diizinkan di `robots.txt`.
+- Semua URL tercantum di `https://dsfahomemade.com/sitemap.xml` dan tertaut dari `/` atau `/produk`.
+- Schema JSON-LD (`Organization`, `Product`/`Offer`, `BreadcrumbList`) valid tanpa error.
+
+### Langkah Pemilik Setelah Live
+1. **Google Search Console (`sc-domain:dsfahomemade.com`):** pastikan sitemap `https://dsfahomemade.com/sitemap.xml` terbaca di laporan **Sitemaps** (jangan submit berulang jika file belum berubah).
+2. **URL Inspection (Google Search Console):** inspeksi dan klik **Request indexing** untuk beranda `/` dan 5–10 halaman prioritas di atas (jangan minta semua 28 URL sekaligus; Google memproses dalam hitungan hari hingga beberapa minggu dan tidak menjamin tanggal pasti).
+3. **Bing Webmaster Tools:** pastikan situs terverifikasi dan sitemap `https://dsfahomemade.com/sitemap.xml` sudah dikirim.
+4. *(Jangan gunakan Google Indexing API karena dibatasi hanya untuk lowongan kerja dan livestream.)*
+
+### Jadwal Cek Ulang (Setelah Tanggal Submit Live `T`)
+- **Hari ke-3 (`T+3`):** cek URL Inspection untuk URL prioritas utama.
+- **Hari ke-7 (`T+7`):** cek status Sitemaps di GSC dan status indeks di Bing.
+- **Hari ke-14 (`T+14`, target `2026-12-08` bila deploy hari ini):** cek RankMySEO `list_keywords`, `site_issues`, dan Search Console untuk 4 keyword baru & halaman yang di-refresh.
+- **Hari ke-21 (`T+21`):** bila ada halaman yang belum terindeks, jalankan diagnosis `seo-go-live-check` tanpa mengulang submit dalam loop.

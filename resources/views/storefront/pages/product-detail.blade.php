@@ -60,8 +60,13 @@
             @endif
 
             @if($product->description)
-                <div class="prose prose-sm text-slate-600 mb-8 leading-relaxed">
-                    <p>{{ $product->description }}</p>
+                @php
+                    $descriptionParagraphs = array_values(array_filter(array_map('trim', preg_split('/\R{2,}/', trim($product->description)) ?: [])));
+                @endphp
+                <div class="prose prose-sm text-slate-600 mb-8 leading-relaxed space-y-3">
+                    @foreach($descriptionParagraphs as $paragraph)
+                        <p>{{ $paragraph }}</p>
+                    @endforeach
                 </div>
             @endif
 
@@ -71,6 +76,17 @@
                     <ul class="flex flex-wrap gap-x-4 gap-y-2">
                         @foreach($relatedPages as $page)
                             <li><a class="underline text-[var(--fb-primary)]" href="/halaman/{{ $page->slug }}">{{ $page->title }}</a></li>
+                        @endforeach
+                    </ul>
+                </nav>
+            @endif
+
+            @if(isset($siblingProducts) && $siblingProducts->isNotEmpty())
+                <nav aria-label="Pilihan varian lain" class="mb-6 text-sm">
+                    <h2 class="font-semibold mb-2">Pilihan varian lain</h2>
+                    <ul class="flex flex-wrap gap-x-4 gap-y-2">
+                        @foreach($siblingProducts as $sibling)
+                            <li><a class="underline text-[var(--fb-primary)]" href="/produk/{{ $sibling->slug }}">{{ $sibling->title }} (Rp {{ number_format($sibling->getStartingPrice(), 0, ',', '.') }})</a></li>
                         @endforeach
                     </ul>
                 </nav>

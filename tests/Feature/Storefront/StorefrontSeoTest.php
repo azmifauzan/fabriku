@@ -76,4 +76,77 @@ class StorefrontSeoTest extends TestCase
         $other = SiteProduct::factory()->create();
         $this->get('https://seo-shop.fabriku.biz.id/produk/'.$other->slug)->assertNotFound();
     }
+
+    public function test_catalog_privacy_short_product_titles_and_sibling_links_stay_tenant_scoped(): void
+    {
+        $site = BusinessSite::factory()->create([
+            'slug' => 'dsfa-test', 'status' => 'published',
+            'profile' => ['name' => 'DSFA Homemade'],
+            'seo' => ['description' => 'Camilan rumahan di Bandung.'],
+        ]);
+        $itemA = InventoryItem::factory()->create([
+            'tenant_id' => $site->tenant_id, 'selling_price' => 10000, 'current_quantity' => 5,
+            'reserved_quantity' => 0, 'status' => 'available',
+        ]);
+        $itemB = InventoryItem::factory()->create([
+            'tenant_id' => $site->tenant_id, 'selling_price' => 10000, 'current_quantity' => 5,
+            'reserved_quantity' => 0, 'status' => 'available',
+        ]);
+        $mixBerry = SiteProduct::factory()->create([
+            'tenant_id' => $site->tenant_id, 'inventory_item_id' => $itemA->id,
+            'slug' => 'jus-mix-berry', 'title' => 'Jus Mix Berry',
+            'description' => "Paragraf pertama.\n\nParagraf kedua <b>aman</b>.",
+        ]);
+        $strawberry = SiteProduct::factory()->create([
+            'tenant_id' => $site->tenant_id, 'inventory_item_id' => $itemB->id,
+            'slug' => 'jus-strawberry', 'title' => 'Jus Strawberry',
+        ]);
+        $hiddenSibling = SiteProduct::factory()->create([
+            'tenant_id' => $site->tenant_id, 'slug' => 'jus-hidden', 'title' => 'Jus Hidden', 'is_visible' => false,
+        ]);
+        $otherTenant = BusinessSite::factory()->create(['slug' => 'other-shop', 'status' => 'published']);
+        SiteContentPage::create([
+            'tenant_id' => $site->tenant_id, 'business_site_id' => $site->id,
+            'slug' => 'jus-homemade-bandung', 'title' => 'Jus Homemade Bandung', 'is_published' => true,
+            'html' => '<div data-fb-slot="products" data-fb-products="jus-mix-berry,jus-strawberry,jus-hidden"></div>',
+        ]);
+        SiteContentPage::create([
+            'tenant_id' => $site->tenant_id, 'business_site_id' => $site->id,
+            'slug' => 'camilan-homemade-vs-kemasan-pabrik', 'title' => 'Panduan Camilan', 'is_published' => true,
+            'html' => '<h1>Panduan</h1>',
+        ]);
+        SiteContentPage::create([
+            'tenant_id' => $site->tenant_id, 'business_site_id' => $site->id,
+            'slug' => 'draft-page', 'title' => 'Draft Page', 'is_published' => false,
+            'html' => '<h1>Draft</h1>',
+        ]);
+        SiteContentPage::create([
+            'tenant_id' => $otherTenant->tenant_id, 'business_site_id' => $otherTenant->id,
+            'slug' => 'other-guide', 'title' => 'Other Guide', 'is_published' => true,
+            'html' => '<h1>Other</h1>',
+        ]);
+
+        $catalog = $this->get('https://dsfa-test.fabriku.biz.id/produk')->assertOk();
+        $catalogDom = new DOMDocument;
+        @$catalogDom->loadHTML($catalog->getContent());
+        $catalogXpath = new DOMXPath($catalogDom);
+        $this->assertSame('Katalog Produk & Harga - DSFA Homemade', $catalogXpath->evaluate('string(//title)'));
+        $this->assertSame(1, $catalogXpath->query('//nav[@aria-label="Halaman terkait katalog"]//a[@href="/halaman/camilan-homemade-vs-kemasan-pabrik"]')->length);
+        $this->assertSame(0, $catalogXpath->query('//a[@href="/halaman/draft-page"]')->length);
+        $this->assertSame(0, $catalogXpath->query('//a[@href="/halaman/other-guide"]')->length);
+
+        $privacy = $this->get('https://dsfa-test.fabriku.biz.id/privasi')->assertOk();
+        $privacyDom = new DOMDocument;
+        @$privacyDom->loadHTML($privacy->getContent());
+        $this->assertSame('Kebijakan Privasi - DSFA Homemade', (new DOMXPath($privacyDom))->evaluate('string(//title)'));
+
+        $detail = $this->get('https://dsfa-test.fabriku.biz.id/produk/'.$mixBerry->slug)->assertOk();
+        $detailDom = new DOMDocument;
+        @$detailDom->loadHTML($detail->getContent());
+        $detailXpath = new DOMXPath($detailDom);
+        $this->assertSame('Jus Mix Berry - Katalog DSFA Homemade', $detailXpath->evaluate('string(//title)'));
+        $this->assertSame(1, $detailXpath->query('//nav[@aria-label="Pilihan varian lain"]//a[@href="/produk/'.$strawberry->slug.'"]')->length);
+        $this->assertSame(0, $detailXpath->query('//a[@href="/produk/'.$hiddenSibling->slug.'"]')->length);
+        $detail->assertSee('Paragraf pertama.')->assertSee('Paragraf kedua &lt;b&gt;aman&lt;/b&gt;.', false);
+    }
 }

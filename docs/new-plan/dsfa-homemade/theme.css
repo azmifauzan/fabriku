@@ -89,6 +89,10 @@ p, h1, h2, h3 { margin: 0; }
 .dsfa-faq h3 + p { margin-top: 0.5rem; }
 .dsfa-page-section a { text-decoration: underline; }
 .dsfa-page-section li + li { margin-top: 0.5rem; }
+.dsfa-table-wrap { margin-top: 1rem; overflow-x: auto; }
+.dsfa-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.dsfa-table th, .dsfa-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #d8d0c0; text-align: left; }
+.dsfa-table th { background: var(--fb-surface); font-weight: 600; }
 .dsfa-related { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 1rem; }
 .dsfa-related a { display: inline-flex; align-items: center; min-height: 44px; padding-block: 0.4rem; }
 .dsfa-footer { padding-block: 3rem 1rem; background: #424b34; color: #e4ddcc; }
